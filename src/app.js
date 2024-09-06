@@ -12,12 +12,16 @@ app.use(express.json())
 app.use('/api', crawlerRoutes)
 
 //Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db', {
+    // useFindAndModify: false,
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
 .then(()=> console.log('MongoDB connected'))
 .catch((err) => console.log(err))
+
+// Use this to log mongo queries being executed!
+mongoose.set('debug', true);
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
