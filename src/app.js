@@ -13,9 +13,10 @@ app.use('/api', crawlerRoutes)
 
 //Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db', {
-    // useFindAndModify: false,
+    useFindAndModify: false,
     useNewUrlParser: true,
-    useUnifiedTopology: true,
+    connectTimeoutMS: 30000,  // 30 seconds connection timeout
+    serverSelectionTimeoutMS: 30000  // 30 seconds server selection timeout
 })
 .then(()=> console.log('MongoDB connected'))
 .catch((err) => console.log(err))
