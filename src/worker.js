@@ -1,8 +1,20 @@
 (async () => {
+    const mongoose = require('mongoose');
     const axios = require('axios')
     const CrawlData = require('./models/CrawlData')
     const { extractHtml } = require('../utils/helperFunctions')
     const crawlQueue = require('./queues/crawlQueue')
+    require('dotenv').config()
+
+
+    //Connect to MongoDB
+    mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db', {
+        // useFindAndModify: false,
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(()=> console.log('MongoDB connected'))
+    .catch((err) => console.log(err))
 
     const extractedData = []
     const failedCrawls = []
@@ -27,7 +39,8 @@
             extractedData.push(extractedDatum)
             
             // Save to database
-            const newCrawl = new CrawlData({ url, html: data,  data: extractedDatum })
+            const newCrawl = new CrawlData({ url, data: extractedDatum })
+            console.log('newCrawl: ', newCrawl.data.title)
             newCrawl.save()
 
             console.log(`Successfully crawled: ${url}`)
