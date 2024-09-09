@@ -6,13 +6,20 @@ let io  // To store the Socket.io instance
 const initializeSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: "*", // Configure CORS settings here
-            methods: ["GET", "POST"]
+            origin: "http://localhost:5173", // Allow your frontend origin
+            methods: ["GET", "POST"],
+            credentials: true,
         }
     })
 
     io.on('connection', (socket) => {
         console.log('New client connected')
+
+        // Join the room for a specific crawl ID
+        socket.on('joinCrawl', (crawlId) => {
+            socket.join(crawlId) // Join room for the crawl by crawlId
+            console.log(`Client joined crawl: ${crawlId}`)
+        })
 
         // Handle any custom events we want, like 'pauseCrawl', 'resumeCrawl'
         socket.on('pauseCrawl', () => {

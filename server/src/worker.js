@@ -1,7 +1,6 @@
 (async () => {
     const express = require('express')
     const http = require('http')
-
     const mongoose = require('mongoose');
     const axios = require('axios')
     const CrawlData = require('./models/CrawlData')
@@ -39,7 +38,7 @@
 
     // Process each job in the queue
     crawlQueue.process(async (job, done) => {
-        const { url } = job.data
+        const { url, crawlId } = job.data
 
         try{
             // Fetch the HTML content from the URL
@@ -52,13 +51,13 @@
             // Save to database
             const newCrawl = new CrawlData({ url, data: extractedDatum })
             console.log('newCrawl: ', newCrawl.data.title)
-            newCrawl.save()
+            // newCrawl.save()
             
             // Emit event to clients when the crawl is completed
             const io = getSocket()
-            io.emit('crawlCompleted', { jobId: job.id, url, result: extractedDatum })
+            io.to(String(crawlId)).emit('crawlCompleted', { jobId: job.id, url, result: extractedDatum })
 
-            console.log(`Successfully crawled: ${url}`)
+            console.log(`Successfully crawled: ${url}, Crawl Id: ${crawlId}`)
             done(null, extractedDatum)
 
         } catch(error) {
@@ -73,9 +72,9 @@
                 console.error(`Error: ${error.message}`)
             }
             const io = getSocket()
-            io.emit('crawlFailed', { job: job.id, url, error: error.message })
+            io.to(crawlId).emit('crawlFailed', { job: job.id, url, error: error.message })
             failedCrawls.push({url: url, message: error.message})
-            done(new Error(`Failed to crawl: ${url}`))
+            done(new Error(`Failed to crawl: ${url}. Error: ${error}`))
         }
     })
     server.listen(3002, () => {

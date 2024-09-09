@@ -1,17 +1,15 @@
 const express = require('express')
-const http = require('http')
 const mongoose = require('mongoose')
 require('dotenv').config()
-const { initializeSocket } = require('../utils/socket')
 const crawlerRoutes = require('./routes/crawlerRoutes')
+const cors = require('cors')
 
 const app = express()
 
-// Create HTTP server and pass it to socket.io
-const server = http.createServer(app)
-// Initialize Socket.io
-initializeSocket(server)
-
+// Allow requests from 'http://localhost:5173'
+app.use(cors({
+    origin: 'http://localhost:5173' // Vue app's origin
+}))
 
 // Middleware
 app.use(express.json())

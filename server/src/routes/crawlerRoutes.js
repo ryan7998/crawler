@@ -1,9 +1,11 @@
 const express = require('express')
-const { crawlWebsite } = require('../controllers/crawlerController')
+const { crawlWebsite, createCrawler, getCrawler } = require('../controllers/crawlerController')
 
 const router = express.Router()
 
 //POST /api/crawl
-router.post('/crawl', crawlWebsite)
+router.post('/startcrawl', crawlWebsite)
+router.post('/createcrawler', createCrawler)
+router.get('/getcrawler/:id', getCrawler)
 
 module.exports = router

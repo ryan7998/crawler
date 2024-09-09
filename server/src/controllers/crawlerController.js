@@ -1,59 +1,64 @@
 const crawlQueue = require('../queues/crawlQueue')
-// const axios = require('axios')
-// const CrawlData = require('../models/CrawlData')
-// const { extractHtml } = require('../../utils/helperFunctions')
+const Crawl = require('../models/Crawl')
 
 const crawlWebsite = async (req, res) => {
     
-    const { urls } = req.body
-
+    const { urls, crawlId} = req.body
     try {
-        // const extractedData = []
-        // const failedCrawls = []
-        // const { default: pThrottle } = await import('p-throttle') // Conditionally import throttle for node version
-        // // Create a single throttle for all requests
-        // const throttle = pThrottle({
-        //     limit: 1,
-        //     interval: 5000
-        // });
-        
-        // Add each URL as a job to the Bull queue. Using for..of for asynchronous behaviour
         for(const url of urls){
-            await crawlQueue.add({ url })
-            // try{
-            //     // Fetch the HTML content from the URL
-            //     const throttled = throttle(async () => await axios.get(url))
-            //     const { data } = await throttled()
-            //     const extractedDatum = await extractHtml(data)
-            //     extractedData.push(extractedDatum)
-                
-            //     // Save to database
-            //     const newCrawl = new CrawlData({ url, html: data,  data: extractedDatum })
-            //     newCrawl.save()
-            // } catch(error) {
-            //     if (error.response) {
-            //         // Server responded with a status code out of the 2xx range
-            //         console.log(`Error: Recieved ${erro.response.status} from ${url}`)
-            //     } else if (error.request) {
-            //         // No response received (network errors, timeouts, etc.)
-            //         console.error('Error: No response received, request failed')
-            //     } else {
-            //         // Something else went wrong in the request
-            //         console.error(`Error: ${error.message}`)
-            //     }
-            //     failedCrawls.push({url: url, message: error.message})
-            // }
+            await crawlQueue.add({ url, crawlId })
         }
-        
-        // Respond with the crawled data
-        // res.json({ message: 'Crawl successful', data: {urls, extractedData, failedCrawls} })
         res.json({message: 'Crawl jobs added to queue', urls})
     } catch (error) {
-        // console.log('Error crawling the website: ', error.message)
-        // res.status(500).json({ error: `Failed to crawl the website. ${error}` })
         console.log('Error adding jobs to the queue: ', error.message)
         res.status(500).json({ error: `Failed to add crawl jobs. ${error.message}`})
     }
 }
 
-module.exports = { crawlWebsite }
+const createCrawler = async (req, res) => {
+    const { title, urls, selectors, userId } = req.body
+
+    try{
+
+        // Create new crawl entry
+        const newCrawl = new Crawl({
+            title,
+            urls,
+            selectors,
+            userId,
+            status: 'pending',
+        })
+    
+        // Save to database
+        await newCrawl.save()
+        // Return the generated _id (crawlId) to the client
+        res.status(201).json({ message: 'Crawl created', crawlId: newCrawl._id })
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating crawl', error: error.message})
+    }
+}
+
+const getCrawler = async (req, res) => {
+    const { id } = req.params
+
+    try{
+        // Find the crawl by its ObjectId
+        const crawler = await Crawl.findById(id)
+
+        // If the crawl doesn't exist, return a 404
+        if (!crawler) {
+            return res.status(404).json({message: 'Crawler not found'})
+        }
+
+        // Return the found crawl data
+        res.status(200).json(crawler)
+    } catch (error) {
+        // Handle invalid ObjectId errors or other server issues
+        if (error.kind === 'ObjectId') {
+            return res.status(400).json({message: 'Invalid crawl ID'})
+        }
+        res.status(500).json({ message: 'Server error', error: error.message })
+    }
+}
+
+module.exports = { crawlWebsite, createCrawler, getCrawler }
