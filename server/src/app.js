@@ -1,9 +1,17 @@
 const express = require('express')
+const http = require('http')
 const mongoose = require('mongoose')
 require('dotenv').config()
+const { initializeSocket } = require('../utils/socket')
+const crawlerRoutes = require('./routes/crawlerRoutes')
 
 const app = express()
-const crawlerRoutes = require('./routes/crawlerRoutes')
+
+// Create HTTP server and pass it to socket.io
+const server = http.createServer(app)
+// Initialize Socket.io
+initializeSocket(server)
+
 
 // Middleware
 app.use(express.json())
