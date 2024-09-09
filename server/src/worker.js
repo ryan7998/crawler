@@ -78,4 +78,7 @@
             done(new Error(`Failed to crawl: ${url}`))
         }
     })
+    server.listen(3002, () => {
+        console.log('Worker server is running on port 3002');
+    });
 })()
