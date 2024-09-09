@@ -1,11 +1,21 @@
 (async () => {
+    const express = require('express')
+    const http = require('http')
+
     const mongoose = require('mongoose');
     const axios = require('axios')
     const CrawlData = require('./models/CrawlData')
     const { extractHtml } = require('../utils/helperFunctions')
     const crawlQueue = require('./queues/crawlQueue')
+    const { initializeSocket, getSocket } = require('../utils/socket')
     require('dotenv').config()
 
+    const app = express()
+
+    // Create HTTP server and pass it to socket.io
+    const server = http.createServer(app)
+    // Initialize Socket.io
+    initializeSocket(server)
 
     //Connect to MongoDB
     mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db', {
@@ -13,7 +23,8 @@
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
-    .then(()=> console.log('MongoDB connected'))
+
+    .then(() => console.log('MongoDB connected'))
     .catch((err) => console.log(err))
 
     const extractedData = []
@@ -42,9 +53,13 @@
             const newCrawl = new CrawlData({ url, data: extractedDatum })
             console.log('newCrawl: ', newCrawl.data.title)
             newCrawl.save()
+            
+            // Emit event to clients when the crawl is completed
+            const io = getSocket()
+            io.emit('crawlCompleted', { jobId: job.id, url, result: extractedDatum })
 
             console.log(`Successfully crawled: ${url}`)
-            done()
+            done(null, extractedDatum)
 
         } catch(error) {
             if (error.response) {
@@ -57,8 +72,10 @@
                 // Something else went wrong in the request
                 console.error(`Error: ${error.message}`)
             }
+            const io = getSocket()
+            io.emit('crawlFailed', { job: job.id, url, error: error.message })
             failedCrawls.push({url: url, message: error.message})
-            done(new Error('Crawl Failed'))
+            done(new Error(`Failed to crawl: ${url}`))
         }
     })
 })()
