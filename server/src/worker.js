@@ -44,18 +44,17 @@
 
         try{
             // Emit crawlLog event to be captured in FE log
-            io.to(String(crawlId)).emit('crawlLog', `Started Crawling ${url}`)
+            io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'started' })
+
             // Fetch the HTML content from the URL
             const throttled = throttle(async () => await axios.get(url))
             const { data } = await throttled()
-
-            io.to(String(crawlId)).emit('crawlLog', `Crawl Successful! Now extracting data as par selectors`)
             
             // Extract data from HTML
             const extractedDatum = await extractHtml(data)
             extractedData.push(extractedDatum)
             
-            io.to(String(crawlId)).emit('crawlLog', `Saving crawled data to the database`)
+            io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'saving' })
             
             // Save to database
             const newCrawlData = new CrawlData({ url, data: extractedDatum, crawlId, status: 'success' })
@@ -70,7 +69,7 @@
             )
             
             // Emit event to clients when the crawl is completed
-            io.to(String(crawlId)).emit('crawlCompleted', { jobId: job.id, url, result: extractedDatum })
+            io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'success', result: extractedDatum })
 
             console.log(`Successfully crawled: ${url}, Crawl Id: ${crawlId}`)
             done(null, extractedDatum)
@@ -87,7 +86,7 @@
                 console.error(`Error: ${error.message}`)
             }
             const io = getSocket()
-            io.to(crawlId).emit('crawlFailed', { job: job.id, url, error: error.message })
+            io.to(crawlId).emit('crawlLog', { job: job.id, url, status: 'failed', error: error.message })
             failedCrawls.push({url: url, message: error.message})
 
             // Save to database
