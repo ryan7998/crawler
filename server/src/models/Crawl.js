@@ -21,10 +21,11 @@ const crawlSchema = new Schema({
         enum: ['pending', 'in-progress', 'completed', 'failed'],
         default: 'pending'
     },
-    result: {
-        type: Array, // Store the results of the crawl
-        default: [],
-    },
+    result: [{
+        type: Schema.Types.ObjectId, // Store references to CrawlData documents
+        ref: 'CrawlData'
+    }],
+    logs: [{}],
     error: {
         type: String, // Error message, if the crawl fails
         default: '',

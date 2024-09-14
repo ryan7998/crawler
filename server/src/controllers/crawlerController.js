@@ -1,5 +1,6 @@
 const crawlQueue = require('../queues/crawlQueue')
 const Crawl = require('../models/Crawl')
+const CrawlData = require('../models/CrawlData')
 
 const crawlWebsite = async (req, res) => {
     
@@ -44,6 +45,11 @@ const getCrawler = async (req, res) => {
     try{
         // Find the crawl by its ObjectId
         const crawler = await Crawl.findById(id)
+        .select('-__v')
+        .populate({
+            path: 'result',
+            select: '-__v'
+        })
 
         // If the crawl doesn't exist, return a 404
         if (!crawler) {

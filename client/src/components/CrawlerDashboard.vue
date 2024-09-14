@@ -33,28 +33,12 @@
                         <h6 class="font-semibold text-gray-700 mb-4">Actions</h6>
                         <button class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Pause</button>
                         <button class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Resume</button>
-                        <button class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Restart</button>
+                        <button class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3"  @click="startCrawl">Restart</button>
                     </div>
                 </div>
 
                 <!-- Crawl Summary and Details -->
                 <div class="w-3/4">
-                    <!-- Summary Cards -->
-                    <!-- <div class="grid grid-cols-3 gap-4 mb-6">
-                        <div class="bg-white p-6 rounded-lg shadow-sm text-center">
-                        <h5 class="text-gray-600 mb-2">In Progress</h5>
-                        <h2 class="text-3xl font-bold text-blue-600">{{ inProgressCount }}</h2>
-                        </div>
-                        <div class="bg-white p-6 rounded-lg shadow-sm text-center">
-                        <h5 class="text-gray-600 mb-2">Completed</h5>
-                        <h2 class="text-3xl font-bold text-green-600">{{ completedCount }}</h2>
-                        </div>
-                        <div class="bg-white p-6 rounded-lg shadow-sm text-center">
-                        <h5 class="text-gray-600 mb-2">Failed</h5>
-                        <h2 class="text-3xl font-bold text-red-600">{{ failedCount }}</h2>
-                        </div>
-                    </div> -->
-                    
                     <!-- Crawl Details -->
                     <div v-if="crawl" class="bg-white rounded-lg shadow-sm p-6">
                         <h6 class="text-gray-700 font-semibold mb-4">Crawl Details</h6>
@@ -86,32 +70,36 @@
                         <!-- Results Section -->
                          <div v-if="crawl.result?.length">
                              <h6 class="mt-6 text-gray-700 font-semibold">Results</h6>
-                             <ul class="list-none mt-2 space-y-2">
-                             <!-- <li v-for="(result, index) in crawl.result" :key="index" class="bg-gray-50 p-2 rounded-lg">
-                                 {{ result }}
-                             </li> -->
-                             </ul>
+                             <ol class="list-none mt-2 space-y-2">
+                                <li v-for="(result, index) in crawl.result" :key="index" class="bg-gray-50 p-2 rounded-lg">
+                                    <div> {{ result.url }}</div>
+                                    <div><strong>Title: </strong> {{ result.data.title }}</div>
+                                </li>
+                             </ol>
                          </div>
                     </div>
                 </div>
             </div>
          </div>
         
-        <!-- Error message -->
-        <p v-if="errorMessage">{{ errorMessage }}</p>
-        
+        <!-- Crawl Logs -->
         <div v-if="logs.length" class="results">
             <h2>Live logs</h2>
             <ul>
                 <li v-for="(result, index) in logs" :key="index">
-                    <strong>URL:</strong> {{ result.url }} <br />
-                    <strong>Status:</strong> {{ result.status }} <br />
-                    <strong>Data:</strong> {{ result.data ? result.data : 'N/A' }} <br />
+                    <template v-if="typeof result === 'object'">
+                        <strong>URL:</strong> {{ result.url }} <br />
+                        <strong>Status:</strong> {{ result.status }} <br />
+                        <strong>Data:</strong> {{ result.data ? result.data : 'N/A' }} <br />
+                    </template>
+                    <template v-else>
+                        {{ result ? result : 'N/A' }} <br />
+                    </template>
                 </li>
             </ul>
         </div>
         <div v-if="errors.length" class="errors">
-            <h2>Errors:</h2>
+            <h2>Failed Crawls:</h2>
             <ul>
                 <li v-for="(error, index) in errors" :key="index">
                 <strong>URL:</strong> {{ error.url }} <br />
@@ -123,14 +111,14 @@
 </template>
 
 <script setup>
-    import { onMounted, ref, watch } from 'vue'
+    import { onMounted, ref, reactive, watch } from 'vue'
     import { io } from "socket.io-client"
     import { useRoute } from 'vue-router'
     import axios from 'axios'
 
     const logs = ref([])  // Reactive state for successfull crawl results
     const errors = ref([])  // Reactive state for failed crawl results
-    const socket = ref(null)    // Ref from the socket instance
+    const socket = ref(io("http://localhost:3002"))    // Ref from the socket instance
     const route = useRoute()    //Access the crawl ID from the URL
     const crawlId = ref(route.params.crawlId)   // Get crawlId from URL
     const crawl = ref(null); // To store crawl data
@@ -145,18 +133,23 @@
     // Watch for route changes to ensure crawlId is updated when the URL changes
     watch(route, async () => {
         crawlId.value = route.params.crawlId
-        socket.value = io("http://localhost:3002")
+        // socket.value = io("http://localhost:3002")
 
         // Fetch the crawl data
         try {
-            const response = await axios.get(`http://localhost:3001/api/getcrawler/${crawlId.value}`);
-            crawl.value = response.data; // Assign response data to the crawl object
+            const response = await axios.get(`http://localhost:3001/api/getcrawler/${crawlId.value}`)
+            crawl.value = response.data // Assign response data to the crawl object
         } catch (error) {
-            errorMessage.value = error.response ? error.response.data.message : 'Error fetching data';
+            errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
         }
         
         // Join the room for the specific crawl ID
         socket.value.emit('joinCrawl', crawlId.value)
+        // Listen for crawl logs
+        socket.value.on("crawlLog", (data) => {
+            console.log('logging', data)
+            logs.value.push(data)
+        })
         // Listen for crawl completion
         socket.value.on("crawlCompleted", (data) => {
             console.log('crawl completed')
@@ -166,6 +159,7 @@
                 data: data.result
             })
         })
+
         // Listen for crawl failures
         socket.value.on('crawlFailed', (data) => {
             errors.value.push({
@@ -181,10 +175,39 @@
         socket.value.on('disconnect', () => {
             console.log('Disconnected from Socket.io server');
         });
-    })
+    }, 
+)
     // Initialize Socket.io connection on component mount
     onMounted(() => {
 
+        //test
+
     })
+
+    // Actions (these functions would need to emit the corresponding Socket.io events)
+    const pauseCrawl = () => {
+    console.log("Pausing crawl");
+    };
+
+    const resumeCrawl = () => {
+    console.log("Resuming crawl");
+    };
+
+    const startCrawl = async () => {
+        console.log('crawl started from FE')
+        try {
+            const requestBody = {
+                urls: crawl.value.urls,
+                crawlId: crawlId.value
+            }
+
+            // Make a POST request to start the crawl
+            const response = await axios.post('http://localhost:3001/api/startcrawl', requestBody)
+            console.log('Crawl started: ', response.data)
+            crawl.value.status = 'in-progress'
+        } catch (error) {
+            console.log('Error starting crawl: ', error.response ?  error.data.message : error.message)
+        }
+    };
 </script>
 

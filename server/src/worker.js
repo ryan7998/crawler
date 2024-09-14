@@ -4,6 +4,7 @@
     const mongoose = require('mongoose');
     const axios = require('axios')
     const CrawlData = require('./models/CrawlData')
+    const Crawl = require('./models/Crawl')
     const { extractHtml } = require('../utils/helperFunctions')
     const crawlQueue = require('./queues/crawlQueue')
     const { initializeSocket, getSocket } = require('../utils/socket')
@@ -39,22 +40,36 @@
     // Process each job in the queue
     crawlQueue.process(async (job, done) => {
         const { url, crawlId } = job.data
+        const io = getSocket()
 
         try{
+            // Emit crawlLog event to be captured in FE log
+            io.to(String(crawlId)).emit('crawlLog', `Started Crawling ${url}`)
             // Fetch the HTML content from the URL
             const throttled = throttle(async () => await axios.get(url))
             const { data } = await throttled()
+
+            io.to(String(crawlId)).emit('crawlLog', `Crawl Successful! Now extracting data as par selectors`)
+            
             // Extract data from HTML
             const extractedDatum = await extractHtml(data)
             extractedData.push(extractedDatum)
             
+            io.to(String(crawlId)).emit('crawlLog', `Saving crawled data to the database`)
+            
             // Save to database
-            const newCrawl = new CrawlData({ url, data: extractedDatum })
-            console.log('newCrawl: ', newCrawl.data.title)
-            // newCrawl.save()
+            const newCrawlData = new CrawlData({ url, data: extractedDatum, crawlId })
+            console.log('newCrawl: ', newCrawlData.data.title)
+            await newCrawlData.save()
+
+            // Find the Crawl entry and push the CrawlData _id into the result array
+            await Crawl.findByIdAndUpdate(
+                crawlId,
+                { $push: { result: newCrawlData._id } },
+                { new: true }
+            )
             
             // Emit event to clients when the crawl is completed
-            const io = getSocket()
             io.to(String(crawlId)).emit('crawlCompleted', { jobId: job.id, url, result: extractedDatum })
 
             console.log(`Successfully crawled: ${url}, Crawl Id: ${crawlId}`)
