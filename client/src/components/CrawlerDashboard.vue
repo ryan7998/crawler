@@ -50,33 +50,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(url, index) in crawl.urls" :key="index" class="text-gray-700 border-b">
+                            <tr v-for="(data, url) in crawl.aggregatedData" :key="url" class="text-gray-700 border-b">
                             <td class="py-2">{{ url }}</td>
                             <td class="py-2">
-                                <!-- <span
+                                <span
                                 :class="[
                                     'inline-block px-2 py-1 rounded-full text-sm',
-                                    url.status === 'completed' ? 'bg-green-100 text-green-600' : url.status === 'failed' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                                    data[data.length-1].status === 'success' ? 'bg-green-100 text-green-600' : data[data.length-1].status === 'failed' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
                                 ]"
                                 >
-                                {{ url.status }}
-                                </span> -->
-                                Status goes here..
+                                <!-- {{ url.status }} -->
+                                {{ data[data.length-1].status }}
+                                </span>
                             </td>
                             </tr>
                         </tbody>
                         </table>
-
-                        <!-- Results Section -->
-                         <div v-if="crawl.result?.length">
-                             <h6 class="mt-6 text-gray-700 font-semibold">Results</h6>
-                             <ol class="list-none mt-2 space-y-2">
-                                <li v-for="(result, index) in crawl.result" :key="index" class="bg-gray-50 p-2 rounded-lg">
-                                    <div> {{ result.url }}</div>
-                                    <div><strong>Title: </strong> {{ result.data.title }}</div>
-                                </li>
-                             </ol>
-                         </div>
                     </div>
                 </div>
             </div>
@@ -156,7 +145,7 @@
             logs.value.push({
                 url: data.url,
                 status: "completed",
-                data: data.result
+                data: data.results
             })
         })
 

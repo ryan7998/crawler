@@ -1,6 +1,7 @@
 const crawlQueue = require('../queues/crawlQueue')
 const Crawl = require('../models/Crawl')
 const CrawlData = require('../models/CrawlData')
+const { aggregateDashboard } = require('../../utils/helperFunctions')
 
 const crawlWebsite = async (req, res) => {
     
@@ -44,20 +45,27 @@ const getCrawler = async (req, res) => {
 
     try{
         // Find the crawl by its ObjectId
-        const crawler = await Crawl.findById(id)
+        const crawlerData = await Crawl.findById(id)
         .select('-__v')
         .populate({
-            path: 'result',
+            path: 'results',
             select: '-__v'
         })
 
         // If the crawl doesn't exist, return a 404
-        if (!crawler) {
+        if (!crawlerData) {
             return res.status(404).json({message: 'Crawler not found'})
         }
 
-        // Return the found crawl data
-        res.status(200).json(crawler)
+        const aggregatedData = aggregateDashboard(crawlerData)
+        const aggregatedCrawlObj = crawlerData.toObject()
+        if (aggregatedData) {
+            // aggregatedCrawlObj 
+            aggregatedCrawlObj.aggregatedData = aggregatedData
+            console.log('crawlerData.aggregatedData: ', aggregatedCrawlObj.aggregatedData)
+            // Return the found crawl data
+        }
+        res.status(200).json(aggregatedCrawlObj)
     } catch (error) {
         // Handle invalid ObjectId errors or other server issues
         if (error.kind === 'ObjectId') {

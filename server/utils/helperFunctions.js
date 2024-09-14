@@ -33,4 +33,29 @@ const extractHtml = (html) => {
     return extractedData
 }
 
-module.exports = { extractHtml }
+// Aggregate the crawler data grouping by urls
+const aggregateDashboard = (crawlerData) => {
+    const { results } = crawlerData
+
+    const aggregatedData = {}
+
+    // Loop through the results
+    results.forEach(result => {
+        let newObj = {
+            date: result.createdAt,
+            status: result.status,
+            data: result.data ?? result.error
+        }
+        // If url property exists in the aggregatedData object
+        if (aggregatedData[result.url]) {
+            aggregatedData[result.url].push(newObj)
+        } else {
+        // Otherwise create new url property in the aggregatedData object
+            aggregatedData[result.url] = [newObj]
+        }
+    })
+
+    return aggregatedData
+
+}
+module.exports = { extractHtml, aggregateDashboard }

@@ -58,14 +58,14 @@
             io.to(String(crawlId)).emit('crawlLog', `Saving crawled data to the database`)
             
             // Save to database
-            const newCrawlData = new CrawlData({ url, data: extractedDatum, crawlId })
+            const newCrawlData = new CrawlData({ url, data: extractedDatum, crawlId, status: 'success' })
             console.log('newCrawl: ', newCrawlData.data.title)
             await newCrawlData.save()
 
             // Find the Crawl entry and push the CrawlData _id into the result array
             await Crawl.findByIdAndUpdate(
                 crawlId,
-                { $push: { result: newCrawlData._id } },
+                { $push: { results: newCrawlData._id } },
                 { new: true }
             )
             
@@ -89,6 +89,18 @@
             const io = getSocket()
             io.to(crawlId).emit('crawlFailed', { job: job.id, url, error: error.message })
             failedCrawls.push({url: url, message: error.message})
+
+            // Save to database
+            const newCrawlData = new CrawlData({ url, crawlId, status: 'failed', error: error.message })
+            await newCrawlData.save()
+
+            // Find the Crawl entry and push the CrawlData _id into the result array
+            await Crawl.findByIdAndUpdate(
+                crawlId,
+                { $push: { results: newCrawlData._id } },
+                { new: true }
+            )
+
             done(new Error(`Failed to crawl: ${url}. Error: ${error}`))
         }
     })
