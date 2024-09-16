@@ -1,41 +1,14 @@
 <template>
     <div class="relative z-10" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
-    <!--
-        Background backdrop, show/hide based on slide-over state.
 
-        Entering: "ease-in-out duration-500"
-        From: "opacity-0"
-        To: "opacity-100"
-        Leaving: "ease-in-out duration-500"
-        From: "opacity-100"
-        To: "opacity-0"
-    -->
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
 
     <div class="fixed inset-0 overflow-hidden">
         <div class="absolute inset-0 overflow-hidden">
         <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-xl pl-10">
-            <!--
-            Slide-over panel, show/hide based on slide-over state.
 
-            Entering: "transform transition ease-in-out duration-500 sm:duration-700"
-                From: "translate-x-full"
-                To: "translate-x-0"
-            Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
-                From: "translate-x-0"
-                To: "translate-x-full"
-            -->
             <div class="pointer-events-auto relative w-screen max-w-full">
-            <!--
-                Close button, show/hide based on slide-over state.
 
-                Entering: "ease-in-out duration-500"
-                From: "opacity-0"
-                To: "opacity-100"
-                Leaving: "ease-in-out duration-500"
-                From: "opacity-100"
-                To: "opacity-0"
-            -->
             <div class="absolute left-0 top-0 -ml-8 flex pr-2 pt-4 sm:-ml-10 sm:pr-4">
                 <button type="button" @click="$emit('closeResultViewEvent')" class="relative rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                 <span class="absolute -inset-2.5"></span>
