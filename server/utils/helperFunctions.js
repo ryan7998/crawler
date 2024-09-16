@@ -35,9 +35,16 @@ const extractHtml = (html) => {
 
 // Aggregate the crawler data grouping by urls
 const aggregateDashboard = (crawlerData) => {
-    const { results } = crawlerData
-
+    const { results, urls } = crawlerData
+    
     const aggregatedData = {}
+    
+    if(!results.length){ // New crawl or haven't run yet
+        urls.map((url) => {
+            aggregatedData[url] = []
+        })
+        return aggregatedData // Return empty array for corresponding url
+    }
 
     // Loop through the results
     results.forEach(result => {

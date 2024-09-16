@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router"
 import CrawlerDashboard from "./components/CrawlerDashboard.vue"
+import CreateCrawl from "./components/CreateCrawl.vue"
 
 const routes = [
     // {
@@ -12,6 +13,11 @@ const routes = [
         name: 'CrawlerDashboard',
         component: CrawlerDashboard
     },
+    {
+        path: '/create',
+        name: 'CreateCrawl',
+        component: CreateCrawl
+    }
 ]
 
 const router = createRouter({

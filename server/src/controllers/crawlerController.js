@@ -60,7 +60,6 @@ const getCrawler = async (req, res) => {
         const aggregatedData = aggregateDashboard(crawlerData)
         const aggregatedCrawlObj = crawlerData.toObject()
         if (aggregatedData) {
-            // aggregatedCrawlObj 
             aggregatedCrawlObj.aggregatedData = aggregatedData
             console.log('crawlerData.aggregatedData: ', aggregatedCrawlObj.aggregatedData)
             // Return the found crawl data
