@@ -1,34 +1,44 @@
 const cheerio = require('cheerio')
 
-const extractHtml = (html) => {
+const extractHtml = (html, selectors = []) => {
     // Load the HTML into cheerio
     const $ = cheerio.load(html)
+    const extractedData = {defaultData:{}}
+    
+    // If user has set selectors:
+    if(selectors.length) {
+        selectors.forEach(selector => {
+            if(selector.name && selector.css){
+                extractedData[selector.name] = $(`${selector.css}`).text().trim()
+                console.log('selector extracted: ', selector.name, selector.css, extractedData[selector.name])
+            }
+        })
+    }
         
-    const extractedData = {}
     // Title
-    extractedData.title = $('title').text().trim()
+    extractedData.defaultData.title = $('title').text().trim()
     // h1 tags
-    extractedData.h1Tags = []
+    extractedData.defaultData.h1Tags = []
     $('h1').each((index, element) => {
-        extractedData.h1Tags.push($(element).text())
+        extractedData.defaultData.h1Tags.push($(element).text())
     })
     // Price
-    extractedData.extractedPrice = $('[class*="price"]').text().trim() || ''
+    extractedData.defaultData.extractedPrice = $('[class*="price"]').text().trim() || ''
     // Images
-    extractedData.images = []
+    extractedData.defaultData.images = []
     $('img').each((index, element) => {
         const src = $(element).attr('src')
-        if(src) extractedData.images.push(src)
+        if(src) extractedData.defaultData.images.push(src)
     })
     // <a> tags (links)
-    extractedData.links = []
+    extractedData.defaultData.links = []
     $('a').each((index, element) => {
         const href = $(element).attr('href')
-        if(href) extractedData.links.push(href)
+        if(href) extractedData.defaultData.links.push(href)
     })
     // Description
-    extractedData.description = $('meta[name="description"]').attr('content') || ''
-    extractedData.keywords = $('meta[name="keywords"]').attr('content') || ''
+    extractedData.defaultData.description = $('meta[name="description"]').attr('content') || ''
+    extractedData.defaultData.keywords = $('meta[name="keywords"]').attr('content') || ''
 
     return extractedData
 }

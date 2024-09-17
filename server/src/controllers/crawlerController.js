@@ -5,10 +5,10 @@ const { aggregateDashboard } = require('../../utils/helperFunctions')
 
 const crawlWebsite = async (req, res) => {
     
-    const { urls, crawlId} = req.body
+    const { urls, crawlId, selectors} = req.body
     try {
         for(const url of urls){
-            await crawlQueue.add({ url, crawlId })
+            await crawlQueue.add({ url, crawlId, selectors })
         }
         res.json({message: 'Crawl jobs added to queue', urls})
     } catch (error) {
@@ -61,7 +61,6 @@ const getCrawler = async (req, res) => {
         const aggregatedCrawlObj = crawlerData.toObject()
         if (aggregatedData) {
             aggregatedCrawlObj.aggregatedData = aggregatedData
-            console.log('crawlerData.aggregatedData: ', aggregatedCrawlObj.aggregatedData)
             // Return the found crawl data
         }
         res.status(200).json(aggregatedCrawlObj)

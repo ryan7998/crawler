@@ -39,7 +39,7 @@
 
     // Process each job in the queue
     crawlQueue.process(async (job, done) => {
-        const { url, crawlId } = job.data
+        const { url, crawlId, selectors } = job.data
         const io = getSocket()
 
         try{
@@ -51,14 +51,14 @@
             const { data } = await throttled()
             
             // Extract data from HTML
-            const extractedDatum = await extractHtml(data)
+            const extractedDatum = await extractHtml(data, selectors)
             extractedData.push(extractedDatum)
             
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'saving' })
             
             // Save to database
             const newCrawlData = new CrawlData({ url, data: extractedDatum, crawlId, status: 'success' })
-            console.log('newCrawl: ', newCrawlData.data.title)
+            // console.log('newCrawl: ', newCrawlData.data.title)
             await newCrawlData.save()
 
             // Find the Crawl entry and push the CrawlData _id into the result array

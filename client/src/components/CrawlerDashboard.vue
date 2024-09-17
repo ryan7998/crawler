@@ -181,7 +181,9 @@
         try {
             const requestBody = {
                 urls: crawl.value.urls,
-                crawlId: crawlId.value
+                crawlId: crawlId.value,
+                selectors: crawl.value.selectors || []
+
             }
 
             // Make a POST request to start the crawl
