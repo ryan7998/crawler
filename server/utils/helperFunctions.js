@@ -23,7 +23,17 @@ const extractHtml = (html, selectors = []) => {
         extractedData.defaultData.h1Tags.push($(element).text())
     })
     // Price
-    extractedData.defaultData.extractedPrice = $('[class*="price"]').text().trim() || ''
+    let probableExtractedPrice = $('[class*="price"]').text().trim() || ''
+    probableExtractedPrice  = probableExtractedPrice.match(/\$\d+(?:\.\.?\d+)?/g) || [] // Extract prices using the regex
+
+    // Proceed with cleaning as before
+    probableExtractedPrice = [...new Set(probableExtractedPrice)]
+    probableExtractedPrice = probableExtractedPrice.map(price => price.replace('..', '.'))
+
+    extractedData.defaultData.price = probableExtractedPrice
+
+    // regex to extract price: \$\d+(?:\.\.?\d+)?
+
     // Images
     extractedData.defaultData.images = []
     $('img').each((index, element) => {
