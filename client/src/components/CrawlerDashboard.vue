@@ -67,9 +67,14 @@
                             </td>
                             <td>
                                 <a href="#" @click.prevent="openViewResult(url)" >View</a>
-                                <Teleport to="body">
-                                    <ViewResult v-if="viewResults[url]" :data="data" :url="url"  @close-result-view-event="closeViewResult(url)" :key="url" />
-                                </Teleport>
+                                <SlideOver v-if="viewResults[url]" @close-slide-over="onCloseSlideOver(url)">
+                                    <template v-slot:title>
+                                        {{ data?.title || url }}
+                                    </template>
+                                    <template #default>
+                                        <ViewResult :data="data" :url="url" :key="url" />
+                                    </template>
+                                </SlideOver>
                             </td>
                         </tr>
                     </tbody>
@@ -87,29 +92,29 @@
     import axios from 'axios'
     import ViewResult from './ViewResult.vue'
     import { useExcerpts } from '../composables/useExcerpts'
+    import SlideOver from './SlideOver.vue'
 
     const logs = ref([])  // Reactive state for successfull crawl results
-    const errors = ref([])  // Reactive state for failed crawl results
     const socket = ref(io("http://localhost:3002"))    // Ref from the socket instance
     const route = useRoute()    //Access the crawl ID from the URL
     const crawlId = ref(route.params.crawlId)   // Get crawlId from URL
     const crawl = ref(null); // To store crawl data
     const errorMessage = ref(''); // To store any error messages
     const liveStatusDictionary = ref({}) // To store status by listening the socket
-    const showResult = ref(false) // To show result panel
     const viewResults = ref({})
     const excerpts = ref({}) // Store excerpts for each URL
 
 
     const openViewResult = (url) => {
       // Set the clicked URL to true in the viewResults object
-      viewResults.value = { ...viewResults.value, [url]: true };
-    };
+      viewResults.value = { ...viewResults.value, [url]: true }
+    }
 
-    const closeViewResult = (url) => {
-      // Set the clicked URL to false to close the ViewResult component
-      viewResults.value = { ...viewResults.value, [url]: false };
-    };
+    const onCloseSlideOver = (url) => {
+        // Set the clicked URL to false to close the ViewResult component
+        viewResults.value = { ...viewResults.value, [url]: false };
+    }
+
     // Function to format time
     const formatTime = (time) => {
     if (!time) return 'N/A';
@@ -133,7 +138,7 @@
             crawl.value = response.data // Assign response data to the crawl object
 
             // Initiate excerpt for each URL
-            console.log(Object.keys(crawl.value.aggregatedData))
+            // console.log(Object.keys(crawl.value.aggregatedData))
             Object.keys(crawl.value.aggregatedData).forEach((url) => {
                 excerpts.value[url] = useExcerpts(ref(url), 30)
             });
