@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose')
 const Crawl = require('./Crawl') // Import the Crawl model
 
 const CrawlDataSchema = new Schema({
-    url: { type: String, required: true },
+    url: { type: {}, required: true },
     data: { type: Object },
     createdAt: { type: Date, default: Date.now },
     crawlId: { type: String, required: true },

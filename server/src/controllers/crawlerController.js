@@ -1,14 +1,27 @@
+const axios = require('axios')
+
 const crawlQueue = require('../queues/crawlQueue')
 const Crawl = require('../models/Crawl')
 const CrawlData = require('../models/CrawlData')
-const { aggregateDashboard } = require('../../utils/helperFunctions')
+const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions')
 
 const crawlWebsite = async (req, res) => {
     
     const { urls, crawlId, selectors} = req.body
+    
+    // it it is a test crawl
+    if(!crawlId){
+        const { data } = await axios.get(urls)
+        // Extract data from HTML
+        const extractedDatum = await extractHtml(data, selectors)
+        res.json({extractedDatum})
+        return
+    }
+    // else
     try {
         for(const url of urls){
-            await crawlQueue.add({ url, crawlId, selectors })
+            await crawlQueue.add({ url, crawlId })
+            // await crawlQueue.add({ url, crawlId, selectors })
         }
         res.json({message: 'Crawl jobs added to queue', urls})
     } catch (error) {
@@ -20,7 +33,7 @@ const crawlWebsite = async (req, res) => {
 const createCrawler = async (req, res) => {
     const { title, urls, selectors, userId } = req.body
 
-    try{
+    try {
 
         // Create new crawl entry
         const newCrawl = new Crawl({

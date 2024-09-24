@@ -1,16 +1,17 @@
 <template>
     <form class="max-w-xl mx-auto py-8" @submit.prevent="handleSubmit">
-    <div class="mb-5">
-        <label for="title" class="text-left block mb-2 text-sm font-medium text-gray-900 dark:text-white">Crawl Title</label>
-        <input v-model="formState.title" type="title" id="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter the crawl name" required />
-    </div>
-    
-    <div class="mb-5 space-y-2">
-        <UrlComponent v-for="(urlData, id) in formState.urls" :key="id" :urlData="urlData" />
-        <button type="submit" class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-        >Submit</button>
-    </div>
-
+        <div class="mb-5">
+            <label for="title" class="text-left block mb-2 text-sm font-medium text-gray-900 dark:text-white">Crawl Title</label>
+            <input v-model="formState.title" type="title" id="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter the crawl name" required />
+        </div>
+        
+        <div class="mb-5 space-y-2">
+            <UrlComponent v-for="(urlData, id) in formState.urls" :key="id" :urlData="urlData" />
+            <button type="button" @click="addUrl" class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            >Add Url</button>
+            <button type="submit" class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            >Save</button>
+        </div>
     </form>
 </template>
 <script setup>
@@ -31,6 +32,12 @@
     const selectors = ref([])
     const count = ref(0)
 
+    const addUrl = () => {
+        formState.urls.push({
+            url: '',
+            selectors: []
+        })
+    }
 
     const handleSubmit = async () => {
         
@@ -44,7 +51,7 @@
         // Prepare data to send
         const requestData = {
             title: formState.title,
-            urls: urlArray,
+            urls: formState.urls,
             selectors: selectors.value,
             userId: '1' // TODO: update dynamically
         }

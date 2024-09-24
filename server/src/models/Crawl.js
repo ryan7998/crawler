@@ -6,7 +6,7 @@ const crawlSchema = new Schema({
         required: true,
     },
     urls: { 
-        type: [String], // Array of URLs to be crawled
+        type: [{}], // Array of Object (URL + selectors) to be crawled
         required:true 
     },
     selectors: [{}], // Array of Objects for custom css selectors

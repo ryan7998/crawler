@@ -35,7 +35,7 @@
     const throttle = pThrottle({
         limit: 1,
         interval: 2000
-    });
+    })
 
     // Process each job in the queue
     crawlQueue.process(async (job, done) => {
@@ -47,17 +47,17 @@
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'started' })
 
             // Fetch the HTML content from the URL
-            const throttled = throttle(async () => await axios.get(url))
+            const throttled = throttle(async () => await axios.get(url.url))
             const { data } = await throttled()
             
             // Extract data from HTML
-            const extractedDatum = await extractHtml(data, selectors)
+            const extractedDatum = await extractHtml(data, url.selectors)
             extractedData.push(extractedDatum)
             
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'saving' })
-            
+            console.log('url: ', url)
             // Save to database
-            const newCrawlData = new CrawlData({ url, data: extractedDatum, crawlId, status: 'success' })
+            const newCrawlData = new CrawlData({ url:url.url, data: extractedDatum, crawlId, status: 'success' })
             // console.log('newCrawl: ', newCrawlData.data.title)
             await newCrawlData.save()
 

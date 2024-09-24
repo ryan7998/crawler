@@ -61,7 +61,7 @@ const aggregateDashboard = (crawlerData) => {
     
     if(!results.length){ // New crawl or haven't run yet
         urls.map((url) => {
-            aggregatedData[url] = []
+            aggregatedData[url.url] = []
         })
         return aggregatedData // Return empty array for corresponding url
     }

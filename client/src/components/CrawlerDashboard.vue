@@ -15,9 +15,9 @@
                 </div>
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h6 class="font-semibold text-gray-700 mb-4">Actions</h6>
+                    <button @click="configureCrawl" class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Configure</button>
                     <button class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Pause</button>
-                    <button class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Resume</button>
-                    <button class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3"  @click="startCrawl">Restart</button>
+                    <button @click="startCrawl" class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Restart</button>
                 </div>
             </div>
 
@@ -69,7 +69,7 @@
                                 <a href="#" @click.prevent="openViewResult(url)" >View</a>
                                 <SlideOver v-if="viewResults[url]" @close-slide-over="onCloseSlideOver(url)">
                                     <template v-slot:title>
-                                        {{ data?.title || url }}
+                                        {{ data[data.length-1]?.data?.defaultData?.title || url }}
                                     </template>
                                     <template #default>
                                         <ViewResult :data="data" :url="url" :key="url" />
@@ -152,11 +152,11 @@
         socket.value.on("crawlLog", (data) => {
             console.log('logging', data)
             logs.value.push(data)
-            liveStatusDictionary.value[data.url] = data.status
+            liveStatusDictionary.value[data.url.url] = data.status
 
             // append new crawled data into FE rather than making a new api call to update the new results
             if (data.status === 'success') {
-                crawl.value.aggregatedData[data.url]
+                crawl.value.aggregatedData[data.url.url]
                     .push({data: data.result, date: new Date(), status: data.status})
             }
 
@@ -171,6 +171,10 @@
         });
 
     })
+
+    const configureCrawl = () => {
+        
+    }
 
     // Actions (these functions would need to emit the corresponding Socket.io events)
     const pauseCrawl = () => {
