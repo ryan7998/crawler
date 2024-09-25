@@ -88,7 +88,7 @@
 <script setup>
     import { onMounted, ref, watch } from 'vue'
     import { io } from "socket.io-client"
-    import { useRoute } from 'vue-router'
+    import { useRoute, useRouter } from 'vue-router'
     import axios from 'axios'
     import ViewResult from './ViewResult.vue'
     import { useExcerpts } from '../composables/useExcerpts'
@@ -97,6 +97,7 @@
     const logs = ref([])  // Reactive state for successfull crawl results
     const socket = ref(io("http://localhost:3002"))    // Ref from the socket instance
     const route = useRoute()    //Access the crawl ID from the URL
+    const router = useRouter()
     const crawlId = ref(route.params.crawlId)   // Get crawlId from URL
     const crawl = ref(null); // To store crawl data
     const errorMessage = ref(''); // To store any error messages
@@ -120,11 +121,6 @@
     if (!time) return 'N/A';
     return new Date(time).toLocaleString();
     };
-
-    // Watch for route changes to ensure crawlId is updated when the URL changes
-    watch(route, async () => {
-
-    })
 
     // Initialize Socket.io connection on component mount
     onMounted(async () => {
@@ -173,7 +169,13 @@
     })
 
     const configureCrawl = () => {
-        
+        router.push({
+            name: 'CreateCrawl',
+            query: {
+                initialTitle: crawl.value.title,
+                initialUrls: JSON.stringify(crawl.value.urls)
+            }
+        })
     }
 
     // Actions (these functions would need to emit the corresponding Socket.io events)

@@ -16,7 +16,12 @@ const routes = [
     {
         path: '/create',
         name: 'CreateCrawl',
-        component: CreateCrawl
+        component: CreateCrawl,
+        props: (route) => ({
+            // Map query params to props
+            initialTitle: route.query.initialTitle || '',
+            initialUrls : route.query.initialUrls ? JSON.parse(route.query.initialUrls) : [],
+        })
     }
 ]
 

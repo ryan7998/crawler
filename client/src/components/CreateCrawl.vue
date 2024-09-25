@@ -21,17 +21,26 @@
     // import CssSelector from './CssSelector.vue'
     import UrlComponent from './UrlComponent.vue'
 
-    const formState = reactive({
-        title: null,
-        urls: [{
-            url: '',
-            selectors: []
-        }],
-        selectors: {}
+    const props = defineProps({
+        initialTitle: {
+            type: String,
+            default: '',
+        },
+        initialUrls: {
+            type: Array,
+            default: [{
+                url: '',
+                selectors: []
+            }],
+        },
     })
-    const selectors = ref([])
-    const count = ref(0)
 
+    const formState = reactive({
+        title: props.initialTitle,
+        urls: props.initialUrls,
+    })
+    
+    const selectors = ref([])
     const addUrl = () => {
         formState.urls.push({
             url: '',
