@@ -29,11 +29,18 @@
     const props = defineProps({
         urlData: Object
     })
-    const url = toRef(props.urlData, 'url')
-    const selectors = toRef(props.urlData, 'selectors')
+    const url = ref('')
+    const selectors = ref([])
     const count = ref(0)
     const openSlide = ref(false)
     const crawledData = ref()
+
+    onMounted(() => {
+        url.value = props.urlData.url
+        // url.value = toRef(props.urlData, 'url')
+        selectors.value = props.urlData.selectors
+        // selectors.value = toRef(props.urlData, 'selectors')
+    })
     
     // Add new selector
     const addSelector = () => {

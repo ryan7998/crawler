@@ -90,6 +90,7 @@
     import { io } from "socket.io-client"
     import { useRoute, useRouter } from 'vue-router'
     import axios from 'axios'
+    import { useCrawlStore } from '../stores/crawlStore'
     import ViewResult from './ViewResult.vue'
     import { useExcerpts } from '../composables/useExcerpts'
     import SlideOver from './SlideOver.vue'
@@ -169,13 +170,19 @@
     })
 
     const configureCrawl = () => {
-        router.push({
-            name: 'CreateCrawl',
-            query: {
-                initialTitle: crawl.value.title,
-                initialUrls: JSON.stringify(crawl.value.urls)
-            }
-        })
+        const crawlStore = useCrawlStore()
+
+        // Set the data in the store
+        crawlStore.setData(crawl.value)
+        // Navigate to CreateCrawl
+        router.push({ name: 'CreateCrawl'})
+        // router.push({
+        //     name: 'CreateCrawl',
+        //     query: {
+        //         initialTitle: crawl.value.title,
+        //         initialUrls: JSON.stringify(crawl.value.urls)
+        //     }
+        // })
     }
 
     // Actions (these functions would need to emit the corresponding Socket.io events)

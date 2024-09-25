@@ -16,28 +16,34 @@
 </template>
 <script setup>
     import axios from 'axios'
-    import { ref, reactive } from 'vue'
+    import { useCrawlStore } from '../stores/crawlStore'
+    import { ref, reactive, onMounted } from 'vue'
     import router from '../router';
     // import CssSelector from './CssSelector.vue'
     import UrlComponent from './UrlComponent.vue'
 
-    const props = defineProps({
-        initialTitle: {
-            type: String,
-            default: '',
-        },
-        initialUrls: {
-            type: Array,
-            default: [{
-                url: '',
-                selectors: []
-            }],
-        },
-    })
+    const crawlStore = useCrawlStore()
+
+    // const props = defineProps({
+    //     initialTitle: {
+    //         type: String,
+    //         default: '',
+    //     },
+    //     initialUrls: {
+    //         type: Array,
+    //         default: [{
+    //             url: '',
+    //             selectors: []
+    //         }],
+    //     },
+    // })
 
     const formState = reactive({
-        title: props.initialTitle,
-        urls: props.initialUrls,
+        title: '',
+        urls: [{
+                url: '',
+                selectors: []
+            }]
     })
     
     const selectors = ref([])
@@ -47,6 +53,13 @@
             selectors: []
         })
     }
+
+    onMounted(() => {
+        if(crawlStore.crawl){
+            formState.title = crawlStore.crawl.title
+            formState.urls = crawlStore.crawl.urls
+        }
+    })
 
     const handleSubmit = async () => {
         
