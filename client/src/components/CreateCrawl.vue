@@ -9,7 +9,9 @@
             <UrlComponent v-for="(urlData, id) in formState.urls" :key="id" :urlData="urlData" />
             <button type="button" @click="addUrl" class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
             >Add Url</button>
-            <button type="submit" class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            <button v-if="crawlStore.crawl._id" type="submit" class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+            >Update Crawl</button>
+            <button v-else type="submit" class="flex text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
             >Save</button>
         </div>
     </form>
@@ -17,36 +19,18 @@
 <script setup>
     import axios from 'axios'
     import { useCrawlStore } from '../stores/crawlStore'
-    import { ref, reactive, onMounted } from 'vue'
+    import { ref, reactive, onMounted, computed } from 'vue'
     import router from '../router';
     // import CssSelector from './CssSelector.vue'
     import UrlComponent from './UrlComponent.vue'
 
     const crawlStore = useCrawlStore()
 
-    // const props = defineProps({
-    //     initialTitle: {
-    //         type: String,
-    //         default: '',
-    //     },
-    //     initialUrls: {
-    //         type: Array,
-    //         default: [{
-    //             url: '',
-    //             selectors: []
-    //         }],
-    //     },
-    // })
-
     const formState = reactive({
         title: '',
-        urls: [{
-                url: '',
-                selectors: []
-            }]
+        urls: []
     })
     
-    const selectors = ref([])
     const addUrl = () => {
         formState.urls.push({
             url: '',
@@ -55,7 +39,7 @@
     }
 
     onMounted(() => {
-        if(crawlStore.crawl){
+        if(crawlStore.crawl?._id){
             formState.title = crawlStore.crawl.title
             formState.urls = crawlStore.crawl.urls
         }
@@ -74,15 +58,20 @@
         const requestData = {
             title: formState.title,
             urls: formState.urls,
-            selectors: selectors.value,
             userId: '1' // TODO: update dynamically
         }
 
         try {
-            // Send POST request
-            const response = await axios.post('http://localhost:3001/api/createcrawler', requestData)
-            console.log('Crawl created: ', response.data)
-            router.push(`/dashboard/${response.data.crawlId}`)
+            // Send POST or PUT request
+            let response = null
+            if (crawlStore.crawl._id) {
+                response = await axios.put(`http://localhost:3001/api/updatecrawl/${crawlStore.crawl._id}`, requestData)
+                router.push(`/dashboard/${crawlStore.crawl._id}`)
+            } else {
+                response = await axios.post('http://localhost:3001/api/createcrawler', requestData)
+                router.push(`/dashboard/${response.data.crawlId}`)
+            }
+            console.log('Crawl created/updated: ', response.data)
         } catch (error) {
             console.log('Error creating crawl: ', error.response ? error.response.data : error.message)
         }

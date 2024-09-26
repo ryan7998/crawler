@@ -16,7 +16,7 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h6 class="font-semibold text-gray-700 mb-4">Actions</h6>
                     <button @click="configureCrawl" class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Configure</button>
-                    <button class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Pause</button>
+                    <button @click="confirmDelete" class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Delete</button>
                     <button @click="startCrawl" class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Restart</button>
                 </div>
             </div>
@@ -82,6 +82,17 @@
                 </div>
             </div>
         </div>
+            <!-- Confirmation Modal -->
+            <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded-lg">
+                <h3 class="text-lg font-semibold">Confirm Deletion</h3>
+                <p>Are you sure you want to delete this crawl? This action cannot be undone.</p>
+                <div class="flex justify-end mt-4 space-x-2">
+                <button @click="deleteCrawl" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+                <button @click="cancelDelete" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                </div>
+            </div>
+            </div>
     </div>
 </template>
 
@@ -105,6 +116,7 @@
     const liveStatusDictionary = ref({}) // To store status by listening the socket
     const viewResults = ref({})
     const excerpts = ref({}) // Store excerpts for each URL
+    const showConfirm = ref(false) // Controle the visibility of the confirmation modal
 
 
     const openViewResult = (url) => {
@@ -176,23 +188,7 @@
         crawlStore.setData(crawl.value)
         // Navigate to CreateCrawl
         router.push({ name: 'CreateCrawl'})
-        // router.push({
-        //     name: 'CreateCrawl',
-        //     query: {
-        //         initialTitle: crawl.value.title,
-        //         initialUrls: JSON.stringify(crawl.value.urls)
-        //     }
-        // })
     }
-
-    // Actions (these functions would need to emit the corresponding Socket.io events)
-    const pauseCrawl = () => {
-    console.log("Pausing crawl");
-    };
-
-    const resumeCrawl = () => {
-    console.log("Resuming crawl");
-    };
 
     const startCrawl = async () => {
         console.log('crawl started from FE')
@@ -203,7 +199,6 @@
                 selectors: crawl.value.selectors || []
 
             }
-
             // Make a POST request to start the crawl
             const response = await axios.post('http://localhost:3001/api/startcrawl', requestBody)
             console.log('Crawl started: ', response.data)
@@ -211,6 +206,27 @@
         } catch (error) {
             console.log('Error starting crawl: ', error.response ?  error.data.message : error.message)
         }
-    };
+    }
+
+    // Function to show the confirmation modal
+    const confirmDelete = () => {
+        showConfirm.value = true
+    }
+
+    const cancelDelete = () => {
+        showConfirm.value = false
+    }
+
+    const deleteCrawl = async () => {
+        try {
+            await axios.delete(`http://localhost:3001/api/deletecrawl/${crawlId.value}`)
+            showConfirm.value = false
+            router.push('/') // Redirect to homepage
+        } catch (error) {
+            console.error('Error deleting crawl: ', error.response ? error.response.data.message : error.message)
+            errorMessage.value = error.response ? error.response.data.message : 'Error deleting crawl'
+            showConfirm.value = false
+        }
+    }
 </script>
 

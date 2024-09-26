@@ -4,6 +4,7 @@ const crawlQueue = require('../queues/crawlQueue')
 const Crawl = require('../models/Crawl')
 const CrawlData = require('../models/CrawlData')
 const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions')
+const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
 
 const crawlWebsite = async (req, res) => {
     
@@ -20,7 +21,10 @@ const crawlWebsite = async (req, res) => {
     // else
     try {
         for(const url of urls){
-            await crawlQueue.add({ url, crawlId })
+            await crawlQueue.add(
+                { url, crawlId },
+                { removeOnComplete: true, removeOnFail: true }
+            )
             // await crawlQueue.add({ url, crawlId, selectors })
         }
         res.json({message: 'Crawl jobs added to queue', urls})
@@ -53,9 +57,77 @@ const createCrawler = async (req, res) => {
     }
 }
 
+const updateCrawler = async (req, res) => {
+    const { id } = req.params
+    const { title, urls} = req.body
+
+    // Validate crawlId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid crawlId'})
+    }
+    try {
+        // Find the existing crawl
+        const crawl = await Crawl.findById(id)
+        if (!crawl) {
+            return res.status(404).json({ message: 'Crawl not found'})
+        }
+        // Update the crawl fields if provided
+        if (title) crawl.title = title
+        if (urls) crawl.urls = urls
+
+        const updatedCrawl = await crawl.save()
+        res.status(200).json({ message: 'Crawl updated successfully', crawl: updatedCrawl })
+    } catch (error) {
+        console.log('Error updating crawl: ', error.message)
+        res.status(500).json({ message: 'Error updating crawl', error: error.message })
+    }
+}
+
+const deleteCrawler = async (req, res) => {
+    const { id } = req.params
+    
+    // Validate crawlId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid crawlId'})
+    }
+    try {
+        // Find existing crawl
+        const crawl = await Crawl.findById(id)
+        if(!crawl) {
+            return res.status(404).json({ message: 'Crawl not found'})
+        }
+        // Remove associated CrawlData entries
+        await CrawlData.deleteMany({ crawlId: id })
+        // Remove jobs related ot this crawl from the queue
+        console.log('deleting jobs')
+        const jobs = await crawlQueue.getJobs(['waiting', 'active', 'delayed', 'failed'])
+        // console.log('jobs: ', jobs)
+        for (const job of jobs) {
+            console.log('job ids, ', job.data.crawlId, id)
+            if(job.data.crawlId?.toString() === id) {
+                await job.remove()
+            }
+            console.log('finished deleting. ')
+        }
+        console.log('deleting crawl')
+        // Delete the crawl document
+        await Crawl.findByIdAndDelete(id)
+        // Emit a socket event to notify clients about the deletion
+        // io.emit('crawlDeleted', { crawlId: id })
+        res.status(200).json({ message: 'Crawl deleted successfully'})
+    } catch (error) {
+        console.error('Error deleting crawl:', error.message);
+        res.status(500).json({ message: 'Error deleting crawl', error: error.message });
+    }
+}
+
 const getCrawler = async (req, res) => {
     const { id } = req.params
 
+    // Validate crawlId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid crawlId'})
+    }
     try{
         // Find the crawl by its ObjectId
         const crawlerData = await Crawl.findById(id)
@@ -86,4 +158,4 @@ const getCrawler = async (req, res) => {
     }
 }
 
-module.exports = { crawlWebsite, createCrawler, getCrawler }
+module.exports = { crawlWebsite, createCrawler, updateCrawler, getCrawler, deleteCrawler }
