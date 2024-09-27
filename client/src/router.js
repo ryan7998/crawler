@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from "vue-router"
 import CrawlerDashboard from "./components/CrawlerDashboard.vue"
 import CreateCrawl from "./components/CreateCrawl.vue"
+import HomePage from "./components/HomePage.vue"
 
 const routes = [
-    // {
-    //     path:'/',
-    //     name: 'Home',
-    //     component: Home,
-    // },
+    {
+        path:'/',
+        name: 'HomePage',
+        component: HomePage,
+    },
     {
         path: '/dashboard/:crawlId',
         name: 'CrawlerDashboard',

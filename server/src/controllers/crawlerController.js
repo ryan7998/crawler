@@ -158,4 +158,40 @@ const getCrawler = async (req, res) => {
     }
 }
 
-module.exports = { crawlWebsite, createCrawler, updateCrawler, getCrawler, deleteCrawler }
+const getAllCrawlers = async (req, res) => {
+
+    try{
+        // Biuld the query
+        let query = {}
+        // Implement pagination
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 20
+        const skip = (page - 1) * limit
+        
+        // Fetch crawls from the database
+        const crawls = await Crawl.find(query)
+            .select('-__v') // Exclude the __v field
+            .populate({
+                path: 'results',
+                select: '-__v'
+            })
+            .sort({ createdAt: -1 }) // Sort by newest first
+            .skip(skip)
+            .limit(limit)
+
+        // Get total count for pagination
+        const totalCrawls = await Crawl.countDocuments(query)
+
+        res.status(200).json({
+            page,
+            totalPages: Math.ceil(totalCrawls / limit),
+            crawls
+        })
+    } catch (error) {
+        console.error('Error fetching all crawls: ', error.message)
+        res.status(500).json({ message: 'Error fetching crawls, ', error: error.message})
+    }
+
+}
+
+module.exports = { crawlWebsite, createCrawler, updateCrawler, getCrawler, getAllCrawlers, deleteCrawler }
