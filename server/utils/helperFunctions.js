@@ -58,31 +58,35 @@ const aggregateDashboard = (crawlerData) => {
     const { results, urls } = crawlerData
     
     const aggregatedData = {}
-    
-    if(!results.length){ // New crawl or haven't run yet
+    try{
+        // create aggregatedData hashmap Object of urls
         urls.map((url) => {
             aggregatedData[url.url] = []
         })
-        return aggregatedData // Return empty array for corresponding url
+
+        if(results.length){
+            // Loop through the results
+            results.forEach(result => {
+                let newObj = {
+                    date: result.createdAt,
+                    status: result.status,
+                    data: result.data ?? result.error
+                }
+                // If url property exists in the aggregatedData object
+                if (aggregatedData[result.url]) {
+                    aggregatedData[result.url].push(newObj)
+                } else {
+                // Otherwise create new url property in the aggregatedData object
+                    aggregatedData[result.url] = [newObj]
+                }
+            })
+        }
+        return aggregatedData
+    } catch (error) {
+        console.error(error)
+        return aggregatedData
     }
 
-    // Loop through the results
-    results.forEach(result => {
-        let newObj = {
-            date: result.createdAt,
-            status: result.status,
-            data: result.data ?? result.error
-        }
-        // If url property exists in the aggregatedData object
-        if (aggregatedData[result.url]) {
-            aggregatedData[result.url].push(newObj)
-        } else {
-        // Otherwise create new url property in the aggregatedData object
-            aggregatedData[result.url] = [newObj]
-        }
-    })
-
-    return aggregatedData
 
 }
 module.exports = { extractHtml, aggregateDashboard }
