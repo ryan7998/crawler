@@ -2,14 +2,14 @@ import { defineStore } from "pinia"
 
 export const useCrawlStore = defineStore('crawl', {
     state: () => ({
-        crawl: {}
+        currentCrawl: {}
     }),
     actions: {
         setData(data) {
-            this.crawl = data
+            this.currentCrawl = data
         },
         clearData() {
-            this.crawl = {}
+            this.currentCrawl = {}
         }
     }
 })
