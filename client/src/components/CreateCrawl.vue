@@ -22,6 +22,7 @@
                 :urlData="urlData" 
                 :index="index" 
                 @updateUrlData="updateUrlData"
+                @removeUrlData="removeUrlData"
             />
             <button 
                 type="button" 
@@ -115,8 +116,6 @@
 
     // Handle updates from UrlComponent.vue
     const updateUrlData = ({ index, key, value }) => {
-        
-        console.log('index, key, value: ', index, key, value)
         if (key === 'url') {
             formState.urls[index].url = value
             // Basic validation
@@ -130,12 +129,17 @@
         } else if (key === 'selectors') {
             formState.urls[index].selectors = value
             // Basic validation for selectors
-            if (!value.length) {
-                errors.urls[index].selectors = 'At least one selector is required.'
-            } else {
-                errors.urls[index].selectors = ''
-            }
+            // if (!value.length) {
+            //     errors.urls[index].selectors = 'At least one selector is required.'
+            // } else {
+            //     errors.urls[index].selectors = ''
+            // }
         }
+    }
+
+    const removeUrlData = ({ index }) => {
+        console.log('index: ', index)
+        formState.urls.splice(index, 1)
     }
 
     // Validate URL format
@@ -177,12 +181,12 @@
             }
 
             // Validate selectors
-            if (!urlEntry.selectors.length) {
-                errors.urls[index].selectors = 'At least one selector is required.'
-                isValid = false
-            } else {
-                errors.urls[index].selectors = ''
-            }
+            // if (!urlEntry.selectors.length) {
+            //     errors.urls[index].selectors = 'At least one selector is required.'
+            //     isValid = false
+            // } else {
+            //     errors.urls[index].selectors = ''
+            // }
         })
 
         if (!isValid) {
