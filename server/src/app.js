@@ -8,7 +8,7 @@ const app = express()
 
 // Allow requests from 'http://localhost:5173'
 app.use(cors({
-    origin: 'http://localhost:5173' // Vue app's origin
+    origin: process.env.ORIGIN || 'http://localhost:5173', // Vue app's origin
 }))
 
 // Middleware
