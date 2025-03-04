@@ -6,7 +6,7 @@ let io  // To store the Socket.io instance
 const initializeSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: process.env.SOCKET_ORIGIN || 'http://localhost:5173', // Allow your frontend origin
+            origin: process.env.ORIGIN || 'http://localhost:5173', // Allow your frontend origin
             methods: ["GET", "POST"],
             credentials: true,
         }
