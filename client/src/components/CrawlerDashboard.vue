@@ -105,9 +105,9 @@
     import ViewResult from './ViewResult.vue'
     import { useExcerpts } from '../composables/useExcerpts'
     import SlideOver from './SlideOver.vue'
-
+    const baseUrl = window.location.origin;
     const logs = ref([])  // Reactive state for successfull crawl results
-    const socket = ref(io("http://localhost:3002"))    // Ref from the socket instance
+    const socket = ref(io(`${baseUrl}:3002`))    // Ref from the socket instance
     const route = useRoute()    //Access the crawl ID from the URL
     const router = useRouter()
     const crawlId = ref(route.params.crawlId)   // Get crawlId from URL
