@@ -13,7 +13,7 @@ export function useExcerpts(text, length = 50) {
 
     const toggleExpand = () => {
         isExpanded.value = !isExpanded.value
-        console.log(isExpanded.value)
+        // console.log(isExpanded.value)
     }
 
     return {

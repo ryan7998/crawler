@@ -17,8 +17,8 @@
         <!-- URLs and Selectors -->
         <div class="mb-5 space-y-2">
             <UrlComponent 
-                v-for="(urlData, index) in formState.urls" 
-                :key="index" 
+                v-for="(urlData, index) in formState.urls"
+                :key="urlData.id" 
                 :urlData="urlData" 
                 :index="index" 
                 @updateUrlData="updateUrlData"
@@ -88,6 +88,7 @@
             formState.title = crawlStore.currentCrawl.title
             // Deep clone to prevent direct mutations
             formState.urls = crawlStore.currentCrawl.urls.map(url => ({
+                id: url.id || '',
                 url: url.url || '',
                 selectors: url.selectors ? [...url.selectors] : []
             }))
@@ -108,6 +109,7 @@
     // Add a new URL entry
     const addUrl = () => {
         formState.urls.push({
+            id: Math.random().toString(36).substring(2, 9),
             url: '',
             selectors: []
         })
@@ -128,12 +130,6 @@
             }
         } else if (key === 'selectors') {
             formState.urls[index].selectors = value
-            // Basic validation for selectors
-            // if (!value.length) {
-            //     errors.urls[index].selectors = 'At least one selector is required.'
-            // } else {
-            //     errors.urls[index].selectors = ''
-            // }
         }
     }
 
