@@ -51,8 +51,8 @@
     // Fetch crawls from the backend
     const fetchCrawls = async () => {
         try {
-            let url = process.env.ORIGIN ?? 'http://localhost:3001'
-            const response = await axios.get(`${url}/api/getallcrawlers`, {
+            const baseUrl = window.location.origin;
+            const response = await axios.get(`${baseUrl}/api/getallcrawlers`, {
                 params: {
                     page: currentPage.value,
                     limit: limit.value,
