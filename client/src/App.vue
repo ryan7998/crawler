@@ -1,9 +1,12 @@
 <script setup>
-  import CrawlerDashboard from './components/CrawlerDashboard.vue'
+import Navbar from './components/Navbar.vue';
 </script>
 
 <template>
-  <CrawlerDashboard/>
+    <div class="min-h-screen bg-gray-100 w-full">
+      <Navbar />
+      <router-view />
+    </div>
 </template>
 
 <style scoped>

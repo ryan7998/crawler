@@ -1,61 +1,92 @@
 const cheerio = require('cheerio')
 
-const extractHtml = (html) => {
+const extractHtml = (html, selectors = []) => {
     // Load the HTML into cheerio
     const $ = cheerio.load(html)
+    const extractedData = {defaultData:{}}
+    
+    // If user has set selectors:
+    if(selectors.length) {
+        selectors.forEach(selector => {
+            if(selector.name && selector.css){
+                extractedData[selector.name] = $(`${selector.css}`).text().trim()
+                console.log('selector extracted: ', selector.name, selector.css, extractedData[selector.name])
+            }
+        })
+    }
         
-    const extractedData = {}
     // Title
-    extractedData.title = $('title').text().trim()
+    extractedData.defaultData.title = $('title').text().trim()
     // h1 tags
-    extractedData.h1Tags = []
+    extractedData.defaultData.h1Tags = []
     $('h1').each((index, element) => {
-        extractedData.h1Tags.push($(element).text())
+        extractedData.defaultData.h1Tags.push($(element).text())
     })
     // Price
-    extractedData.extractedPrice = $('[class*="price"]').text().trim() || ''
+    let probableExtractedPrice = $('[class*="price"]').text().trim() || ''
+    probableExtractedPrice  = probableExtractedPrice.match(/\$\d+(?:\.\.?\d+)?/g) || [] // Extract prices using the regex
+
+    // Proceed with cleaning as before
+    probableExtractedPrice = [...new Set(probableExtractedPrice)]
+    probableExtractedPrice = probableExtractedPrice.map(price => price.replace('..', '.'))
+
+    extractedData.defaultData.price = probableExtractedPrice
+
+    // regex to extract price: \$\d+(?:\.\.?\d+)?
+
     // Images
-    extractedData.images = []
+    extractedData.defaultData.images = []
     $('img').each((index, element) => {
         const src = $(element).attr('src')
-        if(src) extractedData.images.push(src)
+        if(src) extractedData.defaultData.images.push(src)
     })
     // <a> tags (links)
-    extractedData.links = []
+    extractedData.defaultData.links = []
     $('a').each((index, element) => {
         const href = $(element).attr('href')
-        if(href) extractedData.links.push(href)
+        if(href) extractedData.defaultData.links.push(href)
     })
     // Description
-    extractedData.description = $('meta[name="description"]').attr('content') || ''
-    extractedData.keywords = $('meta[name="keywords"]').attr('content') || ''
+    extractedData.defaultData.description = $('meta[name="description"]').attr('content') || ''
+    extractedData.defaultData.keywords = $('meta[name="keywords"]').attr('content') || ''
 
     return extractedData
 }
 
 // Aggregate the crawler data grouping by urls
 const aggregateDashboard = (crawlerData) => {
-    const { results } = crawlerData
-
+    const { results, urls } = crawlerData
+    
     const aggregatedData = {}
+    try{
+        // create aggregatedData hashmap Object of urls
+        urls.map((url) => {
+            aggregatedData[url.url] = []
+        })
 
-    // Loop through the results
-    results.forEach(result => {
-        let newObj = {
-            date: result.createdAt,
-            status: result.status,
-            data: result.data ?? result.error
+        if(results.length){
+            // Loop through the results
+            results.forEach(result => {
+                let newObj = {
+                    date: result.createdAt,
+                    status: result.status,
+                    data: result.data ?? result.error
+                }
+                // If url property exists in the aggregatedData object
+                if (aggregatedData[result.url]) {
+                    aggregatedData[result.url].push(newObj)
+                } else {
+                // Otherwise create new url property in the aggregatedData object
+                    aggregatedData[result.url] = [newObj]
+                }
+            })
         }
-        // If url property exists in the aggregatedData object
-        if (aggregatedData[result.url]) {
-            aggregatedData[result.url].push(newObj)
-        } else {
-        // Otherwise create new url property in the aggregatedData object
-            aggregatedData[result.url] = [newObj]
-        }
-    })
+        return aggregatedData
+    } catch (error) {
+        console.error(error)
+        return aggregatedData
+    }
 
-    return aggregatedData
 
 }
 module.exports = { extractHtml, aggregateDashboard }
