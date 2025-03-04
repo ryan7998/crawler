@@ -1,8 +1,6 @@
 require('dotenv').config()
 const Queue = require('bull')
 
-
-
 // Create a queue for crawling tasks
 const crawlQueue = new Queue('crawlQueue', {
     redis: {
