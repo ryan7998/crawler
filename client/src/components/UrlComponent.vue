@@ -106,7 +106,8 @@
                 selectors: localSelectors || []
             }
             // Make a POST request to start the crawl
-            const { data } = await axios.post('http://localhost:3001/api/startcrawl', requestBody)
+            const baseUrl = window.location.origin;
+            const { data } = await axios.post(`${baseUrl}/api/startcrawl`, requestBody)
             crawledData.value = data?.extractedDatum
             console.log('Crawl started: ', data)
             // crawl.value.status = 'in-progress'

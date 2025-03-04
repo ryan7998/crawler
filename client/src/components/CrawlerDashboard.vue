@@ -200,7 +200,8 @@
 
             }
             // Make a POST request to start the crawl
-            const response = await axios.post('http://localhost:3001/api/startcrawl', requestBody)
+            const baseUrl = window.location.origin;
+            const response = await axios.post(`${baseUrl}/api/startcrawl`, requestBody)
             console.log('Crawl started: ', response.data)
             crawl.value.status = 'in-progress'
         } catch (error) {
