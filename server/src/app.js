@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db'
 // Use this to log mongo queries being executed!
 mongoose.set('debug', true);
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
 })
