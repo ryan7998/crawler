@@ -1,4 +1,5 @@
 const { Server } = require('socket.io')
+require('dotenv').config();
 
 let io  // To store the Socket.io instance
 
