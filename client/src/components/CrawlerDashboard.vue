@@ -143,7 +143,8 @@
 
         // Fetch the crawl data
         try {
-            const response = await axios.get(`http://localhost:3001/api/getcrawler/${crawlId.value}`)
+            const baseUrl = window.location.origin;
+            const response = await axios.get(`${baseUrl}/api/getcrawler/${crawlId.value}`)
             crawl.value = response.data // Assign response data to the crawl object
 
             // Initiate excerpt for each URL
