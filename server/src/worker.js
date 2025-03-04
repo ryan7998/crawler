@@ -39,8 +39,7 @@
 
     // Process each job in the queue
     crawlQueue.process(async (job, done) => {
-        const { url, crawlId } = job.data
-        // const { url, crawlId, selectors } = job.data
+        const { url, crawlId, selectors } = job.data
         const io = getSocket()
 
         try{
