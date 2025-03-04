@@ -100,13 +100,14 @@
     import { onMounted, ref, watch } from 'vue'
     import { io } from "socket.io-client"
     import { useRoute, useRouter } from 'vue-router'
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
+    const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
     import axios from 'axios'
     import { useCrawlStore } from '../stores/crawlStore'
     import ViewResult from './ViewResult.vue'
     import { useExcerpts } from '../composables/useExcerpts'
     import SlideOver from './SlideOver.vue'
     const logs = ref([])  // Reactive state for successfull crawl results
-    const baseUrl = window.location.origin;
     const socket = ref(io(`${baseUrl}:3002`))    // Ref from the socket instance
     const route = useRoute()    //Access the crawl ID from the URL
     const router = useRouter()
@@ -117,6 +118,7 @@
     const viewResults = ref({})
     const excerpts = ref({}) // Store excerpts for each URL
     const showConfirm = ref(false) // Controle the visibility of the confirmation modal
+
 
 
     const openViewResult = (url) => {
@@ -143,8 +145,7 @@
 
         // Fetch the crawl data
         try {
-            const baseUrl = window.location.origin;
-            const response = await axios.get(`${baseUrl}/api/getcrawler/${crawlId.value}`)
+            const response = await axios.get(`${apiUrl}/api/getcrawler/${crawlId.value}`)
             crawl.value = response.data // Assign response data to the crawl object
 
             // Initiate excerpt for each URL
@@ -201,8 +202,7 @@
 
             }
             // Make a POST request to start the crawl
-            const baseUrl = window.location.origin;
-            const response = await axios.post(`${baseUrl}/api/startcrawl`, requestBody)
+            const response = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
             console.log('Crawl started: ', response.data)
             crawl.value.status = 'in-progress'
         } catch (error) {
@@ -221,7 +221,7 @@
 
     const deleteCrawl = async () => {
         try {
-            await axios.delete(`http://localhost:3001/api/deletecrawl/${crawlId.value}`)
+            await axios.delete(`${apiUrl}/api/deletecrawl/${crawlId.value}`)
             showConfirm.value = false
             router.push('/') // Redirect to homepage
         } catch (error) {

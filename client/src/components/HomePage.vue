@@ -36,6 +36,7 @@
     const crawlStore = useCrawlStore()
     // Initialize Vue
     const router = useRouter()
+    const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
 
     // Reactive state
     const crawls = ref([])
@@ -51,8 +52,7 @@
     // Fetch crawls from the backend
     const fetchCrawls = async () => {
         try {
-            const baseUrl = window.location.origin;
-            const response = await axios.get(`${baseUrl}/api/getallcrawlers`, {
+            const response = await axios.get(`${apiUrl}/api/getallcrawlers`, {
                 params: {
                     page: currentPage.value,
                     limit: limit.value,

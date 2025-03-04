@@ -63,6 +63,9 @@
     const crawlStore = useCrawlStore()
     const router = useRouter()
 
+    const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
+
+
     // Reactive form state
     const formState = reactive({
         title: '',
@@ -204,7 +207,7 @@
             let response = null
             if (isEditing.value) {
                 // Update existing crawl
-                response = await axios.put(`http://localhost:3001/api/updatecrawl/${crawlStore.currentCrawl._id}`, requestData)
+                response = await axios.put(`${apiUrl}/api/updatecrawl/${crawlStore.currentCrawl._id}`, requestData)
                 successMessage.value = 'Crawl updated successfully.'
                 // Optionally, clear the store
                 // crawlStore.clearData()
