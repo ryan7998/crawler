@@ -7,6 +7,7 @@ let io  // To store the Socket.io instance
 const initializeSocket = (server) => {
     io = new Server(server, {
         cors: {
+            // origin: "http://crawler.onthis.website", // Allow your frontend origin
             origin: process.env.ORIGIN || 'http://localhost:5173', // Allow your frontend origin
             methods: ["GET", "POST"],
             credentials: true,
@@ -40,7 +41,7 @@ const initializeSocket = (server) => {
 
 // Get the initialized Socket.io instance
 const getSocket = () => {
-    if(!io) {
+    if (!io) {
         throw new Error("Socket.io not initialized. Please call initializeSocket first.")
     }
     return io

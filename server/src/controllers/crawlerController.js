@@ -7,30 +7,33 @@ const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions
 const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
 
 const crawlWebsite = async (req, res) => {
-    
-    const { urls, crawlId, selectors} = req.body
-    
+
+    const { urls, crawlId, selectors } = req.body
+
     // it it is a test crawl
-    if(!crawlId){
+    if (!crawlId) {
         const { data } = await axios.get(urls)
         // Extract data from HTML
         const extractedDatum = await extractHtml(data, selectors)
-        res.json({extractedDatum})
+        res.json({ extractedDatum })
         return
     }
     // else
     try {
-        for(const url of urls){
-            await crawlQueue.add(
-                { url, crawlId },
-                { removeOnComplete: true, removeOnFail: true }
-            )
-            // await crawlQueue.add({ url, crawlId, selectors })
+        // crawlQueue.empty()
+        console.log("Adding job: ", urls, crawlId, selectors)
+        // throw error
+        for (const url of urls) {
+            // await crawlQueue.add(
+            //     { url, crawlId, selectors },
+            //     { removeOnComplete: true, removeOnFail: true }
+            // )
+            await crawlQueue.add({ url, crawlId, selectors }) // for redis 7
         }
-        res.json({message: 'Crawl jobs added to queue', urls})
+        res.json({ message: 'Crawl jobs added to queue', urls })
     } catch (error) {
         console.log('Error adding jobs to the queue: ', error.message)
-        res.status(500).json({ error: `Failed to add crawl jobs. ${error.message}`})
+        res.status(500).json({ error: `Failed to add crawl jobs. ${error.message}` })
     }
 }
 
@@ -47,29 +50,29 @@ const createCrawler = async (req, res) => {
             userId,
             status: 'pending',
         })
-    
+
         // Save to database
         await newCrawl.save()
         // Return the generated _id (crawlId) to the client
         res.status(201).json({ message: 'Crawl created', crawlId: newCrawl._id })
     } catch (error) {
-        res.status(500).json({ message: 'Error creating crawl', error: error.message})
+        res.status(500).json({ message: 'Error creating crawl', error: error.message })
     }
 }
 
 const updateCrawler = async (req, res) => {
     const { id } = req.params
-    const { title, urls} = req.body
+    const { title, urls } = req.body
 
     // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid crawlId'})
+        return res.status(400).json({ message: 'Invalid crawlId' })
     }
     try {
         // Find the existing crawl
         const crawl = await Crawl.findById(id)
         if (!crawl) {
-            return res.status(404).json({ message: 'Crawl not found'})
+            return res.status(404).json({ message: 'Crawl not found' })
         }
         // Update the crawl fields if provided
         if (title) crawl.title = title
@@ -85,16 +88,16 @@ const updateCrawler = async (req, res) => {
 
 const deleteCrawler = async (req, res) => {
     const { id } = req.params
-    
+
     // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid crawlId'})
+        return res.status(400).json({ message: 'Invalid crawlId' })
     }
     try {
         // Find existing crawl
         const crawl = await Crawl.findById(id)
-        if(!crawl) {
-            return res.status(404).json({ message: 'Crawl not found'})
+        if (!crawl) {
+            return res.status(404).json({ message: 'Crawl not found' })
         }
         // Remove associated CrawlData entries
         await CrawlData.deleteMany({ crawlId: id })
@@ -104,7 +107,7 @@ const deleteCrawler = async (req, res) => {
         // console.log('jobs: ', jobs)
         for (const job of jobs) {
             console.log('job ids, ', job.data.crawlId, id)
-            if(job.data.crawlId?.toString() === id) {
+            if (job.data.crawlId?.toString() === id) {
                 await job.remove()
             }
             console.log('finished deleting. ')
@@ -114,7 +117,7 @@ const deleteCrawler = async (req, res) => {
         await Crawl.findByIdAndDelete(id)
         // Emit a socket event to notify clients about the deletion
         // io.emit('crawlDeleted', { crawlId: id })
-        res.status(200).json({ message: 'Crawl deleted successfully'})
+        res.status(200).json({ message: 'Crawl deleted successfully' })
     } catch (error) {
         console.error('Error deleting crawl:', error.message);
         res.status(500).json({ message: 'Error deleting crawl', error: error.message });
@@ -126,20 +129,20 @@ const getCrawler = async (req, res) => {
 
     // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid crawlId'})
+        return res.status(400).json({ message: 'Invalid crawlId' })
     }
-    try{
+    try {
         // Find the crawl by its ObjectId
         const crawlerData = await Crawl.findById(id)
-        .select('-__v')
-        .populate({
-            path: 'results',
-            select: '-__v'
-        })
+            .select('-__v')
+            .populate({
+                path: 'results',
+                select: '-__v'
+            })
 
         // If the crawl doesn't exist, return a 404
         if (!crawlerData) {
-            return res.status(404).json({message: 'Crawler not found'})
+            return res.status(404).json({ message: 'Crawler not found' })
         }
 
         const aggregatedData = aggregateDashboard(crawlerData)
@@ -152,7 +155,7 @@ const getCrawler = async (req, res) => {
     } catch (error) {
         // Handle invalid ObjectId errors or other server issues
         if (error.kind === 'ObjectId') {
-            return res.status(400).json({message: 'Invalid crawl ID'})
+            return res.status(400).json({ message: 'Invalid crawl ID' })
         }
         res.status(500).json({ message: 'Server error', error: error.message })
     }
@@ -160,14 +163,14 @@ const getCrawler = async (req, res) => {
 
 const getAllCrawlers = async (req, res) => {
 
-    try{
+    try {
         // Biuld the query
         let query = {}
         // Implement pagination
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 20
         const skip = (page - 1) * limit
-        
+
         // Fetch crawls from the database
         const crawls = await Crawl.find(query)
             .select('-__v') // Exclude the __v field
@@ -189,7 +192,7 @@ const getAllCrawlers = async (req, res) => {
         })
     } catch (error) {
         console.error('Error fetching all crawls: ', error.message)
-        res.status(500).json({ message: 'Error fetching crawls, ', error: error.message})
+        res.status(500).json({ message: 'Error fetching crawls, ', error: error.message })
     }
 
 }

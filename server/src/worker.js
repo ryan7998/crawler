@@ -24,8 +24,8 @@
         useUnifiedTopology: true,
     })
 
-    .then(() => console.log('MongoDB connected'))
-    .catch((err) => console.log(err))
+        .then(() => console.log('MongoDB connected'))
+        .catch((err) => console.log(err))
 
     const extractedData = []
     const failedCrawls = []
@@ -40,25 +40,24 @@
     // Process each job in the queue
     crawlQueue.process(async (job, done) => {
         // const { url, crawlId } = job.data
-        const { url, crawlId, selectors } = job.data
+        const { url, crawlId } = job.data
         const io = getSocket()
 
-        try{
+        try {
             // Emit crawlLog event to be captured in FE log
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'started' })
 
             // Fetch the HTML content from the URL
             const throttled = throttle(async () => await axios.get(url.url))
             const { data } = await throttled()
-            
+
             // Extract data from HTML
             const extractedDatum = await extractHtml(data, url.selectors)
             extractedData.push(extractedDatum)
-            
+
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'saving' })
-            console.log('url: ', url)
             // Save to database
-            const newCrawlData = new CrawlData({ url:url.url, data: extractedDatum, crawlId, status: 'success' })
+            const newCrawlData = new CrawlData({ url: url.url, data: extractedDatum, crawlId, status: 'success' })
             // console.log('newCrawl: ', newCrawlData.data.title)
             await newCrawlData.save()
 
@@ -68,14 +67,14 @@
                 { $push: { results: newCrawlData._id } },
                 { new: true }
             )
-            
+
             // Emit event to clients when the crawl is completed
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'success', result: extractedDatum })
 
             console.log(`Successfully crawled: ${url}, Crawl Id: ${crawlId}`)
             done(null, extractedDatum)
 
-        } catch(error) {
+        } catch (error) {
             if (error.response) {
                 // Server responded with a status code out of the 2xx range
                 console.log(`Error: Recieved ${error.response.status} from ${url}`)
@@ -88,7 +87,7 @@
             }
             const io = getSocket()
             io.to(crawlId).emit('crawlLog', { job: job.id, url, status: 'failed', error: error.message })
-            failedCrawls.push({url: url, message: error.message})
+            failedCrawls.push({ url: url, message: error.message })
 
             // Save to database
             const newCrawlData = new CrawlData({ url, crawlId, status: 'failed', error: error.message })
