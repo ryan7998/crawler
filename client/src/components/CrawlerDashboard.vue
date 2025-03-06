@@ -107,6 +107,7 @@ import { io } from "socket.io-client"
 import { useRoute, useRouter } from 'vue-router'
 const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
 const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
+const socketUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3002'
 import axios from 'axios'
 import { useCrawlStore } from '../stores/crawlStore'
 import ViewResult from './ViewResult.vue'
@@ -152,7 +153,7 @@ onMounted(async () => {
 
     // Fetch the crawl data
     try {
-        socket.value = io(baseUrl, {
+        socket.value = io(socketUrl, {
             path: "/socket.io/", // Ensure this matches the server's path
             transports: ["polling", "websocket"] // Default behavior
         });
