@@ -87,10 +87,10 @@
             }
             const io = getSocket()
             io.to(crawlId).emit('crawlLog', { job: job.id, url, status: 'failed', error: error.message })
-            failedCrawls.push({ url: url, message: error.message })
-
+            failedCrawls.push({ url: url.url, message: error.message })
+            
             // Save to database
-            const newCrawlData = new CrawlData({ url, crawlId, status: 'failed', error: error.message })
+            const newCrawlData = new CrawlData({ url: url.url, crawlId, status: 'failed', error: error.message })
             await newCrawlData.save()
 
             // Find the Crawl entry and push the CrawlData _id into the result array
