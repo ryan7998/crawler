@@ -32,7 +32,7 @@
                 {{ localUrl }}
             </template>
             <template #default>
-                <pre>{{ crawledData }}</pre>
+                <pre>{{ crawledData || 'Crawl Failed'}}</pre>
             </template>
         </SlideOver>
     </div>
@@ -42,6 +42,8 @@
     import axios from 'axios'
     import CssSelector from './CssSelector.vue'
     import SlideOver from './SlideOver.vue'
+
+    const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
 
     // Define props with structure
     const props = defineProps({
@@ -106,13 +108,12 @@
                 selectors: localSelectors || []
             }
             // Make a POST request to start the crawl
-            const baseUrl = window.location.origin;
-            const { data } = await axios.post(`${baseUrl}/api/startcrawl`, requestBody)
+            const { data } = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
             crawledData.value = data?.extractedDatum
             console.log('Crawl started: ', data)
             // crawl.value.status = 'in-progress'
         } catch (error) {
-            console.log('Error starting crawl: ', error.response ?  error.data.message : error.message)
+            console.log('Error starting crawl: ', error.response ?  error.response.data.message : error.message)
         }
         openSlide.value = true
     }

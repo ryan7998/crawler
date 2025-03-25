@@ -8,6 +8,8 @@
     const { extractHtml } = require('../utils/helperFunctions')
     const crawlQueue = require('./queues/crawlQueue')
     const { initializeSocket, getSocket } = require('../utils/socket')
+
+    const Seed = require('./classes/Seed')
     require('dotenv').config()
 
     const app = express()
@@ -23,9 +25,8 @@
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
-
-        .then(() => console.log('MongoDB connected'))
-        .catch((err) => console.log(err))
+    .then(() => console.log('MongoDB connected'))
+    .catch((err) => console.log(err))
 
     const extractedData = []
     const failedCrawls = []
@@ -47,17 +48,22 @@
             // Emit crawlLog event to be captured in FE log
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'started' })
 
+            const seed = new Seed(url)
+            if(!seed.isValid()) {
+                throw new Error(`Invalid URL: ${seed.url}`)
+            }
             // Fetch the HTML content from the URL
-            const throttled = throttle(async () => await axios.get(url.url))
-            const { data } = await throttled()
-
+            // const throttled = throttle(async () => await axios.get(seed.url))
+            const throttled = throttle(async () => await seed.loadHTMLContent())
+            await throttled()
+            // console.log('seed.cleanHtmlContent: ', seed.cleanHtmlContent)
             // Extract data from HTML
-            const extractedDatum = await extractHtml(data, url.selectors)
+            const extractedDatum = await extractHtml(seed.cleanHtmlContent, seed.selectors)
             extractedData.push(extractedDatum)
 
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'saving' })
             // Save to database
-            const newCrawlData = new CrawlData({ url: url.url, data: extractedDatum, crawlId, status: 'success' })
+            const newCrawlData = new CrawlData({ url: seed.url, data: extractedDatum, crawlId, status: 'success' })
             // console.log('newCrawl: ', newCrawlData.data.title)
             await newCrawlData.save()
 
@@ -71,8 +77,9 @@
             // Emit event to clients when the crawl is completed
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'success', result: extractedDatum })
 
-            console.log(`Successfully crawled: ${url}, Crawl Id: ${crawlId}`)
+            console.log(`Successfully crawled: ${seed}, Crawl Id: ${crawlId}`)
             done(null, extractedDatum)
+            // done(null)
 
         } catch (error) {
             if (error.response) {
@@ -87,7 +94,7 @@
             }
             const io = getSocket()
             io.to(crawlId).emit('crawlLog', { job: job.id, url, status: 'failed', error: error.message })
-            failedCrawls.push({ url: url.url, message: error.message })
+            failedCrawls.push({ url: url, message: error.message })
             
             // Save to database
             const newCrawlData = new CrawlData({ url: url.url, crawlId, status: 'failed', error: error.message })

@@ -59,6 +59,7 @@ const aggregateDashboard = (crawlerData) => {
     
     const aggregatedData = {}
     try{
+        
         // create aggregatedData hashmap Object of urls
         urls.map((url) => {
             aggregatedData[url.url] = []
@@ -89,4 +90,34 @@ const aggregateDashboard = (crawlerData) => {
 
 
 }
-module.exports = { extractHtml, aggregateDashboard }
+
+// remove <script> and <css>
+const getCleanHtml = (sourceCode) => {
+    
+    // // Load HTML from a string:
+    const $ = cheerio.load(sourceCode)
+
+    // Remove <script> and <style> elements
+    $('[style]').removeAttr('style');
+    $('[onload], [onclick], [onmouseover], [onmouseout]').removeAttr('onload onclick onmouseover onmouseout');
+    $('script, style').remove();
+    
+    // Normalize Whitespace in Text Nodes:
+    $('*').each(function() {
+      $(this).contents().filter(function() {
+        return this.type === 'text';
+      }).each(function() {
+        this.data = this.data.replace(/\s+/g, ' ').trim();
+      });
+    });
+    // Get the cleaned HTML
+    const cleanedHtml = $.html();
+    return cleanedHtml
+
+}
+
+// remove special characters from fine name
+const sanitizeFilename = (str) => {
+    return str.replace(/[^a-z0-9]/gi, '_')
+}
+module.exports = { extractHtml, aggregateDashboard, getCleanHtml, sanitizeFilename }
