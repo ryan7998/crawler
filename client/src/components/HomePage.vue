@@ -56,6 +56,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCrawlStore } from '../stores/crawlStore'
+import { getStatusColor } from '../utils/statusUtils'
 
 // Initialize Pinia store
 const crawlStore = useCrawlStore()
@@ -109,17 +110,6 @@ const configureCrawl = (crawl) => {
 const goToPage = (page) => {
     currentPage.value = page
     fetchCrawls()
-}
-
-// Helper function to get status color
-const getStatusColor = (status) => {
-    const colors = {
-        'running': 'info',
-        'completed': 'success',
-        'failed': 'error',
-        'pending': 'warning'
-    }
-    return colors[status.toLowerCase()] || 'grey'
 }
 
 // Helper function to format date
