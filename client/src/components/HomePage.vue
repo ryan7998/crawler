@@ -1,89 +1,141 @@
 <template>
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-2xl font-bold mb-6">All Crawls</h1>
+    <v-container>
+        <h1 class="text-h4 mb-6">All Crawls</h1>
 
-        <!-- Table of Crawls -->
-         <table class="min-w-full bg-white">
-            <thead>
-                <tr>
-                    <th class="py-2 px-4 border-b">Title</th>
-                    <th class="py-2 px-4 border-b">Status</th>
-                    <th class="py-2 px-4 border-b">Created At</th>
-                    <th class="py-2 px-4 border-b">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="crawl in crawls" :key="crawl._id" class="hover:bg-gray-100">
-                    <td class="py-2 px-4 border-b">{{ crawl.title }}</td>
-                    <td class="py-2 px-4 border-b capitalize">{{ crawl.status }}</td>
-                    <td class="py-2 px-4 border-b">{{ crawl.createdAt }}</td>
-                    <td class="py-2 px-4 border-b">
-                        <router-link :to="{ name: 'CrawlerDashboard', params: { crawlId: crawl._id} }" class="text-blue-500 hover:underline mr-2">View</router-link>
-                        <button @click="configureCrawl(crawl)" class="text-yellow-500 hover:underline mr-2 focus:outline-none">Edit</button>
-                    </td>
-                </tr>
-            </tbody>
-         </table>
-    </div>
+        <v-data-table
+            :headers="headers"
+            :items="crawls"
+            :items-per-page="limit"
+            :page="currentPage"
+            :server-items-length="totalPages * limit"
+            @update:page="goToPage"
+            hover
+        >
+            <!-- Custom cell for Actions column -->
+            <template v-slot:item.actions="{ item }">
+                <v-btn
+                    variant="text"
+                    color="primary"
+                    size="small"
+                    :to="{ name: 'CrawlerDashboard', params: { crawlId: item._id } }"
+                    class="mr-2"
+                >
+                    View
+                </v-btn>
+                <v-btn
+                    variant="text"
+                    color="warning"
+                    size="small"
+                    @click="configureCrawl(item)"
+                >
+                    Edit
+                </v-btn>
+            </template>
+
+            <!-- Custom cell for Status column -->
+            <template v-slot:item.status="{ item }">
+                <v-chip
+                    :color="getStatusColor(item.status)"
+                    size="small"
+                    class="text-capitalize"
+                >
+                    {{ item.status }}
+                </v-chip>
+            </template>
+
+            <!-- Custom cell for Created At column -->
+            <template v-slot:item.createdAt="{ item }">
+                {{ formatDate(item.updatedAt) }}
+            </template>
+        </v-data-table>
+    </v-container>
 </template>
+
 <script setup>
-    import { ref, onMounted, computed } from 'vue'
-    import axios from 'axios'
-    import { useRouter } from 'vue-router'
-    import { useCrawlStore } from '../stores/crawlStore'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
+import { useCrawlStore } from '../stores/crawlStore'
 
-    // Initialize Pinia store
-    const crawlStore = useCrawlStore()
-    // Initialize Vue
-    const router = useRouter()
-    const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
+// Initialize Pinia store
+const crawlStore = useCrawlStore()
+// Initialize Vue
+const router = useRouter()
+const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
 
-    // Reactive state
-    const crawls = ref([])
-    const searchQuery = ref('')
-    const currentPage = ref(1)
-    const totalPages = ref(1)
-    const limit = ref(20)   // Items per page
+// Table headers configuration
+const headers = [
+    { title: 'Title', key: 'title', sortable: true },
+    { title: 'Status', key: 'status', sortable: true },
+    { title: 'Updated At', key: 'updatedAt', sortable: true },
+    { title: 'Actions', key: 'actions', sortable: false }
+]
 
-    // Success and error messages
-    const successMessage = ref('')
-    const errorMessage = ref('')
+// Reactive state
+const crawls = ref([])
+const currentPage = ref(1)
+const totalPages = ref(1)
+const limit = ref(20)   // Items per page
 
-    // Fetch crawls from the backend
-    const fetchCrawls = async () => {
-        try {
-            const response = await axios.get(`${apiUrl}/api/getallcrawlers`, {
-                params: {
-                    page: currentPage.value,
-                    limit: limit.value,
-                },
-            })
-            crawls.value = response.data.crawls
-            totalPages.value = response.data.totalPages
-            console.log(response)
-        } catch (error) {
-            errorMessage.value = error.response ? error.response.data.message : 'Error fetching crawls'
-            console.log(error)
-        }
+// Success and error messages
+const successMessage = ref('')
+const errorMessage = ref('')
+
+// Fetch crawls from the backend
+const fetchCrawls = async () => {
+    try {
+        const response = await axios.get(`${apiUrl}/api/getallcrawlers`, {
+            params: {
+                page: currentPage.value,
+                limit: limit.value,
+            },
+        })
+        crawls.value = response.data.crawls
+        totalPages.value = response.data.totalPages
+        console.log(response)
+    } catch (error) {
+        errorMessage.value = error.response ? error.response.data.message : 'Error fetching crawls'
+        console.log(error)
     }
+}
 
-    // Configure crawl function
-    const configureCrawl = (crawl) => {
-        // Set the current crawl data in the store
-        crawlStore.setData(crawl);
-        // Navigate to CreateCrawl component
-        router.push({ name: 'CreateCrawl' });
-    };
+// Configure crawl function
+const configureCrawl = (crawl) => {
+    crawlStore.setData(crawl)
+    router.push({ name: 'CreateCrawl' })
+}
 
-    // Pagination functions
-    const goToPage = (page) => {
-        if(page < 1 || page > totalPages.value) 
-            return
-        currentPage.value = page
-        fetchCrawls()
+// Pagination function
+const goToPage = (page) => {
+    currentPage.value = page
+    fetchCrawls()
+}
+
+// Helper function to get status color
+const getStatusColor = (status) => {
+    const colors = {
+        'running': 'info',
+        'completed': 'success',
+        'failed': 'error',
+        'pending': 'warning'
     }
+    return colors[status.toLowerCase()] || 'grey'
+}
 
-    onMounted(async () => {
-        fetchCrawls()
-    })
+// Helper function to format date
+const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString()
+}
+
+onMounted(async () => {
+    fetchCrawls()
+})
 </script>
+
+<style scoped>
+.v-data-table {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+</style>
