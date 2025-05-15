@@ -7,20 +7,83 @@
             <div class="w-1/4 space-y-2">
                 <div v-if="crawl" class="bg-white rounded-lg shadow-sm p-6">
                     <h6 class="font-semibold text-gray-700 mb-4">Crawl Stats</h6>
-                    <h2><strong>Name:</strong> {{ crawl.title }}</h2>
-                    <p><strong>Crawl Id:</strong> {{ crawlId }}</p>
-                    <p><strong>Status:</strong> {{ crawl.status }}</p>
-                    <p><strong>Start Time:</strong> {{ formatTime(crawl.startTime) }}</p>
-                    <p><strong>End Time:</strong> {{ formatTime(crawl.endTime) }}</p>
+                    <v-list>
+                        <v-list-item>
+                            <template v-slot:prepend>
+                                <v-icon icon="mdi-text-box-outline" />
+                            </template>
+                            <v-list-item-title>Name</v-list-item-title>
+                            <v-list-item-subtitle>{{ crawl.title }}</v-list-item-subtitle>
+                        </v-list-item>
+                        <v-list-item>
+                            <template v-slot:prepend>
+                                <v-icon icon="mdi-identifier" />
+                            </template>
+                            <v-list-item-title>Crawl Id</v-list-item-title>
+                            <v-list-item-subtitle>{{ crawlId }}</v-list-item-subtitle>
+                        </v-list-item>
+                        <v-list-item>
+                            <template v-slot:prepend>
+                                <v-icon icon="mdi-information-outline" />
+                            </template>
+                            <v-list-item-title>Status</v-list-item-title>
+                            <v-list-item-subtitle>
+                                <v-chip
+                                    :color="getStatusColor(crawl.status)"
+                                    size="small"
+                                    class="text-capitalize"
+                                >
+                                    {{ crawl.status }}
+                                </v-chip>
+                            </v-list-item-subtitle>
+                        </v-list-item>
+                        <v-list-item>
+                            <template v-slot:prepend>
+                                <v-icon icon="mdi-clock-start" />
+                            </template>
+                            <v-list-item-title>Start Time</v-list-item-title>
+                            <v-list-item-subtitle>{{ formatTime(crawl.startTime) }}</v-list-item-subtitle>
+                        </v-list-item>
+                        <v-list-item>
+                            <template v-slot:prepend>
+                                <v-icon icon="mdi-clock-end" />
+                            </template>
+                            <v-list-item-title>End Time</v-list-item-title>
+                            <v-list-item-subtitle>{{ formatTime(crawl.endTime) }}</v-list-item-subtitle>
+                        </v-list-item>
+                    </v-list>
                 </div>
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h6 class="font-semibold text-gray-700 mb-4">Actions</h6>
-                    <button @click="configureCrawl"
-                        class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Configure</button>
-                    <button @click="confirmDelete"
-                        class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Delete</button>
-                    <button @click="startCrawl"
-                        class="w-full bg-transparent border border-gray-300 text-gray-600 hover:bg-gray-100 py-2 px-4 rounder-md transition-all mb-3">Restart</button>
+                    <v-btn
+                        block
+                        variant="outlined"
+                        color="primary"
+                        class="mb-2"
+                        @click="configureCrawl"
+                    >
+                        <v-icon start icon="mdi-cog" />
+                        Configure
+                    </v-btn>
+                    <v-btn
+                        block
+                        variant="outlined"
+                        color="error"
+                        class="mb-2"
+                        @click="confirmDelete"
+                    >
+                        <v-icon start icon="mdi-delete" />
+                        Delete
+                    </v-btn>
+                    <v-btn
+                        block
+                        variant="outlined"
+                        color="info"
+                        @click="startCrawl"
+                    >
+                        <v-icon start icon="mdi-restart" />
+                        Restart
+                    </v-btn>
                 </div>
             </div>
 
@@ -29,49 +92,57 @@
                 <!-- Crawl Details -->
                 <div v-if="crawl" class="bg-white rounded-lg shadow-sm p-6">
                     <h6 class="text-gray-700 font-semibold mb-4">Crawl Details</h6>
-                    <table class="w-full text-left">
+                    <v-table>
                         <thead>
-                            <tr class="text-sm text-gray-600 uppercase tracking-wide border-b">
-                                <th class="py-2">URL</th>
-                                <th class="py-2">Status</th>
-                                <th class="py-2"></th>
+                            <tr>
+                                <th>URL</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(data, url) in crawl.aggregatedData" :key="url" class="text-gray-700 border-b">
-                                <td class="py-2">
-                                    <!-- Use excerpt composable for the URL -->
+                            <tr v-for="(data, url) in crawl.aggregatedData" :key="url">
+                                <td>
                                     {{ excerpts[url].excerpt }}
-                                    <a v-if="url.length > 30" href="#" @click.prevent="excerpts[url].toggleExpand">
+                                    <v-btn
+                                        v-if="url.length > 30"
+                                        variant="text"
+                                        size="small"
+                                        @click="excerpts[url].toggleExpand"
+                                    >
                                         {{ excerpts[url].isExpanded ? 'Read less' : 'Read more' }}
-                                    </a>
-                                </td>
-                                <td class="py-2">
-                                    <span v-if="liveStatusDictionary?.[url] === 'started'">
-                                        <svg aria-hidden="true"
-                                            class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
-                                            viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                                                fill="currentColor" />
-                                            <path
-                                                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                                                fill="currentFill" />
-                                        </svg>
-                                    </span>
-                                    <span v-else-if="liveStatusDictionary[url] || data[data.length - 1]?.status" :class="[
-                                        'inline-block px-2 py-1 rounded-full text-sm',
-                                        (liveStatusDictionary[url] || data[data.length - 1]?.status) === 'success' ? 'bg-green-100 text-green-600' : (liveStatusDictionary[url] || data[data.length - 1]?.status) === 'failed' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
-                                    ]"> {{ liveStatusDictionary[url] || data[data.length - 1]?.status }} </span>
-                                    <span v-else-if="!data.length" :class="[
-                                        'inline-block px-2 py-1 rounded-full text-sm bg-blue-100 text-blue-600',
-                                    ]">
-                                        pending
-                                    </span>
-
+                                    </v-btn>
                                 </td>
                                 <td>
-                                    <a href="#" @click.prevent="openViewResult(url)">View</a>
+                                    <v-progress-circular
+                                        v-if="liveStatusDictionary?.[url] === 'started'"
+                                        indeterminate
+                                        color="primary"
+                                    />
+                                    <v-chip
+                                        v-else-if="liveStatusDictionary[url] || data[data.length - 1]?.status"
+                                        :color="getStatusColor(liveStatusDictionary[url] || data[data.length - 1]?.status)"
+                                        size="small"
+                                    >
+                                        {{ liveStatusDictionary[url] || data[data.length - 1]?.status }}
+                                    </v-chip>
+                                    <v-chip
+                                        v-else-if="!data.length"
+                                        color="info"
+                                        size="small"
+                                    >
+                                        pending
+                                    </v-chip>
+                                </td>
+                                <td>
+                                    <v-btn
+                                        variant="text"
+                                        color="primary"
+                                        size="small"
+                                        @click="openViewResult(url)"
+                                    >
+                                        View
+                                    </v-btn>
                                     <SlideOver v-if="viewResults[url]" @close-slide-over="onCloseSlideOver(url)">
                                         <template v-slot:title>
                                             {{ data[data.length - 1]?.data?.defaultData?.title || url }}
@@ -83,7 +154,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </v-table>
                 </div>
             </div>
         </div>
@@ -105,14 +176,16 @@
 import { onMounted, ref, watch } from 'vue'
 import { io } from "socket.io-client"
 import { useRoute, useRouter } from 'vue-router'
-const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
-const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
-const socketUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3002'
 import axios from 'axios'
 import { useCrawlStore } from '../stores/crawlStore'
 import ViewResult from './ViewResult.vue'
 import { useExcerpts } from '../composables/useExcerpts'
 import SlideOver from './SlideOver.vue'
+import { getStatusColor } from '../utils/statusUtils'
+
+const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
+const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
+const socketUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3002'
 const logs = ref([])  // Reactive state for successfull crawl results
 const socket = ref()    // Ref from the socket instance
 // const socket = ref(io(`${baseUrl}/socket.io/`))    // Ref from the socket instance
@@ -245,3 +318,9 @@ const deleteCrawl = async () => {
     }
 }
 </script>
+
+<style scoped>
+.v-card {
+    margin-bottom: 1rem;
+}
+</style>
