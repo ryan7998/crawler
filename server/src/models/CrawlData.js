@@ -19,8 +19,40 @@ CrawlDataSchema.post('findOneAndDelete', async function (doc) {
             { $pull: { results: doc._id }} // Remove the deleted _id from the results array
         )
     }
-    
 })
+
+// Post middleware to update Crawl document after saving CrawlData
+CrawlDataSchema.post('save', async function (doc) {
+    try {
+        // Find the related Crawl document
+        const crawl = await Crawl.findById(doc.crawlId)
+        if (!crawl) return
+
+        // Add the new CrawlData _id to the results array
+        await Crawl.findByIdAndUpdate(
+            doc.crawlId,
+            { $push: { results: doc._id } }
+        )
+
+        // Get all CrawlData documents for this crawl
+        const allCrawlData = await this.constructor.find({ crawlId: doc.crawlId })
+        
+        // If all URLs have been crawled (success or failed)
+        if (allCrawlData.length === crawl.urls.length) {
+            // Check if any URLs failed
+            const hasFailures = allCrawlData.some(data => data.status === 'failed')
+            
+            // Update crawl status
+            await Crawl.findByIdAndUpdate(doc.crawlId, {
+                status: hasFailures ? 'failed' : 'completed',
+                endTime: new Date()
+            })
+        }
+    } catch (error) {
+        console.error('Error in CrawlData post-save middleware:', error)
+    }
+})
+
 // create the crawl data model using the schema:
 const CrawlData = model('CrawlData', CrawlDataSchema)
 

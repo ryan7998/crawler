@@ -215,8 +215,7 @@
                 router.push(`/dashboard/${crawlStore.currentCrawl._id}`)
             } else {
                 // Create a new crawl
-                const baseUrl = window.location.origin;
-                response = await axios.post(`${baseUrl}/api/createcrawler`, requestData)
+                response = await axios.post(`${apiUrl}/api/createcrawler`, requestData)
                 successMessage.value = 'Crawl created successfully.'
                 // Navigate to the new crawl's dashboard
                 router.push(`/dashboard/${response.data.crawlId}`)
