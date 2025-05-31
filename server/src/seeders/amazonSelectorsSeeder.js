@@ -7,43 +7,43 @@ const amazonSelectors = [
         domain: 'amazon.ca',
         selectors: [
             {
-                target_elemnt: 'title',
+                target_element: 'title',
                 selector_value: '#productTitle'
             },
             {
-                target_elemnt: 'price',
+                target_element: 'price',
                 selector_value: '#corePrice_feature_div .a-offscreen, span#priceblock_ourprice, span#priceblock_dealprice, span.a-price span.a-offscreen'
             },
             {
-                target_elemnt: 'rating',
+                target_element: 'rating',
                 selector_value: 'span[data-hook="rating-out-of-text"], i.a-icon-star span.a-icon-alt'
             },
             {
-                target_elemnt: 'reviews_count',
+                target_element: 'reviews_count',
                 selector_value: '#acrCustomerReviewText'
             },
             {
-                target_elemnt: 'availability',
+                target_element: 'availability',
                 selector_value: '#availability span'
             },
             {
-                target_elemnt: 'main_image',
+                target_element: 'main_image',
                 selector_value: '#imgTagWrapperId img#landingImage'
             },
             {
-                target_elemnt: 'bullet_points',
+                target_element: 'bullet_points',
                 selector_value: '#feature-bullets ul li span'
             },
             {
-                target_elemnt: 'description',
+                target_element: 'description',
                 selector_value: '#productDescription p, div#productDescription'
             },
             {
-                target_elemnt: 'brand',
+                target_element: 'brand',
                 selector_value: '#bylineInfo'
             },
             {
-                target_elemnt: 'asin',
+                target_element: 'asin',
                 selector_value: 'input#ASIN'
             }
         ],

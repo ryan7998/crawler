@@ -1,4 +1,5 @@
-const { Schema, model, default: mongoose } = require('mongoose')
+const mongoose = require('mongoose')
+const { Schema, model } = mongoose
 const { generateHtmlChecksum } = require('../utils/checksum')
 
 const SelectorSchema = new Schema({
@@ -7,15 +8,10 @@ const SelectorSchema = new Schema({
         required: true,
         unique: true
     },
-    selectors: {
-        type: [
-            {
-                target_elemnt: {type: String, require: true},
-                selector_value: {type: String, required: true}
-            }
-        ],
-        default: []
-    },
+    selectors: [{
+        target_element: {type: String, require: true},
+        selector_value: {type: String, require: true}
+    }],
     htmlChecksum: {
         type: String,
     },
@@ -42,8 +38,8 @@ SelectorSchema.methods.updateHtmlChecksum = function(html) {
     return this.save();
 }
 
-// create the Selectors model using the schema:
-const Selectors = model('Selector', SelectorSchema)
+// create the selectors model using the schema:
+const Selectors = model('Selectors', SelectorSchema)
 
 // export the Selectors model
 module.exports = Selectors

@@ -102,17 +102,17 @@
             // Emit crawlLog event to be captured in FE log
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'started' })
 
-            const seed = new Seed(url)
+            const seed = new Seed({ url })
             if(!seed.isValid()) {
                 throw new Error(`Invalid URL: ${seed.url}`)
             }
-            // Fetch the HTML content from the URL
-            // const throttled = throttle(async () => await axios.get(seed.url))
+            
+            // Initialize the seed (load selectors)
+            await seed.initialize()
+            
+            // Fetch the HTML content and extract data
             const throttled = throttle(async () => await seed.loadHTMLContent())
-            await throttled()
-            // console.log('seed.cleanHtmlContent: ', seed.cleanHtmlContent)
-            // Extract data from HTML
-            const extractedDatum = await extractHtml(seed.cleanHtmlContent, seed.selectors)
+            const extractedDatum = await throttled()
             extractedData.push(extractedDatum)
 
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'saving' })

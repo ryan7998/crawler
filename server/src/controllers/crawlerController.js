@@ -36,7 +36,7 @@ const crawlWebsite = async (req, res) => {
         // throw error
         for (const url of urls) {
             await crawlQueue.add(
-                { url, crawlId },
+                { url: url.url, crawlId },
                 { removeOnComplete: true, removeOnFail: true }
             )
             // await crawlQueue.add({ url, crawlId }) // for redis 7
