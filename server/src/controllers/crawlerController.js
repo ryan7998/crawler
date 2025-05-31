@@ -10,25 +10,36 @@ const crawlWebsite = async (req, res) => {
 
     const { urls, crawlId, selectors } = req.body
 
+    // console.log('req.body: ', req.body)
     // it it is a test crawl
     if (!crawlId) {
-        const { data } = await axios.get(urls)
-        // Extract data from HTML
-        const extractedDatum = await extractHtml(data, selectors)
-        res.json({ extractedDatum })
+        try{
+            const { data } = await axios.get(urls)
+            // Extract data from HTML
+            const extractedDatum = await extractHtml(data, selectors)
+            res.json({ extractedDatum })
+
+        } catch (error) {
+            console.log('Error crawling test website: ', error.message)
+            res.status(500).json({ message: `Failed to crawl test website. ${error.message}` })
+        }
         return
     }
     // else
     try {
+        // Update crawl status to in-progress
+        await Crawl.findByIdAndUpdate(crawlId, { status: 'in-progress' })
+        
         // crawlQueue.empty()
-        console.log("Adding job: ", urls, crawlId, selectors)
+        // return 
+        console.log("Adding job: ", urls, crawlId)
         // throw error
         for (const url of urls) {
-            // await crawlQueue.add(
-            //     { url, crawlId, selectors },
-            //     { removeOnComplete: true, removeOnFail: true }
-            // )
-            await crawlQueue.add({ url, crawlId, selectors }) // for redis 7
+            await crawlQueue.add(
+                { url: url.url, crawlId },
+                { removeOnComplete: true, removeOnFail: true }
+            )
+            // await crawlQueue.add({ url, crawlId }) // for redis 7
         }
         res.json({ message: 'Crawl jobs added to queue', urls })
     } catch (error) {
@@ -50,10 +61,11 @@ const createCrawler = async (req, res) => {
             userId,
             status: 'pending',
         })
-
+        console.log('newCrawl: ', newCrawl)
         // Save to database
         await newCrawl.save()
         // Return the generated _id (crawlId) to the client
+        // res.status(201).json({ message: 'Crawl created' })
         res.status(201).json({ message: 'Crawl created', crawlId: newCrawl._id })
     } catch (error) {
         res.status(500).json({ message: 'Error creating crawl', error: error.message })

@@ -4,3 +4,4 @@ client/node_modules
 .env
 .DS_Store
 /db
+github_pat_*

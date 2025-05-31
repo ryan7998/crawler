@@ -18,4 +18,4 @@ const crawlQueue = new Queue('crawlQueue', {
 //     console.error('Error clearing queue:', err)
 // })
 
-module.exports = crawlQueue
+module.exports = crawlQueue   
