@@ -27,13 +27,16 @@ const crawlWebsite = async (req, res) => {
     }
     // else
     try {
+        // Update crawl status to in-progress
+        await Crawl.findByIdAndUpdate(crawlId, { status: 'in-progress' })
+        
         // crawlQueue.empty()
         // return 
         console.log("Adding job: ", urls, crawlId)
         // throw error
         for (const url of urls) {
             await crawlQueue.add(
-                { url, crawlId },
+                { url: url.url, crawlId },
                 { removeOnComplete: true, removeOnFail: true }
             )
             // await crawlQueue.add({ url, crawlId }) // for redis 7
@@ -58,10 +61,11 @@ const createCrawler = async (req, res) => {
             userId,
             status: 'pending',
         })
-
+        console.log('newCrawl: ', newCrawl)
         // Save to database
         await newCrawl.save()
         // Return the generated _id (crawlId) to the client
+        // res.status(201).json({ message: 'Crawl created' })
         res.status(201).json({ message: 'Crawl created', crawlId: newCrawl._id })
     } catch (error) {
         res.status(500).json({ message: 'Error creating crawl', error: error.message })

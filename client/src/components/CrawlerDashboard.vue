@@ -82,7 +82,7 @@
                         @click="startCrawl"
                     >
                         <v-icon start icon="mdi-restart" />
-                        Restart
+                        {{ crawl?.status === 'pending' ? 'Start' : 'Restart' }}
                     </v-btn>
                 </div>
             </div>
@@ -199,6 +199,7 @@ const liveStatusDictionary = ref({}) // To store status by listening the socket
 const viewResults = ref({})
 const excerpts = ref({}) // Store excerpts for each URL
 const showConfirm = ref(false) // Controle the visibility of the confirmation modal
+const successMessage = ref('') // To store success messages
 
 
 
@@ -248,14 +249,23 @@ onMounted(async () => {
     socket.value.on("crawlLog", (data) => {
         console.log('logging', data)
         logs.value.push(data)
-        liveStatusDictionary.value[data.url.url] = data.status
+        
+        // Update crawl status if it's a final status update
+        if (data.status === 'completed' || data.status === 'failed') {
+            crawl.value.status = data.status
+            if (data.message) {
+                successMessage.value = data.message
+            }
+        } else {
+            // Update individual URL status
+            liveStatusDictionary.value[data.url.url] = data.status
+        }
 
         // append new crawled data into FE rather than making a new api call to update the new results
         if (data.status === 'success') {
             crawl.value.aggregatedData[data.url.url]
                 .push({ data: data.result, date: new Date(), status: data.status })
         }
-
     })
 
     socket.value.on('connect', () => {
