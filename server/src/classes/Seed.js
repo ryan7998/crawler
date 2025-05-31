@@ -48,9 +48,23 @@ class Seed {
         }
     }
 
-    getDefaultSelectors() {
-        // TODO: selector loading logic: get from db or by llm
-        return null
+    async getDefaultSelectors() {
+        try {
+            // Get selectors from database for this domain
+            const Selectors = require('../models/Selectors');
+            const domainSelectors = await Selectors.findOne({ domain: this.hostname });
+            
+            if (domainSelectors) {
+                console.log(`Found selectors for domain: ${this.hostname}`);
+                return domainSelectors.selectors;
+            }
+            
+            console.log(`No selectors found for domain: ${this.hostname}`);
+            return null;
+        } catch (error) {
+            console.error('Error fetching selectors:', error);
+            return null;
+        }
     }
 
     extractProtocol() {
