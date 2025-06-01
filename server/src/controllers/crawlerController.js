@@ -3,14 +3,13 @@ const axios = require('axios')
 const crawlQueue = require('../queues/crawlQueue')
 const Crawl = require('../models/Crawl')
 const CrawlData = require('../models/CrawlData')
+const Selectors = require('../models/Selectors')
 const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions')
 const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
 
 const crawlWebsite = async (req, res) => {
-
     const { urls, crawlId, selectors } = req.body
 
-    // console.log('req.body: ', req.body)
     // it it is a test crawl
     if (!crawlId) {
         try{
@@ -30,13 +29,10 @@ const crawlWebsite = async (req, res) => {
         // Update crawl status to in-progress
         await Crawl.findByIdAndUpdate(crawlId, { status: 'in-progress' })
         
-        // crawlQueue.empty()
-        // return 
         console.log("Adding job: ", urls, crawlId)
-        // throw error
         for (const url of urls) {
             await crawlQueue.add(
-                { url: url.url, crawlId },
+                { url, crawlId },
                 { removeOnComplete: true, removeOnFail: true }
             )
             // await crawlQueue.add({ url, crawlId }) // for redis 7
@@ -52,20 +48,17 @@ const createCrawler = async (req, res) => {
     const { title, urls, selectors, userId } = req.body
 
     try {
-
         // Create new crawl entry
         const newCrawl = new Crawl({
             title,
-            urls,
-            selectors,
+            urls: urls.map(url => url.trim()), // Convert to array of strings
+            selectors: selectors || [], // Use provided selectors or empty array
             userId,
             status: 'pending',
         })
         console.log('newCrawl: ', newCrawl)
         // Save to database
         await newCrawl.save()
-        // Return the generated _id (crawlId) to the client
-        // res.status(201).json({ message: 'Crawl created' })
         res.status(201).json({ message: 'Crawl created', crawlId: newCrawl._id })
     } catch (error) {
         res.status(500).json({ message: 'Error creating crawl', error: error.message })
@@ -74,7 +67,7 @@ const createCrawler = async (req, res) => {
 
 const updateCrawler = async (req, res) => {
     const { id } = req.params
-    const { title, urls } = req.body
+    const { title, urls, selectors } = req.body
 
     // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -88,7 +81,8 @@ const updateCrawler = async (req, res) => {
         }
         // Update the crawl fields if provided
         if (title) crawl.title = title
-        if (urls) crawl.urls = urls
+        if (urls) crawl.urls = urls.map(url => url.trim())
+        if (selectors) crawl.selectors = selectors
 
         const updatedCrawl = await crawl.save()
         res.status(200).json({ message: 'Crawl updated successfully', crawl: updatedCrawl })
@@ -209,4 +203,41 @@ const getAllCrawlers = async (req, res) => {
 
 }
 
-module.exports = { crawlWebsite, createCrawler, updateCrawler, getCrawler, getAllCrawlers, deleteCrawler }
+const checkDomainSelectors = async (req, res) => {
+    const { domain } = req.params
+    console.log('domain: ', domain)
+    
+    try {
+        // Find selectors for the domain
+        const domainSelectors = await Selectors.findOne({ domain })
+
+        if (!domainSelectors) {
+            return res.status(404).json({
+                message: 'No selectors found for this domain',
+                hasSelectors: false
+            })
+        }
+
+        res.status(200).json({
+            message: 'Selectors found for this domain',
+            hasSelectors: true,
+            selectors: domainSelectors.selectors
+        })
+    } catch (error) {
+        console.error('Error checking domain selectors:', error.message)
+        res.status(500).json({
+            message: 'Error checking domain selectors',
+            error: error.message
+        })
+    }
+}
+
+module.exports = {
+    crawlWebsite,
+    createCrawler,
+    updateCrawler,
+    getCrawler,
+    getAllCrawlers,
+    deleteCrawler,
+    checkDomainSelectors
+}
