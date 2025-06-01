@@ -6,10 +6,13 @@ const crawlSchema = new Schema({
         required: true,
     },
     urls: { 
-        type: [{}], // Array of Object (URL + selectors) to be crawled
-        required:true 
+        type: [String], // Array of URLs to be crawled
+        required: true 
     },
-    selectors: [{}], // Array of Objects for custom css selectors
+    selectors: [{
+        target_element: { type: String, required: true },
+        selector_value: { type: String, required: true }
+    }], // Array of selector objects
     userId: {
         type: String, // Placeholder for userId
         required: true,

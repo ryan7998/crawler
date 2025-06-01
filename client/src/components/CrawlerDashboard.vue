@@ -101,16 +101,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(data, url) in crawl.aggregatedData" :key="url">
+                            <tr v-for="url in crawl.urls" :key="url">
                                 <td>
-                                    {{ excerpts[url].excerpt }}
+                                    {{ excerpts[url]?.excerpt || url }}
                                     <v-btn
                                         v-if="url.length > 30"
                                         variant="text"
                                         size="small"
-                                        @click="excerpts[url].toggleExpand"
+                                        @click="excerpts[url]?.toggleExpand"
                                     >
-                                        {{ excerpts[url].isExpanded ? 'Read less' : 'Read more' }}
+                                        {{ excerpts[url]?.isExpanded ? 'Read less' : 'Read more' }}
                                     </v-btn>
                                 </td>
                                 <td>
@@ -120,14 +120,14 @@
                                         color="primary"
                                     />
                                     <v-chip
-                                        v-else-if="liveStatusDictionary[url] || data[data.length - 1]?.status"
-                                        :color="getStatusColor(liveStatusDictionary[url] || data[data.length - 1]?.status)"
+                                        v-else-if="liveStatusDictionary[url] || crawl.aggregatedData?.[url]?.[crawl.aggregatedData[url].length - 1]?.status"
+                                        :color="getStatusColor(liveStatusDictionary[url] || crawl.aggregatedData[url][crawl.aggregatedData[url].length - 1]?.status)"
                                         size="small"
                                     >
-                                        {{ liveStatusDictionary[url] || data[data.length - 1]?.status }}
+                                        {{ liveStatusDictionary[url] || crawl.aggregatedData[url][crawl.aggregatedData[url].length - 1]?.status }}
                                     </v-chip>
                                     <v-chip
-                                        v-else-if="!data.length"
+                                        v-else
                                         color="info"
                                         size="small"
                                     >
@@ -145,10 +145,10 @@
                                     </v-btn>
                                     <SlideOver v-if="viewResults[url]" @close-slide-over="onCloseSlideOver(url)">
                                         <template v-slot:title>
-                                            {{ data[data.length - 1]?.data?.defaultData?.title || url }}
+                                            {{ crawl.aggregatedData?.[url]?.[crawl.aggregatedData[url].length - 1]?.data?.defaultData?.title || url }}
                                         </template>
                                         <template #default>
-                                            <ViewResult :data="data" :url="url" :key="url" />
+                                            <ViewResult :data="crawl.aggregatedData[url]" :url="url" :key="url" />
                                         </template>
                                     </SlideOver>
                                 </td>
@@ -221,22 +221,28 @@ const formatTime = (time) => {
 
 // Initialize Socket.io connection on component mount
 onMounted(async () => {
-
     crawlId.value = route.params.crawlId
-    // socket.value = io("http://localhost:3002")
 
-    // Fetch the crawl data
     try {
         socket.value = io(socketUrl, {
-            path: "/socket.io/", // Ensure this matches the server's path
-            transports: ["polling", "websocket"] // Default behavior
+            path: "/socket.io/",
+            transports: ["polling", "websocket"]
         });
         const response = await axios.get(`${apiUrl}/api/getcrawler/${crawlId.value}`)
-        crawl.value = response.data // Assign response data to the crawl object
+        crawl.value = response.data
 
-        // Initiate excerpt for each URL
-        // console.log(Object.keys(crawl.value.aggregatedData))
-        Object.keys(crawl.value.aggregatedData).forEach((url) => {
+        // Initialize aggregatedData if it doesn't exist
+        if (!crawl.value.aggregatedData) {
+            crawl.value.aggregatedData = {}
+        }
+
+        // Initialize excerpts for each URL
+        crawl.value.urls.forEach((url) => {
+            // Initialize aggregatedData for this URL if it doesn't exist
+            if (!crawl.value.aggregatedData[url]) {
+                crawl.value.aggregatedData[url] = []
+            }
+            // Initialize excerpt
             excerpts.value[url] = useExcerpts(ref(url), 30)
         });
     } catch (error) {
@@ -258,12 +264,12 @@ onMounted(async () => {
             }
         } else {
             // Update individual URL status
-            liveStatusDictionary.value[data.url.url] = data.status
+            liveStatusDictionary.value[data.url] = data.status
         }
 
         // append new crawled data into FE rather than making a new api call to update the new results
         if (data.status === 'success') {
-            crawl.value.aggregatedData[data.url.url]
+            crawl.value.aggregatedData[data.url]
                 .push({ data: data.result, date: new Date(), status: data.status })
         }
     })
