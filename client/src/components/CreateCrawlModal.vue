@@ -195,21 +195,12 @@
                     {{ isEditing ? 'Update' : 'Create' }}
                 </v-btn>
             </v-card-actions>
-
-            <!-- Success and Error Messages -->
-            <v-snackbar
-                v-model="showSnackbar"
-                :color="snackbarColor"
-                timeout="3000"
-            >
-                {{ snackbarText }}
-            </v-snackbar>
         </v-card>
     </v-dialog>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import CssSelector from './CssSelector.vue'
@@ -222,7 +213,7 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['update:modelValue', 'crawl-created'])
+const emit = defineEmits(['update:modelValue', 'crawl-created', 'error'])
 
 // Computed properties
 const dialog = computed({
@@ -241,15 +232,15 @@ const title = ref('')
 const urlsText = ref('')
 const loading = ref(false)
 const domainLoading = ref(false)
-const showSnackbar = ref(false)
-const snackbarText = ref('')
-const snackbarColor = ref('success')
 const domainError = ref('')
 const domainInfo = ref(null)
 
 // Add new refs for selectors
 const localSelectors = ref([])
 const currentSelectors = ref([])
+
+// Inject the notification function
+const showNotification = inject('showNotification')
 
 // Initialize form
 const initializeForm = () => {
@@ -391,9 +382,7 @@ const addDomainSelectorToCurrent = (selector) => {
 // Add validation function for selectors
 const validateSelectors = () => {
     if (currentSelectors.value.length === 0) {
-        showSnackbar.value = true
-        snackbarText.value = 'Please add at least one selector'
-        snackbarColor.value = 'error'
+        showNotification('Please add at least one selector', 'error')
         return false
     }
 
@@ -402,9 +391,7 @@ const validateSelectors = () => {
     )
 
     if (emptySelectors.length > 0) {
-        showSnackbar.value = true
-        snackbarText.value = 'Please fill in all selector fields'
-        snackbarColor.value = 'error'
+        showNotification('Please fill in all selector fields', 'error')
         return false
     }
 
@@ -416,26 +403,20 @@ const handleNext = async () => {
     if (currentStep.value === 1) {
         const { valid } = await form.value.validate()
         if (!valid) {
-            showSnackbar.value = true
-            snackbarText.value = 'Please enter a title'
-            snackbarColor.value = 'error'
+            showNotification('Please enter a title', 'error')
             return
         }
         currentStep.value++
     } else if (currentStep.value === 2) {
         const urls = parseUrls(urlsText.value)
         if (urls.length === 0) {
-            showSnackbar.value = true
-            snackbarText.value = 'Please enter at least one URL'
-            snackbarColor.value = 'error'
+            showNotification('Please enter at least one URL', 'error')
             return
         }
 
         const invalidUrls = urls.filter(url => !isValidUrl(url))
         if (invalidUrls.length > 0) {
-            showSnackbar.value = true
-            snackbarText.value = 'Please enter valid URLs'
-            snackbarColor.value = 'error'
+            showNotification('Please enter valid URLs', 'error')
             return
         }
 
@@ -475,17 +456,13 @@ const handleSubmit = async () => {
     const urls = parseUrls(urlsText.value)
     
     if (urls.length === 0) {
-        showSnackbar.value = true
-        snackbarText.value = 'Please enter at least one URL'
-        snackbarColor.value = 'error'
+        showNotification('Please enter at least one URL', 'error')
         return
     }
 
     const invalidUrls = urls.filter(url => !isValidUrl(url))
     if (invalidUrls.length > 0) {
-        showSnackbar.value = true
-        snackbarText.value = 'Please enter valid URLs'
-        snackbarColor.value = 'error'
+        showNotification('Please enter valid URLs', 'error')
         return
     }
 
@@ -493,7 +470,6 @@ const handleSubmit = async () => {
         return
     }
 
-    // Add selector validation
     if (!validateSelectors()) {
         return
     }
@@ -514,18 +490,13 @@ const handleSubmit = async () => {
         const response = isEditing.value
             ? await axios.put(`${apiUrl.value}/api/updatecrawl/${props.crawlData._id}`, requestData)
             : await axios.post(`${apiUrl.value}/api/createcrawler`, requestData)
-
-        showSnackbar.value = true
-        snackbarText.value = isEditing.value ? 'Crawl updated successfully' : 'Crawl created successfully'
-        snackbarColor.value = 'success'
         
+        showNotification(isEditing.value ? 'Crawl updated successfully' : 'Crawl created successfully', 'success')
         emit('crawl-created', isEditing.value ? response.data.crawl : { _id: response.data.crawlId })
         closeDialog()
     } catch (error) {
         console.error('Error creating/updating crawl:', error)
-        showSnackbar.value = true
-        snackbarText.value = error.response?.data?.message || 'An error occurred'
-        snackbarColor.value = 'error'
+        showNotification(error.response?.data?.message || 'An error occurred', 'error')
     } finally {
         loading.value = false
     }

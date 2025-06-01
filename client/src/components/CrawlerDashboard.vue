@@ -169,11 +169,28 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Add CreateCrawlModal -->
+        <CreateCrawlModal
+            v-model="showCreateModal"
+            :crawl-data="crawl"
+            @crawl-created="handleCrawlCreated"
+            @error="handleModalError"
+        />
+
+        <!-- Add Snackbar -->
+        <v-snackbar
+            v-model="showSnackbar"
+            :color="snackbarColor"
+            timeout="3000"
+        >
+            {{ snackbarText }}
+        </v-snackbar>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, inject } from 'vue'
 import { io } from "socket.io-client"
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
@@ -182,6 +199,7 @@ import ViewResult from './ViewResult.vue'
 import { useExcerpts } from '../composables/useExcerpts'
 import SlideOver from './SlideOver.vue'
 import { getStatusColor } from '../utils/statusUtils'
+import CreateCrawlModal from './CreateCrawlModal.vue'
 
 const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
 const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
@@ -200,8 +218,15 @@ const viewResults = ref({})
 const excerpts = ref({}) // Store excerpts for each URL
 const showConfirm = ref(false) // Controle the visibility of the confirmation modal
 const successMessage = ref('') // To store success messages
+const showCreateModal = ref(false)
 
+// Add snackbar refs
+const showSnackbar = ref(false)
+const snackbarText = ref('')
+const snackbarColor = ref('success')
 
+// Inject the notification function
+const showNotification = inject('showNotification')
 
 const openViewResult = (url) => {
     // Set the clicked URL to true in the viewResults object
@@ -219,15 +244,9 @@ const formatTime = (time) => {
     return new Date(time).toLocaleString();
 };
 
-// Initialize Socket.io connection on component mount
-onMounted(async () => {
-    crawlId.value = route.params.crawlId
-
+// Add fetchCrawlData function
+const fetchCrawlData = async () => {
     try {
-        socket.value = io(socketUrl, {
-            path: "/socket.io/",
-            transports: ["polling", "websocket"]
-        });
         const response = await axios.get(`${apiUrl}/api/getcrawler/${crawlId.value}`)
         crawl.value = response.data
 
@@ -248,49 +267,60 @@ onMounted(async () => {
     } catch (error) {
         errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
     }
+}
 
-    // Join the room for the specific crawl ID
-    socket.value.emit('joinCrawl', crawlId.value)
-    // Listen for crawl logs
-    socket.value.on("crawlLog", (data) => {
-        console.log('logging', data)
-        logs.value.push(data)
+// Initialize Socket.io connection on component mount
+onMounted(async () => {
+    crawlId.value = route.params.crawlId
+
+    try {
+        socket.value = io(socketUrl, {
+            path: "/socket.io/",
+            transports: ["polling", "websocket"]
+        });
         
-        // Update crawl status if it's a final status update
-        if (data.status === 'completed' || data.status === 'failed') {
-            crawl.value.status = data.status
-            if (data.message) {
-                successMessage.value = data.message
+        await fetchCrawlData()
+
+        // Join the room for the specific crawl ID
+        socket.value.emit('joinCrawl', crawlId.value)
+        // Listen for crawl logs
+        socket.value.on("crawlLog", (data) => {
+            console.log('logging', data)
+            logs.value.push(data)
+            
+            // Update crawl status if it's a final status update
+            if (data.status === 'completed' || data.status === 'failed') {
+                crawl.value.status = data.status
+                if (data.message) {
+                    successMessage.value = data.message
+                }
+            } else {
+                // Update individual URL status
+                liveStatusDictionary.value[data.url] = data.status
             }
-        } else {
-            // Update individual URL status
-            liveStatusDictionary.value[data.url] = data.status
-        }
 
-        // append new crawled data into FE rather than making a new api call to update the new results
-        if (data.status === 'success') {
-            crawl.value.aggregatedData[data.url]
-                .push({ data: data.result, date: new Date(), status: data.status })
-        }
-    })
+            // append new crawled data into FE rather than making a new api call to update the new results
+            if (data.status === 'success') {
+                crawl.value.aggregatedData[data.url]
+                    .push({ data: data.result, date: new Date(), status: data.status })
+            }
+        })
 
-    socket.value.on('connect', () => {
-        console.log('Connected to Socket.io server');
-    });
+        socket.value.on('connect', () => {
+            console.log('Connected to Socket.io server');
+        });
 
-    socket.value.on('disconnect', () => {
-        console.log('Disconnected from Socket.io server');
-    });
+        socket.value.on('disconnect', () => {
+            console.log('Disconnected from Socket.io server');
+        });
 
+    } catch (error) {
+        errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
+    }
 })
 
 const configureCrawl = () => {
-    const crawlStore = useCrawlStore()
-
-    // Set the data in the store
-    crawlStore.setData(crawl.value)
-    // Navigate to CreateCrawl
-    router.push({ name: 'CreateCrawl' })
+    showCreateModal.value = true
 }
 
 const startCrawl = async () => {
@@ -305,11 +335,13 @@ const startCrawl = async () => {
         const response = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
         console.log('Crawl started: ', response.data)
         crawl.value.status = 'in-progress'
+        showNotification('Crawl started successfully', 'success')
     } catch (error) {
         const errMsg = error.response && error.response.data && error.response.data.error
             ? error.response.data.error
             : error.message
         console.log('Error starting crawl: ', errMsg)
+        showNotification(errMsg, 'error')
     }
 }
 
@@ -326,12 +358,26 @@ const deleteCrawl = async () => {
     try {
         await axios.delete(`${apiUrl}/api/deletecrawl/${crawlId.value}`)
         showConfirm.value = false
+        showNotification('Crawl deleted successfully', 'success')
         router.push('/') // Redirect to homepage
     } catch (error) {
         console.error('Error deleting crawl: ', error.response ? error.response.data.message : error.message)
-        errorMessage.value = error.response ? error.response.data.message : 'Error deleting crawl'
+        showNotification(error.response?.data?.message || 'Error deleting crawl', 'error')
         showConfirm.value = false
     }
+}
+
+// Add handler for crawl creation/update
+const handleCrawlCreated = (updatedCrawl) => {
+    showNotification('Crawl updated successfully', 'success')
+    fetchCrawlData()
+}
+
+// Add error handler
+const handleModalError = (errorMessage) => {
+    showSnackbar.value = true
+    snackbarText.value = errorMessage
+    snackbarColor.value = 'error'
 }
 </script>
 

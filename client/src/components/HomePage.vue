@@ -68,16 +68,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-    import axios from 'axios'
-    import { useRouter } from 'vue-router'
-    import { useCrawlStore } from '../stores/crawlStore'
+import { ref, onMounted, inject } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
+import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 
-    // Initialize Pinia store
-    const crawlStore = useCrawlStore()
-    const router = useRouter()
+// Initialize Pinia store
+const crawlStore = useCrawlStore()
+const router = useRouter()
+
+// Inject the notification function
+const showNotification = inject('showNotification')
 
 // Table configuration
 const headers = [
@@ -88,9 +91,9 @@ const headers = [
 ]
 
 // Pagination
-    const currentPage = ref(1)
+const currentPage = ref(1)
 const limit = 10
-    const totalPages = ref(1)
+const totalPages = ref(1)
 const crawls = ref([])
 
 // Modal state
@@ -104,18 +107,19 @@ const formatDate = (date) => {
 
 // Fetch crawls with pagination
 const fetchCrawls = async (page = 1) => {
-        try {
+    try {
         const response = await axios.get(`${import.meta.env.VITE_BASE_URL || 'http://localhost:3001'}/api/getallcrawlers?page=${page}&limit=${limit}`)
-            crawls.value = response.data.crawls
-            totalPages.value = response.data.totalPages
-        } catch (error) {
+        crawls.value = response.data.crawls
+        totalPages.value = response.data.totalPages
+    } catch (error) {
         console.error('Error fetching crawls:', error)
-        }
+        showNotification('Error fetching crawls', 'error')
     }
+}
 
 // Handle page changes
-    const goToPage = (page) => {
-        currentPage.value = page
+const goToPage = (page) => {
+    currentPage.value = page
     fetchCrawls(page)
 }
 
@@ -135,13 +139,14 @@ const openEditModal = (crawl) => {
 const handleCrawlCreated = (crawl) => {
     fetchCrawls(currentPage.value)
     if (crawl._id) {
+        showNotification('Crawl created successfully', 'success')
         router.push({ name: 'CrawlerDashboard', params: { crawlId: crawl._id } })
     }
-    }
+}
 
 onMounted(() => {
-        fetchCrawls()
-    })
+    fetchCrawls()
+})
 </script>
 
 <style scoped>
