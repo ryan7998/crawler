@@ -1,5 +1,28 @@
 const { Schema, model } = require('mongoose')
 
+const childSelectorSchema = new Schema({
+    target_element: { type: String, required: true },
+    selector_value: { type: String, required: true },
+    type: { 
+        type: String, 
+        enum: ['text', 'link', 'image', 'table', 'list'],
+        default: 'text'
+    },
+    attribute: { type: String, default: null }
+})
+
+const selectorSchema = new Schema({
+    target_element: { type: String, required: true },
+    selector_value: { type: String, required: true },
+    type: { 
+        type: String, 
+        enum: ['text', 'link', 'image', 'table', 'list', 'container'],
+        default: 'text'
+    },
+    attribute: { type: String, default: null },
+    childSelectors: [childSelectorSchema]
+})
+
 const crawlSchema = new Schema({
     title: {
         type: String,
@@ -9,10 +32,7 @@ const crawlSchema = new Schema({
         type: [String], // Array of URLs to be crawled
         required: true 
     },
-    selectors: [{
-        target_element: { type: String, required: true },
-        selector_value: { type: String, required: true }
-    }], // Array of selector objects
+    selectors: [selectorSchema], // Array of selector objects with child selectors
     userId: {
         type: String, // Placeholder for userId
         required: true,

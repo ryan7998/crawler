@@ -1,5 +1,4 @@
 const axios = require('axios')
-
 const crawlQueue = require('../queues/crawlQueue')
 const Crawl = require('../models/Crawl')
 const CrawlData = require('../models/CrawlData')
@@ -232,6 +231,22 @@ const checkDomainSelectors = async (req, res) => {
     }
 }
 
+const getQueueStatus = async (req, res) => {
+    try {
+        const { crawlId } = req.params
+        const jobs = await crawlQueue.getJobs(['active', 'waiting', 'delayed'])
+        const crawlJobs = jobs.filter(job => job.data.crawlId === crawlId)
+        res.json({
+            active: crawlJobs.filter(job => job.status === 'active').length,
+            waiting: crawlJobs.filter(job => job.status === 'waiting').length,
+            delayed: crawlJobs.filter(job => job.status === 'delayed').length,
+            total: crawlJobs.length
+        })
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+
 module.exports = {
     crawlWebsite,
     createCrawler,
@@ -239,5 +254,6 @@ module.exports = {
     getCrawler,
     getAllCrawlers,
     deleteCrawler,
-    checkDomainSelectors
+    checkDomainSelectors,
+    getQueueStatus
 }

@@ -91,7 +91,51 @@
             <div class="w-3/4">
                 <!-- Crawl Details -->
                 <div v-if="crawl" class="bg-white rounded-lg shadow-sm p-6">
-                    <h6 class="text-gray-700 font-semibold mb-4">Crawl Details</h6>
+                    <div class="flex justify-between items-center mb-4">
+                        <h6 class="text-gray-700 font-semibold">Crawl Details</h6>
+                        <div class="flex items-center space-x-4">
+                            <!-- Queue Status -->
+                            <div class="text-sm text-gray-600">
+                                <span v-if="queueStatus.total > 0">
+                                    Queue: {{ queueStatus.active }} active, {{ queueStatus.waiting }} waiting
+                                </span>
+                            </div>
+                            <!-- Export Button -->
+                            <div class="relative">
+                                <v-btn
+                                    variant="outlined"
+                                    color="success"
+                                    size="small"
+                                    @click="showExportMenu = true"
+                                >
+                                    <v-icon start icon="mdi-download" />
+                                    Export
+                                </v-btn>
+                                <v-menu
+                                    v-model="showExportMenu"
+                                    :close-on-content-click="false"
+                                    location="bottom end"
+                                >
+                                    <v-card min-width="200">
+                                        <v-list>
+                                            <v-list-item @click="exportToCSV">
+                                                <template v-slot:prepend>
+                                                    <v-icon icon="mdi-file-delimited" />
+                                                </template>
+                                                <v-list-item-title>Export as CSV</v-list-item-title>
+                                            </v-list-item>
+                                            <v-list-item @click="exportToExcel">
+                                                <template v-slot:prepend>
+                                                    <v-icon icon="mdi-microsoft-excel" />
+                                                </template>
+                                                <v-list-item-title>Export as Excel</v-list-item-title>
+                                            </v-list-item>
+                                        </v-list>
+                                    </v-card>
+                                </v-menu>
+                            </div>
+                        </div>
+                    </div>
                     <v-table>
                         <thead>
                             <tr>
@@ -200,25 +244,25 @@ import { useExcerpts } from '../composables/useExcerpts'
 import SlideOver from './SlideOver.vue'
 import { getStatusColor } from '../utils/statusUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
+import * as XLSX from 'xlsx'
 
 const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
 const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
 const socketUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3002'
-const logs = ref([])  // Reactive state for successfull crawl results
-const socket = ref()    // Ref from the socket instance
-// const socket = ref(io(`${baseUrl}/socket.io/`))    // Ref from the socket instance
-// const socket = ref(io(`${baseUrl}:3002`))    // Ref from the socket instance
-const route = useRoute()    //Access the crawl ID from the URL
+const logs = ref([])  // Reactive state for successful crawl results
+const socket = ref()  // Ref for the socket instance
+const route = useRoute()  // Access the crawl ID from the URL
 const router = useRouter()
-const crawlId = ref(route.params.crawlId)   // Get crawlId from URL
-const crawl = ref(null); // To store crawl data
-const errorMessage = ref(''); // To store any error messages
-const liveStatusDictionary = ref({}) // To store status by listening the socket
+const crawlId = ref(route.params.crawlId)  // Get crawlId from URL
+const crawl = ref(null)  // To store crawl data
+const errorMessage = ref('')  // To store any error messages
+const liveStatusDictionary = ref({})  // To store status by listening to the socket
 const viewResults = ref({})
-const excerpts = ref({}) // Store excerpts for each URL
-const showConfirm = ref(false) // Controle the visibility of the confirmation modal
-const successMessage = ref('') // To store success messages
+const excerpts = ref({})  // Store excerpts for each URL
+const showConfirm = ref(false)  // Control the visibility of the confirmation modal
 const showCreateModal = ref(false)
+const showExportMenu = ref(false)  // Control the visibility of the export menu
+const queueStatus = ref({ active: 0, waiting: 0, delayed: 0, total: 0 })  // Store queue status
 
 // Add snackbar refs
 const showSnackbar = ref(false)
@@ -235,16 +279,16 @@ const openViewResult = (url) => {
 
 const onCloseSlideOver = (url) => {
     // Set the clicked URL to false to close the ViewResult component
-    viewResults.value = { ...viewResults.value, [url]: false };
+    viewResults.value = { ...viewResults.value, [url]: false }
 }
 
 // Function to format time
 const formatTime = (time) => {
-    if (!time) return 'N/A';
-    return new Date(time).toLocaleString();
-};
+    if (!time) return 'N/A'
+    return new Date(time).toLocaleString()
+}
 
-// Add fetchCrawlData function
+// Function to fetch crawl data from the server
 const fetchCrawlData = async () => {
     try {
         const response = await axios.get(`${apiUrl}/api/getcrawler/${crawlId.value}`)
@@ -263,9 +307,19 @@ const fetchCrawlData = async () => {
             }
             // Initialize excerpt
             excerpts.value[url] = useExcerpts(ref(url), 30)
-        });
+        })
     } catch (error) {
         errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
+    }
+}
+
+// Function to check queue status
+const checkQueueStatus = async () => {
+    try {
+        const response = await axios.get(`${apiUrl}/api/queuestatus/${crawlId.value}`)
+        queueStatus.value = response.data
+    } catch (error) {
+        console.error('Error checking queue status:', error)
     }
 }
 
@@ -274,48 +328,60 @@ onMounted(async () => {
     crawlId.value = route.params.crawlId
 
     try {
+        // Log the socket URL for debugging
+        console.log('Connecting to socket at:', socketUrl)
+        
         socket.value = io(socketUrl, {
             path: "/socket.io/",
-            transports: ["polling", "websocket"]
-        });
+            transports: ["websocket", "polling"],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        })
         
         await fetchCrawlData()
+        await checkQueueStatus()  // Check initial queue status
 
         // Join the room for the specific crawl ID
         socket.value.emit('joinCrawl', crawlId.value)
+        
         // Listen for crawl logs
-        socket.value.on("crawlLog", (data) => {
-            console.log('logging', data)
+        socket.value.on("crawlLog", async (data) => {
+            console.log('Received crawl log:', data)  // Add logging
             logs.value.push(data)
             
             // Update crawl status if it's a final status update
             if (data.status === 'completed' || data.status === 'failed') {
                 crawl.value.status = data.status
-                if (data.message) {
-                    successMessage.value = data.message
-                }
+                await checkQueueStatus()  // Check queue status when crawl completes
             } else {
                 // Update individual URL status
                 liveStatusDictionary.value[data.url] = data.status
             }
 
-            // append new crawled data into FE rather than making a new api call to update the new results
+            // Append new crawled data into FE rather than making a new api call
             if (data.status === 'success') {
                 crawl.value.aggregatedData[data.url]
                     .push({ data: data.result, date: new Date(), status: data.status })
+                await checkQueueStatus()  // Check queue status after each successful crawl
             }
         })
 
         socket.value.on('connect', () => {
-            console.log('Connected to Socket.io server');
-        });
+            console.log('Connected to Socket.io server')
+        })
 
-        socket.value.on('disconnect', () => {
-            console.log('Disconnected from Socket.io server');
-        });
+        socket.value.on('connect_error', (error) => {
+            console.error('Socket connection error:', error)
+        })
+
+        socket.value.on('disconnect', (reason) => {
+            console.log('Disconnected from Socket.io server:', reason)
+        })
 
     } catch (error) {
-        errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
+        console.error('Socket initialization error:', error)
+        errorMessage.value = error.response ? error.response.data.message : 'Error initializing socket connection'
     }
 })
 
@@ -324,7 +390,6 @@ const configureCrawl = () => {
 }
 
 const startCrawl = async () => {
-    console.log('crawl started from FE')
     try {
         const requestBody = {
             urls: crawl.value.urls,
@@ -333,14 +398,10 @@ const startCrawl = async () => {
         }
         // Make a POST request to start the crawl
         const response = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
-        console.log('Crawl started: ', response.data)
         crawl.value.status = 'in-progress'
         showNotification('Crawl started successfully', 'success')
     } catch (error) {
-        const errMsg = error.response && error.response.data && error.response.data.error
-            ? error.response.data.error
-            : error.message
-        console.log('Error starting crawl: ', errMsg)
+        const errMsg = error.response?.data?.error || error.message
         showNotification(errMsg, 'error')
     }
 }
@@ -359,25 +420,106 @@ const deleteCrawl = async () => {
         await axios.delete(`${apiUrl}/api/deletecrawl/${crawlId.value}`)
         showConfirm.value = false
         showNotification('Crawl deleted successfully', 'success')
-        router.push('/') // Redirect to homepage
+        router.push('/')  // Redirect to homepage
     } catch (error) {
-        console.error('Error deleting crawl: ', error.response ? error.response.data.message : error.message)
         showNotification(error.response?.data?.message || 'Error deleting crawl', 'error')
         showConfirm.value = false
     }
 }
 
-// Add handler for crawl creation/update
+// Handler for crawl creation/update
 const handleCrawlCreated = (updatedCrawl) => {
     showNotification('Crawl updated successfully', 'success')
     fetchCrawlData()
 }
 
-// Add error handler
+// Error handler for modal
 const handleModalError = (errorMessage) => {
     showSnackbar.value = true
     snackbarText.value = errorMessage
     snackbarColor.value = 'error'
+}
+
+// Function to prepare data for export
+const prepareExportData = () => {
+    const exportData = []
+    
+    // For each URL in the crawl
+    crawl.value.urls.forEach(url => {
+        const urlData = crawl.value.aggregatedData[url]
+        if (!urlData || !urlData.length) return
+
+        // Process each historical entry for this URL
+        urlData.forEach(entry => {
+            const row = {
+                'URL': url,
+                'Crawl Date': new Date(entry.date).toLocaleString(),
+                'Status': entry.status
+            }
+
+            // Add data if available
+            if (entry.data) {
+                Object.entries(entry.data).forEach(([key, value]) => {
+                    row[key] = Array.isArray(value) ? value.join(', ') : value
+                })
+            }
+
+            exportData.push(row)
+        })
+    })
+
+    // Sort by URL and then by date (newest first)
+    return exportData.sort((a, b) => {
+        if (a.URL === b.URL) {
+            return new Date(b['Crawl Date']) - new Date(a['Crawl Date'])
+        }
+        return a.URL.localeCompare(b.URL)
+    })
+}
+
+// Function to export to CSV
+const exportToCSV = () => {
+    const data = prepareExportData()
+    if (!data.length) {
+        showNotification('No data available to export', 'error')
+        return
+    }
+
+    const headers = Object.keys(data[0])
+    const csvContent = [
+        headers.join(','),
+        ...data.map(row => headers.map(header => {
+            const value = row[header]
+            // Escape commas and quotes in the value
+            return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
+        }).join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `crawl_results_${crawlId.value}_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    showExportMenu.value = false
+    showNotification('CSV file exported successfully', 'success')
+}
+
+// Function to export to Excel
+const exportToExcel = () => {
+    const data = prepareExportData()
+    if (!data.length) {
+        showNotification('No data available to export', 'error')
+        return
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(data)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Crawl Results')
+    
+    // Generate Excel file
+    XLSX.writeFile(workbook, `crawl_results_${crawlId.value}_${new Date().toISOString().split('T')[0]}.xlsx`)
+    showExportMenu.value = false
+    showNotification('Excel file exported successfully', 'success')
 }
 </script>
 

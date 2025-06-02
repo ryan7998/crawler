@@ -247,11 +247,20 @@ const initializeForm = () => {
     if (props.crawlData) {
         title.value = props.crawlData.title
         urlsText.value = props.crawlData.urls.join('\n')
-        // Initialize current selectors from crawlData
+        // Initialize current selectors from crawlData with child selectors
         currentSelectors.value = props.crawlData.selectors?.map(selector => ({
             id: Math.random().toString(36).substring(2, 9),
             name: selector.target_element,
-            css: selector.selector_value
+            css: selector.selector_value,
+            type: selector.type || 'text',
+            attribute: selector.attribute || null,
+            childSelectors: (selector.childSelectors || []).map(child => ({
+                id: Math.random().toString(36).substring(2, 9),
+                name: child.target_element,
+                selector: child.selector_value,
+                type: child.type || 'text',
+                attribute: child.attribute || null
+            }))
         })) || []
     } else {
         title.value = ''
@@ -482,7 +491,15 @@ const handleSubmit = async () => {
             urls: urls.map(url => url.trim()),
             selectors: currentSelectors.value.map(selector => ({
                 target_element: selector.name,
-                selector_value: selector.css
+                selector_value: selector.css,
+                type: selector.type || 'text',
+                attribute: selector.attribute,
+                childSelectors: selector.childSelectors?.map(child => ({
+                    target_element: child.name,
+                    selector_value: child.selector,
+                    type: child.type || 'text',
+                    attribute: child.attribute
+                })) || []
             })),
             userId: '1'
         }
