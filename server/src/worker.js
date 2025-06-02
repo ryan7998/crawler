@@ -1,3 +1,5 @@
+const { selectors } = require('playwright');
+
 (async () => {
     const express = require('express')
     const http = require('http')
@@ -91,8 +93,8 @@
 
         try {
             // Initialize job tracking for this crawl if not exists
+            const crawl = await Crawl.findById(crawlId)
             if (!activeJobs.has(crawlId)) {
-                const crawl = await Crawl.findById(crawlId)
                 activeJobs.set(crawlId, {
                     total: crawl.urls.length,
                     completed: 0
@@ -108,12 +110,15 @@
             }
             
             // Initialize the seed (load selectors)
-            await seed.initialize()
+            // await seed.initialize()
             
             // Fetch the HTML content and extract data
             const throttled = throttle(async () => await seed.loadHTMLContent())
-            const extractedDatum = await throttled()
-            extractedData.push(extractedDatum)
+            const cleanHtmlContent = await throttled()
+            // console.log('cleanHtmlContent: ', cleanHtmlContent)
+            console.log('crawl.selectors: ', crawl.selectors)
+            const extractedDatum = await extractHtml(cleanHtmlContent, crawl.selectors)
+            // extractedData.push(extractedDatum)
 
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'saving' })
             // Save to database
@@ -124,7 +129,7 @@
             // Emit event to clients when the crawl is completed
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'success', result: extractedDatum })
 
-            console.log(`Successfully crawled: ${seed}, Crawl Id: ${crawlId}`)
+            console.log(`Successfully crawled: ${seed.url}, Crawl Id: ${crawlId}, extractedDatum: ${extractedDatum}`)
             done(null, extractedDatum)
             // done(null)
 

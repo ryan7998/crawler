@@ -1,6 +1,15 @@
 <template>
     <v-container>
-        <h1 class="text-h4 mb-6">All Crawls</h1>
+        <div class="d-flex justify-space-between align-center mb-6">
+            <h1 class="text-h4">All Crawls</h1>
+            <v-btn
+                color="primary"
+                @click="openCreateModal"
+            >
+                <v-icon start icon="mdi-plus" />
+                New Crawl
+            </v-btn>
+    </div>
 
         <v-data-table
             :headers="headers"
@@ -26,7 +35,7 @@
                     variant="text"
                     color="warning"
                     size="small"
-                    @click="configureCrawl(item)"
+                    @click="openEditModal(item)"
                 >
                     Edit
                 </v-btn>
@@ -48,76 +57,94 @@
                 {{ formatDate(item.updatedAt) }}
             </template>
         </v-data-table>
+
+        <!-- Create/Edit Crawl Modal -->
+        <CreateCrawlModal
+            v-model="showModal"
+            :crawl-data="selectedCrawl"
+            @crawl-created="handleCrawlCreated"
+        />
     </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
+import CreateCrawlModal from './CreateCrawlModal.vue'
 
 // Initialize Pinia store
 const crawlStore = useCrawlStore()
-// Initialize Vue
 const router = useRouter()
-const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
 
-// Table headers configuration
+// Inject the notification function
+const showNotification = inject('showNotification')
+
+// Table configuration
 const headers = [
-    { title: 'Title', key: 'title', sortable: true },
-    { title: 'Status', key: 'status', sortable: true },
-    { title: 'Updated At', key: 'updatedAt', sortable: true },
+    { title: 'Title', key: 'title' },
+    { title: 'Status', key: 'status' },
+    { title: 'Created At', key: 'createdAt' },
     { title: 'Actions', key: 'actions', sortable: false }
 ]
 
-// Reactive state
-const crawls = ref([])
+// Pagination
 const currentPage = ref(1)
+const limit = 10
 const totalPages = ref(1)
-const limit = ref(20)   // Items per page
+const crawls = ref([])
 
-// Success and error messages
-const successMessage = ref('')
-const errorMessage = ref('')
+// Modal state
+const showModal = ref(false)
+const selectedCrawl = ref(null)
 
-// Fetch crawls from the backend
-const fetchCrawls = async () => {
+// Format date for display
+const formatDate = (date) => {
+    return new Date(date).toLocaleDateString()
+}
+
+// Fetch crawls with pagination
+const fetchCrawls = async (page = 1) => {
     try {
-        const response = await axios.get(`${apiUrl}/api/getallcrawlers`, {
-            params: {
-                page: currentPage.value,
-                limit: limit.value,
-            },
-        })
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL || 'http://localhost:3001'}/api/getallcrawlers?page=${page}&limit=${limit}`)
         crawls.value = response.data.crawls
         totalPages.value = response.data.totalPages
-        console.log(response)
     } catch (error) {
-        errorMessage.value = error.response ? error.response.data.message : 'Error fetching crawls'
-        console.log(error)
+        console.error('Error fetching crawls:', error)
+        showNotification('Error fetching crawls', 'error')
     }
 }
 
-// Configure crawl function
-const configureCrawl = (crawl) => {
-    crawlStore.setData(crawl)
-    router.push({ name: 'CreateCrawl' })
-}
-
-// Pagination function
+// Handle page changes
 const goToPage = (page) => {
     currentPage.value = page
-    fetchCrawls()
+    fetchCrawls(page)
 }
 
-// Helper function to format date
-const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString()
+// Open create modal
+const openCreateModal = () => {
+    selectedCrawl.value = null
+    showModal.value = true
 }
 
-onMounted(async () => {
+// Open edit modal
+const openEditModal = (crawl) => {
+    selectedCrawl.value = crawl
+    showModal.value = true
+}
+
+// Handle crawl creation/update
+const handleCrawlCreated = (crawl) => {
+    fetchCrawls(currentPage.value)
+    if (crawl._id) {
+        showNotification('Crawl created successfully', 'success')
+        router.push({ name: 'CrawlerDashboard', params: { crawlId: crawl._id } })
+    }
+}
+
+onMounted(() => {
     fetchCrawls()
 })
 </script>
@@ -128,4 +155,4 @@ onMounted(async () => {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-</style>
+</style> 

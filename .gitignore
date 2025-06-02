@@ -5,3 +5,7 @@ client/node_modules
 .DS_Store
 /db
 github_pat_*
+server/node_modules
+client/node_modules
+server/files
+client/files

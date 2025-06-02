@@ -1,54 +1,196 @@
 <template>
-    <div class="flex space-x-2 ml-3">
-        <div>
-            <!-- <label :for="'selector-name-' + selector.id" class="text-left block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label> -->
-            <input 
-                required 
-                v-model="localSelector.name" 
-                type="text" 
-                :id="'selector-name' + selector.id" 
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                placeholder="Enter selector name" />
-        </div>
-        <div>
-            <!-- <label :for="'selector-css-' + selector.id" class="text-left block mb-2 text-sm font-medium text-gray-900 dark:text-white">Css Selector</label> -->
-            <input 
-                required 
-                v-model="localSelector.css" 
-                type="text"
-                :id="'selector-css-' + selector.id"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                placeholder="Enter css selector" />
-        </div>
-        <div class="flex items-end">
-            <button type="button" class="rounded-md text-xs text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium text-sm px-2.5 py-2"
+    <div class="border rounded-lg p-4">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex-1 grid grid-cols-2 gap-4">
+                <v-text-field
+                    v-model="localSelector.name"
+                    label="Name"
+                    required
+                    @update:model-value="updateSelector"
+                />
+                <v-text-field
+                    v-model="localSelector.selector"
+                    label="CSS Selector"
+                    required
+                    @update:model-value="updateSelector"
+                />
+                <v-select
+                    v-model="localSelector.type"
+                    :items="selectorTypes"
+                    item-title="label"
+                    item-value="value"
+                    label="Type"
+                    required
+                    @update:model-value="updateSelector"
+                />
+                <v-text-field
+                    v-if="localSelector.type === 'link' || localSelector.type === 'image'"
+                    v-model="localSelector.attribute"
+                    label="Attribute (e.g., href, src)"
+                    @update:model-value="updateSelector"
+                />
+            </div>
+            <v-btn
+                v-if="showRemoveButton"
+                variant="text"
+                color="error"
+                size="small"
                 @click="$emit('removeSelector', selector.id)"
-            >X</button>
+                class="ml-2"
+            >
+                <v-icon>mdi-delete</v-icon>
+            </v-btn>
+        </div>
+
+        <!-- Child Selectors Section -->
+        <div v-if="localSelector.type === 'container'" class="mt-4">
+            <div class="flex items-center justify-between mb-2">
+                <h6 class="font-medium">Child Selectors</h6>
+                <v-btn
+                    variant="text"
+                    color="primary"
+                    size="small"
+                    @click="addChildSelector"
+                >
+                    <v-icon>mdi-plus</v-icon>
+                    Add Child Selector
+                </v-btn>
+            </div>
+
+            <div v-for="(childSelector, index) in localSelector.childSelectors" :key="index" class="ml-4 p-3 border rounded-lg mb-2">
+                <div class="flex items-center justify-between mb-2">
+                    <h6 class="font-medium">Child {{ index + 1 }}</h6>
+                    <v-btn
+                        variant="text"
+                        color="error"
+                        size="small"
+                        @click="removeChildSelector(index)"
+                    >
+                        <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <v-text-field
+                        v-model="childSelector.name"
+                        label="Name"
+                        required
+                        @update:model-value="updateSelector"
+                    />
+                    <v-text-field
+                        v-model="childSelector.selector"
+                        label="CSS Selector"
+                        required
+                        @update:model-value="updateSelector"
+                    />
+                    <v-select
+                        v-model="childSelector.type"
+                        :items="childSelectorTypes"
+                        item-title="label"
+                        item-value="value"
+                        label="Type"
+                        required
+                        @update:model-value="updateSelector"
+                    />
+                    <v-text-field
+                        v-if="childSelector.type === 'link' || childSelector.type === 'image'"
+                        v-model="childSelector.attribute"
+                        label="Attribute (e.g., href, src)"
+                        @update:model-value="updateSelector"
+                    />
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-    import { reactive, watch } from 'vue'
+import { ref, watch } from 'vue'
 
-    const props = defineProps({
+const props = defineProps({
+    selector: {
+        type: Object,
+        required: true
+    },
+    showRemoveButton: {
+        type: Boolean,
+        default: true
+    }
+})
+
+const emit = defineEmits(['updateSelector', 'removeSelector'])
+
+const selectorTypes = [
+    { value: 'text', label: 'Text' },
+    { value: 'link', label: 'Link' },
+    { value: 'image', label: 'Image' },
+    { value: 'table', label: 'Table' },
+    { value: 'list', label: 'List' },
+    { value: 'container', label: 'Container' }
+]
+
+const childSelectorTypes = selectorTypes.filter(type => type.value !== 'container')
+
+const localSelector = ref({
+    id: props.selector.id,
+    name: props.selector.name || '',
+    selector: props.selector.css || '',
+    type: props.selector.type || 'text',
+    attribute: props.selector.attribute || null,
+    childSelectors: (props.selector.childSelectors || []).map(child => ({
+        name: child.name || '',
+        selector: child.selector || '',
+        type: child.type || 'text',
+        attribute: child.attribute || null
+    }))
+})
+
+watch(() => props.selector, (newVal) => {
+    localSelector.value = {
+        id: newVal.id,
+        name: newVal.name || '',
+        selector: newVal.css || '',
+        type: newVal.type || 'text',
+        attribute: newVal.attribute || null,
+        childSelectors: (newVal.childSelectors || []).map(child => ({
+            name: child.name || '',
+            selector: child.selector || '',
+            type: child.type || 'text',
+            attribute: child.attribute || null
+        }))
+    }
+}, { deep: true })
+
+const updateSelector = () => {
+    emit('updateSelector', {
         selector: {
-            type: Object,
-            required: true
+            id: localSelector.value.id,
+            name: localSelector.value.name,
+            css: localSelector.value.selector,
+            type: localSelector.value.type,
+            attribute: localSelector.value.attribute,
+            childSelectors: localSelector.value.childSelectors.map(child => ({
+                name: child.name,
+                selector: child.selector,
+                type: child.type,
+                attribute: child.attribute
+            }))
         }
     })
+}
 
-    const emit = defineEmits(['removeSelector', 'updateSelector'])
-
-    // Create a local copy of the selector to avoid mutating props
-    const localSelector = reactive({
-        id: props.selector.id,
-        name: props.selector.name || '',
-        css: props.selector.css || ''
+const addChildSelector = () => {
+    localSelector.value.childSelectors.push({
+        name: '',
+        selector: '',
+        type: 'text',
+        attribute: null
     })
+    updateSelector()
+}
 
-    // Watch for changes and emit updates to the parent
-    watch(localSelector, (newVal) => {
-        emit('updateSelector', { selector: { ...newVal } })
-    }, { deep: true })
+const removeChildSelector = (index) => {
+    localSelector.value.childSelectors.splice(index, 1)
+    updateSelector()
+}
 </script>
