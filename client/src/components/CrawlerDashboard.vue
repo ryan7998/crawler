@@ -93,38 +93,47 @@
                 <div v-if="crawl" class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h6 class="text-gray-700 font-semibold">Crawl Details</h6>
-                        <div class="relative">
-                            <v-btn
-                                variant="outlined"
-                                color="success"
-                                size="small"
-                                @click="showExportMenu = true"
-                            >
-                                <v-icon start icon="mdi-download" />
-                                Export
-                            </v-btn>
-                            <v-menu
-                                v-model="showExportMenu"
-                                :close-on-content-click="false"
-                                location="bottom end"
-                            >
-                                <v-card min-width="200">
-                                    <v-list>
-                                        <v-list-item @click="exportToCSV">
-                                            <template v-slot:prepend>
-                                                <v-icon icon="mdi-file-delimited" />
-                                            </template>
-                                            <v-list-item-title>Export as CSV</v-list-item-title>
-                                        </v-list-item>
-                                        <v-list-item @click="exportToExcel">
-                                            <template v-slot:prepend>
-                                                <v-icon icon="mdi-microsoft-excel" />
-                                            </template>
-                                            <v-list-item-title>Export as Excel</v-list-item-title>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-card>
-                            </v-menu>
+                        <div class="flex items-center space-x-4">
+                            <!-- Queue Status -->
+                            <div class="text-sm text-gray-600">
+                                <span v-if="queueStatus.total > 0">
+                                    Queue: {{ queueStatus.active }} active, {{ queueStatus.waiting }} waiting
+                                </span>
+                            </div>
+                            <!-- Export Button -->
+                            <div class="relative">
+                                <v-btn
+                                    variant="outlined"
+                                    color="success"
+                                    size="small"
+                                    @click="showExportMenu = true"
+                                >
+                                    <v-icon start icon="mdi-download" />
+                                    Export
+                                </v-btn>
+                                <v-menu
+                                    v-model="showExportMenu"
+                                    :close-on-content-click="false"
+                                    location="bottom end"
+                                >
+                                    <v-card min-width="200">
+                                        <v-list>
+                                            <v-list-item @click="exportToCSV">
+                                                <template v-slot:prepend>
+                                                    <v-icon icon="mdi-file-delimited" />
+                                                </template>
+                                                <v-list-item-title>Export as CSV</v-list-item-title>
+                                            </v-list-item>
+                                            <v-list-item @click="exportToExcel">
+                                                <template v-slot:prepend>
+                                                    <v-icon icon="mdi-microsoft-excel" />
+                                                </template>
+                                                <v-list-item-title>Export as Excel</v-list-item-title>
+                                            </v-list-item>
+                                        </v-list>
+                                    </v-card>
+                                </v-menu>
+                            </div>
                         </div>
                     </div>
                     <v-table>
@@ -240,21 +249,20 @@ import * as XLSX from 'xlsx'
 const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
 const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
 const socketUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3002'
-const logs = ref([])  // Reactive state for successfull crawl results
-const socket = ref()    // Ref from the socket instance
-// const socket = ref(io(`${baseUrl}/socket.io/`))    // Ref from the socket instance
-// const socket = ref(io(`${baseUrl}:3002`))    // Ref from the socket instance
-const route = useRoute()    //Access the crawl ID from the URL
+const logs = ref([])  // Reactive state for successful crawl results
+const socket = ref()  // Ref for the socket instance
+const route = useRoute()  // Access the crawl ID from the URL
 const router = useRouter()
-const crawlId = ref(route.params.crawlId)   // Get crawlId from URL
-const crawl = ref(null); // To store crawl data
-const errorMessage = ref(''); // To store any error messages
-const liveStatusDictionary = ref({}) // To store status by listening the socket
+const crawlId = ref(route.params.crawlId)  // Get crawlId from URL
+const crawl = ref(null)  // To store crawl data
+const errorMessage = ref('')  // To store any error messages
+const liveStatusDictionary = ref({})  // To store status by listening to the socket
 const viewResults = ref({})
-const excerpts = ref({}) // Store excerpts for each URL
-const showConfirm = ref(false) // Controle the visibility of the confirmation modal
-const successMessage = ref('') // To store success messages
+const excerpts = ref({})  // Store excerpts for each URL
+const showConfirm = ref(false)  // Control the visibility of the confirmation modal
 const showCreateModal = ref(false)
+const showExportMenu = ref(false)  // Control the visibility of the export menu
+const queueStatus = ref({ active: 0, waiting: 0, delayed: 0, total: 0 })  // Store queue status
 
 // Add snackbar refs
 const showSnackbar = ref(false)
@@ -264,8 +272,6 @@ const snackbarColor = ref('success')
 // Inject the notification function
 const showNotification = inject('showNotification')
 
-const showExportMenu = ref(false)
-
 const openViewResult = (url) => {
     // Set the clicked URL to true in the viewResults object
     viewResults.value = { ...viewResults.value, [url]: true }
@@ -273,16 +279,16 @@ const openViewResult = (url) => {
 
 const onCloseSlideOver = (url) => {
     // Set the clicked URL to false to close the ViewResult component
-    viewResults.value = { ...viewResults.value, [url]: false };
+    viewResults.value = { ...viewResults.value, [url]: false }
 }
 
 // Function to format time
 const formatTime = (time) => {
-    if (!time) return 'N/A';
-    return new Date(time).toLocaleString();
-};
+    if (!time) return 'N/A'
+    return new Date(time).toLocaleString()
+}
 
-// Add fetchCrawlData function
+// Function to fetch crawl data from the server
 const fetchCrawlData = async () => {
     try {
         const response = await axios.get(`${apiUrl}/api/getcrawler/${crawlId.value}`)
@@ -301,9 +307,19 @@ const fetchCrawlData = async () => {
             }
             // Initialize excerpt
             excerpts.value[url] = useExcerpts(ref(url), 30)
-        });
+        })
     } catch (error) {
         errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
+    }
+}
+
+// Function to check queue status
+const checkQueueStatus = async () => {
+    try {
+        const response = await axios.get(`${apiUrl}/api/queuestatus/${crawlId.value}`)
+        queueStatus.value = response.data
+    } catch (error) {
+        console.error('Error checking queue status:', error)
     }
 }
 
@@ -315,42 +331,41 @@ onMounted(async () => {
         socket.value = io(socketUrl, {
             path: "/socket.io/",
             transports: ["polling", "websocket"]
-        });
+        })
         
         await fetchCrawlData()
+        await checkQueueStatus()  // Check initial queue status
 
         // Join the room for the specific crawl ID
         socket.value.emit('joinCrawl', crawlId.value)
         // Listen for crawl logs
-        socket.value.on("crawlLog", (data) => {
-            console.log('logging', data)
+        socket.value.on("crawlLog", async (data) => {
             logs.value.push(data)
             
             // Update crawl status if it's a final status update
             if (data.status === 'completed' || data.status === 'failed') {
                 crawl.value.status = data.status
-                if (data.message) {
-                    successMessage.value = data.message
-                }
+                await checkQueueStatus()  // Check queue status when crawl completes
             } else {
                 // Update individual URL status
                 liveStatusDictionary.value[data.url] = data.status
             }
 
-            // append new crawled data into FE rather than making a new api call to update the new results
+            // Append new crawled data into FE rather than making a new api call
             if (data.status === 'success') {
                 crawl.value.aggregatedData[data.url]
                     .push({ data: data.result, date: new Date(), status: data.status })
+                await checkQueueStatus()  // Check queue status after each successful crawl
             }
         })
 
         socket.value.on('connect', () => {
-            console.log('Connected to Socket.io server');
-        });
+            console.log('Connected to Socket.io server')
+        })
 
         socket.value.on('disconnect', () => {
-            console.log('Disconnected from Socket.io server');
-        });
+            console.log('Disconnected from Socket.io server')
+        })
 
     } catch (error) {
         errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
@@ -362,7 +377,6 @@ const configureCrawl = () => {
 }
 
 const startCrawl = async () => {
-    console.log('crawl started from FE')
     try {
         const requestBody = {
             urls: crawl.value.urls,
@@ -371,14 +385,10 @@ const startCrawl = async () => {
         }
         // Make a POST request to start the crawl
         const response = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
-        console.log('Crawl started: ', response.data)
         crawl.value.status = 'in-progress'
         showNotification('Crawl started successfully', 'success')
     } catch (error) {
-        const errMsg = error.response && error.response.data && error.response.data.error
-            ? error.response.data.error
-            : error.message
-        console.log('Error starting crawl: ', errMsg)
+        const errMsg = error.response?.data?.error || error.message
         showNotification(errMsg, 'error')
     }
 }
@@ -397,21 +407,20 @@ const deleteCrawl = async () => {
         await axios.delete(`${apiUrl}/api/deletecrawl/${crawlId.value}`)
         showConfirm.value = false
         showNotification('Crawl deleted successfully', 'success')
-        router.push('/') // Redirect to homepage
+        router.push('/')  // Redirect to homepage
     } catch (error) {
-        console.error('Error deleting crawl: ', error.response ? error.response.data.message : error.message)
         showNotification(error.response?.data?.message || 'Error deleting crawl', 'error')
         showConfirm.value = false
     }
 }
 
-// Add handler for crawl creation/update
+// Handler for crawl creation/update
 const handleCrawlCreated = (updatedCrawl) => {
     showNotification('Crawl updated successfully', 'success')
     fetchCrawlData()
 }
 
-// Add error handler
+// Error handler for modal
 const handleModalError = (errorMessage) => {
     showSnackbar.value = true
     snackbarText.value = errorMessage
@@ -435,14 +444,7 @@ const prepareExportData = () => {
                 'Status': entry.status
             }
 
-            // Add custom selectors data if available
-            // if (entry.data.selectors) {
-            //     Object.entries(entry.data.selectors).forEach(([key, value]) => {
-            //         row[key] = Array.isArray(value) ? value.join(', ') : value
-            //     })
-            // }
-
-            // Add default data if available
+            // Add data if available
             if (entry.data) {
                 Object.entries(entry.data).forEach(([key, value]) => {
                     row[key] = Array.isArray(value) ? value.join(', ') : value

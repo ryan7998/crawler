@@ -1,76 +1,107 @@
 const cheerio = require('cheerio')
 
-const extractHtml = (html, selectors = []) => {
-    // Load the HTML into cheerio
+const extractHtml = async (html, selectors) => {
     const $ = cheerio.load(html)
-    const extractedData = {defaultData:{}}
-    
-    // If user has set selectors:
-    if(selectors.length) {
-        selectors.forEach(selector => {
-            if(selector.target_element && selector.selector_value){
-                let value = ''
-                // Handle multiple selectors (comma-separated)
-                const selectorList = selector.selector_value.split(',').map(s => s.trim())
-                
-                for (const sel of selectorList) {
-                    const element = $(sel)
-                    if (element.length > 0) {
-                        // Handle different types of elements
-                        if (element.is('img')) {
-                            value = element.attr('src')
-                        } else if (element.is('input')) {
-                            value = element.attr('value')
-                        } else {
-                            value = element.text().trim()
-                        }
-                        break // Use the first matching selector
+    const result = {}
+
+    // If no selectors provided, extract default data
+    if (!selectors || selectors.length === 0) {
+        return {
+            defaultData: {
+                title: $('title').text(),
+                h1Tags: $('h1').map((i, el) => $(el).text()).get(),
+                price: $('[class*="price"]').first().text(),
+                images: $('img').map((i, el) => $(el).attr('src')).get(),
+                links: $('a').map((i, el) => $(el).attr('href')).get(),
+                description: $('meta[name="description"]').attr('content'),
+                keywords: $('meta[name="keywords"]').attr('content')
+            }
+        }
+    }
+
+    // Process each selector
+    for (const selector of selectors) {
+        // Handle both old and new selector formats
+        const selectorValue = selector.selector_value || selector.selector
+        const elementName = selector.target_element || selector.name
+        const selectorType = selector.type || 'text'
+        const attribute = selector.attribute
+
+        const elements = $(selectorValue)
+        
+        if (elements.length === 0) {
+            result[elementName] = null
+            continue
+        }
+
+        // Handle container type selectors with child selectors
+        if (selectorType === 'container' && selector.childSelectors) {
+            result[elementName] = elements.map((i, container) => {
+                const containerData = {}
+                const $container = $(container)
+
+                // Process each child selector within the container
+                for (const childSelector of selector.childSelectors) {
+                    const childSelectorValue = childSelector.selector_value || childSelector.selector
+                    const childElementName = childSelector.target_element || childSelector.name
+                    const childType = childSelector.type || 'text'
+                    const childAttribute = childSelector.attribute
+
+                    const childElements = $container.find(childSelectorValue)
+                    
+                    if (childElements.length === 0) {
+                        containerData[childElementName] = null
+                        continue
+                    }
+
+                    // Extract data based on child selector type
+                    switch (childType) {
+                        case 'text':
+                            containerData[childElementName] = childElements.text().trim()
+                            break
+                        case 'link':
+                            containerData[childElementName] = childElements.attr(childAttribute || 'href')
+                            break
+                        case 'image':
+                            containerData[childElementName] = childElements.attr(childAttribute || 'src')
+                            break
+                        case 'table':
+                            containerData[childElementName] = childElements.map((i, cell) => $(cell).text().trim()).get()
+                            break
+                        case 'list':
+                            containerData[childElementName] = childElements.map((i, item) => $(item).text().trim()).get()
+                            break
+                        default:
+                            containerData[childElementName] = childElements.text().trim()
                     }
                 }
-                
-                extractedData[selector.target_element] = value
-                console.log('selector extracted: ', selector.target_element, selector.selector_value, value)
+                return containerData
+            }).get()
+        } else {
+            // Handle regular selectors
+            switch (selectorType) {
+                case 'text':
+                    result[elementName] = elements.text().trim()
+                    break
+                case 'link':
+                    result[elementName] = elements.attr(attribute || 'href')
+                    break
+                case 'image':
+                    result[elementName] = elements.attr(attribute || 'src')
+                    break
+                case 'table':
+                    result[elementName] = elements.map((i, cell) => $(cell).text().trim()).get()
+                    break
+                case 'list':
+                    result[elementName] = elements.map((i, item) => $(item).text().trim()).get()
+                    break
+                default:
+                    result[elementName] = elements.text().trim()
             }
-        })
-    }
-        
-    // Default data extraction if no specific selectors found
-    if (Object.keys(extractedData).length === 0) {
-        // Title
-        extractedData.defaultData.title = $('title').text().trim()
-        // h1 tags
-        extractedData.defaultData.h1Tags = []
-        $('h1').each((index, element) => {
-            extractedData.defaultData.h1Tags.push($(element).text())
-        })
-        // Price
-        let probableExtractedPrice = $('[class*="price"]').text().trim() || ''
-        probableExtractedPrice  = probableExtractedPrice.match(/\$\d+(?:\.\.?\d+)?/g) || [] // Extract prices using the regex
-
-        // Proceed with cleaning as before
-        probableExtractedPrice = [...new Set(probableExtractedPrice)]
-        probableExtractedPrice = probableExtractedPrice.map(price => price.replace('..', '.'))
-
-        extractedData.defaultData.price = probableExtractedPrice
-
-        // Images
-        extractedData.defaultData.images = []
-        $('img').each((index, element) => {
-            const src = $(element).attr('src')
-            if(src) extractedData.defaultData.images.push(src)
-        })
-        // <a> tags (links)
-        extractedData.defaultData.links = []
-        $('a').each((index, element) => {
-            const href = $(element).attr('href')
-            if(href) extractedData.defaultData.links.push(href)
-        })
-        // Description
-        extractedData.defaultData.description = $('meta[name="description"]').attr('content') || ''
-        extractedData.defaultData.keywords = $('meta[name="keywords"]').attr('content') || ''
+        }
     }
 
-    return extractedData
+    return result
 }
 
 // Aggregate the crawler data grouping by urls
