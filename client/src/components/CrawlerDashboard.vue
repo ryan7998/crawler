@@ -328,9 +328,15 @@ onMounted(async () => {
     crawlId.value = route.params.crawlId
 
     try {
+        // Log the socket URL for debugging
+        console.log('Connecting to socket at:', socketUrl)
+        
         socket.value = io(socketUrl, {
             path: "/socket.io/",
-            transports: ["polling", "websocket"]
+            transports: ["websocket", "polling"],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
         })
         
         await fetchCrawlData()
@@ -338,8 +344,10 @@ onMounted(async () => {
 
         // Join the room for the specific crawl ID
         socket.value.emit('joinCrawl', crawlId.value)
+        
         // Listen for crawl logs
         socket.value.on("crawlLog", async (data) => {
+            console.log('Received crawl log:', data)  // Add logging
             logs.value.push(data)
             
             // Update crawl status if it's a final status update
@@ -363,12 +371,17 @@ onMounted(async () => {
             console.log('Connected to Socket.io server')
         })
 
-        socket.value.on('disconnect', () => {
-            console.log('Disconnected from Socket.io server')
+        socket.value.on('connect_error', (error) => {
+            console.error('Socket connection error:', error)
+        })
+
+        socket.value.on('disconnect', (reason) => {
+            console.log('Disconnected from Socket.io server:', reason)
         })
 
     } catch (error) {
-        errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
+        console.error('Socket initialization error:', error)
+        errorMessage.value = error.response ? error.response.data.message : 'Error initializing socket connection'
     }
 })
 
