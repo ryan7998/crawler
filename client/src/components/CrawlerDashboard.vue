@@ -91,7 +91,42 @@
             <div class="w-3/4">
                 <!-- Crawl Details -->
                 <div v-if="crawl" class="bg-white rounded-lg shadow-sm p-6">
-                    <h6 class="text-gray-700 font-semibold mb-4">Crawl Details</h6>
+                    <div class="flex justify-between items-center mb-4">
+                        <h6 class="text-gray-700 font-semibold">Crawl Details</h6>
+                        <div class="relative">
+                            <v-btn
+                                variant="outlined"
+                                color="success"
+                                size="small"
+                                @click="showExportMenu = true"
+                            >
+                                <v-icon start icon="mdi-download" />
+                                Export
+                            </v-btn>
+                            <v-menu
+                                v-model="showExportMenu"
+                                :close-on-content-click="false"
+                                location="bottom end"
+                            >
+                                <v-card min-width="200">
+                                    <v-list>
+                                        <v-list-item @click="exportToCSV">
+                                            <template v-slot:prepend>
+                                                <v-icon icon="mdi-file-delimited" />
+                                            </template>
+                                            <v-list-item-title>Export as CSV</v-list-item-title>
+                                        </v-list-item>
+                                        <v-list-item @click="exportToExcel">
+                                            <template v-slot:prepend>
+                                                <v-icon icon="mdi-microsoft-excel" />
+                                            </template>
+                                            <v-list-item-title>Export as Excel</v-list-item-title>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-card>
+                            </v-menu>
+                        </div>
+                    </div>
                     <v-table>
                         <thead>
                             <tr>
@@ -200,6 +235,7 @@ import { useExcerpts } from '../composables/useExcerpts'
 import SlideOver from './SlideOver.vue'
 import { getStatusColor } from '../utils/statusUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
+import * as XLSX from 'xlsx'
 
 const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
 const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
@@ -227,6 +263,8 @@ const snackbarColor = ref('success')
 
 // Inject the notification function
 const showNotification = inject('showNotification')
+
+const showExportMenu = ref(false)
 
 const openViewResult = (url) => {
     // Set the clicked URL to true in the viewResults object
@@ -378,6 +416,95 @@ const handleModalError = (errorMessage) => {
     showSnackbar.value = true
     snackbarText.value = errorMessage
     snackbarColor.value = 'error'
+}
+
+// Function to prepare data for export
+const prepareExportData = () => {
+    const exportData = []
+    
+    // For each URL in the crawl
+    crawl.value.urls.forEach(url => {
+        const urlData = crawl.value.aggregatedData[url]
+        if (!urlData || !urlData.length) return
+
+        // Process each historical entry for this URL
+        urlData.forEach(entry => {
+            const row = {
+                'URL': url,
+                'Crawl Date': new Date(entry.date).toLocaleString(),
+                'Status': entry.status
+            }
+
+            // Add custom selectors data if available
+            // if (entry.data.selectors) {
+            //     Object.entries(entry.data.selectors).forEach(([key, value]) => {
+            //         row[key] = Array.isArray(value) ? value.join(', ') : value
+            //     })
+            // }
+
+            // Add default data if available
+            if (entry.data) {
+                Object.entries(entry.data).forEach(([key, value]) => {
+                    row[key] = Array.isArray(value) ? value.join(', ') : value
+                })
+            }
+
+            exportData.push(row)
+        })
+    })
+
+    // Sort by URL and then by date (newest first)
+    return exportData.sort((a, b) => {
+        if (a.URL === b.URL) {
+            return new Date(b['Crawl Date']) - new Date(a['Crawl Date'])
+        }
+        return a.URL.localeCompare(b.URL)
+    })
+}
+
+// Function to export to CSV
+const exportToCSV = () => {
+    const data = prepareExportData()
+    if (!data.length) {
+        showNotification('No data available to export', 'error')
+        return
+    }
+
+    const headers = Object.keys(data[0])
+    const csvContent = [
+        headers.join(','),
+        ...data.map(row => headers.map(header => {
+            const value = row[header]
+            // Escape commas and quotes in the value
+            return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
+        }).join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `crawl_results_${crawlId.value}_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    showExportMenu.value = false
+    showNotification('CSV file exported successfully', 'success')
+}
+
+// Function to export to Excel
+const exportToExcel = () => {
+    const data = prepareExportData()
+    if (!data.length) {
+        showNotification('No data available to export', 'error')
+        return
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(data)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Crawl Results')
+    
+    // Generate Excel file
+    XLSX.writeFile(workbook, `crawl_results_${crawlId.value}_${new Date().toISOString().split('T')[0]}.xlsx`)
+    showExportMenu.value = false
+    showNotification('Excel file exported successfully', 'success')
 }
 </script>
 

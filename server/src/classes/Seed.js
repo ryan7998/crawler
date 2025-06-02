@@ -19,7 +19,7 @@ class Seed {
 
     async initialize() {
         // Initialize selectors
-        this.selector = await this.getDefaultSelectors()
+        // this.selector = await this.getDefaultSelectors()
         return this
     }
 
@@ -49,10 +49,11 @@ class Seed {
             // Close the browser
             await browser.close()
             this.cleanHtmlContent = cleanHtmlContent
+            return this.cleanHtmlContent
             
             // Extract data after loading HTML
-            await this.extractData()
-            return this.extractedData
+            // await this.extractData()
+            // return this.extractedData
 
         } catch (err) {
             throw new Error(`'Unable to load Content: ', ${err}`)
