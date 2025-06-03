@@ -1,37 +1,67 @@
-const express = require('express')
-const mongoose = require('mongoose')
-require('dotenv').config()
-const crawlerRoutes = require('./routes/crawlerRoutes')
-const cors = require('cors')
+// server/src/app.js
+const express = require('express');
+const mongoose = require('mongoose');
+const path = require('path');
+require('dotenv').config();
 
-const app = express()
+const cors = require('cors');
+const crawlerRoutes = require('./routes/crawlerRoutes');
 
-// Allow requests from 'http://localhost:5173'
-app.use(cors({
-    origin: process.env.ORIGIN || 'http://localhost:5173', // Vue app's origin
-}))
+const app = express();
+const isProd = process.env.NODE_ENV === 'production';
 
-// Middleware
-app.use(express.json())
+/* ———————————————————
+   1) CORS (dev only)
+   ——————————————————— */
+if (!isProd) {
+    app.use(
+        cors({
+            origin: process.env.ORIGIN || 'http://localhost:5173', // Vue dev server
+        })
+    );
+}
 
-// Routes
-app.use('/api', crawlerRoutes)
+/* ———————————————————
+   2) Body-parser
+   ——————————————————— */
+app.use(express.json());
 
-//Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db', {
-    // useFindAndModify: false,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(()=> console.log('MongoDB connected'))
-.catch((err) => console.log(err))
+/* ———————————————————
+   3) API routes
+   ——————————————————— */
+app.use('/api', crawlerRoutes);
 
-// Use this to log mongo queries being executed!
-mongoose.set('debug', true);
+/* ———————————————————
+   4) Serve Vue build (prod only)
+   ——————————————————— */
+if (isProd) {
+    const clientDistPath = path.join(__dirname, '../../client/dist');
+    app.use(express.static(clientDistPath));
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+    // SPA fallback
+    app.get('*', (_req, res) =>
+        res.sendFile(path.join(clientDistPath, 'index.html'))
+    );
+}
 
-// module.exports = app
+/* ———————————————————
+   5) MongoDB
+   ——————————————————— */
+mongoose
+    .connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db')
+    .then(() => console.log('MongoDB connected'))
+    .catch((err) => console.error(err));
+
+if (!isProd) mongoose.set('debug', true); // query logging in dev
+
+/* ———————————————————
+   6) Start server
+   ——————————————————— */
+const PORT = process.env.PORT || (isProd ? 3000 : 3001);
+app.listen(PORT, () =>
+    console.log(
+        `Server running in ${isProd ? 'production' : 'development'} mode on port ${PORT}`
+    )
+);
+
+module.exports = app;

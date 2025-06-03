@@ -30,13 +30,11 @@ const { selectors } = require('playwright');
 
         const jobs = activeJobs.get(crawlId)
         jobs.completed++
-        
         // If all jobs are completed
         if (jobs.completed === jobs.total) {
             // Get all CrawlData for this crawl
             const allCrawlData = await CrawlData.find({ crawlId })
             const hasFailures = allCrawlData.some(data => data.status === 'failed')
-            
             // Update crawl status
             await Crawl.findByIdAndUpdate(crawlId, {
                 status: hasFailures ? 'failed' : 'completed',
@@ -73,8 +71,8 @@ const { selectors } = require('playwright');
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
-    .then(() => console.log('MongoDB connected'))
-    .catch((err) => console.log(err))
+        .then(() => console.log('MongoDB connected'))
+        .catch((err) => console.log(err))
 
     const extractedData = []
     const failedCrawls = []
@@ -88,8 +86,11 @@ const { selectors } = require('playwright');
 
     // Process each job in the queue
     crawlQueue.process(async (job, done) => {
+        console.log('>>> [Worker] received job:', job.id, job.data);
         const { url, crawlId } = job.data
+        console.log('>>> [Worker] parsed url:', url, 'crawlId:', crawlId);
         const io = getSocket()
+        console.log('>>> [Worker] socket.io instance available:', !!io);
 
         try {
             // Initialize job tracking for this crawl if not exists
@@ -103,15 +104,14 @@ const { selectors } = require('playwright');
 
             // Emit crawlLog event to be captured in FE log
             io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'started' })
+            console.log(`>>> [Worker] emitted 'started' for job ${job.id}`);
 
             const seed = new Seed({ url })
-            if(!seed.isValid()) {
+            if (!seed.isValid()) {
                 throw new Error(`Invalid URL: ${seed.url}`)
             }
-            
             // Initialize the seed (load selectors)
             // await seed.initialize()
-            
             // Fetch the HTML content and extract data
             const throttled = throttle(async () => await seed.loadHTMLContent())
             const cleanHtmlContent = await throttled()
@@ -134,6 +134,7 @@ const { selectors } = require('playwright');
             // done(null)
 
         } catch (error) {
+            console.error('>>> [Worker] error inside job:', error);
             if (error.response) {
                 // Server responded with a status code out of the 2xx range
                 console.log(`Error: Recieved ${error.response.status} from ${url}`)
@@ -147,7 +148,7 @@ const { selectors } = require('playwright');
             const io = getSocket()
             io.to(crawlId).emit('crawlLog', { job: job.id, url, status: 'failed', error: error.message })
             failedCrawls.push({ url: url, message: error.message })
-            
+
             // Save to database
             const newCrawlData = new CrawlData({ url: url.url, crawlId, status: 'failed', error: error.message })
             await newCrawlData.save()
