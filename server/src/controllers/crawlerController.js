@@ -11,7 +11,7 @@ const crawlWebsite = async (req, res) => {
 
     // it it is a test crawl
     if (!crawlId) {
-        try{
+        try {
             const { data } = await axios.get(urls)
             // Extract data from HTML
             const extractedDatum = await extractHtml(data, selectors)
@@ -27,14 +27,18 @@ const crawlWebsite = async (req, res) => {
     try {
         // Update crawl status to in-progress
         await Crawl.findByIdAndUpdate(crawlId, { status: 'in-progress' })
-        
+
         console.log("Adding job: ", urls, crawlId)
         for (const url of urls) {
-            await crawlQueue.add(
-                { url, crawlId },
-                { removeOnComplete: true, removeOnFail: true }
-            )
-            // await crawlQueue.add({ url, crawlId }) // for redis 7
+            // Use different queue configurations based on environment
+            if (process.env.NODE_ENV === 'production') {
+                await crawlQueue.add({ url, crawlId }) // for redis 7
+            } else {
+                await crawlQueue.add(
+                    { url, crawlId },
+                    { removeOnComplete: true, removeOnFail: true }
+                )
+            }
         }
         res.json({ message: 'Crawl jobs added to queue', urls })
     } catch (error) {
@@ -205,7 +209,7 @@ const getAllCrawlers = async (req, res) => {
 const checkDomainSelectors = async (req, res) => {
     const { domain } = req.params
     console.log('domain: ', domain)
-    
+
     try {
         // Find selectors for the domain
         const domainSelectors = await Selectors.findOne({ domain })

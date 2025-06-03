@@ -9,3 +9,5 @@ server/node_modules
 client/node_modules
 server/files
 client/files
+server/src/app.js
+server/KEYS
