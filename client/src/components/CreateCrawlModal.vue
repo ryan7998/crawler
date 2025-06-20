@@ -250,14 +250,14 @@ const initializeForm = () => {
         // Initialize current selectors from crawlData with child selectors
         currentSelectors.value = props.crawlData.selectors?.map(selector => ({
             id: Math.random().toString(36).substring(2, 9),
-            name: selector.target_element,
-            css: selector.selector_value,
+            name: selector.target_element || selector.name, // Handle both formats
+            css: selector.selector_value || selector.selector, // Handle both formats
             type: selector.type || 'text',
             attribute: selector.attribute || null,
             childSelectors: (selector.childSelectors || []).map(child => ({
                 id: Math.random().toString(36).substring(2, 9),
-                name: child.target_element,
-                selector: child.selector_value,
+                name: child.target_element || child.name, // Handle both formats
+                selector: child.selector_value || child.selector, // Handle both formats
                 type: child.type || 'text',
                 attribute: child.attribute || null
             }))
@@ -324,12 +324,25 @@ const checkDomainConsistency = (urls) => {
 const fetchDomainSelectors = async (domain) => {
     try {
         const response = await axios.get(`${apiUrl.value}/api/selectors/${domain}`)
+        console.log('Raw selectors from backend:', response.data.selectors)
+        
         // Transform the selectors to match the CssSelector component format
         const transformedSelectors = response.data.selectors.map(selector => ({
             id: Math.random().toString(36).substring(2, 9),
-            name: selector.target_element,
-            css: selector.selector_value
+            name: selector.name, // Backend uses 'name', not 'target_element'
+            css: selector.selector, // Backend uses 'selector', not 'selector_value'
+            type: selector.type || 'text',
+            attribute: selector.attribute || null,
+            childSelectors: (selector.childSelectors || []).map(child => ({
+                id: Math.random().toString(36).substring(2, 9),
+                name: child.name, // Backend uses 'name'
+                selector: child.selector, // Backend uses 'selector'
+                type: child.type || 'text',
+                attribute: child.attribute || null
+            }))
         }))
+        console.log('Transformed selectors for frontend:', transformedSelectors)
+        
         localSelectors.value = transformedSelectors
         return {
             domain,
@@ -383,7 +396,16 @@ const addDomainSelectorToCurrent = (selector) => {
         currentSelectors.value.push({
             id: Math.random().toString(36).substring(2, 9),
             name: selector.name,
-            css: selector.css
+            css: selector.css,
+            type: selector.type || 'text',
+            attribute: selector.attribute || null,
+            childSelectors: (selector.childSelectors || []).map(child => ({
+                id: Math.random().toString(36).substring(2, 9),
+                name: child.name,
+                selector: child.selector,
+                type: child.type || 'text',
+                attribute: child.attribute || null
+            }))
         })
     }
 }
@@ -503,6 +525,8 @@ const handleSubmit = async () => {
             })),
             userId: '1'
         }
+
+        console.log('Sending request data:', requestData)
 
         const response = isEditing.value
             ? await axios.put(`${apiUrl.value}/api/updatecrawl/${props.crawlData._id}`, requestData)

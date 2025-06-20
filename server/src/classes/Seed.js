@@ -29,6 +29,8 @@ class Seed {
             console.log('Inside loadHTMLContent() Using Playwright')
             // Launch the browser
             const browser = await chromium.launch()
+            console.log('Browser initialized with proxy');
+
             // Create a new page
             const page = await browser.newPage()
             // Navigate to the target webpage
