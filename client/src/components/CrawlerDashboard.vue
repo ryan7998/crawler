@@ -68,12 +68,23 @@
                     <v-btn
                         block
                         variant="outlined"
+                        color="warning"
+                        class="mb-2"
+                        @click="confirmDeleteCrawlData"
+                        :disabled="!hasCrawlData"
+                    >
+                        <v-icon start icon="mdi-delete-sweep" />
+                        Clear Data
+                    </v-btn>
+                    <v-btn
+                        block
+                        variant="outlined"
                         color="error"
                         class="mb-2"
                         @click="confirmDelete"
                     >
                         <v-icon start icon="mdi-delete" />
-                        Delete
+                        Delete Crawl
                     </v-btn>
                     <v-btn
                         block
@@ -94,6 +105,17 @@
                     <div class="flex justify-between items-center mb-4">
                         <h6 class="text-gray-700 font-semibold">Crawl Details</h6>
                         <div class="flex items-center space-x-4">
+                            <!-- Bulk Delete Button -->
+                            <v-btn
+                                v-if="selectedUrls.length > 0"
+                                variant="outlined"
+                                color="warning"
+                                size="small"
+                                @click="confirmBulkDelete"
+                            >
+                                <v-icon start icon="mdi-delete-sweep" />
+                                Clear Selected ({{ selectedUrls.length }})
+                            </v-btn>
                             <!-- Queue Status -->
                             <div class="text-sm text-gray-600">
                                 <span v-if="queueStatus.total > 0">
@@ -139,6 +161,13 @@
                     <v-table>
                         <thead>
                             <tr>
+                                <th>
+                                    <v-checkbox
+                                        v-model="selectAll"
+                                        @change="toggleSelectAll"
+                                        hide-details
+                                    />
+                                </th>
                                 <th>URL</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -146,6 +175,13 @@
                         </thead>
                         <tbody>
                             <tr v-for="url in crawl.urls" :key="url">
+                                <td>
+                                    <v-checkbox
+                                        v-model="selectedUrls"
+                                        :value="url"
+                                        hide-details
+                                    />
+                                </td>
                                 <td>
                                     {{ excerpts[url]?.excerpt || url }}
                                     <v-btn
@@ -187,6 +223,15 @@
                                     >
                                         View
                                     </v-btn>
+                                    <v-btn
+                                        v-if="hasUrlData(url)"
+                                        variant="text"
+                                        color="warning"
+                                        size="small"
+                                        @click="confirmDeleteUrlData(url)"
+                                    >
+                                        Clear
+                                    </v-btn>
                                     <SlideOver v-if="viewResults[url]" @close-slide-over="onCloseSlideOver(url)">
                                         <template v-slot:title>
                                             {{ crawl.aggregatedData?.[url]?.[crawl.aggregatedData[url].length - 1]?.data?.defaultData?.title || url }}
@@ -214,6 +259,49 @@
             </div>
         </div>
         
+        <!-- Delete Crawl Data Confirmation Modal -->
+        <div v-if="showDeleteDataConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded-lg max-w-md">
+                <h3 class="text-lg font-semibold">Clear Crawl Data</h3>
+                <p>Are you sure you want to clear all crawled data for this crawl? The crawl configuration will remain intact, but all collected data will be deleted.</p>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button @click="deleteCrawlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
+                    <button @click="cancelDeleteData" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete URL Data Confirmation Modal -->
+        <div v-if="showDeleteUrlDataConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded-lg max-w-md">
+                <h3 class="text-lg font-semibold">Clear URL Data</h3>
+                <p>Are you sure you want to clear the crawled data for this URL?</p>
+                <p class="text-sm text-gray-600 mt-2 break-all">{{ urlToDelete }}</p>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button @click="deleteUrlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
+                    <button @click="cancelDeleteUrlData" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Delete Confirmation Modal -->
+        <div v-if="showBulkDeleteConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded-lg max-w-md">
+                <h3 class="text-lg font-semibold">Clear Selected URL Data</h3>
+                <p>Are you sure you want to clear the crawled data for {{ selectedUrls.length }} selected URLs?</p>
+                <div class="max-h-32 overflow-y-auto mt-2">
+                    <p class="text-sm text-gray-600">Selected URLs:</p>
+                    <ul class="text-xs text-gray-500 mt-1">
+                        <li v-for="url in selectedUrls" :key="url" class="break-all">{{ url }}</li>
+                    </ul>
+                </div>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button @click="bulkDeleteUrlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
+                    <button @click="cancelBulkDelete" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Add CreateCrawlModal -->
         <CreateCrawlModal
             v-model="showCreateModal"
@@ -234,7 +322,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, inject } from 'vue'
+import { onMounted, ref, watch, inject, computed } from 'vue'
 import { io } from "socket.io-client"
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
@@ -269,8 +357,28 @@ const showSnackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
 
+// Add delete crawl data refs
+const showDeleteDataConfirm = ref(false)
+const showDeleteUrlDataConfirm = ref(false)
+const urlToDelete = ref('')
+
+// Add bulk delete refs
+const showBulkDeleteConfirm = ref(false)
+const selectedUrls = ref([])
+const selectAll = ref(false)
+
 // Inject the notification function
 const showNotification = inject('showNotification')
+
+// Computed properties
+const hasCrawlData = computed(() => {
+    if (!crawl.value?.aggregatedData) return false
+    return Object.values(crawl.value.aggregatedData).some(urlData => urlData && urlData.length > 0)
+})
+
+const hasUrlData = (url) => {
+    return crawl.value?.aggregatedData?.[url] && crawl.value.aggregatedData[url].length > 0
+}
 
 const openViewResult = (url) => {
     // Set the clicked URL to true in the viewResults object
@@ -521,6 +629,99 @@ const exportToExcel = () => {
     showExportMenu.value = false
     showNotification('Excel file exported successfully', 'success')
 }
+
+// Delete crawl data functions
+const confirmDeleteCrawlData = () => {
+    showDeleteDataConfirm.value = true
+}
+
+const cancelDeleteData = () => {
+    showDeleteDataConfirm.value = false
+}
+
+const deleteCrawlData = async () => {
+    try {
+        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}`)
+        showDeleteDataConfirm.value = false
+        showNotification(`Crawl data cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        await fetchCrawlData() // Refresh the data
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Error clearing crawl data', 'error')
+        showDeleteDataConfirm.value = false
+    }
+}
+
+const confirmDeleteUrlData = (url) => {
+    urlToDelete.value = url
+    showDeleteUrlDataConfirm.value = true
+}
+
+const cancelDeleteUrlData = () => {
+    showDeleteUrlDataConfirm.value = false
+    urlToDelete.value = ''
+}
+
+const deleteUrlData = async () => {
+    try {
+        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}/urls`, {
+            data: {
+                urls: [urlToDelete.value]
+            }
+        })
+        showDeleteUrlDataConfirm.value = false
+        urlToDelete.value = ''
+        showNotification(`URL data cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        await fetchCrawlData() // Refresh the data
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Error clearing URL data', 'error')
+        showDeleteUrlDataConfirm.value = false
+    }
+}
+
+// Bulk delete functions
+const confirmBulkDelete = () => {
+    showBulkDeleteConfirm.value = true
+}
+
+const cancelBulkDelete = () => {
+    showBulkDeleteConfirm.value = false
+    selectedUrls.value = []
+    selectAll.value = false
+}
+
+const bulkDeleteUrlData = async () => {
+    try {
+        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}/urls`, {
+            data: {
+                urls: selectedUrls.value
+            }
+        })
+        showBulkDeleteConfirm.value = false
+        selectedUrls.value = []
+        selectAll.value = false
+        showNotification(`Selected URLs cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        await fetchCrawlData() // Refresh the data
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Error clearing selected URLs', 'error')
+        showBulkDeleteConfirm.value = false
+    }
+}
+
+// Toggle select all
+const toggleSelectAll = () => {
+    if (selectAll.value) {
+        selectedUrls.value = crawl.value.urls
+    } else {
+        selectedUrls.value = []
+    }
+}
+
+// Watch for changes in selectedUrls to update selectAll
+watch(selectedUrls, (newSelectedUrls) => {
+    if (crawl.value?.urls) {
+        selectAll.value = newSelectedUrls.length === crawl.value.urls.length && crawl.value.urls.length > 0
+    }
+}, { deep: true })
 </script>
 
 <style scoped>

@@ -7,7 +7,9 @@ const {
     getCrawler,
     getAllCrawlers,
     checkDomainSelectors,
-    getQueueStatus
+    getQueueStatus,
+    deleteCrawlData,
+    deleteCrawlDataForUrls
 } = require('../controllers/crawlerController')
 const { crawlQueue } = require('../queues/crawlQueue')
 
@@ -21,6 +23,8 @@ router.post('/startcrawl', crawlWebsite)
 router.post('/createcrawler', createCrawler)
 router.put('/updatecrawl/:id', updateCrawler)
 router.delete('/deletecrawl/:id', deleteCrawler)
+router.delete('/deletecrawldata/:id', deleteCrawlData)
+router.delete('/deletecrawldata/:id/urls', deleteCrawlDataForUrls)
 router.get('/queuestatus/:crawlId', getQueueStatus)
 
 module.exports = router

@@ -50,19 +50,60 @@ const { selectors } = require('playwright');
 
             // Clean up
             activeJobs.delete(crawlId)
+            // Clean up crawl-specific throttle
+            crawlThrottles.delete(crawlId)
         }
     }
 
     // Listen for job completion events
     crawlQueue.on('completed', async (job) => {
-        const { crawlId } = job.data
-        await handleJobCompletion(crawlId)
+        try {
+            if (!job || !job.data) {
+                console.log('Job completed but job or job.data is null');
+                return;
+            }
+            const { crawlId } = job.data
+            console.log(`Job ${job.id} completed for crawl ${crawlId}`);
+            await handleJobCompletion(crawlId)
+        } catch (error) {
+            console.error('Error in completed event handler:', error);
+        }
     })
 
     // Listen for job failure events
     crawlQueue.on('failed', async (job, error) => {
-        const { crawlId } = job.data
-        await handleJobCompletion(crawlId)
+        try {
+            if (!job || !job.data) {
+                console.log('Job failed but job or job.data is null');
+                return;
+            }
+            const { crawlId } = job.data
+            console.log(`Job ${job.id} failed for crawl ${crawlId}:`, error.message);
+            await handleJobCompletion(crawlId)
+            // Clean up crawl-specific throttle
+            crawlThrottles.delete(crawlId)
+        } catch (handlerError) {
+            console.error('Error in failed event handler:', handlerError);
+        }
+    })
+
+    // Additional queue event listeners for monitoring
+    crawlQueue.on('error', (error) => {
+        console.error('Queue error:', error);
+    })
+
+    crawlQueue.on('waiting', (jobId) => {
+        console.log(`Job ${jobId} is waiting`);
+    })
+
+    crawlQueue.on('active', (job) => {
+        if (job && job.data) {
+            console.log(`Job ${job.id} is now active for crawl ${job.data.crawlId}`);
+        }
+    })
+
+    crawlQueue.on('stalled', (jobId) => {
+        console.log(`Job ${jobId} has stalled`);
     })
 
     //Connect to MongoDB
@@ -78,21 +119,42 @@ const { selectors } = require('playwright');
     const failedCrawls = []
     const { default: pThrottle } = await import('p-throttle') // Conditionally import throttle for node version
 
-    // Set up throttling
-    const throttle = pThrottle({
-        limit: 1,
-        interval: 2000
-    })
+    // Create crawl-specific throttles to allow concurrent crawls
+    const crawlThrottles = new Map()
 
-    // Process each job in the queue
-    crawlQueue.process(async (job, done) => {
-        console.log('>>> [Worker] received job:', job.id, job.data);
-        const { url, crawlId } = job.data
-        console.log('>>> [Worker] parsed url:', url, 'crawlId:', crawlId);
-        const io = getSocket()
-        console.log('>>> [Worker] socket.io instance available:', !!io);
+    // Function to get or create throttle for a specific crawl
+    const getCrawlThrottle = (crawlId) => {
+        if (!crawlThrottles.has(crawlId)) {
+            crawlThrottles.set(crawlId, pThrottle({
+                limit: 1,
+                interval: 2000
+            }))
+        }
+        return crawlThrottles.get(crawlId)
+    }
 
+    // Process each job in the queue with concurrency
+    crawlQueue.process(10, async (job, done) => {
+        let url, crawlId, io;
+        
         try {
+            if (!job || !job.data) {
+                console.error('Invalid job received:', job);
+                return done(new Error('Invalid job data'));
+            }
+
+            console.log('>>> [Worker] received job:', job.id, job.data);
+            ({ url, crawlId } = job.data);
+            
+            if (!url || !crawlId) {
+                console.error('Missing required job data:', { url, crawlId });
+                return done(new Error('Missing required job data: url or crawlId'));
+            }
+            
+            console.log('>>> [Worker] parsed url:', url, 'crawlId:', crawlId);
+            io = getSocket()
+            console.log('>>> [Worker] socket.io instance available:', !!io);
+
             // Initialize job tracking for this crawl if not exists
             const crawl = await Crawl.findById(crawlId)
             if (!activeJobs.has(crawlId)) {
@@ -112,8 +174,9 @@ const { selectors } = require('playwright');
             }
             // Initialize the seed (load selectors)
             // await seed.initialize()
-            // Fetch the HTML content and extract data
-            const throttled = throttle(async () => await seed.loadHTMLContent())
+            // Fetch the HTML content and extract data using crawl-specific throttle
+            const crawlThrottle = getCrawlThrottle(crawlId)
+            const throttled = crawlThrottle(async () => await seed.loadHTMLContent())
             const cleanHtmlContent = await throttled()
             // console.log('cleanHtmlContent: ', cleanHtmlContent)
             console.log('crawl.selectors: ', crawl.selectors)
@@ -137,7 +200,7 @@ const { selectors } = require('playwright');
             console.error('>>> [Worker] error inside job:', error);
             if (error.response) {
                 // Server responded with a status code out of the 2xx range
-                console.log(`Error: Recieved ${error.response.status} from ${url}`)
+                console.log(`Error: Received ${error.response.status} from ${url}`)
             } else if (error.request) {
                 // No response received (network errors, timeouts, etc.)
                 console.error('Error: No response received, request failed')
@@ -149,11 +212,16 @@ const { selectors } = require('playwright');
             io.to(crawlId).emit('crawlLog', { job: job.id, url, status: 'failed', error: error.message })
             failedCrawls.push({ url: url, message: error.message })
 
-            // Save to database
-            const newCrawlData = new CrawlData({ url: url.url, crawlId, status: 'failed', error: error.message })
+            // Save to database - fix the URL field
+            const newCrawlData = new CrawlData({ 
+                url: url, // Use the url directly, not url.url
+                crawlId, 
+                status: 'failed', 
+                error: error.message 
+            })
             await newCrawlData.save()
 
-            done(new Error(`Failed to crawl: ${url}. Error: ${error}`))
+            done(new Error(`Failed to crawl: ${url}. Error: ${error.message}`))
         }
     })
     server.listen(3002, () => {
