@@ -85,10 +85,10 @@ const showNotification = inject('showNotification')
 
 // Table configuration
 const headers = [
-    { title: 'Title', key: 'title' },
-    { title: 'Status', key: 'status' },
-    { title: 'Created At', key: 'createdAt' },
-    { title: 'Actions', key: 'actions', sortable: false }
+    { title: 'Title', key: 'title', align: 'center' },
+    { title: 'Status', key: 'status', align: 'center' },
+    { title: 'Created At', key: 'createdAt', align: 'center' },
+    { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
 ]
 
 // Vuetify server-side pagination options
