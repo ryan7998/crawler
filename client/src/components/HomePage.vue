@@ -10,15 +10,12 @@
                 New Crawl
             </v-btn>
         </div>
-
-        <v-data-table
+        
+        <v-data-table-server
             :headers="headers"
             :items="crawls"
-            :items-per-page="options.itemsPerPage"
-            :page="options.page"
-            :server-items-length="totalCrawls"
-            :options="options"
-            @update:options="opts => options.value = opts"
+            v-model:options="options"                
+            :items-length="totalCrawls"              
             hover
         >
             <!-- Custom cell for Actions column -->
@@ -57,7 +54,7 @@
             <template v-slot:item.createdAt="{ item }">
                 {{ formatDate(item.updatedAt) }}
             </template>
-        </v-data-table>
+        </v-data-table-server>
 
         <!-- Create/Edit Crawl Modal -->
         <CreateCrawlModal
@@ -94,7 +91,7 @@ const headers = [
 // Vuetify server-side pagination options
 const options = ref({
     page: 1,
-    itemsPerPage: 20,
+    itemsPerPage: 10,
     sortBy: [],
     sortDesc: [],
     groupBy: [],
