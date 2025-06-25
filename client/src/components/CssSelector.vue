@@ -134,7 +134,7 @@ const childSelectorTypes = selectorTypes.filter(type => type.value !== 'containe
 const localSelector = ref({
     id: props.selector.id,
     name: props.selector.name || '',
-    selector: props.selector.css || '',
+    selector: props.selector.css || props.selector.selector || '',
     type: props.selector.type || 'text',
     attribute: props.selector.attribute || null,
     childSelectors: (props.selector.childSelectors || []).map(child => ({
@@ -149,7 +149,7 @@ watch(() => props.selector, (newVal) => {
     localSelector.value = {
         id: newVal.id,
         name: newVal.name || '',
-        selector: newVal.css || '',
+        selector: newVal.css || newVal.selector || '',
         type: newVal.type || 'text',
         attribute: newVal.attribute || null,
         childSelectors: (newVal.childSelectors || []).map(child => ({

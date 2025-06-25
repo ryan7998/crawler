@@ -19,25 +19,41 @@ const extractHtml = async (html, selectors) => {
         }
     }
 
-    // Process each selector
-    for (const selector of selectors) {
-        // Handle both old and new selector formats
+    // Helper function to extract data based on selector type
+    const extractDataByType = (elements, selectorType, attribute) => {
+        switch (selectorType) {
+            case 'text':
+                return elements.text().trim()
+            case 'link':
+                return elements.attr(attribute || 'href')
+            case 'image':
+                return elements.attr(attribute || 'src')
+            case 'table':
+                return elements.map((i, cell) => $(cell).text().trim()).get()
+            case 'list':
+                return elements.map((i, item) => $(item).text().trim()).get()
+            default:
+                return elements.text().trim()
+        }
+    }
+
+    // Helper function to process a single selector
+    const processSelector = (selector, $context = $) => {
         const selectorValue = selector.selector_value || selector.selector
         const elementName = selector.target_element || selector.name
         const selectorType = selector.type || 'text'
         const attribute = selector.attribute
 
-        const elements = $(selectorValue)
+        const elements = $context(selectorValue)
         
         if (elements.length === 0) {
-            result[elementName] = null
-            continue
+            return { [elementName]: null }
         }
 
         // Handle container type selectors with child selectors
         if (selectorType === 'container' && selector.childSelectors) {
-            result[elementName] = elements.map((i, container) => {
-                const containerData = {}
+            const containerData = elements.map((i, container) => {
+                const containerResult = {}
                 const $container = $(container)
 
                 // Process each child selector within the container
@@ -50,55 +66,27 @@ const extractHtml = async (html, selectors) => {
                     const childElements = $container.find(childSelectorValue)
                     
                     if (childElements.length === 0) {
-                        containerData[childElementName] = null
+                        containerResult[childElementName] = null
                         continue
                     }
 
-                    // Extract data based on child selector type
-                    switch (childType) {
-                        case 'text':
-                            containerData[childElementName] = childElements.text().trim()
-                            break
-                        case 'link':
-                            containerData[childElementName] = childElements.attr(childAttribute || 'href')
-                            break
-                        case 'image':
-                            containerData[childElementName] = childElements.attr(childAttribute || 'src')
-                            break
-                        case 'table':
-                            containerData[childElementName] = childElements.map((i, cell) => $(cell).text().trim()).get()
-                            break
-                        case 'list':
-                            containerData[childElementName] = childElements.map((i, item) => $(item).text().trim()).get()
-                            break
-                        default:
-                            containerData[childElementName] = childElements.text().trim()
-                    }
+                    containerResult[childElementName] = extractDataByType(childElements, childType, childAttribute)
                 }
-                return containerData
+                return containerResult
             }).get()
+
+            return { [elementName]: containerData }
         } else {
             // Handle regular selectors
-            switch (selectorType) {
-                case 'text':
-                    result[elementName] = elements.text().trim()
-                    break
-                case 'link':
-                    result[elementName] = elements.attr(attribute || 'href')
-                    break
-                case 'image':
-                    result[elementName] = elements.attr(attribute || 'src')
-                    break
-                case 'table':
-                    result[elementName] = elements.map((i, cell) => $(cell).text().trim()).get()
-                    break
-                case 'list':
-                    result[elementName] = elements.map((i, item) => $(item).text().trim()).get()
-                    break
-                default:
-                    result[elementName] = elements.text().trim()
-            }
+            const extractedData = extractDataByType(elements, selectorType, attribute)
+            return { [elementName]: extractedData }
         }
+    }
+
+    // Process each selector
+    for (const selector of selectors) {
+        const selectorResult = processSelector(selector)
+        Object.assign(result, selectorResult)
     }
 
     return result

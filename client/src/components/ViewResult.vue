@@ -1,6 +1,12 @@
 <template>
     <div class="pa-4">
-        <template v-if="tableData.length">
+        <!-- Handle error message case -->
+        <v-alert v-if="typeof props.data === 'string'" type="error" class="mb-4">
+            {{ props.data }}
+        </v-alert>
+        
+        <!-- Handle normal data case -->
+        <template v-else-if="tableData.length">
             <h3 class="text-h6 mb-4">Crawl History</h3>
             <v-table>
                 <thead>
@@ -28,6 +34,8 @@
                 </tbody>
             </v-table>
         </template>
+        
+        <!-- Handle no data case -->
         <v-alert v-else type="info" class="mt-4">
             No crawl data available
         </v-alert>
@@ -54,11 +62,17 @@ const formatKey = (key) => {
 
 // Get all unique keys from all data objects
 const allKeys = computed(() => {
-    if (!props.data || !Array.isArray(props.data)) return []
+    if (!props.data) return []
+    
+    // Handle case where data is a string (error message)
+    if (typeof props.data === 'string') return []
+    
+    // Handle case where data is not an array
+    if (!Array.isArray(props.data)) return []
     
     const keys = new Set()
     props.data.forEach(item => {
-        if (item.data) {
+        if (item && item.data && typeof item.data === 'object') {
             Object.keys(item.data).forEach(key => keys.add(key))
         }
     })
@@ -67,7 +81,13 @@ const allKeys = computed(() => {
 
 // Transform data into table format
 const tableData = computed(() => {
-    if (!props.data || !Array.isArray(props.data)) return []
+    if (!props.data) return []
+    
+    // Handle case where data is a string (error message)
+    if (typeof props.data === 'string') return []
+    
+    // Handle case where data is not an array
+    if (!Array.isArray(props.data)) return []
     
     return props.data.map(item => ({
         date: item.date,
