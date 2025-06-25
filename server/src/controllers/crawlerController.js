@@ -197,7 +197,8 @@ const getAllCrawlers = async (req, res) => {
         res.status(200).json({
             page,
             totalPages: Math.ceil(totalCrawls / limit),
-            crawls
+            crawls,
+            totalCrawls
         })
     } catch (error) {
         console.error('Error fetching all crawls: ', error.message)

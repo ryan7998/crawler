@@ -9,15 +9,16 @@
                 <v-icon start icon="mdi-plus" />
                 New Crawl
             </v-btn>
-    </div>
+        </div>
 
         <v-data-table
             :headers="headers"
             :items="crawls"
-            :items-per-page="limit"
-            :page="currentPage"
-            :server-items-length="totalPages * limit"
-            @update:page="goToPage"
+            :items-per-page="options.itemsPerPage"
+            :page="options.page"
+            :server-items-length="totalCrawls"
+            :options="options"
+            @update:options="opts => options.value = opts"
             hover
         >
             <!-- Custom cell for Actions column -->
@@ -68,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue'
+import { ref, onMounted, inject, watch } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCrawlStore } from '../stores/crawlStore'
@@ -90,10 +91,18 @@ const headers = [
     { title: 'Actions', key: 'actions', sortable: false }
 ]
 
-// Pagination
-const currentPage = ref(1)
-const limit = 10
-const totalPages = ref(1)
+// Vuetify server-side pagination options
+const options = ref({
+    page: 1,
+    itemsPerPage: 20,
+    sortBy: [],
+    sortDesc: [],
+    groupBy: [],
+    groupDesc: [],
+    multiSort: false,
+    mustSort: false,
+})
+const totalCrawls = ref(0)
 const crawls = ref([])
 
 // Modal state
@@ -106,22 +115,20 @@ const formatDate = (date) => {
 }
 
 // Fetch crawls with pagination
-const fetchCrawls = async (page = 1) => {
+const fetchCrawls = async () => {
     try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL || 'http://localhost:3001'}/api/getallcrawlers?page=${page}&limit=${limit}`)
+        const { page, itemsPerPage } = options.value
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL || 'http://localhost:3001'}/api/getallcrawlers?page=${page}&limit=${itemsPerPage}`)
         crawls.value = response.data.crawls
-        totalPages.value = response.data.totalPages
+        totalCrawls.value = response.data.totalCrawls
     } catch (error) {
         console.error('Error fetching crawls:', error)
         showNotification('Error fetching crawls', 'error')
     }
 }
 
-// Handle page changes
-const goToPage = (page) => {
-    currentPage.value = page
-    fetchCrawls(page)
-}
+// Watch for changes in options to fetch data
+watch(options, fetchCrawls, { deep: true })
 
 // Open create modal
 const openCreateModal = () => {
@@ -137,7 +144,7 @@ const openEditModal = (crawl) => {
 
 // Handle crawl creation/update
 const handleCrawlCreated = (crawl) => {
-    fetchCrawls(currentPage.value)
+    fetchCrawls()
     if (crawl._id) {
         showNotification('Crawl created successfully', 'success')
         router.push({ name: 'CrawlerDashboard', params: { crawlId: crawl._id } })
