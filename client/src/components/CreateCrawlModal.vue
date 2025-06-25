@@ -204,25 +204,28 @@ import { ref, computed, watch, inject } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import CssSelector from './CssSelector.vue'
+import { getApiUrl, isValidUrl } from '../utils/commonUtils'
+
+const emit = defineEmits(['update:modelValue', 'crawl-created'])
 
 const props = defineProps({
-    modelValue: Boolean,
+    modelValue: {
+        type: Boolean,
+        default: false
+    },
     crawlData: {
         type: Object,
         default: null
     }
 })
 
-const emit = defineEmits(['update:modelValue', 'crawl-created', 'error'])
-
-// Computed properties
 const dialog = computed({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value)
 })
 
 const isEditing = computed(() => !!props.crawlData)
-const apiUrl = computed(() => import.meta.env.VITE_BASE_URL || 'http://localhost:3001')
+const apiUrl = computed(() => getApiUrl())
 
 // Refs
 const router = useRouter()
@@ -280,16 +283,6 @@ watch(() => dialog.value, (newVal) => {
         initializeForm()
     }
 })
-
-// URL validation
-const isValidUrl = (url) => {
-    try {
-        new URL(url)
-        return true
-    } catch {
-        return false
-    }
-}
 
 // Parse URLs from text
 const parseUrls = (text) => {
