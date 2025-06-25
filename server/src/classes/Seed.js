@@ -43,19 +43,52 @@ class Seed {
                         '--no-zygote',
                         '--disable-gpu',
                         '--disable-web-security',
-                        '--disable-features=VizDisplayCompositor'
+                        '--disable-features=VizDisplayCompositor',
+                        '--disable-blink-features=AutomationControlled',
+                        '--disable-extensions',
+                        '--disable-plugins',
+                        '--disable-images',
+                        '--disable-javascript',
+                        '--disable-background-timer-throttling',
+                        '--disable-backgrounding-occluded-windows',
+                        '--disable-renderer-backgrounding',
+                        '--disable-field-trial-config',
+                        '--disable-ipc-flooding-protection'
                     ]
                 });
                 // console.log('Browser initialized with proxy');
 
-                // Create a new context with user agent
+                // Create a new context with user agent and additional settings
                 const context = await browser.newContext({
                     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    viewport: { width: 1920, height: 1080 }
+                    viewport: { width: 1920, height: 1080 },
+                    ignoreHTTPSErrors: true,
+                    bypassCSP: true,
+                    extraHTTPHeaders: {
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Accept-Encoding': 'gzip, deflate, br',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache',
+                        'Sec-Fetch-Dest': 'document',
+                        'Sec-Fetch-Mode': 'navigate',
+                        'Sec-Fetch-Site': 'none',
+                        'Sec-Fetch-User': '?1',
+                        'Upgrade-Insecure-Requests': '1'
+                    }
                 });
 
                 // Create a new page
                 const page = await context.newPage()
+                
+                // Add page-level error handling
+                page.on('error', (err) => {
+                    console.log('Page error:', err.message);
+                });
+                
+                page.on('pageerror', (err) => {
+                    console.log('Page error:', err.message);
+                });
                 
                 // Add extra headers for Amazon
                 if (this.hostname && this.hostname.includes('amazon')) {
@@ -72,14 +105,15 @@ class Seed {
                     }
                 }
                 
-                // Navigate to the target webpage with increased timeout
+                // Navigate to the target webpage with increased timeout and different wait strategy
+                console.log(`Attempting to navigate to: ${this.url}`);
                 await page.goto(this.url, { 
-                    waitUntil: 'domcontentloaded',
-                    timeout: 60000 
+                    waitUntil: 'networkidle',
+                    timeout: 90000 
                 });
                 
                 // Wait a bit for dynamic content to load
-                await page.waitForTimeout(3000);
+                await page.waitForTimeout(5000);
                 
                 // For Amazon, wait for specific elements to load
                 if (this.hostname && this.hostname.includes('amazon')) {
@@ -118,7 +152,12 @@ class Seed {
                 return this.cleanHtmlContent
 
             } catch (err) {
-                console.error(`Error in loadHTMLContent (attempt ${attempt}):`, err);
+                console.error(`Error in loadHTMLContent (attempt ${attempt}):`, err.message);
+                console.error('Call log:');
+                console.error(`  - navigating to "${this.url}", waiting until "networkidle"`);
+                console.error('');
+                console.error(`    at Seed.loadHTMLContent (${__filename}:${err.stack ? err.stack.split('\n')[1].split(':')[1] : 'unknown'})`);
+                console.error(`    at async ${err.stack ? err.stack.split('\n')[2] : 'unknown'}`);
                 
                 // Close browser before retry
                 if (browser) {
@@ -135,9 +174,10 @@ class Seed {
                     throw new Error(`Unable to load Content after ${maxRetries} attempts: ${err.message}`)
                 }
                 
-                // Wait before retry
-                console.log(`Retrying in ${attempt * 2} seconds...`);
-                await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+                // Wait before retry with exponential backoff
+                const waitTime = Math.min(attempt * 3000, 15000); // Max 15 seconds
+                console.log(`Retrying in ${waitTime/1000} seconds...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
             }
         }
     }

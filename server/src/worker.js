@@ -155,6 +155,11 @@ const { selectors } = require('playwright');
             io = getSocket()
             console.log('>>> [Worker] socket.io instance available:', !!io);
 
+            // Add random delay to avoid detection (1-3 seconds)
+            const randomDelay = Math.floor(Math.random() * 2000) + 1000;
+            console.log(`>>> [Worker] waiting ${randomDelay}ms before processing...`);
+            await new Promise(resolve => setTimeout(resolve, randomDelay));
+
             // Initialize job tracking for this crawl if not exists
             const crawl = await Crawl.findById(crawlId)
             if (!activeJobs.has(crawlId)) {
