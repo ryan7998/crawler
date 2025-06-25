@@ -42,14 +42,14 @@
                                 <v-icon icon="mdi-clock-start" />
                             </template>
                             <v-list-item-title>Start Time</v-list-item-title>
-                            <v-list-item-subtitle>{{ formatTime(crawl.startTime) }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>{{ formatDateTime(crawl.startTime) }}</v-list-item-subtitle>
                         </v-list-item>
                         <v-list-item>
                             <template v-slot:prepend>
                                 <v-icon icon="mdi-clock-end" />
                             </template>
                             <v-list-item-title>End Time</v-list-item-title>
-                            <v-list-item-subtitle>{{ formatTime(crawl.endTime) }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>{{ formatDateTime(crawl.endTime) }}</v-list-item-subtitle>
                         </v-list-item>
                     </v-list>
                 </div>
@@ -331,12 +331,13 @@ import ViewResult from './ViewResult.vue'
 import { useExcerpts } from '../composables/useExcerpts'
 import SlideOver from './SlideOver.vue'
 import { getStatusColor } from '../utils/statusUtils'
+import { getApiUrl, getSocketUrl, formatDateTime } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import * as XLSX from 'xlsx'
 
-const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
-const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
-const socketUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3002'
+const baseUrl = getApiUrl()
+const apiUrl = getApiUrl()
+const socketUrl = getSocketUrl()
 const logs = ref([])  // Reactive state for successful crawl results
 const socket = ref()  // Ref for the socket instance
 const route = useRoute()  // Access the crawl ID from the URL
@@ -388,12 +389,6 @@ const openViewResult = (url) => {
 const onCloseSlideOver = (url) => {
     // Set the clicked URL to false to close the ViewResult component
     viewResults.value = { ...viewResults.value, [url]: false }
-}
-
-// Function to format time
-const formatTime = (time) => {
-    if (!time) return 'N/A'
-    return new Date(time).toLocaleString()
 }
 
 // Function to fetch crawl data from the server

@@ -71,6 +71,7 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
+import { formatDate, getApiUrl } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 
 // Initialize Pinia store
@@ -106,16 +107,11 @@ const crawls = ref([])
 const showModal = ref(false)
 const selectedCrawl = ref(null)
 
-// Format date for display
-const formatDate = (date) => {
-    return new Date(date).toLocaleDateString()
-}
-
 // Fetch crawls with pagination
 const fetchCrawls = async () => {
     try {
         const { page, itemsPerPage } = options.value
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL || 'http://localhost:3001'}/api/getallcrawlers?page=${page}&limit=${itemsPerPage}`)
+        const response = await axios.get(`${getApiUrl()}/api/getallcrawlers?page=${page}&limit=${itemsPerPage}`)
         crawls.value = response.data.crawls
         totalCrawls.value = response.data.totalCrawls
     } catch (error) {

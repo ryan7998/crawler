@@ -17,7 +17,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="row in tableData" :key="row.date">
-                        <td>{{ formatDate(row.date) }}</td>
+                        <td>{{ formatDateTime(row.date) }}</td>
                         <td v-for="key in allKeys" :key="key">
                             <template v-if="Array.isArray(row.data[key])">
                                 <v-list>
@@ -44,13 +44,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { formatDateTime } from '../utils/commonUtils'
 
 const props = defineProps(['data'])
-
-// Format date to readable string
-const formatDate = (date) => {
-    return new Date(date).toLocaleString()
-}
 
 // Format key to readable string
 const formatKey = (key) => {
