@@ -88,6 +88,12 @@ class Seed {
                     } catch (selectorError) {
                         console.log('Amazon product title selector not found, continuing...');
                     }
+                } else if(this.hostname && this.hostname.includes('adgarcanada')) {
+                    // try {
+                    //     await page.waitForSelector('#vacancy_table table tbody tr', { timeout: 50000 });
+                    // } catch (selectorError) {
+                    //     console.log('adgarcanada product title selector not found, continuing...');
+                    // }
                 }
                 
                 // Take a screenshot of the page
