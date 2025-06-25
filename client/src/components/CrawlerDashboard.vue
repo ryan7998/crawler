@@ -548,6 +548,67 @@ const handleModalError = (errorMessage) => {
     snackbarColor.value = 'error'
 }
 
+// Function to format selectors for better readability in exports
+const formatSelectors = (selectors) => {
+    if (!selectors || !Array.isArray(selectors)) return ''
+    
+    return selectors.map(selector => {
+        if (typeof selector === 'string') {
+            return selector
+        } else if (typeof selector === 'object' && selector !== null) {
+            // Format selector object
+            const parts = []
+            if (selector.name) parts.push(`Name: ${selector.name}`)
+            if (selector.selector) parts.push(`Selector: ${selector.selector}`)
+            if (selector.attribute) parts.push(`Attribute: ${selector.attribute}`)
+            if (selector.type) parts.push(`Type: ${selector.type}`)
+            return parts.join(' | ')
+        }
+        return String(selector)
+    }).join('; ')
+}
+
+// Function to flatten nested objects and arrays for export
+const flattenObject = (obj, prefix = '') => {
+    const flattened = {}
+    
+    for (const [key, value] of Object.entries(obj)) {
+        const newKey = prefix ? `${prefix}_${key}` : key
+        
+        if (value === null || value === undefined) {
+            flattened[newKey] = ''
+        } else if (key === 'selectors' && Array.isArray(value)) {
+            // Special handling for selectors
+            flattened[newKey] = formatSelectors(value)
+        } else if (typeof value === 'object' && !Array.isArray(value)) {
+            // Recursively flatten nested objects
+            Object.assign(flattened, flattenObject(value, newKey))
+        } else if (Array.isArray(value)) {
+            // Handle arrays - join with semicolon or flatten if objects
+            if (value.length === 0) {
+                flattened[newKey] = ''
+            } else if (typeof value[0] === 'object' && value[0] !== null) {
+                // If array contains objects, flatten them
+                const flattenedArray = value.map((item, index) => {
+                    if (typeof item === 'object' && item !== null) {
+                        return flattenObject(item, `${newKey}_${index + 1}`)
+                    }
+                    return item
+                })
+                Object.assign(flattened, ...flattenedArray)
+            } else {
+                // Simple array - join with semicolon
+                flattened[newKey] = value.join('; ')
+            }
+        } else {
+            // Simple value
+            flattened[newKey] = value
+        }
+    }
+    
+    return flattened
+}
+
 // Function to prepare data for export
 const prepareExportData = () => {
     const exportData = []
@@ -565,11 +626,10 @@ const prepareExportData = () => {
                 'Status': entry.status
             }
 
-            // Add data if available
+            // Add data if available - flatten nested objects
             if (entry.data) {
-                Object.entries(entry.data).forEach(([key, value]) => {
-                    row[key] = Array.isArray(value) ? value.join(', ') : value
-                })
+                const flattenedData = flattenObject(entry.data)
+                Object.assign(row, flattenedData)
             }
 
             exportData.push(row)
@@ -598,8 +658,17 @@ const exportToCSV = () => {
         headers.join(','),
         ...data.map(row => headers.map(header => {
             const value = row[header]
-            // Escape commas and quotes in the value
-            return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
+            // Convert all values to strings and escape properly
+            let stringValue = ''
+            if (value === null || value === undefined) {
+                stringValue = ''
+            } else if (typeof value === 'object') {
+                stringValue = JSON.stringify(value)
+            } else {
+                stringValue = String(value)
+            }
+            // Escape commas, quotes, and newlines in the value
+            return `"${stringValue.replace(/"/g, '""').replace(/\n/g, ' ').replace(/\r/g, ' ')}"`
         }).join(','))
     ].join('\n')
 
