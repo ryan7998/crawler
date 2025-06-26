@@ -1,222 +1,247 @@
 (async () => {
-const express = require('express')
-const http = require('http')
-const mongoose = require('mongoose');
-const CrawlData = require('./models/CrawlData')
-const Crawl = require('./models/Crawl')
-const { extractHtml } = require('../utils/helperFunctions')
-const crawlQueue = require('./queues/crawlQueue')
-const { initializeSocket, getSocket } = require('../utils/socket')
+     // load the ES module exactly once
+const { default: pThrottle } = await import('p-throttle');
+const express         = require('express');
+const http            = require('http');
+const mongoose        = require('mongoose');
+const CrawlData       = require('./models/CrawlData');
+const Crawl           = require('./models/Crawl');
+const { extractHtml } = require('../utils/helperFunctions');
+const getCrawlQueue   = require('./queues/getCrawlQueue');
+const { initializeSocket, getSocket } = require('../utils/socket');
+const Seed            = require('./classes/Seed');
+require('dotenv').config();
 
-const Seed = require('./classes/Seed')
-require('dotenv').config()
+// —————————————— APP & SOCKET.IO SETUP ——————————————
+const app    = express();
+const server = http.createServer(app);
+initializeSocket(server);
 
-const app = express()
-
-// Create HTTP server and pass it to socket.io
-const server = http.createServer(app)
-// Initialize Socket.io
-initializeSocket(server)
-
-// Track active jobs for each crawl
-const activeJobs = new Map()
-
-// Shared function to handle job completion/failure
-const handleJobCompletion = async (crawlId) => {
-    if (!activeJobs.has(crawlId)) return
-
-    const jobs = activeJobs.get(crawlId)
-    jobs.completed++
-    // If all jobs are completed
-    if (jobs.completed === jobs.total) {
-        // Get all CrawlData for this crawl
-        const allCrawlData = await CrawlData.find({ crawlId })
-        const hasFailures = allCrawlData.some(data => data.status === 'failed')
-        // Update crawl status
-        await Crawl.findByIdAndUpdate(crawlId, {
-            status: hasFailures ? 'failed' : 'completed',
-            endTime: new Date()
-        })
-
-        // Emit final status
-        const io = getSocket()
-        io.to(String(crawlId)).emit('crawlLog', {
-            status: hasFailures ? 'failed' : 'completed',
-            message: hasFailures ? 'Some URLs failed to crawl' : 'All URLs crawled successfully'
-        })
-
-        // Clean up
-        activeJobs.delete(crawlId)
-        // Clean up crawl-specific throttle
-        crawlThrottles.delete(crawlId)
-    }
-}
-
-// Listen for job completion events
-crawlQueue.on('completed', async (job) => {
-    try {
-        if (!job || !job.data) {
-            console.log('Job completed but job or job.data is null');
-            return;
-        }
-        const { crawlId } = job.data
-        console.log(`Job ${job.id} completed for crawl ${crawlId}`);
-        await handleJobCompletion(crawlId)
-    } catch (error) {
-        console.error('Error in completed event handler:', error);
-    }
-})
-
-// Listen for job failure events
-crawlQueue.on('failed', async (job, error) => {
-    try {
-        if (!job || !job.data) {
-            console.log('Job failed but job or job.data is null');
-            return;
-        }
-        const { crawlId } = job.data
-        console.log(`Job ${job.id} failed for crawl ${crawlId}:`, error.message);
-        await handleJobCompletion(crawlId)
-        // Clean up crawl-specific throttle
-        crawlThrottles.delete(crawlId)
-    } catch (handlerError) {
-        console.error('Error in failed event handler:', handlerError);
-    }
-})
-
-// Additional queue event listeners for monitoring
-crawlQueue.on('error', (error) => {
-    console.error('Queue error:', error);
-})
-
-crawlQueue.on('waiting', (jobId) => {
-    console.log(`Job ${jobId} is waiting`);
-})
-
-crawlQueue.on('active', (job) => {
-    if (job && job.data) {
-        console.log(`Job ${job.id} is now active for crawl ${job.data.crawlId}`);
-    }
-})
-
-crawlQueue.on('stalled', (jobId) => {
-    console.log(`Job ${jobId} has stalled`);
-})
-
-//Connect to MongoDB
+// —————————————— MONGODB SETUP ——————————————
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+  useNewUrlParser:    true,
+  useUnifiedTopology: true,
 })
-    .then(() => console.log('MongoDB connected'))
-    .catch((err) => console.log(err))
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-const { default: pThrottle } = await import('p-throttle')
+// —————————————— PER-CRAWL PROCESSORS ——————————————
+const activeProcessors = new Set();
+const activeJobs       = new Map();
+const crawlThrottles   = new Map();
 
-// Create crawl-specific throttles to allow concurrent crawls
-const crawlThrottles = new Map()
-
-// Function to get or create throttle for a specific crawl
-const getCrawlThrottle = (crawlId) => {
-    if (!crawlThrottles.has(crawlId)) {
-        crawlThrottles.set(crawlId, pThrottle({
-            limit: 1,
-            interval: 2000
-        }))
-    }
-    return crawlThrottles.get(crawlId)
+// Helper to get a p-Throttle for each crawl
+function getThrottle(crawlId) {
+  if (!crawlThrottles.has(crawlId)) {
+    // 1 request per 2 s; you can tune these
+    crawlThrottles.set(crawlId, pThrottle({ limit: 1, interval: 2000 }));
+  }
+  return crawlThrottles.get(crawlId);
 }
 
-// Process each job in the queue with concurrency
-crawlQueue.process(10, async (job, done) => {
-    let url, crawlId, io;
+// Cleanup function for completed crawls
+function cleanupCrawl(crawlId) {
+  activeJobs.delete(crawlId);
+  crawlThrottles.delete(crawlId);
+  activeProcessors.delete(crawlId);
+  console.log(`🧹 Cleaned up crawl ${crawlId}`);
+}
+
+// Called once per crawlId to wire up its queue
+function ensureProcessor(crawlId) {
+  if (activeProcessors.has(crawlId)) {
+    console.log(`[${crawlId}] Processor already exists, skipping...`);
+    return;
+  }
+  activeProcessors.add(crawlId);
+
+  const q = getCrawlQueue(crawlId);
+  const io = getSocket();
+  const crawlIdStr = String(crawlId); // Ensure crawlId is a string for socket rooms
+
+  console.log(`[${crawlId}] Setting up processor...`);
+
+  // Track how many URLs this crawl has in total
+  Crawl.findById(crawlId).then(crawlDoc => {
+    activeJobs.set(crawlId, { total: crawlDoc.urls.length, completed: 0 });
+    console.log(`[${crawlId}] Tracking ${crawlDoc.urls.length} URLs`);
+  }).catch(console.error);
+
+  // Listen for completions & failures to update crawl status
+  q.on('completed', async job => {
+    const state = activeJobs.get(crawlId);
+    if (!state) return;
+    state.completed++;
+    console.log(`[${crawlId}] Job ${job.id} completed. Progress: ${state.completed}/${state.total}`);
+    
+    if (state.completed === state.total) {
+      const allData = await CrawlData.find({ crawlId });
+      const hasFail = allData.some(d => d.status === 'failed');
+      await Crawl.findByIdAndUpdate(crawlId, {
+        status:  hasFail ? 'failed' : 'completed',
+        endTime: new Date()
+      });
+      io.to(crawlIdStr).emit('crawlLog', {
+        status:  hasFail ? 'failed' : 'completed',
+        message: hasFail ? 'Some URLs failed' : 'All URLs done'
+      });
+      cleanupCrawl(crawlId);
+    }
+  });
+
+  // Listen for failed jobs
+  q.on('failed', async (job, err) => {
+    console.log(`[${crawlId}] Job ${job.id} failed with error:`, err.message);
+    const state = activeJobs.get(crawlId);
+    if (!state) return;
+    state.completed++;
+    console.log(`[${crawlId}] Job ${job.id} failed. Progress: ${state.completed}/${state.total}`);
+    
+    if (state.completed === state.total) {
+      const allData = await CrawlData.find({ crawlId });
+      const hasFail = allData.some(d => d.status === 'failed');
+      await Crawl.findByIdAndUpdate(crawlId, {
+        status:  hasFail ? 'failed' : 'completed',
+        endTime: new Date()
+      });
+      io.to(crawlIdStr).emit('crawlLog', {
+        status:  hasFail ? 'failed' : 'completed',
+        message: hasFail ? 'Some URLs failed' : 'All URLs done'
+      });
+      cleanupCrawl(crawlId);
+    }
+  });
+
+  // Now process up to N jobs in parallel for this crawl
+  const CONCURRENCY = parseInt(process.env.CRAWL_CONCURRENCY || '3', 10);
+  q.process(CONCURRENCY, async (job) => {
+    if (!job || !job.data || !job.data.url) {
+      console.error(`[${crawlId}] Invalid job data:`, job);
+      throw new Error('Invalid job data');
+    }
+    
+    const { url } = job.data;
+    console.log(`[${crawlId}] Processing job ${job.id} for URL: ${url}`);
     
     try {
-        if (!job || !job.data) {
-            console.error('Invalid job received:', job);
-            return done(new Error('Invalid job data'));
-        }
+      console.log(`[${crawlId}] Job ${job.id} started: ${url}`);
+      io.to(crawlIdStr).emit('crawlLog', { jobId: job.id, url, status: 'started' });
 
-        console.log('>>> [Worker] received job:', job.id, job.data);
-        ({ url, crawlId } = job.data);
-        
-        if (!url || !crawlId) {
-            console.error('Missing required job data:', { url, crawlId });
-            return done(new Error('Missing required job data: url or crawlId'));
-        }
-        
-        console.log('>>> [Worker] parsed url:', url, 'crawlId:', crawlId);
-        io = getSocket()
-        console.log('>>> [Worker] socket.io instance available:', !!io);
+      // random anti-detection delay
+      await new Promise(r => setTimeout(r, 1000 + Math.random()*2000));
 
-        // Add random delay to avoid detection (1-3 seconds)
-        const randomDelay = Math.floor(Math.random() * 2000) + 1000;
-        console.log(`>>> [Worker] waiting ${randomDelay}ms before processing...`);
-        await new Promise(resolve => setTimeout(resolve, randomDelay));
+      // Playwright or axios fetch
+      const seed = new Seed({ url });
+      if (!seed.isValid()) throw new Error(`Invalid URL: ${url}`);
 
-        // Initialize job tracking for this crawl if not exists
-        const crawl = await Crawl.findById(crawlId)
-        if (!activeJobs.has(crawlId)) {
-            activeJobs.set(crawlId, {
-                total: crawl.urls.length,
-                completed: 0
-            })
-        }
+      const crawlThrottle = getThrottle(crawlId)
+      const throttled = crawlThrottle(async () => await seed.loadHTMLContent())
+      const html = await throttled()
+      console.log(`[${crawlId}] Loaded HTML content for ${url}`);
+      const data = await extractHtml(html, (await Crawl.findById(crawlId)).selectors);
 
-        // Emit crawlLog event to be captured in FE log
-        io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'started' })
-        console.log(`>>> [Worker] emitted 'started' for job ${job.id}`);
+      // Save to database
+      const newCrawlData = new CrawlData({ url, data, crawlId, status: 'success' })
+      await newCrawlData.save()
 
-        const seed = new Seed({ url })
-        if (!seed.isValid()) {
-            throw new Error(`Invalid URL: ${seed.url}`)
-        }
-        // Initialize the seed (load selectors)
-        // await seed.initialize()
-        // Fetch the HTML content and extract data using crawl-specific throttle
-        const crawlThrottle = getCrawlThrottle(crawlId)
-        const throttled = crawlThrottle(async () => await seed.loadHTMLContent())
-        const cleanHtmlContent = await throttled()
-        // console.log('cleanHtmlContent: ', cleanHtmlContent)
-        console.log('crawl.selectors: ', crawl.selectors)
-        const extractedDatum = await extractHtml(cleanHtmlContent, crawl.selectors)
-        // extractedData.push(extractedDatum)
+      io.to(crawlIdStr).emit('crawlLog', {
+        jobId: job.id,
+        url,
+        status: 'success',
+        result: data
+      });
+      console.log(`[${crawlId}] Job ${job.id} succeeded`);
+      return data;
 
-        io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'saving' })
-        // Save to database
-        const newCrawlData = new CrawlData({ url: seed.url, data: extractedDatum, crawlId, status: 'success' })
-        // console.log('newCrawl: ', newCrawlData.data.title)
-        await newCrawlData.save()
-
-        // Emit event to clients when the crawl is completed
-        io.to(String(crawlId)).emit('crawlLog', { jobId: job.id, url, status: 'success', result: extractedDatum })
-
-        console.log(`Successfully crawled: ${seed.url}, Crawl Id: ${crawlId}, extractedDatum: ${extractedDatum}`)
-        done(null, extractedDatum)
-        // done(null)
-
-    } catch (error) {
-        console.error('>>> [Worker] error inside job:', error);
-        
-        // Ensure error message is a proper string
-        const errorMessage = typeof error.message === 'string' ? error.message : String(error.message || error)
-        
-        const io = getSocket()
-        io.to(crawlId).emit('crawlLog', { job: job.id, url, status: 'failed', error: errorMessage })
-
-        // Save to database
-        const newCrawlData = new CrawlData({ 
-            url: url,
-            crawlId, 
-            status: 'failed', 
-            error: errorMessage 
-        })
-        await newCrawlData.save()
-
-        done(new Error(`Failed to crawl: ${url}. Error: ${errorMessage}`))
+    } catch (err) {
+      const msg = err.message || String(err);
+      console.error(`[${crawlId}] Job ${job.id} failed:`, msg);
+      io.to(crawlIdStr).emit('crawlLog', {
+        jobId: job.id,
+        url,
+        status: 'failed',
+        error: msg
+      });
+      // save failure
+      await new CrawlData({ url, crawlId, status: 'failed', error: msg }).save();
+      console.log(`[${crawlId}] Job ${job.id} marked as failed and saved to database`);
+      throw err;
     }
-})
-server.listen(3002, () => {
-    console.log('Worker server is running on port 3002');
+  });
+
+  console.log(`📡 Processor started for crawl ${crawlId} (concurrency=${CONCURRENCY})`);
+}
+
+// —————————————— OPTIONAL: HTTP ENDPOINT TO START A PROCESSOR ——————————————
+// If you'd like to trigger this from your controller via an HTTP call:
+app.post('/processor/:crawlId', (req, res) => {
+    const { crawlId } = req.params;
+    try {
+      ensureProcessor(crawlId);
+      return res.json({ message: `Processor ensured for ${crawlId}` });
+    } catch (err) {
+      console.error('Error ensuring processor:', err);
+      return res.status(500).json({ error: err.message });
+    }
 });
+
+// Debug endpoint to check queue status
+app.get('/queue-status/:crawlId', async (req, res) => {
+    const { crawlId } = req.params;
+    try {
+      const q = getCrawlQueue(crawlId);
+      const waiting = await q.getJobs(['waiting']);
+      const active = await q.getJobs(['active']);
+      const completed = await q.getJobs(['completed']);
+      const failed = await q.getJobs(['failed']);
+      
+      return res.json({
+        crawlId,
+        waiting: waiting.length,
+        active: active.length,
+        completed: completed.length,
+        failed: failed.length,
+        total: waiting.length + active.length + completed.length + failed.length,
+        activeJobs: activeProcessors.has(crawlId),
+        jobDetails: {
+          waiting: waiting.map(j => ({ id: j.id, url: j.data.url })),
+          active: active.map(j => ({ id: j.id, url: j.data.url })),
+          failed: failed.map(j => ({ id: j.id, url: j.data.url, error: j.failedReason }))
+        }
+      });
+    } catch (err) {
+      console.error('Error checking queue status:', err);
+      return res.status(500).json({ error: err.message });
+    }
+});
+
+// Debug endpoint to clear all jobs for a crawl
+app.delete('/queue-clear/:crawlId', async (req, res) => {
+    const { crawlId } = req.params;
+    try {
+      const q = getCrawlQueue(crawlId);
+      const waiting = await q.getJobs(['waiting', 'active', 'delayed', 'failed']);
+      
+      for (const job of waiting) {
+        await job.remove();
+      }
+      
+      cleanupCrawl(crawlId);
+      
+      return res.json({ 
+        message: `Cleared ${waiting.length} jobs for crawl ${crawlId}`,
+        clearedJobs: waiting.length
+      });
+    } catch (err) {
+      console.error('Error clearing queue:', err);
+      return res.status(500).json({ error: err.message });
+    }
+});
+
+// —————————————— LAUNCH ——————————————
+const PORT = parseInt(process.env.PORT || '3002', 10);
+server.listen(PORT, () => {
+  console.log(`Worker + Socket.IO listening on port ${PORT}`);
+});
+
 })()
