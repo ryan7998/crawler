@@ -59,12 +59,12 @@
     import UrlComponent from './UrlComponent.vue'
     import { useCrawlStore } from '../stores/crawlStore'
     import { useRouter } from 'vue-router'
+    import { getApiUrl } from '../utils/commonUtils'
 
     const crawlStore = useCrawlStore()
     const router = useRouter()
 
-    const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
-
+    const apiUrl = getApiUrl()
 
     // Reactive form state
     const formState = reactive({

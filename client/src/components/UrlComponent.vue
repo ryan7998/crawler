@@ -42,17 +42,16 @@
     import axios from 'axios'
     import CssSelector from './CssSelector.vue'
     import SlideOver from './SlideOver.vue'
+    import { getApiUrl } from '../utils/commonUtils'
 
-    const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
-
-    // Define props with structure
     const props = defineProps({
-        urlData: {
-            type: Object,
-            required: true,
-            validator: (value) => {
-                return 'url' in value && 'selectors' in value && Array.isArray(value.selectors)
-            }
+        modelValue: {
+            type: String,
+            default: ''
+        },
+        selectors: {
+            type: Array,
+            default: () => []
         },
         index: {
             type: Number,
@@ -60,25 +59,23 @@
         }
     })
 
-    const emit = defineEmits(['updateUrlData', 'removeUrlData'])
+    const emit = defineEmits(['update:modelValue', 'update:selectors', 'removeUrlData'])
+
+    const apiUrl = getApiUrl()
 
     // Local reactive state
-    const localUrl = ref(props.urlData.url || '')
-    const localSelectors = reactive([ ...props.urlData.selectors ] || [])
+    const localUrl = ref(props.modelValue || '')
+    const localSelectors = reactive([ ...props.selectors ] || [])
     const openSlide = ref(false)
     const crawledData = ref()
 
     // Watchers to emit updates to parent
     watch(localUrl, (newUrl) =>{
-        emit('updateUrlData', { index: props.index, key: 'url', value: newUrl })
+        emit('update:modelValue', newUrl)
     })
 
     watch(localSelectors, (newSelectors) => {
-        emit('updateUrlData', {
-            index: props.index,
-            key: 'selectors',
-            value: newSelectors
-        }, { deep: true })
+        emit('update:selectors', newSelectors)
     })
     
     // Add new selector

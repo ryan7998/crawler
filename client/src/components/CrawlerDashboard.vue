@@ -42,14 +42,14 @@
                                 <v-icon icon="mdi-clock-start" />
                             </template>
                             <v-list-item-title>Start Time</v-list-item-title>
-                            <v-list-item-subtitle>{{ formatTime(crawl.startTime) }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>{{ formatDateTime(crawl.startTime) }}</v-list-item-subtitle>
                         </v-list-item>
                         <v-list-item>
                             <template v-slot:prepend>
                                 <v-icon icon="mdi-clock-end" />
                             </template>
                             <v-list-item-title>End Time</v-list-item-title>
-                            <v-list-item-subtitle>{{ formatTime(crawl.endTime) }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>{{ formatDateTime(crawl.endTime) }}</v-list-item-subtitle>
                         </v-list-item>
                     </v-list>
                 </div>
@@ -68,12 +68,23 @@
                     <v-btn
                         block
                         variant="outlined"
+                        color="warning"
+                        class="mb-2"
+                        @click="confirmDeleteCrawlData"
+                        :disabled="!hasCrawlData"
+                    >
+                        <v-icon start icon="mdi-delete-sweep" />
+                        Clear Data
+                    </v-btn>
+                    <v-btn
+                        block
+                        variant="outlined"
                         color="error"
                         class="mb-2"
                         @click="confirmDelete"
                     >
                         <v-icon start icon="mdi-delete" />
-                        Delete
+                        Delete Crawl
                     </v-btn>
                     <v-btn
                         block
@@ -94,6 +105,17 @@
                     <div class="flex justify-between items-center mb-4">
                         <h6 class="text-gray-700 font-semibold">Crawl Details</h6>
                         <div class="flex items-center space-x-4">
+                            <!-- Bulk Delete Button -->
+                            <v-btn
+                                v-if="selectedUrls.length > 0"
+                                variant="outlined"
+                                color="warning"
+                                size="small"
+                                @click="confirmBulkDelete"
+                            >
+                                <v-icon start icon="mdi-delete-sweep" />
+                                Clear Selected ({{ selectedUrls.length }})
+                            </v-btn>
                             <!-- Queue Status -->
                             <div class="text-sm text-gray-600">
                                 <span v-if="queueStatus.total > 0">
@@ -139,6 +161,13 @@
                     <v-table>
                         <thead>
                             <tr>
+                                <th>
+                                    <v-checkbox
+                                        v-model="selectAll"
+                                        @change="toggleSelectAll"
+                                        hide-details
+                                    />
+                                </th>
                                 <th>URL</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -146,6 +175,13 @@
                         </thead>
                         <tbody>
                             <tr v-for="url in crawl.urls" :key="url">
+                                <td>
+                                    <v-checkbox
+                                        v-model="selectedUrls"
+                                        :value="url"
+                                        hide-details
+                                    />
+                                </td>
                                 <td>
                                     {{ excerpts[url]?.excerpt || url }}
                                     <v-btn
@@ -187,6 +223,15 @@
                                     >
                                         View
                                     </v-btn>
+                                    <v-btn
+                                        v-if="hasUrlData(url)"
+                                        variant="text"
+                                        color="warning"
+                                        size="small"
+                                        @click="confirmDeleteUrlData(url)"
+                                    >
+                                        Clear
+                                    </v-btn>
                                     <SlideOver v-if="viewResults[url]" @close-slide-over="onCloseSlideOver(url)">
                                         <template v-slot:title>
                                             {{ crawl.aggregatedData?.[url]?.[crawl.aggregatedData[url].length - 1]?.data?.defaultData?.title || url }}
@@ -214,6 +259,49 @@
             </div>
         </div>
         
+        <!-- Delete Crawl Data Confirmation Modal -->
+        <div v-if="showDeleteDataConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded-lg max-w-md">
+                <h3 class="text-lg font-semibold">Clear Crawl Data</h3>
+                <p>Are you sure you want to clear all crawled data for this crawl? The crawl configuration will remain intact, but all collected data will be deleted.</p>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button @click="deleteCrawlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
+                    <button @click="cancelDeleteData" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete URL Data Confirmation Modal -->
+        <div v-if="showDeleteUrlDataConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded-lg max-w-md">
+                <h3 class="text-lg font-semibold">Clear URL Data</h3>
+                <p>Are you sure you want to clear the crawled data for this URL?</p>
+                <p class="text-sm text-gray-600 mt-2 break-all">{{ urlToDelete }}</p>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button @click="deleteUrlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
+                    <button @click="cancelDeleteUrlData" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Delete Confirmation Modal -->
+        <div v-if="showBulkDeleteConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded-lg max-w-md">
+                <h3 class="text-lg font-semibold">Clear Selected URL Data</h3>
+                <p>Are you sure you want to clear the crawled data for {{ selectedUrls.length }} selected URLs?</p>
+                <div class="max-h-32 overflow-y-auto mt-2">
+                    <p class="text-sm text-gray-600">Selected URLs:</p>
+                    <ul class="text-xs text-gray-500 mt-1">
+                        <li v-for="url in selectedUrls" :key="url" class="break-all">{{ url }}</li>
+                    </ul>
+                </div>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button @click="bulkDeleteUrlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
+                    <button @click="cancelBulkDelete" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Add CreateCrawlModal -->
         <CreateCrawlModal
             v-model="showCreateModal"
@@ -234,7 +322,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, inject } from 'vue'
+import { onMounted, ref, watch, inject, computed } from 'vue'
 import { io } from "socket.io-client"
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
@@ -243,12 +331,13 @@ import ViewResult from './ViewResult.vue'
 import { useExcerpts } from '../composables/useExcerpts'
 import SlideOver from './SlideOver.vue'
 import { getStatusColor } from '../utils/statusUtils'
+import { getApiUrl, getSocketUrl, formatDateTime } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import * as XLSX from 'xlsx'
 
-const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost'
-const apiUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
-const socketUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3002'
+const baseUrl = getApiUrl()
+const apiUrl = getApiUrl()
+const socketUrl = getSocketUrl()
 const logs = ref([])  // Reactive state for successful crawl results
 const socket = ref()  // Ref for the socket instance
 const route = useRoute()  // Access the crawl ID from the URL
@@ -269,8 +358,28 @@ const showSnackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
 
+// Add delete crawl data refs
+const showDeleteDataConfirm = ref(false)
+const showDeleteUrlDataConfirm = ref(false)
+const urlToDelete = ref('')
+
+// Add bulk delete refs
+const showBulkDeleteConfirm = ref(false)
+const selectedUrls = ref([])
+const selectAll = ref(false)
+
 // Inject the notification function
 const showNotification = inject('showNotification')
+
+// Computed properties
+const hasCrawlData = computed(() => {
+    if (!crawl.value?.aggregatedData) return false
+    return Object.values(crawl.value.aggregatedData).some(urlData => urlData && urlData.length > 0)
+})
+
+const hasUrlData = (url) => {
+    return crawl.value?.aggregatedData?.[url] && crawl.value.aggregatedData[url].length > 0
+}
 
 const openViewResult = (url) => {
     // Set the clicked URL to true in the viewResults object
@@ -280,12 +389,6 @@ const openViewResult = (url) => {
 const onCloseSlideOver = (url) => {
     // Set the clicked URL to false to close the ViewResult component
     viewResults.value = { ...viewResults.value, [url]: false }
-}
-
-// Function to format time
-const formatTime = (time) => {
-    if (!time) return 'N/A'
-    return new Date(time).toLocaleString()
 }
 
 // Function to fetch crawl data from the server
@@ -314,14 +417,14 @@ const fetchCrawlData = async () => {
 }
 
 // Function to check queue status
-const checkQueueStatus = async () => {
-    try {
-        const response = await axios.get(`${apiUrl}/api/queuestatus/${crawlId.value}`)
-        queueStatus.value = response.data
-    } catch (error) {
-        console.error('Error checking queue status:', error)
-    }
-}
+// const checkQueueStatus = async () => {
+//     try {
+//         const response = await axios.get(`${apiUrl}/api/queuestatus/${crawlId.value}`)
+//         queueStatus.value = response.data
+//     } catch (error) {
+//         console.error('Error checking queue status:', error)
+//     }
+// }
 
 // Initialize Socket.io connection on component mount
 onMounted(async () => {
@@ -340,7 +443,7 @@ onMounted(async () => {
         })
         
         await fetchCrawlData()
-        await checkQueueStatus()  // Check initial queue status
+        // await checkQueueStatus()  // Check initial queue status
 
         // Join the room for the specific crawl ID
         socket.value.emit('joinCrawl', crawlId.value)
@@ -353,7 +456,7 @@ onMounted(async () => {
             // Update crawl status if it's a final status update
             if (data.status === 'completed' || data.status === 'failed') {
                 crawl.value.status = data.status
-                await checkQueueStatus()  // Check queue status when crawl completes
+                // await checkQueueStatus()  // Check queue status when crawl completes
             } else {
                 // Update individual URL status
                 liveStatusDictionary.value[data.url] = data.status
@@ -363,7 +466,7 @@ onMounted(async () => {
             if (data.status === 'success') {
                 crawl.value.aggregatedData[data.url]
                     .push({ data: data.result, date: new Date(), status: data.status })
-                await checkQueueStatus()  // Check queue status after each successful crawl
+                // await checkQueueStatus()  // Check queue status after each successful crawl
             }
         })
 
@@ -440,6 +543,67 @@ const handleModalError = (errorMessage) => {
     snackbarColor.value = 'error'
 }
 
+// Function to format selectors for better readability in exports
+const formatSelectors = (selectors) => {
+    if (!selectors || !Array.isArray(selectors)) return ''
+    
+    return selectors.map(selector => {
+        if (typeof selector === 'string') {
+            return selector
+        } else if (typeof selector === 'object' && selector !== null) {
+            // Format selector object
+            const parts = []
+            if (selector.name) parts.push(`Name: ${selector.name}`)
+            if (selector.selector) parts.push(`Selector: ${selector.selector}`)
+            if (selector.attribute) parts.push(`Attribute: ${selector.attribute}`)
+            if (selector.type) parts.push(`Type: ${selector.type}`)
+            return parts.join(' | ')
+        }
+        return String(selector)
+    }).join('; ')
+}
+
+// Function to flatten nested objects and arrays for export
+const flattenObject = (obj, prefix = '') => {
+    const flattened = {}
+    
+    for (const [key, value] of Object.entries(obj)) {
+        const newKey = prefix ? `${prefix}_${key}` : key
+        
+        if (value === null || value === undefined) {
+            flattened[newKey] = ''
+        } else if (key === 'selectors' && Array.isArray(value)) {
+            // Special handling for selectors
+            flattened[newKey] = formatSelectors(value)
+        } else if (typeof value === 'object' && !Array.isArray(value)) {
+            // Recursively flatten nested objects
+            Object.assign(flattened, flattenObject(value, newKey))
+        } else if (Array.isArray(value)) {
+            // Handle arrays - join with semicolon or flatten if objects
+            if (value.length === 0) {
+                flattened[newKey] = ''
+            } else if (typeof value[0] === 'object' && value[0] !== null) {
+                // If array contains objects, flatten them
+                const flattenedArray = value.map((item, index) => {
+                    if (typeof item === 'object' && item !== null) {
+                        return flattenObject(item, `${newKey}_${index + 1}`)
+                    }
+                    return item
+                })
+                Object.assign(flattened, ...flattenedArray)
+            } else {
+                // Simple array - join with semicolon
+                flattened[newKey] = value.join('; ')
+            }
+        } else {
+            // Simple value
+            flattened[newKey] = value
+        }
+    }
+    
+    return flattened
+}
+
 // Function to prepare data for export
 const prepareExportData = () => {
     const exportData = []
@@ -457,11 +621,18 @@ const prepareExportData = () => {
                 'Status': entry.status
             }
 
-            // Add data if available
-            if (entry.data) {
-                Object.entries(entry.data).forEach(([key, value]) => {
-                    row[key] = Array.isArray(value) ? value.join(', ') : value
-                })
+            // Add error message if available
+            if (entry.error) {
+                row['Error Message'] = entry.error
+            }
+
+            // Add data if available - flatten nested objects
+            if (entry.data && typeof entry.data === 'object') {
+                const flattenedData = flattenObject(entry.data)
+                Object.assign(row, flattenedData)
+            } else if (entry.data) {
+                // If data is a simple value, add it directly
+                row['Data'] = entry.data
             }
 
             exportData.push(row)
@@ -490,8 +661,17 @@ const exportToCSV = () => {
         headers.join(','),
         ...data.map(row => headers.map(header => {
             const value = row[header]
-            // Escape commas and quotes in the value
-            return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
+            // Convert all values to strings and escape properly
+            let stringValue = ''
+            if (value === null || value === undefined) {
+                stringValue = ''
+            } else if (typeof value === 'object') {
+                stringValue = JSON.stringify(value)
+            } else {
+                stringValue = String(value)
+            }
+            // Escape commas, quotes, and newlines in the value
+            return `"${stringValue.replace(/"/g, '""').replace(/\n/g, ' ').replace(/\r/g, ' ')}"`
         }).join(','))
     ].join('\n')
 
@@ -521,6 +701,99 @@ const exportToExcel = () => {
     showExportMenu.value = false
     showNotification('Excel file exported successfully', 'success')
 }
+
+// Delete crawl data functions
+const confirmDeleteCrawlData = () => {
+    showDeleteDataConfirm.value = true
+}
+
+const cancelDeleteData = () => {
+    showDeleteDataConfirm.value = false
+}
+
+const deleteCrawlData = async () => {
+    try {
+        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}`)
+        showDeleteDataConfirm.value = false
+        showNotification(`Crawl data cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        await fetchCrawlData() // Refresh the data
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Error clearing crawl data', 'error')
+        showDeleteDataConfirm.value = false
+    }
+}
+
+const confirmDeleteUrlData = (url) => {
+    urlToDelete.value = url
+    showDeleteUrlDataConfirm.value = true
+}
+
+const cancelDeleteUrlData = () => {
+    showDeleteUrlDataConfirm.value = false
+    urlToDelete.value = ''
+}
+
+const deleteUrlData = async () => {
+    try {
+        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}/urls`, {
+            data: {
+                urls: [urlToDelete.value]
+            }
+        })
+        showDeleteUrlDataConfirm.value = false
+        urlToDelete.value = ''
+        showNotification(`URL data cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        await fetchCrawlData() // Refresh the data
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Error clearing URL data', 'error')
+        showDeleteUrlDataConfirm.value = false
+    }
+}
+
+// Bulk delete functions
+const confirmBulkDelete = () => {
+    showBulkDeleteConfirm.value = true
+}
+
+const cancelBulkDelete = () => {
+    showBulkDeleteConfirm.value = false
+    selectedUrls.value = []
+    selectAll.value = false
+}
+
+const bulkDeleteUrlData = async () => {
+    try {
+        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}/urls`, {
+            data: {
+                urls: selectedUrls.value
+            }
+        })
+        showBulkDeleteConfirm.value = false
+        selectedUrls.value = []
+        selectAll.value = false
+        showNotification(`Selected URLs cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        await fetchCrawlData() // Refresh the data
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Error clearing selected URLs', 'error')
+        showBulkDeleteConfirm.value = false
+    }
+}
+
+// Toggle select all
+const toggleSelectAll = () => {
+    if (selectAll.value) {
+        selectedUrls.value = crawl.value.urls
+    } else {
+        selectedUrls.value = []
+    }
+}
+
+// Watch for changes in selectedUrls to update selectAll
+watch(selectedUrls, (newSelectedUrls) => {
+    if (crawl.value?.urls) {
+        selectAll.value = newSelectedUrls.length === crawl.value.urls.length && crawl.value.urls.length > 0
+    }
+}, { deep: true })
 </script>
 
 <style scoped>
