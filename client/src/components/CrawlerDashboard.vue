@@ -417,14 +417,14 @@ const fetchCrawlData = async () => {
 }
 
 // Function to check queue status
-const checkQueueStatus = async () => {
-    try {
-        const response = await axios.get(`${apiUrl}/api/queuestatus/${crawlId.value}`)
-        queueStatus.value = response.data
-    } catch (error) {
-        console.error('Error checking queue status:', error)
-    }
-}
+// const checkQueueStatus = async () => {
+//     try {
+//         const response = await axios.get(`${apiUrl}/api/queuestatus/${crawlId.value}`)
+//         queueStatus.value = response.data
+//     } catch (error) {
+//         console.error('Error checking queue status:', error)
+//     }
+// }
 
 // Initialize Socket.io connection on component mount
 onMounted(async () => {
@@ -443,7 +443,7 @@ onMounted(async () => {
         })
         
         await fetchCrawlData()
-        await checkQueueStatus()  // Check initial queue status
+        // await checkQueueStatus()  // Check initial queue status
 
         // Join the room for the specific crawl ID
         socket.value.emit('joinCrawl', crawlId.value)
@@ -456,7 +456,7 @@ onMounted(async () => {
             // Update crawl status if it's a final status update
             if (data.status === 'completed' || data.status === 'failed') {
                 crawl.value.status = data.status
-                await checkQueueStatus()  // Check queue status when crawl completes
+                // await checkQueueStatus()  // Check queue status when crawl completes
             } else {
                 // Update individual URL status
                 liveStatusDictionary.value[data.url] = data.status
@@ -466,7 +466,7 @@ onMounted(async () => {
             if (data.status === 'success') {
                 crawl.value.aggregatedData[data.url]
                     .push({ data: data.result, date: new Date(), status: data.status })
-                await checkQueueStatus()  // Check queue status after each successful crawl
+                // await checkQueueStatus()  // Check queue status after each successful crawl
             }
         })
 
@@ -621,10 +621,18 @@ const prepareExportData = () => {
                 'Status': entry.status
             }
 
+            // Add error message if available
+            if (entry.error) {
+                row['Error Message'] = entry.error
+            }
+
             // Add data if available - flatten nested objects
-            if (entry.data) {
+            if (entry.data && typeof entry.data === 'object') {
                 const flattenedData = flattenObject(entry.data)
                 Object.assign(row, flattenedData)
+            } else if (entry.data) {
+                // If data is a simple value, add it directly
+                row['Data'] = entry.data
             }
 
             exportData.push(row)

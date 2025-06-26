@@ -110,7 +110,8 @@ const aggregateDashboard = (crawlerData) => {
                 let newObj = {
                     date: result.createdAt,
                     status: result.status,
-                    data: result.data ?? result.error
+                    data: result.data || null,
+                    error: result.error || null
                 }
                 // If url property exists in the aggregatedData object
                 if (aggregatedData[result.url]) {
