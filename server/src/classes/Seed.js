@@ -2,7 +2,7 @@ const { chromium } = require('playwright')
 const path = require('path')
 const { getCleanHtml, sanitizeFilename } = require('../../utils/helperFunctions')
 const fs = require('fs')
-const cheerio = require('cheerio')
+const ErrorHandler = require('./ErrorHandler')
 
 class Seed {
     constructor(url) {
@@ -15,6 +15,7 @@ class Seed {
         this.cleanHtmlContent = null
         this.htmlfileLocation = null
         this.extractedData = null
+        this.errorHandler = new ErrorHandler()
     }
 
     async initialize() {
@@ -28,6 +29,12 @@ class Seed {
         const maxRetries = 3;
         
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            // Track response status and errors - moved outside try block for proper scope
+            let responseStatus = null;
+            let responseHeaders = null;
+            let pageErrors = [];
+            let networkErrors = [];
+            
             try {
                 // Using Playwright
                 console.log(`Inside loadHTMLContent() Using Playwright - Attempt ${attempt}/${maxRetries}`)
@@ -48,7 +55,7 @@ class Seed {
                         '--disable-extensions',
                         '--disable-plugins',
                         '--disable-images',
-                        '--disable-javascript',
+                        // '--disable-javascript',
                         '--disable-background-timer-throttling',
                         '--disable-backgrounding-occluded-windows',
                         '--disable-renderer-backgrounding',
@@ -81,13 +88,59 @@ class Seed {
                 // Create a new page
                 const page = await context.newPage()
                 
+                // Block analytics and tracking requests to improve performance
+                await page.route('**/*', (route) => {
+                    const url = route.request().url();
+                    const blockedDomains = [
+                        'google-analytics.com',
+                        'googletagmanager.com',
+                        'analytics.sharplaunch.com',
+                        'js-eu1.hs-scripts.com',
+                        'pagead2.googlesyndication.com',
+                        'doubleclick.net',
+                        'facebook.com',
+                        'twitter.com'
+                    ];
+                    
+                    if (blockedDomains.some(domain => url.includes(domain))) {
+                        route.abort();
+                    } else {
+                        route.continue();
+                    }
+                });
+                
                 // Add page-level error handling
                 page.on('error', (err) => {
                     console.log('Page error:', err.message);
+                    pageErrors.push(err.message);
                 });
                 
                 page.on('pageerror', (err) => {
                     console.log('Page error:', err.message);
+                    pageErrors.push(err.message);
+                });
+
+                // Track network responses
+                page.on('response', (response) => {
+                    responseStatus = response.status();
+                    responseHeaders = response.headers();
+                    // Only log the initial response status, not every single request
+                    if (response.url() === this.url) {
+                        console.log(`Initial response status: ${responseStatus}`);
+                    }
+                });
+
+                // Track failed requests
+                page.on('requestfailed', (request) => {
+                    const failure = request.failure();
+                    if (failure) {
+                        networkErrors.push({
+                            url: request.url(),
+                            errorText: failure.errorText,
+                            failure: failure
+                        });
+                        console.log(`Request failed: ${request.url()} - ${failure.errorText}`);
+                    }
                 });
                 
                 // Add extra headers for Amazon
@@ -107,13 +160,32 @@ class Seed {
                 
                 // Navigate to the target webpage with increased timeout and different wait strategy
                 console.log(`Attempting to navigate to: ${this.url}`);
-                await page.goto(this.url, { 
+                const response = await page.goto(this.url, { 
                     waitUntil: 'networkidle',
                     timeout: 90000 
                 });
                 
+                // Check response status immediately
+                if (response) {
+                    responseStatus = response.status();
+                    responseHeaders = response.headers();
+                    console.log(`Initial response status: ${responseStatus}`);
+                    
+                    // Check for common HTTP error statuses
+                    if (responseStatus >= 400) {
+                        const errorInfo = this.errorHandler.analyzeHttpError(responseStatus, responseHeaders);
+                        throw new Error(`HTTP ${responseStatus} Error: ${errorInfo}`);
+                    }
+                }
+                
                 // Wait a bit for dynamic content to load
                 await page.waitForTimeout(5000);
+                
+                // Check for captcha or anti-bot mechanisms using ErrorHandler
+                const antiBotDetection = await this.detectAntiBotMechanisms(page);
+                if (antiBotDetection) {
+                    throw new Error(`Anti-bot mechanism detected: ${antiBotDetection}`);
+                }
                 
                 // For Amazon, wait for specific elements to load
                 if (this.hostname && this.hostname.includes('amazon')) {
@@ -134,6 +206,12 @@ class Seed {
                 const htmlContent = await page.content()
                 console.log('Received HTML Content')
                 
+                // Check if the page content indicates an error using ErrorHandler
+                const contentAnalysis = this.errorHandler.analyzePageContent(htmlContent);
+                if (contentAnalysis.error) {
+                    throw new Error(`Page content error: ${contentAnalysis.error}`);
+                }
+                
                 // remove script and css:
                 const cleanHtmlContent = getCleanHtml(htmlContent)
                 
@@ -146,12 +224,20 @@ class Seed {
                 return this.cleanHtmlContent
 
             } catch (err) {
-                console.error(`Error in loadHTMLContent (attempt ${attempt}):`, err.message);
-                console.error('Call log:');
-                console.error(`  - navigating to "${this.url}", waiting until "networkidle"`);
-                console.error('');
-                console.error(`    at Seed.loadHTMLContent (${__filename}:${err.stack ? err.stack.split('\n')[1].split(':')[1] : 'unknown'})`);
-                console.error(`    at async ${err.stack ? err.stack.split('\n')[2] : 'unknown'}`);
+                // Use ErrorHandler for comprehensive error analysis
+                const errorContext = {
+                    responseStatus,
+                    responseHeaders,
+                    pageErrors,
+                    networkErrors,
+                    url: this.url,
+                    htmlContent: null // We don't have HTML content in error cases
+                };
+                
+                const errorAnalysis = this.errorHandler.analyzeError(err, errorContext);
+                
+                // Log error with appropriate level
+                this.errorHandler.logError(errorAnalysis, attempt, maxRetries);
                 
                 // Close browser before retry
                 if (browser) {
@@ -163,9 +249,15 @@ class Seed {
                     }
                 }
                 
-                // If this is the last attempt, throw the error
+                // If error is not blocking, continue with crawl
+                if (!errorAnalysis.isBlocking) {
+                    console.log('Non-blocking errors detected, continuing with crawl...');
+                    return this.cleanHtmlContent;
+                }
+                
+                // If this is the last attempt, throw the enhanced error
                 if (attempt === maxRetries) {
-                    throw new Error(`Unable to load Content after ${maxRetries} attempts: ${err.message}`)
+                    throw new Error(`Unable to load Content after ${maxRetries} attempts: ${errorAnalysis.message}`)
                 }
                 
                 // Wait before retry with exponential backoff
@@ -173,6 +265,88 @@ class Seed {
                 console.log(`Retrying in ${waitTime/1000} seconds...`);
                 await new Promise(resolve => setTimeout(resolve, waitTime));
             }
+        }
+    }
+
+    // Keep the anti-bot detection method as it's specific to page interaction
+    async detectAntiBotMechanisms(page) {
+        try {
+            // Check for common captcha indicators
+            const captchaSelectors = [
+                'iframe[src*="captcha"]',
+                'iframe[src*="recaptcha"]',
+                'iframe[src*="hcaptcha"]',
+                '.captcha',
+                '.recaptcha',
+                '.hcaptcha',
+                '#captcha',
+                '#recaptcha',
+                '#hcaptcha',
+                '[class*="captcha"]',
+                '[id*="captcha"]'
+            ];
+
+            for (const selector of captchaSelectors) {
+                const element = await page.$(selector);
+                if (element) {
+                    return `Captcha detected (selector: ${selector})`;
+                }
+            }
+
+            // Check for Cloudflare protection
+            const cloudflareIndicators = [
+                'iframe[src*="cloudflare"]',
+                '.cf-browser-verification',
+                '#cf-please-wait',
+                '[class*="cf-"]'
+            ];
+
+            for (const selector of cloudflareIndicators) {
+                const element = await page.$(selector);
+                if (element) {
+                    return 'Cloudflare protection detected';
+                }
+            }
+
+            // Check for common anti-bot messages
+            const antiBotTexts = [
+                'access denied',
+                'blocked',
+                'suspicious activity',
+                'bot detected',
+                'automated access',
+                'please verify',
+                'security check',
+                'human verification',
+                'challenge',
+                'rate limit',
+                'too many requests'
+            ];
+
+            const pageText = await page.textContent('body');
+            const lowerText = pageText.toLowerCase();
+            
+            for (const text of antiBotTexts) {
+                if (lowerText.includes(text)) {
+                    return `Anti-bot text detected: "${text}"`;
+                }
+            }
+
+            // Check for JavaScript challenges
+            const jsChallenge = await page.evaluate(() => {
+                return document.title.toLowerCase().includes('challenge') ||
+                       document.title.toLowerCase().includes('verify') ||
+                       document.title.toLowerCase().includes('security');
+            });
+
+            if (jsChallenge) {
+                return 'JavaScript challenge detected';
+            }
+
+            return null;
+        } catch (error) {
+            console.log('Error detecting anti-bot mechanisms:', error.message);
+            return null;
         }
     }
 
