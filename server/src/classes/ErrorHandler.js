@@ -27,7 +27,9 @@ class ErrorHandler {
             pageErrors = [],
             networkErrors = [],
             url,
-            htmlContent
+            htmlContent,
+            retryWithProxy,
+            contentAnalysis
         } = context;
 
         const analysis = {
@@ -37,8 +39,16 @@ class ErrorHandler {
             message: err.message,
             details: {},
             isBlocking: true,
-            recoverySuggestions: []
+            recoverySuggestions: [],
+            retryWithProxy: retryWithProxy || false,
         };
+
+        // If we have contentAnalysis from analyzePageContent, use its retryWithProxy value
+        if (contentAnalysis && contentAnalysis.retryWithProxy !== undefined) {
+            analysis.retryWithProxy = contentAnalysis.retryWithProxy;
+            analysis.category = contentAnalysis.category || this.errorCategories.CONTENT;
+            analysis.severity = contentAnalysis.severity || this.severityLevels.CRITICAL;
+        }
 
         // Categorize the error
         this.categorizeError(analysis, err, context);
@@ -60,6 +70,8 @@ class ErrorHandler {
         if (err.message.includes('net::') || err.message.includes('ERR_')) {
             analysis.category = this.errorCategories.NETWORK;
             analysis.message = 'Network connection error';
+            // Network errors might be resolved with proxy
+            analysis.retryWithProxy = true;
             return;
         }
 
@@ -67,6 +79,8 @@ class ErrorHandler {
         if (err.message.includes('Timeout') || err.message.includes('timeout')) {
             analysis.category = this.errorCategories.TIMEOUT;
             analysis.message = 'Page load timeout';
+            // Timeout errors might be resolved with proxy
+            analysis.retryWithProxy = true;
             return;
         }
 
@@ -74,6 +88,11 @@ class ErrorHandler {
         if (responseStatus && responseStatus >= 400) {
             analysis.category = this.errorCategories.HTTP;
             analysis.message = this.analyzeHttpError(responseStatus, context.responseHeaders);
+            
+            // Set retryWithProxy for specific HTTP errors that could be resolved with proxy
+            if (responseStatus === 403 || responseStatus === 429 || responseStatus === 503) {
+                analysis.retryWithProxy = true;
+            }
             return;
         }
 
@@ -95,6 +114,8 @@ class ErrorHandler {
         if (this.detectAntiBotIndicators(err, context)) {
             analysis.category = this.errorCategories.ANTI_BOT;
             analysis.message = 'Anti-bot protection detected';
+            // Anti-bot errors should definitely retry with proxy
+            analysis.retryWithProxy = true;
             return;
         }
     }
@@ -128,17 +149,27 @@ class ErrorHandler {
                 if (this.hasOnlyAnalyticsFailures(networkErrors)) {
                     analysis.severity = this.severityLevels.INFO;
                     analysis.isBlocking = false;
+                } else if (analysis.retryWithProxy) {
+                    // Network errors that can be retried with proxy are less severe
+                    analysis.severity = this.severityLevels.WARNING;
+                    analysis.isBlocking = true; // Still blocking but retryable
                 }
                 break;
 
             case this.errorCategories.TIMEOUT:
                 analysis.severity = this.severityLevels.CRITICAL;
                 analysis.isBlocking = true;
+                // Timeout errors might be resolved with proxy
+                if (analysis.retryWithProxy) {
+                    analysis.severity = this.severityLevels.WARNING;
+                }
                 break;
 
             case this.errorCategories.ANTI_BOT:
                 analysis.severity = this.severityLevels.CRITICAL;
                 analysis.isBlocking = true;
+                // Anti-bot errors should definitely retry with proxy
+                analysis.retryWithProxy = true;
                 break;
 
             case this.errorCategories.HTTP:
@@ -148,6 +179,11 @@ class ErrorHandler {
                     analysis.severity = this.severityLevels.WARNING;
                 }
                 analysis.isBlocking = true;
+                
+                // HTTP errors that can be retried with proxy are less severe
+                if (analysis.retryWithProxy) {
+                    analysis.severity = this.severityLevels.WARNING;
+                }
                 break;
         }
     }
@@ -229,19 +265,35 @@ class ErrorHandler {
             case this.errorCategories.TIMEOUT:
                 suggestions.push('Increase timeout duration');
                 suggestions.push('Check server response time');
-                suggestions.push('Consider using a proxy');
+                if (analysis.retryWithProxy) {
+                    suggestions.push('Try using a residential proxy');
+                    suggestions.push('Rotate proxy servers');
+                } else {
+                    suggestions.push('Consider using a proxy');
+                }
                 break;
 
             case this.errorCategories.NETWORK:
                 suggestions.push('Check internet connection');
                 suggestions.push('Verify URL accessibility');
-                suggestions.push('Try using a different network');
+                if (analysis.retryWithProxy) {
+                    suggestions.push('Try using a different proxy server');
+                    suggestions.push('Rotate proxy locations');
+                } else {
+                    suggestions.push('Try using a different network');
+                }
                 break;
 
             case this.errorCategories.ANTI_BOT:
                 suggestions.push('Add delays between requests');
                 suggestions.push('Rotate user agents');
-                suggestions.push('Use residential proxies');
+                if (analysis.retryWithProxy) {
+                    suggestions.push('Use residential proxies');
+                    suggestions.push('Rotate proxy servers');
+                    suggestions.push('Try different proxy locations');
+                } else {
+                    suggestions.push('Use residential proxies');
+                }
                 suggestions.push('Implement session management');
                 break;
 
@@ -250,10 +302,20 @@ class ErrorHandler {
                     suggestions.push('Implement exponential backoff');
                     suggestions.push('Reduce request frequency');
                     suggestions.push('Use rate limiting');
+                    if (analysis.retryWithProxy) {
+                        suggestions.push('Rotate proxy servers to avoid rate limits');
+                    }
                 } else if (context.responseStatus === 403) {
                     suggestions.push('Check if IP is blocked');
                     suggestions.push('Update user agent');
                     suggestions.push('Add more realistic headers');
+                    if (analysis.retryWithProxy) {
+                        suggestions.push('Use a different proxy server');
+                        suggestions.push('Try residential proxy');
+                    }
+                } else if (analysis.retryWithProxy) {
+                    suggestions.push('Try using a different proxy server');
+                    suggestions.push('Rotate proxy locations');
                 }
                 break;
 
@@ -265,6 +327,11 @@ class ErrorHandler {
                     suggestions.push('Check for JavaScript errors in console');
                 }
                 break;
+        }
+
+        // Add general proxy suggestions if retryWithProxy is true
+        if (analysis.retryWithProxy) {
+            suggestions.push('Retry with proxy enabled');
         }
 
         analysis.recoverySuggestions = suggestions;
@@ -323,13 +390,51 @@ class ErrorHandler {
             'gateway timeout'
         ];
 
+        // Proxy-resolvable error indicators
+        const proxyResolvableIndicators = [
+            'access denied',
+            'blocked',
+            'forbidden',
+            'rate limit',
+            'too many requests',
+            'suspicious activity',
+            'bot detected',
+            'automated access',
+            'please verify',
+            'security check',
+            'human verification',
+            'challenge',
+            'cloudflare',
+            'captcha',
+            'one moment, please...',
+            'checking your browser',
+            'ddos protection'
+        ];
+
         // Only check title for error indicators
         for (const indicator of errorIndicators) {
             if (title.includes(indicator)) {
+                const isProxyResolvable = proxyResolvableIndicators.some(proxyIndicator => 
+                    title.includes(proxyIndicator) || bodyText.includes(proxyIndicator)
+                );
+                
                 return { 
                     error: `Error page detected: "${indicator}"`,
                     category: this.errorCategories.CONTENT,
-                    severity: this.severityLevels.CRITICAL
+                    severity: this.severityLevels.CRITICAL,
+                    retryWithProxy: isProxyResolvable
+                };
+            }
+        }
+
+        // Check for proxy-resolvable indicators in title and body text
+        for (const indicator of proxyResolvableIndicators) {
+            if (title.includes(indicator)) {
+                return { 
+                    error: `Anti-bot/proxy-resolvable content detected: "${indicator}"`,
+                    category: this.errorCategories.ANTI_BOT,
+                    severity: this.severityLevels.CRITICAL,
+                    retryWithProxy: true
                 };
             }
         }
@@ -340,7 +445,8 @@ class ErrorHandler {
             return { 
                 error: `Page content too short (${textLength} characters)`,
                 category: this.errorCategories.CONTENT,
-                severity: this.severityLevels.WARNING
+                severity: this.severityLevels.WARNING,
+                retryWithProxy: false
             };
         }
 
@@ -350,7 +456,8 @@ class ErrorHandler {
             return { 
                 error: `Page lacks meaningful content`,
                 category: this.errorCategories.CONTENT,
-                severity: this.severityLevels.WARNING
+                severity: this.severityLevels.WARNING,
+                retryWithProxy: false
             };
         }
 
@@ -383,6 +490,88 @@ class ErrorHandler {
         });
 
         return stats;
+    }
+
+    // Detect anti-bot mechanisms on a page
+    async detectAntiBotMechanisms(page) {
+        try {
+            // Check for common captcha indicators
+            const captchaSelectors = [
+                'iframe[src*="captcha"]',
+                'iframe[src*="recaptcha"]',
+                'iframe[src*="hcaptcha"]',
+                '.captcha',
+                '.recaptcha',
+                '.hcaptcha',
+                '#captcha',
+                '#recaptcha',
+                '#hcaptcha',
+                '[class*="captcha"]',
+                '[id*="captcha"]'
+            ];
+
+            for (const selector of captchaSelectors) {
+                const element = await page.$(selector);
+                if (element) {
+                    return `Captcha detected (selector: ${selector})`;
+                }
+            }
+
+            // Check for Cloudflare protection
+            const cloudflareIndicators = [
+                'iframe[src*="cloudflare"]',
+                '.cf-browser-verification',
+                '#cf-please-wait',
+                '[class*="cf-"]'
+            ];
+
+            for (const selector of cloudflareIndicators) {
+                const element = await page.$(selector);
+                if (element) {
+                    return 'Cloudflare protection detected';
+                }
+            }
+
+            // Check for common anti-bot messages
+            // const antiBotTexts = [
+            //     'access denied',
+            //     'blocked',
+            //     'suspicious activity',
+            //     'bot detected',
+            //     'automated access',
+            //     'please verify',
+            //     'security check',
+            //     'human verification',
+            //     'challenge',
+            //     'rate limit',
+            //     'too many requests'
+            // ];
+
+            // const pageText = await page.textContent('body');
+            // const lowerText = pageText.toLowerCase();
+            
+            // for (const text of antiBotTexts) {
+            //     if (lowerText.includes(text)) {
+            //         return `Anti-bot text detected: "${text}"`;
+            //     }
+            // }
+
+            // Check for JavaScript challenges
+            const jsChallenge = await page.evaluate(() => {
+                return document.title.toLowerCase().includes('challenge') ||
+                       document.title.toLowerCase().includes('verify') ||
+                       document.title.toLowerCase().includes('security');
+            });
+
+            if (jsChallenge) {
+                return 'JavaScript challenge detected';
+            }
+
+            return null;
+        } catch (error) {
+            console.log('Error detecting anti-bot mechanisms:', error.message);
+            return null;
+        }
     }
 }
 

@@ -16,6 +16,8 @@ class Seed {
         this.htmlfileLocation = null
         this.extractedData = null
         this.errorHandler = new ErrorHandler()
+        this.useProxy = false // Flag to enable/disable proxy
+        this.proxyConfig = null // Will store proxy configuration
     }
 
     async initialize() {
@@ -26,9 +28,10 @@ class Seed {
 
     async loadHTMLContent() {
         let browser = null;
-        const maxRetries = 3;
+        const maxRetries = 2;
+        let attempt = 1;
         
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        while (attempt <= maxRetries) {
             // Track response status and errors - moved outside try block for proper scope
             let responseStatus = null;
             let responseHeaders = null;
@@ -39,7 +42,7 @@ class Seed {
                 // Using Playwright
                 console.log(`Inside loadHTMLContent() Using Playwright - Attempt ${attempt}/${maxRetries}`)
                 // Launch the browser with additional options
-                browser = await chromium.launch({
+                const browserOptions = {
                     headless: true,
                     args: [
                         '--no-sandbox',
@@ -55,16 +58,26 @@ class Seed {
                         '--disable-extensions',
                         '--disable-plugins',
                         '--disable-images',
-                        // '--disable-javascript',
+                        '--disable-javascript',
                         '--disable-background-timer-throttling',
                         '--disable-backgrounding-occluded-windows',
                         '--disable-renderer-backgrounding',
                         '--disable-field-trial-config',
                         '--disable-ipc-flooding-protection'
                     ]
-                });
-                // console.log('Browser initialized with proxy');
+                };
 
+                // Add proxy configuration if enabled
+                if (this.useProxy && this.proxyConfig) {
+                    browserOptions.proxy = this.proxyConfig;
+                    console.log('Browser initialized with proxy');
+                } else {
+                    console.log('Browser initialized without proxy');
+                }
+
+                browser = await chromium.launch(browserOptions);
+
+                // const context = await browser.newContext();
                 // Create a new context with user agent and additional settings
                 const context = await browser.newContext({
                     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -120,7 +133,7 @@ class Seed {
                     pageErrors.push(err.message);
                 });
 
-                // Track network responses
+                // // Track network responses
                 page.on('response', (response) => {
                     responseStatus = response.status();
                     responseHeaders = response.headers();
@@ -164,7 +177,12 @@ class Seed {
                     waitUntil: 'networkidle',
                     timeout: 90000 
                 });
-                
+                                
+                // Take a screenshot of the page
+                const timeNow = Date.now()
+                const screenshotPath = path.join(__dirname, `../../files/${sanitizeFilename(this.url)}_${timeNow}.png`)
+                await page.screenshot({path: screenshotPath, fullPage: true, timeout: 60000})
+                this.screenshotLocation = screenshotPath
                 // Check response status immediately
                 if (response) {
                     responseStatus = response.status();
@@ -179,10 +197,10 @@ class Seed {
                 }
                 
                 // Wait a bit for dynamic content to load
-                await page.waitForTimeout(5000);
+                // await page.waitForTimeout(5000);
                 
                 // Check for captcha or anti-bot mechanisms using ErrorHandler
-                const antiBotDetection = await this.detectAntiBotMechanisms(page);
+                const antiBotDetection = await this.errorHandler.detectAntiBotMechanisms(page);
                 if (antiBotDetection) {
                     throw new Error(`Anti-bot mechanism detected: ${antiBotDetection}`);
                 }
@@ -195,21 +213,20 @@ class Seed {
                         console.log('Amazon product title selector not found, continuing...');
                     }
                 }
-                
-                // Take a screenshot of the page
-                const timeNow = Date.now()
-                const screenshotPath = path.join(__dirname, `../../files/${sanitizeFilename(this.url)}_${timeNow}.png`)
-                await page.screenshot({path: screenshotPath, fullPage: true, timeout: 60000})
-                this.screenshotLocation = screenshotPath
+                // todo: add title selector to check if dom is loaded.
+
                 
                 // Get the HTML content from the page
                 const htmlContent = await page.content()
-                console.log('Received HTML Content')
+                // console.log('Received HTML Content: ', htmlContent)
                 
                 // Check if the page content indicates an error using ErrorHandler
                 const contentAnalysis = this.errorHandler.analyzePageContent(htmlContent);
                 if (contentAnalysis.error) {
-                    throw new Error(`Page content error: ${contentAnalysis.error}`);
+                    // Create a custom error object that preserves contentAnalysis
+                    const contentError = new Error(contentAnalysis.error);
+                    contentError.contentAnalysis = contentAnalysis;
+                    throw contentError;
                 }
                 
                 // remove script and css:
@@ -231,10 +248,12 @@ class Seed {
                     pageErrors,
                     networkErrors,
                     url: this.url,
-                    htmlContent: null // We don't have HTML content in error cases
+                    htmlContent: null, // We don't have HTML content in error cases
+                    contentAnalysis: err.contentAnalysis || null // Get contentAnalysis from custom error if available
                 };
                 
                 const errorAnalysis = this.errorHandler.analyzeError(err, errorContext);
+                console.log('Error Analysis: ', errorAnalysis)
                 
                 // Log error with appropriate level
                 this.errorHandler.logError(errorAnalysis, attempt, maxRetries);
@@ -260,93 +279,20 @@ class Seed {
                     throw new Error(`Unable to load Content after ${maxRetries} attempts: ${errorAnalysis.message}`)
                 }
                 
+                // Check if we should retry with proxy
+                if (errorAnalysis.retryWithProxy && !this.useProxy) {
+                    console.log('Error suggests retry with proxy. Enabling proxy for next attempt...');
+                    this.enableProxy(); // Enable proxy with default configuration
+                }
+                
+                // Increment attempt counter and retry
+                attempt++;
+                
                 // Wait before retry with exponential backoff
                 const waitTime = Math.min(attempt * 3000, 15000); // Max 15 seconds
                 console.log(`Retrying in ${waitTime/1000} seconds...`);
                 await new Promise(resolve => setTimeout(resolve, waitTime));
             }
-        }
-    }
-
-    // Keep the anti-bot detection method as it's specific to page interaction
-    async detectAntiBotMechanisms(page) {
-        try {
-            // Check for common captcha indicators
-            const captchaSelectors = [
-                'iframe[src*="captcha"]',
-                'iframe[src*="recaptcha"]',
-                'iframe[src*="hcaptcha"]',
-                '.captcha',
-                '.recaptcha',
-                '.hcaptcha',
-                '#captcha',
-                '#recaptcha',
-                '#hcaptcha',
-                '[class*="captcha"]',
-                '[id*="captcha"]'
-            ];
-
-            for (const selector of captchaSelectors) {
-                const element = await page.$(selector);
-                if (element) {
-                    return `Captcha detected (selector: ${selector})`;
-                }
-            }
-
-            // Check for Cloudflare protection
-            const cloudflareIndicators = [
-                'iframe[src*="cloudflare"]',
-                '.cf-browser-verification',
-                '#cf-please-wait',
-                '[class*="cf-"]'
-            ];
-
-            for (const selector of cloudflareIndicators) {
-                const element = await page.$(selector);
-                if (element) {
-                    return 'Cloudflare protection detected';
-                }
-            }
-
-            // Check for common anti-bot messages
-            const antiBotTexts = [
-                'access denied',
-                'blocked',
-                'suspicious activity',
-                'bot detected',
-                'automated access',
-                'please verify',
-                'security check',
-                'human verification',
-                'challenge',
-                'rate limit',
-                'too many requests'
-            ];
-
-            const pageText = await page.textContent('body');
-            const lowerText = pageText.toLowerCase();
-            
-            for (const text of antiBotTexts) {
-                if (lowerText.includes(text)) {
-                    return `Anti-bot text detected: "${text}"`;
-                }
-            }
-
-            // Check for JavaScript challenges
-            const jsChallenge = await page.evaluate(() => {
-                return document.title.toLowerCase().includes('challenge') ||
-                       document.title.toLowerCase().includes('verify') ||
-                       document.title.toLowerCase().includes('security');
-            });
-
-            if (jsChallenge) {
-                return 'JavaScript challenge detected';
-            }
-
-            return null;
-        } catch (error) {
-            console.log('Error detecting anti-bot mechanisms:', error.message);
-            return null;
         }
     }
 
@@ -394,6 +340,42 @@ class Seed {
             return true
         } catch (error) {
             return false
+        }
+    }
+
+    // Method to enable proxy with configuration
+    enableProxy(proxyConfig = null) {
+        this.useProxy = true;
+        this.proxyConfig = proxyConfig || {
+            server: process.env.OXYLAB_SERVER,
+            username: process.env.OXYLAB_USERNAME,
+            password: process.env.OXYLAB_PASSWORD
+        };
+        console.log('Proxy enabled with configuration:', this.proxyConfig);
+    }
+
+    // Method to disable proxy
+    disableProxy() {
+        this.useProxy = false;
+        this.proxyConfig = null;
+        console.log('Proxy disabled');
+    }
+
+    // Method to get proxy status and configuration
+    getProxyStatus() {
+        return {
+            enabled: this.useProxy,
+            config: this.proxyConfig
+        };
+    }
+
+    // Method to update proxy configuration
+    updateProxyConfig(newConfig) {
+        if (this.useProxy) {
+            this.proxyConfig = { ...this.proxyConfig, ...newConfig };
+            console.log('Proxy configuration updated:', this.proxyConfig);
+        } else {
+            console.log('Proxy is not enabled. Use enableProxy() first.');
         }
     }
 }
