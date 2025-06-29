@@ -116,6 +116,17 @@
                                 <v-icon start icon="mdi-delete-sweep" />
                                 Clear Selected ({{ selectedUrls.length }})
                             </v-btn>
+                            <!-- Restart Selected Button -->
+                            <v-btn
+                                v-if="selectedUrls.length > 0"
+                                variant="outlined"
+                                color="info"
+                                size="small"
+                                @click="confirmRestartSelected"
+                            >
+                                <v-icon start icon="mdi-restart" />
+                                Restart Selected ({{ selectedUrls.length }})
+                            </v-btn>
                             <!-- Queue Status -->
                             <div class="text-sm text-gray-600">
                                 <span v-if="queueStatus.total > 0">
@@ -302,6 +313,24 @@
             </div>
         </div>
 
+        <!-- Restart Selected Confirmation Modal -->
+        <div v-if="showRestartSelectedConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white p-6 rounded-lg max-w-md">
+                <h3 class="text-lg font-semibold">Restart Selected URLs</h3>
+                <p>Are you sure you want to restart the crawl for {{ selectedUrls.length }} selected URLs?</p>
+                <div class="max-h-32 overflow-y-auto mt-2">
+                    <p class="text-sm text-gray-600">Selected URLs:</p>
+                    <ul class="text-xs text-gray-500 mt-1">
+                        <li v-for="url in selectedUrls" :key="url" class="break-all">{{ url }}</li>
+                    </ul>
+                </div>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button @click="restartSelectedUrls" class="bg-blue-500 text-white px-4 py-2 rounded">Restart</button>
+                    <button @click="cancelRestartSelected" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Add CreateCrawlModal -->
         <CreateCrawlModal
             v-model="showCreateModal"
@@ -367,6 +396,9 @@ const urlToDelete = ref('')
 const showBulkDeleteConfirm = ref(false)
 const selectedUrls = ref([])
 const selectAll = ref(false)
+
+// Add restart selected refs
+const showRestartSelectedConfirm = ref(false)
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -837,6 +869,38 @@ const bulkDeleteUrlData = async () => {
     } catch (error) {
         showNotification(error.response?.data?.message || 'Error clearing selected URLs', 'error')
         showBulkDeleteConfirm.value = false
+    }
+}
+
+// Restart selected functions
+const confirmRestartSelected = () => {
+    showRestartSelectedConfirm.value = true
+}
+
+const cancelRestartSelected = () => {
+    showRestartSelectedConfirm.value = false
+    selectedUrls.value = []
+    selectAll.value = false
+}
+
+const restartSelectedUrls = async () => {
+    try {
+        const requestBody = {
+            urls: selectedUrls.value,
+            crawlId: crawlId.value,
+            selectors: crawl.value.selectors || []
+        }
+        // Make a POST request to start the crawl with selected URLs
+        const response = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
+        crawl.value.status = 'in-progress'
+        showRestartSelectedConfirm.value = false
+        selectedUrls.value = []
+        selectAll.value = false
+        showNotification(`Restarted crawl for ${requestBody.urls.length} selected URLs`, 'success')
+    } catch (error) {
+        const errMsg = error.response?.data?.error || error.message
+        showNotification(errMsg, 'error')
+        showRestartSelectedConfirm.value = false
     }
 }
 
