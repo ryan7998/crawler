@@ -6,7 +6,7 @@ const http            = require('http');
 const mongoose        = require('mongoose');
 const CrawlData       = require('./models/CrawlData');
 const Crawl           = require('./models/Crawl');
-const { extractHtml } = require('../utils/helperFunctions');
+const { extractHtml, determineCrawlStatus } = require('../utils/helperFunctions');
 const getCrawlQueue   = require('./queues/getCrawlQueue');
 const { initializeSocket, getSocket } = require('../utils/socket');
 const Seed            = require('./classes/Seed');
@@ -79,14 +79,17 @@ async function ensureProcessor(crawlId) {
     
     if (state.completed === state.total) {
       const allData = await CrawlData.find({ crawlId });
-      const hasFail = allData.some(d => d.status === 'failed');
+      
+      // Determine status based on latest attempts
+      const statusInfo = determineCrawlStatus(allData);
+      
       await Crawl.findByIdAndUpdate(crawlId, {
-        status:  hasFail ? 'failed' : 'completed',
+        status: statusInfo.status,
         endTime: new Date()
       });
       io.to(crawlIdStr).emit('crawlLog', {
-        status:  hasFail ? 'failed' : 'completed',
-        message: hasFail ? 'Some URLs failed' : 'All URLs done'
+        status: statusInfo.status,
+        message: statusInfo.status === 'failed' ? 'Some URLs failed' : 'All URLs done'
       });
       cleanupCrawl(crawlId);
     }
@@ -102,14 +105,17 @@ async function ensureProcessor(crawlId) {
     
     if (state.completed === state.total) {
       const allData = await CrawlData.find({ crawlId });
-      const hasFail = allData.some(d => d.status === 'failed');
+      
+      // Determine status based on latest attempts
+      const statusInfo = determineCrawlStatus(allData);
+      
       await Crawl.findByIdAndUpdate(crawlId, {
-        status:  hasFail ? 'failed' : 'completed',
+        status: statusInfo.status,
         endTime: new Date()
       });
       io.to(crawlIdStr).emit('crawlLog', {
-        status:  hasFail ? 'failed' : 'completed',
-        message: hasFail ? 'Some URLs failed' : 'All URLs done'
+        status: statusInfo.status,
+        message: statusInfo.status === 'failed' ? 'Some URLs failed' : 'All URLs done'
       });
       cleanupCrawl(crawlId);
     }

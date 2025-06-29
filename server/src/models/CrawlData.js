@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose')
 const Crawl = require('./Crawl') // Import the Crawl model
+const { determineCrawlStatus } = require('../../utils/helperFunctions')
 
 const CrawlDataSchema = new Schema({
     url: { type: {}, required: true },
@@ -39,14 +40,14 @@ CrawlDataSchema.post('save', async function (doc) {
         
         // If all URLs have been crawled (success or failed)
         if (allCrawlData.length === crawl.urls.length) {
-            // Check if any URLs failed
-            const hasFailures = allCrawlData.some(data => data.status === 'failed')
-            
-            // Update crawl status
-            await Crawl.findByIdAndUpdate(doc.crawlId, {
-                status: hasFailures ? 'failed' : 'completed',
-                endTime: new Date()
-            })
+          // Determine status based on latest attempts
+          const statusInfo = determineCrawlStatus(allCrawlData);
+          
+          // Update crawl status
+          await Crawl.findByIdAndUpdate(doc.crawlId, {
+            status: statusInfo.status,
+            endTime: new Date()
+          })
         }
     } catch (error) {
         console.error('Error in CrawlData post-save middleware:', error)
