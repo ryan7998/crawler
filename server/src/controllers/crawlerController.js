@@ -178,8 +178,14 @@ const getCrawler = async (req, res) => {
 const getAllCrawlers = async (req, res) => {
 
     try {
-        // Biuld the query
+        // Build the query
         let query = {}
+        
+        // Add search functionality
+        if (req.query.search) {
+            query.title = { $regex: req.query.search, $options: 'i' } // Case-insensitive search
+        }
+        
         // Implement pagination
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 20
