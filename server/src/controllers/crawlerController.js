@@ -10,21 +10,6 @@ const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
 const crawlWebsite = async (req, res) => {
     const { urls, crawlId, selectors } = req.body
 
-    // it it is a test crawl
-    if (!crawlId) {
-        try {
-            const { data } = await axios.get(urls)
-            // Extract data from HTML
-            const extractedDatum = await extractHtml(data, selectors)
-            res.json({ extractedDatum })
-
-        } catch (error) {
-            console.log('Error crawling test website: ', error.message)
-            res.status(500).json({ message: `Failed to crawl test website. ${error.message}` })
-        }
-        return
-    }
-    // else
     try {
         // Check if crawl is already in progress
         const existingCrawl = await Crawl.findById(crawlId)

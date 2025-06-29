@@ -48,7 +48,7 @@ function cleanupCrawl(crawlId) {
 }
 
 // Called once per crawlId to wire up its queue
-function ensureProcessor(crawlId) {
+async function ensureProcessor(crawlId) {
   if (activeProcessors.has(crawlId)) {
     console.log(`[${crawlId}] Processor already exists, skipping...`);
     return;
@@ -62,10 +62,13 @@ function ensureProcessor(crawlId) {
   console.log(`[${crawlId}] Setting up processor...`);
 
   // Track how many URLs this crawl has in total
-  Crawl.findById(crawlId).then(crawlDoc => {
-    activeJobs.set(crawlId, { total: crawlDoc.urls.length, completed: 0 });
-    console.log(`[${crawlId}] Tracking ${crawlDoc.urls.length} URLs`);
-  }).catch(console.error);
+  const crawl = await Crawl.findById(crawlId);
+  if (!crawl) {
+    console.error(`[${crawlId}] Crawl not found`);
+    return;
+  }
+  activeJobs.set(crawlId, { total: crawl.urls.length, completed: 0 });
+  console.log(`[${crawlId}] Tracking ${crawl.urls.length} URLs`);
 
   // Listen for completions & failures to update crawl status
   q.on('completed', async job => {
@@ -137,8 +140,8 @@ function ensureProcessor(crawlId) {
       const crawlThrottle = getThrottle(crawlId)
       const throttled = crawlThrottle(async () => await seed.loadHTMLContent())
       const html = await throttled()
-      console.log(`[${crawlId}] Loaded HTML content for ${url}`);
-      const data = await extractHtml(html, (await Crawl.findById(crawlId)).selectors);
+      console.log(`[${crawlId}] Loaded HTML content for ${url}, Extracting Data...`);
+      const data = await extractHtml(html, (crawl.selectors));
 
       // Save to database
       const newCrawlData = new CrawlData({ url, data, crawlId, status: 'success' })
