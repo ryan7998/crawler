@@ -195,7 +195,7 @@
                                 </td>
                                 <td>
                                     <v-progress-circular
-                                        v-if="liveStatusDictionary?.[url] === 'started'"
+                                        v-if="liveStatusDictionary?.[url] === 'started' && crawl?.status !== 'completed' && crawl?.status !== 'failed'"
                                         indeterminate
                                         color="primary"
                                     />
@@ -322,7 +322,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, inject, computed } from 'vue'
+import { onMounted, ref, watch, inject, computed, onUnmounted } from 'vue'
 import { io } from "socket.io-client"
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
@@ -371,6 +371,38 @@ const selectAll = ref(false)
 // Inject the notification function
 const showNotification = inject('showNotification')
 
+// Function to clear live status dictionary
+const clearLiveStatusDictionary = () => {
+    liveStatusDictionary.value = {};
+}
+
+// Function to update live status for a specific URL
+const updateLiveStatus = (url, status) => {
+    if (url) {
+        liveStatusDictionary.value[url] = status;
+    }
+}
+
+// Watch for crawl status changes to clear live status when crawl completes
+watch(() => crawl.value?.status, (newStatus) => {
+    if (newStatus === 'completed' || newStatus === 'failed') {
+        // Clear all 'started' statuses when crawl completes
+        Object.keys(liveStatusDictionary.value).forEach(url => {
+            if (liveStatusDictionary.value[url] === 'started') {
+                // Check if this URL has a final status in aggregatedData
+                const urlData = crawl.value.aggregatedData[url];
+                if (urlData && urlData.length > 0) {
+                    const lastEntry = urlData[urlData.length - 1];
+                    liveStatusDictionary.value[url] = lastEntry.status;
+                } else {
+                    // If no data, mark as failed
+                    liveStatusDictionary.value[url] = 'failed';
+                }
+            }
+        });
+    }
+});
+
 // Computed properties
 const hasCrawlData = computed(() => {
     if (!crawl.value?.aggregatedData) return false
@@ -411,20 +443,25 @@ const fetchCrawlData = async () => {
             // Initialize excerpt
             excerpts.value[url] = useExcerpts(ref(url), 30)
         })
+
+        // Clear any stale 'started' statuses if crawl is completed
+        if (crawl.value.status === 'completed' || crawl.value.status === 'failed') {
+            clearLiveStatusDictionary()
+        }
     } catch (error) {
         errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
     }
 }
 
 // Function to check queue status
-const checkQueueStatus = async () => {
-    try {
-        const response = await axios.get(`${apiUrl}/api/queuestatus/${crawlId.value}`)
-        queueStatus.value = response.data
-    } catch (error) {
-        console.error('Error checking queue status:', error)
-    }
-}
+// const checkQueueStatus = async () => {
+//     try {
+//         const response = await axios.get(`${apiUrl}/api/queuestatus/${crawlId.value}`)
+//         queueStatus.value = response.data
+//     } catch (error) {
+//         console.error('Error checking queue status:', error)
+//     }
+// }
 
 // Initialize Socket.io connection on component mount
 onMounted(async () => {
@@ -443,7 +480,7 @@ onMounted(async () => {
         })
         
         await fetchCrawlData()
-        await checkQueueStatus()  // Check initial queue status
+        // await checkQueueStatus()  // Check initial queue status
 
         // Join the room for the specific crawl ID
         socket.value.emit('joinCrawl', crawlId.value)
@@ -456,17 +493,30 @@ onMounted(async () => {
             // Update crawl status if it's a final status update
             if (data.status === 'completed' || data.status === 'failed') {
                 crawl.value.status = data.status
-                await checkQueueStatus()  // Check queue status when crawl completes
-            } else {
-                // Update individual URL status
-                liveStatusDictionary.value[data.url] = data.status
+                // Clear all 'started' statuses when crawl completes
+                Object.keys(liveStatusDictionary.value).forEach(url => {
+                    if (liveStatusDictionary.value[url] === 'started') {
+                        // Check if this URL has a final status in aggregatedData
+                        const urlData = crawl.value.aggregatedData[url];
+                        if (urlData && urlData.length > 0) {
+                            const lastEntry = urlData[urlData.length - 1];
+                            liveStatusDictionary.value[url] = lastEntry.status;
+                        } else {
+                            // If no data, mark as failed
+                            liveStatusDictionary.value[url] = 'failed';
+                        }
+                    }
+                });
+            } else if (data.url) {
+                // Update individual URL status using helper function
+                updateLiveStatus(data.url, data.status);
             }
 
             // Append new crawled data into FE rather than making a new api call
             if (data.status === 'success') {
                 crawl.value.aggregatedData[data.url]
                     .push({ data: data.result, date: new Date(), status: data.status })
-                await checkQueueStatus()  // Check queue status after each successful crawl
+                // await checkQueueStatus()  // Check queue status after each successful crawl
             }
         })
 
@@ -486,6 +536,17 @@ onMounted(async () => {
         console.error('Socket initialization error:', error)
         errorMessage.value = error.response ? error.response.data.message : 'Error initializing socket connection'
     }
+})
+
+// Cleanup function when component unmounts
+onUnmounted(() => {
+    if (socket.value) {
+        console.log('Cleaning up socket connection...')
+        socket.value.disconnect()
+        socket.value = null
+    }
+    // Clear live status dictionary
+    clearLiveStatusDictionary()
 })
 
 const configureCrawl = () => {
@@ -621,10 +682,18 @@ const prepareExportData = () => {
                 'Status': entry.status
             }
 
+            // Add error message if available
+            if (entry.error) {
+                row['Error Message'] = entry.error
+            }
+
             // Add data if available - flatten nested objects
-            if (entry.data) {
+            if (entry.data && typeof entry.data === 'object') {
                 const flattenedData = flattenObject(entry.data)
                 Object.assign(row, flattenedData)
+            } else if (entry.data) {
+                // If data is a simple value, add it directly
+                row['Data'] = entry.data
             }
 
             exportData.push(row)

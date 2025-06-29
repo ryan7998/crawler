@@ -12,12 +12,33 @@
                 <thead>
                     <tr>
                         <th>Date</th>
+                        <th>Status</th>
+                        <th v-if="hasErrors">Error Message</th>
                         <th v-for="key in allKeys" :key="key">{{ formatKey(key) }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="row in tableData" :key="row.date">
                         <td>{{ formatDateTime(row.date) }}</td>
+                        <td>
+                            <v-chip 
+                                :color="row.status === 'success' ? 'success' : 'error'" 
+                                size="small"
+                            >
+                                {{ row.status }}
+                            </v-chip>
+                        </td>
+                        <td v-if="hasErrors">
+                            <v-alert 
+                                v-if="row.error" 
+                                type="error" 
+                                variant="tonal" 
+                                density="compact"
+                                class="ma-0 pa-2"
+                            >
+                                {{ row.error }}
+                            </v-alert>
+                        </td>
                         <td v-for="key in allKeys" :key="key">
                             <template v-if="Array.isArray(row.data[key])">
                                 <v-list>
@@ -56,6 +77,12 @@ const formatKey = (key) => {
         .join(' ')
 }
 
+// Check if any entries have errors
+const hasErrors = computed(() => {
+    if (!props.data || !Array.isArray(props.data)) return false
+    return props.data.some(item => item.error)
+})
+
 // Get all unique keys from all data objects
 const allKeys = computed(() => {
     if (!props.data) return []
@@ -87,6 +114,8 @@ const tableData = computed(() => {
     
     return props.data.map(item => ({
         date: item.date,
+        status: item.status,
+        error: item.error,
         data: item.data || {}
     }))
 })
