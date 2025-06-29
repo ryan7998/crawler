@@ -238,6 +238,17 @@ class Seed {
                 this.htmlfileLocation = htmlPath
                 
                 this.cleanHtmlContent = cleanHtmlContent
+                
+                // Clean up browser resources to prevent page errors
+                if (browser) {
+                    try {
+                        await browser.close();
+                        browser = null;
+                    } catch (closeError) {
+                        console.error('Error closing browser:', closeError);
+                    }
+                }
+                
                 return this.cleanHtmlContent
 
             } catch (err) {
