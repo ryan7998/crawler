@@ -154,6 +154,22 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Advanced Section -->
+                            <v-expansion-panels class="mt-6">
+                                <v-expansion-panel>
+                                    <v-expansion-panel-title>Advanced</v-expansion-panel-title>
+                                    <v-expansion-panel-text>
+                                        <v-textarea
+                                            v-model="advancedSelectorsText"
+                                            label="Advanced CSS Selectors (one per line)"
+                                            hint="These selectors will be used to scope captcha checks. If a captcha is inside any of these, it will be ignored."
+                                            persistent-hint
+                                            rows="3"
+                                            auto-grow
+                                        ></v-textarea>
+                                    </v-expansion-panel-text>
+                                </v-expansion-panel>
+                            </v-expansion-panels>
                         </v-stepper-window-item>
                     </v-stepper-window>
                 </v-stepper>
@@ -241,6 +257,7 @@ const domainInfo = ref(null)
 // Add new refs for selectors
 const localSelectors = ref([])
 const currentSelectors = ref([])
+const advancedSelectorsText = ref('')
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -264,11 +281,13 @@ const initializeForm = () => {
                 type: child.type || 'text',
                 attribute: child.attribute || null
             }))
-        })) || []
+        })) || [],
+        advancedSelectorsText.value = (props.crawlData.advancedSelectors || []).join('\n')
     } else {
         title.value = ''
         urlsText.value = ''
         currentSelectors.value = []
+        advancedSelectorsText.value = ''
     }
 }
 
@@ -516,6 +535,10 @@ const handleSubmit = async () => {
                     attribute: child.attribute
                 })) || []
             })),
+            advancedSelectors: advancedSelectorsText.value
+                .split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0),
             userId: '1'
         }
 

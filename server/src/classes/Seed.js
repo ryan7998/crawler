@@ -5,8 +5,8 @@ const fs = require('fs')
 const ErrorHandler = require('./ErrorHandler')
 
 class Seed {
-    constructor(url) {
-        this.url = url.url;
+    constructor({ url, advancedSelectors = [] }) {
+        this.url = url;
         this.protocol = this.extractProtocol()
         this.hostname = this.extractHostname()
         this.path = this.extractPath()
@@ -18,6 +18,7 @@ class Seed {
         this.errorHandler = new ErrorHandler()
         this.useProxy = false // Flag to enable/disable proxy
         this.proxyConfig = null // Will store proxy configuration
+        this.advancedSelectors = advancedSelectors;
     }
 
     async initialize() {
@@ -121,7 +122,9 @@ class Seed {
                         route.continue();
                     }
                 });
-                
+                // page.on('console', msg => {
+                //     console.log('[BROWSER LOG]', msg.text());
+                // });
                 // Add page-level error handling
                 page.on('error', (err) => {
                     console.log('Page error:', err.message);
@@ -199,12 +202,6 @@ class Seed {
                 // Wait a bit for dynamic content to load
                 // await page.waitForTimeout(5000);
                 
-                // Check for captcha or anti-bot mechanisms using ErrorHandler
-                const antiBotDetection = await this.errorHandler.detectAntiBotMechanisms(page);
-                if (antiBotDetection) {
-                    throw new Error(`Anti-bot mechanism detected: ${antiBotDetection}`);
-                }
-                
                 // For Amazon, wait for specific elements to load
                 if (this.hostname && this.hostname.includes('amazon')) {
                     try {
@@ -223,6 +220,12 @@ class Seed {
                 // Check if the page content indicates an error using ErrorHandler
                 const contentAnalysis = this.errorHandler.analyzePageContent(htmlContent);
                 if (contentAnalysis.error) {
+                    // Check for captcha or anti-bot mechanisms using ErrorHandler
+                    const antiBotDetection = await this.errorHandler.detectAntiBotMechanisms(page, this.advancedSelectors);
+                    if (antiBotDetection) {
+                        throw new Error(`Anti-bot mechanism detected: ${antiBotDetection}`);
+                    }
+
                     // Create a custom error object that preserves contentAnalysis
                     const contentError = new Error(contentAnalysis.error);
                     contentError.contentAnalysis = contentAnalysis;
@@ -293,7 +296,7 @@ class Seed {
                 // Check if we should retry with proxy
                 if (errorAnalysis.retryWithProxy && !this.useProxy) {
                     console.log('Error suggests retry with proxy. Enabling proxy for next attempt...');
-                    this.enableProxy(); // Enable proxy with default configuration
+                    // this.enableProxy(); // Enable proxy with default configuration
                 }
                 
                 // Increment attempt counter and retry

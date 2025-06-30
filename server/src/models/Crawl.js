@@ -33,6 +33,10 @@ const crawlSchema = new Schema({
         required: true 
     },
     selectors: [selectorSchema], // Array of selector objects with child selectors
+    advancedSelectors: {
+        type: [String], // Array of advanced CSS selectors
+        default: []
+    },
     userId: {
         type: String, // Placeholder for userId
         required: true,

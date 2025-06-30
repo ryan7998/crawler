@@ -52,7 +52,7 @@ const crawlWebsite = async (req, res) => {
 }
 
 const createCrawler = async (req, res) => {
-    const { title, urls, selectors, userId } = req.body
+    const { title, urls, selectors, userId, advancedSelectors } = req.body
 
     try {
         // Create new crawl entry
@@ -60,6 +60,7 @@ const createCrawler = async (req, res) => {
             title,
             urls: urls.map(url => url.trim()), // Convert to array of strings
             selectors: selectors || [], // Use provided selectors or empty array
+            advancedSelectors: advancedSelectors || [],
             userId,
             status: 'pending',
         })
@@ -74,7 +75,7 @@ const createCrawler = async (req, res) => {
 
 const updateCrawler = async (req, res) => {
     const { id } = req.params
-    const { title, urls, selectors } = req.body
+    const { title, urls, selectors, advancedSelectors } = req.body
 
     // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -90,6 +91,7 @@ const updateCrawler = async (req, res) => {
         if (title) crawl.title = title
         if (urls) crawl.urls = urls.map(url => url.trim())
         if (selectors) crawl.selectors = selectors
+        if (advancedSelectors) crawl.advancedSelectors = advancedSelectors
 
         const updatedCrawl = await crawl.save()
         res.status(200).json({ message: 'Crawl updated successfully', crawl: updatedCrawl })
