@@ -11,6 +11,32 @@
             </v-btn>
         </div>
         
+        <!-- Search Bar -->
+        <v-card class="mb-4 pa-4">
+            <div class="d-flex align-center">
+                <v-text-field
+                    v-model="searchQuery"
+                    label="Search crawls by name"
+                    prepend-inner-icon="mdi-magnify"
+                    variant="outlined"
+                    clearable
+                    hide-details
+                    class="flex-grow-1 mr-4"
+                    :loading="isSearching"
+                    @update:model-value="handleSearch"
+                    @click:clear="handleSearch"
+                />
+                <v-chip
+                    v-if="searchQuery"
+                    color="primary"
+                    variant="outlined"
+                    class="ml-2"
+                >
+                    {{ totalCrawls }} result{{ totalCrawls !== 1 ? 's' : '' }}
+                </v-chip>
+            </div>
+        </v-card>
+        
         <v-data-table-server
             :headers="headers"
             :items="crawls"
@@ -18,6 +44,19 @@
             :items-length="totalCrawls"              
             hover
         >
+            <!-- No results message -->
+            <template v-slot:no-data>
+                <div class="text-center pa-4">
+                    <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-magnify</v-icon>
+                    <p class="text-h6 text-grey-darken-1">
+                        {{ searchQuery ? `No crawls found matching "${searchQuery}"` : 'No crawls found' }}
+                    </p>
+                    <p class="text-body-2 text-grey">
+                        {{ searchQuery ? 'Try adjusting your search terms' : 'Create your first crawl to get started' }}
+                    </p>
+                </div>
+            </template>
+            
             <!-- Custom cell for Actions column -->
             <template v-slot:item.actions="{ item }">
                 <v-btn
@@ -107,17 +146,43 @@ const crawls = ref([])
 const showModal = ref(false)
 const selectedCrawl = ref(null)
 
-// Fetch crawls with pagination
+// Search query
+const searchQuery = ref('')
+const isSearching = ref(false)
+
+// Debounced search function
+let searchTimeout = null
+
+// Fetch crawls with pagination and search
 const fetchCrawls = async () => {
     try {
+        isSearching.value = true
         const { page, itemsPerPage } = options.value
-        const response = await axios.get(`${getApiUrl()}/api/getallcrawlers?page=${page}&limit=${itemsPerPage}`)
+        const searchParam = searchQuery.value ? `&search=${encodeURIComponent(searchQuery.value)}` : ''
+        const response = await axios.get(`${getApiUrl()}/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`)
         crawls.value = response.data.crawls
         totalCrawls.value = response.data.totalCrawls
     } catch (error) {
         console.error('Error fetching crawls:', error)
         showNotification('Error fetching crawls', 'error')
+    } finally {
+        isSearching.value = false
     }
+}
+
+// Handle search with debouncing
+const handleSearch = () => {
+    // Clear existing timeout
+    if (searchTimeout) {
+        clearTimeout(searchTimeout)
+    }
+    
+    // Set new timeout for debounced search
+    searchTimeout = setTimeout(() => {
+        // Reset to first page when searching
+        options.value.page = 1
+        fetchCrawls()
+    }, 300) // 300ms delay
 }
 
 // Watch for changes in options to fetch data

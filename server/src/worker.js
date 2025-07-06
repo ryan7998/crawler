@@ -140,7 +140,7 @@ async function ensureProcessor(crawlId) {
       await new Promise(r => setTimeout(r, 1000 + Math.random()*2000));
 
       // Playwright or axios fetch
-      const seed = new Seed({ url });
+      const seed = new Seed({ url, advancedSelectors: crawl.advancedSelectors });
       if (!seed.isValid()) throw new Error(`Invalid URL: ${url}`);
 
       const crawlThrottle = getThrottle(crawlId)
