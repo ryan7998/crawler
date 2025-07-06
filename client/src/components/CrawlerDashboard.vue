@@ -52,6 +52,25 @@
                             <v-list-item-subtitle>{{ formatDateTime(crawl.endTime) }}</v-list-item-subtitle>
                         </v-list-item>
                     </v-list>
+                    
+                    <!-- Latest Export Link -->
+                    <div v-if="latestExportLink" class="mt-4 pt-4 border-t border-gray-200">
+                        <h6 class="font-semibold text-gray-700 mb-2">Latest Export</h6>
+                        <v-btn
+                            :href="latestExportLink"
+                            target="_blank"
+                            variant="outlined"
+                            color="success"
+                            size="small"
+                            class="w-full"
+                        >
+                            <v-icon start icon="mdi-google-drive" />
+                            Open Google Sheet
+                        </v-btn>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Exported: {{ formatDateTime(latestExportDate) }}
+                        </div>
+                    </div>
                 </div>
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h6 class="font-semibold text-gray-700 mb-4">Actions</h6>
@@ -134,39 +153,16 @@
                                 </span>
                             </div>
                             <!-- Export Button -->
-                            <div class="relative">
-                                <v-btn
-                                    variant="outlined"
-                                    color="success"
-                                    size="small"
-                                    @click="showExportMenu = true"
-                                >
-                                    <v-icon start icon="mdi-download" />
-                                    Export
-                                </v-btn>
-                                <v-menu
-                                    v-model="showExportMenu"
-                                    :close-on-content-click="false"
-                                    location="bottom end"
-                                >
-                                    <v-card min-width="200">
-                                        <v-list>
-                                            <v-list-item @click="exportToCSV">
-                                                <template v-slot:prepend>
-                                                    <v-icon icon="mdi-file-delimited" />
-                                                </template>
-                                                <v-list-item-title>Export as CSV</v-list-item-title>
-                                            </v-list-item>
-                                            <v-list-item @click="exportToExcel">
-                                                <template v-slot:prepend>
-                                                    <v-icon icon="mdi-microsoft-excel" />
-                                                </template>
-                                                <v-list-item-title>Export as Excel</v-list-item-title>
-                                            </v-list-item>
-                                        </v-list>
-                                    </v-card>
-                                </v-menu>
-                            </div>
+                            <v-btn
+                                variant="outlined"
+                                color="success"
+                                size="small"
+                                @click="showExportModal = true"
+                                :disabled="!hasCrawlData"
+                            >
+                                <v-icon start icon="mdi-download" />
+                                Export with Changes
+                            </v-btn>
                         </div>
                     </div>
                     <v-table>
@@ -339,6 +335,14 @@
             @error="handleModalError"
         />
 
+        <!-- Add ExportModal -->
+        <ExportModal
+            v-model="showExportModal"
+            :crawl-id="crawlId"
+            :crawl-title="crawl?.title"
+            @export-success="handleExportSuccess"
+        />
+
         <!-- Add Snackbar -->
         <v-snackbar
             v-model="showSnackbar"
@@ -362,6 +366,7 @@ import SlideOver from './SlideOver.vue'
 import { getStatusColor } from '../utils/statusUtils'
 import { getApiUrl, getSocketUrl, formatDateTime } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
+import ExportModal from './ExportModal.vue'
 import * as XLSX from 'xlsx'
 
 const baseUrl = getApiUrl()
@@ -399,6 +404,10 @@ const selectAll = ref(false)
 
 // Add restart selected refs
 const showRestartSelectedConfirm = ref(false)
+
+// Add export tracking refs
+const latestExportLink = ref('')
+const latestExportDate = ref(null)
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -513,6 +522,18 @@ onMounted(async () => {
         
         await fetchCrawlData()
         // await checkQueueStatus()  // Check initial queue status
+
+        // Load saved export link from localStorage
+        const savedExport = localStorage.getItem(`export_${crawlId.value}`)
+        if (savedExport) {
+            try {
+                const exportData = JSON.parse(savedExport)
+                latestExportLink.value = exportData.sheetUrl
+                latestExportDate.value = new Date(exportData.exportDate)
+            } catch (error) {
+                console.error('Error loading saved export data:', error)
+            }
+        }
 
         // Join the room for the specific crawl ID
         socket.value.emit('joinCrawl', crawlId.value)
@@ -636,6 +657,20 @@ const handleModalError = (errorMessage) => {
     snackbarColor.value = 'error'
 }
 
+// Handle successful export
+const handleExportSuccess = (exportResult) => {
+    latestExportLink.value = exportResult.sheetUrl
+    latestExportDate.value = exportResult.exportDate
+    
+    // Save to localStorage for persistence
+    localStorage.setItem(`export_${crawlId.value}`, JSON.stringify({
+        sheetUrl: exportResult.sheetUrl,
+        exportDate: exportResult.exportDate
+    }))
+    
+    showNotification('Export completed successfully!', 'success')
+}
+
 // Function to format selectors for better readability in exports
 const formatSelectors = (selectors) => {
     if (!selectors || !Array.isArray(selectors)) return ''
@@ -741,59 +776,8 @@ const prepareExportData = () => {
     })
 }
 
-// Function to export to CSV
-const exportToCSV = () => {
-    const data = prepareExportData()
-    if (!data.length) {
-        showNotification('No data available to export', 'error')
-        return
-    }
-
-    const headers = Object.keys(data[0])
-    const csvContent = [
-        headers.join(','),
-        ...data.map(row => headers.map(header => {
-            const value = row[header]
-            // Convert all values to strings and escape properly
-            let stringValue = ''
-            if (value === null || value === undefined) {
-                stringValue = ''
-            } else if (typeof value === 'object') {
-                stringValue = JSON.stringify(value)
-            } else {
-                stringValue = String(value)
-            }
-            // Escape commas, quotes, and newlines in the value
-            return `"${stringValue.replace(/"/g, '""').replace(/\n/g, ' ').replace(/\r/g, ' ')}"`
-        }).join(','))
-    ].join('\n')
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = `crawl_results_${crawlId.value}_${new Date().toISOString().split('T')[0]}.csv`
-    link.click()
-    showExportMenu.value = false
-    showNotification('CSV file exported successfully', 'success')
-}
-
-// Function to export to Excel
-const exportToExcel = () => {
-    const data = prepareExportData()
-    if (!data.length) {
-        showNotification('No data available to export', 'error')
-        return
-    }
-
-    const worksheet = XLSX.utils.json_to_sheet(data)
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Crawl Results')
-    
-    // Generate Excel file
-    XLSX.writeFile(workbook, `crawl_results_${crawlId.value}_${new Date().toISOString().split('T')[0]}.xlsx`)
-    showExportMenu.value = false
-    showNotification('Excel file exported successfully', 'success')
-}
+// Export modal state
+const showExportModal = ref(false)
 
 // Delete crawl data functions
 const confirmDeleteCrawlData = () => {

@@ -10,3 +10,4 @@ client/node_modules
 server/files
 client/files
 server/KEYS
+server/google-credentials.json
