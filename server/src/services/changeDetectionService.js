@@ -5,7 +5,7 @@ class ChangeDetectionService {
     /**
      * Compare current crawl data with previous crawl data
      * @param {string} crawlId - The crawl ID to analyze
-     * @param {string} compareWith - Optional: specific crawl ID to compare with (defaults to previous)
+     * @param {string} compareWith - Optional: specific crawl ID to compare with (defaults to previous run)
      * @returns {Object} Change analysis results
      */
     async detectChanges(crawlId, compareWith = null) {
@@ -16,27 +16,30 @@ class ChangeDetectionService {
                 throw new Error('Crawl not found');
             }
 
-            // Get all crawl data for this crawl
-            const currentCrawlData = await CrawlData.find({ crawlId })
+            // Get all crawl data for this crawl, sorted by creation time (newest first)
+            const allCrawlData = await CrawlData.find({ crawlId })
                 .sort({ createdAt: -1 });
 
-            // Group by URL and get latest data for each URL
-            const currentDataByUrl = this.groupByUrlAndGetLatest(currentCrawlData);
+            if (allCrawlData.length === 0) {
+                throw new Error('No crawl data found for this crawl');
+            }
+
+            // Group by URL and get the latest data for each URL (most recent run)
+            const currentDataByUrl = this.groupByUrlAndGetLatest(allCrawlData);
 
             // Get previous crawl data for comparison
             let previousDataByUrl = {};
             if (compareWith) {
-                // Compare with specific crawl
+                // Compare with specific crawl (manual selection)
                 const previousCrawlData = await CrawlData.find({ crawlId: compareWith })
                     .sort({ createdAt: -1 });
                 previousDataByUrl = this.groupByUrlAndGetLatest(previousCrawlData);
             } else {
-                // Compare with previous crawl attempt (same crawl, different run)
-                const previousCrawlData = await CrawlData.find({ 
-                    crawlId,
-                    createdAt: { $lt: currentCrawl.startTime }
-                }).sort({ createdAt: -1 });
-                previousDataByUrl = this.groupByUrlAndGetLatest(previousCrawlData);
+                // Automatically compare with the previous run of the same crawl
+                const previousRunData = await this.getPreviousRunData(crawlId, allCrawlData);
+                if (previousRunData.length > 0) {
+                    previousDataByUrl = this.groupByUrlAndGetLatest(previousRunData);
+                }
             }
 
             // Analyze changes
@@ -51,7 +54,13 @@ class ChangeDetectionService {
                 removedUrls: changes.removedUrls.length,
                 unchangedUrls: changes.unchangedUrls.length,
                 changes: changes,
-                summary: this.generateSummary(changes)
+                summary: this.generateSummary(changes),
+                comparisonInfo: {
+                    currentRunDate: allCrawlData[0]?.createdAt,
+                    previousRunDate: Object.keys(previousDataByUrl).length > 0 ? 
+                        Math.max(...Object.values(previousDataByUrl).map(d => d.createdAt)) : null,
+                    hasPreviousRun: Object.keys(previousDataByUrl).length > 0
+                }
             };
 
         } catch (error) {
@@ -329,18 +338,31 @@ class ChangeDetectionService {
             }
         });
 
-        // Process changed URLs
+        // Process changed URLs - show as two separate rows: removed and new
         changes.changedUrls.forEach(item => {
             item.fieldChanges.forEach(change => {
+                // First row: Previous value as "Removed" (highlighted in red)
+                rows.push([
+                    item.url,
+                    change.field,
+                    '', // Current value empty for removed row
+                    change.previousValue,
+                    'Removed',
+                    'removed',
+                    '', // Current date empty for removed row
+                    item.previousDate
+                ]);
+                
+                // Second row: Current value as "New" (highlighted in green)
                 rows.push([
                     item.url,
                     change.field,
                     change.currentValue,
-                    change.previousValue,
-                    'Changed',
-                    change.changeType,
+                    '', // Previous value empty for new row
+                    'New',
+                    'new',
                     item.currentDate,
-                    item.previousDate
+                    '' // Previous date empty for new row
                 ]);
             });
         });
@@ -364,6 +386,36 @@ class ChangeDetectionService {
         });
 
         return rows;
+    }
+
+    /**
+     * Get data from the previous run of the same crawl
+     * @param {string} crawlId - The crawl ID
+     * @param {Array} allCrawlData - All crawl data sorted by createdAt desc
+     * @returns {Array} Previous run data
+     */
+    async getPreviousRunData(crawlId, allCrawlData) {
+        if (allCrawlData.length === 0) {
+            return [];
+        }
+
+        // Find the most recent data entry
+        const mostRecentEntry = allCrawlData[0];
+        const mostRecentTime = mostRecentEntry.createdAt;
+
+        // Find all data entries that are older than the most recent entry
+        // This represents the previous run(s)
+        const previousRunData = allCrawlData.filter(entry => 
+            entry.createdAt < mostRecentTime
+        );
+
+        // If we have previous run data, return it
+        if (previousRunData.length > 0) {
+            return previousRunData;
+        }
+
+        // If no previous run data found, return empty array
+        return [];
     }
 }
 

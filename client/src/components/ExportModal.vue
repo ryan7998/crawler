@@ -20,14 +20,20 @@
                                 Change Detection Options
                             </v-expansion-panel-title>
                             <v-expansion-panel-text>
+                                <v-alert type="info" variant="tonal" class="mb-3">
+                                    <div class="text-body-2">
+                                        <strong>Automatic Comparison:</strong> The system will automatically compare the most recent run with the previous run of this crawl.
+                                    </div>
+                                </v-alert>
+                                
                                 <v-select
                                     v-model="compareWith"
                                     :items="availableCrawls"
                                     item-title="title"
                                     item-value="_id"
-                                    label="Compare with previous crawl (optional)"
+                                    label="Compare with different crawl (optional)"
                                     clearable
-                                    hint="Leave empty to compare with previous attempt of the same crawl"
+                                    hint="Leave empty for automatic comparison with previous run, or select a specific crawl to compare with"
                                     persistent-hint
                                 />
 
@@ -70,11 +76,34 @@
                     <div v-if="changeAnalysis" class="mb-4">
                         <v-alert type="info" variant="tonal">
                             <div class="text-h6 mb-2">Change Summary</div>
+                            
+                            <!-- Comparison Info -->
+                            <div v-if="changeAnalysis.comparisonInfo" class="mb-3">
+                                <div class="text-body-2">
+                                    <strong>Comparison:</strong> 
+                                    <span v-if="changeAnalysis.comparisonInfo.hasPreviousRun">
+                                        Most recent run vs Previous run
+                                    </span>
+                                    <span v-else class="text-warning">
+                                        No previous run found for comparison
+                                    </span>
+                                </div>
+                                <div v-if="changeAnalysis.comparisonInfo.currentRunDate" class="text-caption">
+                                    Current run: {{ new Date(changeAnalysis.comparisonInfo.currentRunDate).toLocaleString() }}
+                                </div>
+                                <div v-if="changeAnalysis.comparisonInfo.previousRunDate" class="text-caption">
+                                    Previous run: {{ new Date(changeAnalysis.comparisonInfo.previousRunDate).toLocaleString() }}
+                                </div>
+                            </div>
+                            
                             <div class="d-flex justify-space-between">
                                 <span>Total URLs: {{ changeAnalysis.totalUrls }}</span>
                                 <span>Changed: {{ changeAnalysis.changedUrls }}</span>
                                 <span>New: {{ changeAnalysis.newUrls }}</span>
                                 <span>Removed: {{ changeAnalysis.removedUrls }}</span>
+                            </div>
+                            <div class="mt-2 text-caption">
+                                <strong>Note:</strong> Changes will be shown as separate "Removed" (red) and "New" (green) rows in the export.
                             </div>
                             <div class="mt-2">
                                 Change Percentage: {{ changeAnalysis.summary?.changePercentage }}%
