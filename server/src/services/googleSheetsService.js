@@ -78,10 +78,20 @@ class GoogleSheetsService {
                 );
             }
 
+            // Generate sheet title with comparison info
+            let finalSheetTitle = sheetTitle;
+            if (!finalSheetTitle) {
+                if (changeAnalysis.comparisonInfo?.hasPreviousRun) {
+                    finalSheetTitle = `Crawl Changes - ${changeAnalysis.crawlTitle} (vs Previous Run)`;
+                } else {
+                    finalSheetTitle = `Crawl Data - ${changeAnalysis.crawlTitle} (No Previous Run)`;
+                }
+            }
+
             // Create or update Google Sheet
             let spreadsheetId = existingSheetId;
             if (!spreadsheetId || !updateExisting) {
-                spreadsheetId = await this.createNewSheet(sheetTitle || `Crawl Changes - ${changeAnalysis.crawlTitle}`);
+                spreadsheetId = await this.createNewSheet(finalSheetTitle);
             }
 
             // Write data to sheet
@@ -239,28 +249,7 @@ class GoogleSheetsService {
                 }
             });
 
-            // Yellow for Changed
-            requests.push({
-                addConditionalFormatRule: {
-                    rule: {
-                        ranges: [{
-                            sheetId: sheetId,
-                            startRowIndex: 1,
-                            startColumnIndex: 4,
-                            endColumnIndex: 5
-                        }],
-                        booleanRule: {
-                            condition: {
-                                type: 'TEXT_EQ',
-                                values: [{ userEnteredValue: 'Changed' }]
-                            },
-                            format: {
-                                backgroundColor: { red: 1, green: 0.9, blue: 0.8 }
-                            }
-                        }
-                    }
-                }
-            });
+            // Note: Removed "Changed" formatting since changes are now shown as separate "Removed" and "New" rows
 
             // Red for Removed
             requests.push({
@@ -328,6 +317,11 @@ class GoogleSheetsService {
                 ['Crawl ID', changeAnalysis.crawlId],
                 ['Export Date', new Date().toISOString()],
                 [''],
+                ['Comparison Information'],
+                ['Comparison Type', changeAnalysis.comparisonInfo?.hasPreviousRun ? 'Most Recent vs Previous Run' : 'No Previous Run Available'],
+                ['Current Run Date', changeAnalysis.comparisonInfo?.currentRunDate ? new Date(changeAnalysis.comparisonInfo.currentRunDate).toLocaleString() : 'N/A'],
+                ['Previous Run Date', changeAnalysis.comparisonInfo?.previousRunDate ? new Date(changeAnalysis.comparisonInfo.previousRunDate).toLocaleString() : 'N/A'],
+                [''],
                 ['Statistics'],
                 ['Total URLs', changeAnalysis.totalUrls],
                 ['Changed URLs', changeAnalysis.changedUrls],
@@ -336,12 +330,18 @@ class GoogleSheetsService {
                 ['Unchanged URLs', changeAnalysis.unchangedUrls],
                 ['Change Percentage', `${changeAnalysis.summary.changePercentage}%`],
                 [''],
+                ['Export Format'],
+                ['Changes Display', 'Each change shown as separate "Removed" and "New" rows'],
+                ['Removed Rows', 'Highlighted in red'],
+                ['New Rows', 'Highlighted in green'],
+                [''],
                 ['Change Breakdown'],
                 ['Type', 'Count', 'Percentage'],
-                ['Changed', changeAnalysis.changedUrls, `${((changeAnalysis.changedUrls / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
-                ['New', changeAnalysis.newUrls, `${((changeAnalysis.newUrls / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
-                ['Removed', changeAnalysis.removedUrls, `${((changeAnalysis.removedUrls / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
-                ['Unchanged', changeAnalysis.unchangedUrls, `${((changeAnalysis.unchangedUrls / changeAnalysis.totalUrls) * 100).toFixed(1)}%`]
+                ['New (including changes)', changeAnalysis.newUrls + changeAnalysis.changedUrls, `${(((changeAnalysis.newUrls + changeAnalysis.changedUrls) / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
+                ['Removed (including changes)', changeAnalysis.removedUrls + changeAnalysis.changedUrls, `${(((changeAnalysis.removedUrls + changeAnalysis.changedUrls) / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
+                ['Unchanged', changeAnalysis.unchangedUrls, `${((changeAnalysis.unchangedUrls / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
+                [''],
+                ['Note', 'Changes are shown as separate "Removed" and "New" rows']
             ];
 
             // Write summary data

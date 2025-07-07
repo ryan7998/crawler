@@ -42,6 +42,9 @@ const CrawlData = require('../models/CrawlData');
 /**
  * Export crawl data with change tracking to Google Sheets
  * POST /api/export/google-sheets/:crawlId
+ * 
+ * By default, automatically compares the most recent run with the previous run of the same crawl.
+ * Use compareWith parameter to compare with a specific different crawl.
  */
 router.post('/google-sheets/:crawlId', async (req, res) => {
     try {
@@ -92,6 +95,9 @@ router.post('/google-sheets/:crawlId', async (req, res) => {
 /**
  * Get change analysis for a crawl
  * GET /api/export/changes/:crawlId
+ * 
+ * By default, automatically compares the most recent run with the previous run of the same crawl.
+ * Use compareWith query parameter to compare with a specific different crawl.
  */
 router.get('/changes/:crawlId', async (req, res) => {
     console.log('🔍 Changes route hit:', req.params, req.query);
