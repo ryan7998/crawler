@@ -972,6 +972,47 @@ class GoogleSheetsOAuth2Service {
             console.error('Error applying global summary formatting:', error);
         }
     }
+
+    /**
+     * Get Google Drive storage quota information
+     */
+    async getDriveStorageQuota() {
+        try {
+            if (!this.isAuthenticated()) {
+                return {
+                    error: 'OAuth2 authentication required'
+                };
+            }
+
+            const about = await this.drive.about.get({
+                fields: 'storageQuota,user'
+            });
+
+            const quota = about.data.storageQuota;
+            const user = about.data.user;
+
+            return {
+                success: true,
+                quota: {
+                    limit: quota.limit,
+                    usage: quota.usage,
+                    usageInDrive: quota.usageInDrive,
+                    usageInDriveTrash: quota.usageInDriveTrash
+                },
+                user: {
+                    email: user.emailAddress,
+                    displayName: user.displayName
+                },
+                usagePercentage: quota.limit ? Math.round((quota.usage / quota.limit) * 100) : 0
+            };
+
+        } catch (error) {
+            console.error('Error getting Drive storage quota:', error);
+            return {
+                error: `Error getting storage quota: ${error.message}`
+            };
+        }
+    }
 }
 
 module.exports = new GoogleSheetsOAuth2Service(); 

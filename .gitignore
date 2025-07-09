@@ -10,6 +10,5 @@ client/node_modules
 server/files
 client/files
 server/KEYS
-server/google-credentials.json
 server/oauth2-credentials.json
 server/oauth2-tokens.json

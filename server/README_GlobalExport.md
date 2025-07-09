@@ -143,7 +143,7 @@ The `GlobalExportModal.vue` component provides:
 
 ## Backend Implementation
 
-### GoogleSheetsService Methods
+### GoogleSheetsOAuth2Service Methods
 
 #### `exportGlobalChanges(options)`
 
@@ -237,8 +237,8 @@ The test script covers:
 Ensure these are set for Google Sheets integration:
 
 ```bash
-GOOGLE_SERVICE_ACCOUNT_KEY=./path/to/service-account-key.json
-GOOGLE_SHARE_EMAIL=your-email@gmail.com
+GOOGLE_OAUTH2_CREDENTIALS=./oauth2-credentials.json
+GOOGLE_DRIVE_FOLDER_ID=your-folder-id  # Optional: for organized exports
 ```
 
 ### Dependencies
