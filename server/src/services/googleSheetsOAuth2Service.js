@@ -8,16 +8,21 @@ try {
 }
 
 const changeDetectionService = require('./changeDetectionService');
+const fs = require('fs');
+const path = require('path');
 
-class GoogleSheetsService {
+class GoogleSheetsOAuth2Service {
     constructor() {
         this.auth = null;
         this.sheets = null;
+        this.drive = null;
+        this.credentials = null;
+        this.tokens = null;
         this.initializeAuth();
     }
 
     /**
-     * Initialize Google Sheets authentication
+     * Initialize OAuth2 authentication
      */
     async initializeAuth() {
         try {
@@ -26,33 +31,110 @@ class GoogleSheetsService {
                 return;
             }
 
-            this.auth = new google.auth.GoogleAuth({
-                keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_KEY || './google-credentials.json',
-                scopes: [
-                    'https://www.googleapis.com/auth/spreadsheets',
-                    'https://www.googleapis.com/auth/drive'
-                ]
-            });
+            // Load OAuth2 credentials
+            const credentialsPath = process.env.GOOGLE_OAUTH2_CREDENTIALS || './oauth2-credentials.json';
+            if (!fs.existsSync(credentialsPath)) {
+                console.warn('OAuth2 credentials file not found. Google Sheets export disabled.');
+                return;
+            }
 
-            this.sheets = google.sheets({ version: 'v4', auth: this.auth });
-            console.log('Google Sheets authentication initialized');
+            this.credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+            
+            // Check if we have stored tokens
+            const tokensPath = './oauth2-tokens.json';
+            if (fs.existsSync(tokensPath)) {
+                this.tokens = JSON.parse(fs.readFileSync(tokensPath, 'utf8'));
+                console.log('Found stored OAuth2 tokens');
+            }
+
+            // Create OAuth2 client
+            const { client_secret, client_id, redirect_uris } = this.credentials.installed;
+            
+            // Use environment variable for redirect URI, fallback to the first one from credentials
+            const redirectUri = process.env.GOOGLE_OAUTH2_REDIRECT_URI || redirect_uris[0];
+            
+            this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirectUri);
+
+            // Set credentials if we have tokens
+            if (this.tokens) {
+                this.oAuth2Client.setCredentials(this.tokens);
+                this.auth = this.oAuth2Client;
+                this.sheets = google.sheets({ version: 'v4', auth: this.auth });
+                this.drive = google.drive({ version: 'v3', auth: this.auth });
+                console.log('OAuth2 authentication initialized with stored tokens');
+            } else {
+                console.log('OAuth2 authentication initialized. Run getAuthUrl() to get authorization URL');
+            }
+
         } catch (error) {
-            console.error('Error initializing Google Sheets auth:', error);
-            // Don't throw error, just log it
+            console.error('Error initializing OAuth2 auth:', error);
         }
     }
 
     /**
+     * Get authorization URL for OAuth2 flow
+     */
+    getAuthUrl() {
+        if (!this.oAuth2Client) {
+            throw new Error('OAuth2 client not initialized');
+        }
+
+        const scopes = [
+            'https://www.googleapis.com/auth/spreadsheets',
+            'https://www.googleapis.com/auth/drive'
+        ];
+
+        // Use environment variable for redirect URI, fallback to localhost for development
+        const redirectUri = process.env.GOOGLE_OAUTH2_REDIRECT_URI || 'http://localhost';
+
+        return this.oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: scopes,
+            prompt: 'consent',
+            redirect_uri: redirectUri
+        });
+    }
+
+    /**
+     * Exchange authorization code for tokens
+     */
+    async getTokensFromCode(code) {
+        try {
+            const { tokens } = await this.oAuth2Client.getToken(code);
+            this.tokens = tokens;
+            this.oAuth2Client.setCredentials(tokens);
+            
+            // Store tokens for future use
+            fs.writeFileSync('./oauth2-tokens.json', JSON.stringify(tokens));
+            
+            // Initialize APIs with new tokens
+            this.auth = this.oAuth2Client;
+            this.sheets = google.sheets({ version: 'v4', auth: this.auth });
+            this.drive = google.drive({ version: 'v3', auth: this.auth });
+            
+            console.log('OAuth2 tokens obtained and stored');
+            return tokens;
+        } catch (error) {
+            console.error('Error getting tokens:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Check if authentication is ready
+     */
+    isAuthenticated() {
+        return this.auth && this.sheets && this.drive;
+    }
+
+    /**
      * Export crawl data with change tracking to Google Sheets
-     * @param {string} crawlId - The crawl ID to export
-     * @param {Object} options - Export options
-     * @returns {Object} Export result with sheet URL
      */
     async exportCrawlWithChanges(crawlId, options = {}) {
         try {
-            if (!google) {
+            if (!this.isAuthenticated()) {
                 return {
-                    error: 'Google Sheets API not available. Please install googleapis package and configure credentials.'
+                    error: 'OAuth2 authentication required. Please run the authentication flow first.'
                 };
             }
 
@@ -61,7 +143,8 @@ class GoogleSheetsService {
                 includeUnchanged = false,
                 sheetTitle = null,
                 updateExisting = false,
-                existingSheetId = null
+                existingSheetId = null,
+                folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || null
             } = options;
 
             // Detect changes
@@ -91,7 +174,7 @@ class GoogleSheetsService {
             // Create or update Google Sheet
             let spreadsheetId = existingSheetId;
             if (!spreadsheetId || !updateExisting) {
-                spreadsheetId = await this.createNewSheet(finalSheetTitle);
+                spreadsheetId = await this.createNewSheet(finalSheetTitle, folderId);
             }
 
             // Write data to sheet
@@ -126,7 +209,7 @@ class GoogleSheetsService {
     /**
      * Create a new Google Sheet
      */
-    async createNewSheet(title) {
+    async createNewSheet(title, folderId = null) {
         try {
             if (!this.sheets) {
                 throw new Error('Google Sheets API not initialized');
@@ -151,7 +234,26 @@ class GoogleSheetsService {
                 }
             });
 
-            return response.data.spreadsheetId;
+            const spreadsheetId = response.data.spreadsheetId;
+            console.log('Sheet created with OAuth2:', spreadsheetId);
+
+            // If a folder ID is provided, move the file to that folder
+            if (folderId) {
+                try {
+                    await this.drive.files.update({
+                        fileId: spreadsheetId,
+                        addParents: folderId,
+                        removeParents: 'root',
+                        fields: 'id, parents'
+                    });
+                    console.log(`Sheet moved to folder: ${folderId}`);
+                } catch (moveError) {
+                    console.warn('Could not move sheet to folder:', moveError.message);
+                    console.log('Sheet created in root Drive instead');
+                }
+            }
+
+            return spreadsheetId;
         } catch (error) {
             console.error('Error creating Google Sheet:', error);
             throw error;
@@ -249,8 +351,6 @@ class GoogleSheetsService {
                 }
             });
 
-            // Note: Removed "Changed" formatting since changes are now shown as separate "Removed" and "New" rows
-
             // Red for Removed
             requests.push({
                 addConditionalFormatRule: {
@@ -327,21 +427,7 @@ class GoogleSheetsService {
                 ['Changed URLs', changeAnalysis.changedUrls],
                 ['New URLs', changeAnalysis.newUrls],
                 ['Removed URLs', changeAnalysis.removedUrls],
-                ['Unchanged URLs', changeAnalysis.unchangedUrls],
-                ['Change Percentage', `${changeAnalysis.summary.changePercentage}%`],
-                [''],
-                ['Export Format'],
-                ['Changes Display', 'Each change shown as separate "Removed" and "New" rows'],
-                ['Removed Rows', 'Highlighted in red'],
-                ['New Rows', 'Highlighted in green'],
-                [''],
-                ['Change Breakdown'],
-                ['Type', 'Count', 'Percentage'],
-                ['New (including changes)', changeAnalysis.newUrls + changeAnalysis.changedUrls, `${(((changeAnalysis.newUrls + changeAnalysis.changedUrls) / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
-                ['Removed (including changes)', changeAnalysis.removedUrls + changeAnalysis.changedUrls, `${(((changeAnalysis.removedUrls + changeAnalysis.changedUrls) / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
-                ['Unchanged', changeAnalysis.unchangedUrls, `${((changeAnalysis.unchangedUrls / changeAnalysis.totalUrls) * 100).toFixed(1)}%`],
-                [''],
-                ['Note', 'Changes are shown as separate "Removed" and "New" rows']
+                ['Unchanged URLs', changeAnalysis.unchangedUrls]
             ];
 
             // Write summary data
@@ -355,12 +441,256 @@ class GoogleSheetsService {
             console.log('Added summary sheet');
         } catch (error) {
             console.error('Error adding summary sheet:', error);
-            // Don't throw error for summary sheet failures
         }
     }
 
     /**
-     * Add a global summary sheet with statistics for all crawls
+     * Share the sheet with the user
+     */
+    async shareSheet(spreadsheetId) {
+        try {
+            if (!this.drive) {
+                console.warn('Drive API not available, skipping sheet sharing');
+                return;
+            }
+
+            const userEmail = process.env.GOOGLE_SHARE_EMAIL;
+            if (!userEmail) {
+                console.log('No GOOGLE_SHARE_EMAIL set, skipping sheet sharing');
+                return;
+            }
+
+            await this.drive.permissions.create({
+                fileId: spreadsheetId,
+                requestBody: {
+                    role: 'writer',
+                    type: 'user',
+                    emailAddress: userEmail
+                },
+                sendNotificationEmail: false
+            });
+
+            console.log(`Sheet shared with ${userEmail}`);
+        } catch (error) {
+            console.warn('Could not share sheet:', error.message);
+        }
+    }
+
+    /**
+     * Export multiple crawls to a single Google Sheet
+     */
+    async exportMultipleCrawls(crawlIds, options = {}) {
+        try {
+            if (!this.isAuthenticated()) {
+                return {
+                    error: 'OAuth2 authentication required. Please run the authentication flow first.'
+                };
+            }
+
+            const { 
+                sheetTitle,
+                folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || null
+            } = options;
+            const finalSheetTitle = sheetTitle || `Multiple Crawls - ${new Date().toISOString().split('T')[0]}`;
+
+            // Create a new sheet
+            const spreadsheetId = await this.createNewSheet(finalSheetTitle, folderId);
+
+            // Get data for all crawls
+            const allData = [];
+            let currentRow = 1;
+
+            for (const crawlId of crawlIds) {
+                const changeAnalysis = await changeDetectionService.detectChanges(crawlId);
+                const crawlData = changeDetectionService.prepareForGoogleSheets(changeAnalysis.changes);
+                
+                // Add crawl header
+                allData.push([`Crawl: ${changeAnalysis.crawlTitle}`]);
+                allData.push(['']); // Empty row
+                
+                // Add data rows
+                crawlData.forEach(row => {
+                    allData.push(row);
+                });
+                
+                allData.push(['']); // Empty row between crawls
+                allData.push(['']); // Another empty row
+            }
+
+            // Write all data to sheet
+            await this.writeDataToSheet(spreadsheetId, allData);
+
+            // Apply formatting
+            await this.applyMultiCrawlFormatting(spreadsheetId);
+
+            // Share the sheet
+            await this.shareSheet(spreadsheetId);
+
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
+
+            return {
+                success: true,
+                spreadsheetId,
+                sheetUrl,
+                rowCount: allData.length - 1,
+                message: 'Multiple crawls exported successfully'
+            };
+
+        } catch (error) {
+            console.error('Error exporting multiple crawls:', error);
+            return {
+                error: `Error exporting multiple crawls: ${error.message}`
+            };
+        }
+    }
+
+    /**
+     * Export global changes from all crawls
+     */
+    async exportGlobalChanges(options = {}) {
+        try {
+            if (!this.isAuthenticated()) {
+                return {
+                    error: 'OAuth2 authentication required. Please run the authentication flow first.'
+                };
+            }
+
+            const { 
+                userId, 
+                includeUnchanged = false, 
+                sheetTitle, 
+                limit = 100,
+                statusFilter,
+                folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || null
+            } = options;
+
+            const Crawl = require('../models/Crawl');
+            const CrawlData = require('../models/CrawlData');
+
+            // Get all crawls
+            let query = {};
+            if (userId) {
+                query.userId = userId;
+            }
+            if (statusFilter) {
+                query.status = statusFilter;
+            }
+
+            const crawls = await Crawl.find(query).limit(limit).sort({ createdAt: -1 });
+
+            if (crawls.length === 0) {
+                return {
+                    error: 'No crawls found matching the criteria'
+                };
+            }
+
+            const finalSheetTitle = sheetTitle || `Global Crawl Changes - ${new Date().toISOString().split('T')[0]}`;
+
+            // Create a new sheet
+            const spreadsheetId = await this.createNewSheet(finalSheetTitle, folderId);
+
+            // Collect all changes from all crawls
+            const allChanges = [];
+            const summaryData = {
+                totalCrawls: crawls.length,
+                totalChanges: 0,
+                totalNew: 0,
+                totalRemoved: 0,
+                totalUnchanged: 0,
+                crawlBreakdown: []
+            };
+
+            for (const crawl of crawls) {
+                const changeAnalysis = await changeDetectionService.detectChanges(crawl._id.toString());
+                
+                // Check if we have any changes data
+                if (changeAnalysis.changes && (
+                    changeAnalysis.changes.newUrls.length > 0 ||
+                    changeAnalysis.changes.removedUrls.length > 0 ||
+                    changeAnalysis.changes.changedUrls.length > 0 ||
+                    changeAnalysis.changes.unchangedUrls.length > 0
+                )) {
+                    const crawlChanges = changeDetectionService.prepareForGoogleSheets(changeAnalysis.changes);
+                    
+                    // Filter out unchanged if requested
+                    let filteredChanges = crawlChanges;
+                    if (!includeUnchanged) {
+                        // Skip the header row and filter out unchanged rows
+                        const headerRow = filteredChanges[0];
+                        const dataRows = filteredChanges.slice(1).filter(row => 
+                            row.length > 4 && row[4] !== 'Unchanged'
+                        );
+                        filteredChanges = [headerRow, ...dataRows];
+                    }
+
+                    if (filteredChanges.length > 1) { // More than just header
+                        // Add crawl header
+                        allChanges.push([`Crawl: ${changeAnalysis.crawlTitle}`]);
+                        allChanges.push(['']); // Empty row
+                        
+                        // Add data rows
+                        filteredChanges.forEach(row => {
+                            allChanges.push(row);
+                        });
+                        
+                        allChanges.push(['']); // Empty row between crawls
+                        allChanges.push(['']); // Another empty row
+
+                        // Update summary
+                        summaryData.totalChanges += changeAnalysis.changedUrls;
+                        summaryData.totalNew += changeAnalysis.newUrls;
+                        summaryData.totalRemoved += changeAnalysis.removedUrls;
+                        summaryData.totalUnchanged += changeAnalysis.unchangedUrls;
+                        summaryData.crawlBreakdown.push({
+                            title: changeAnalysis.crawlTitle,
+                            changes: changeAnalysis.changedUrls,
+                            new: changeAnalysis.newUrls,
+                            removed: changeAnalysis.removedUrls,
+                            unchanged: changeAnalysis.unchangedUrls
+                        });
+                    }
+                }
+            }
+
+            if (allChanges.length === 0) {
+                return {
+                    error: 'No changes found in any of the crawls'
+                };
+            }
+
+            // Write all data to sheet
+            await this.writeDataToSheet(spreadsheetId, allChanges);
+
+            // Add global summary sheet
+            await this.addGlobalSummarySheet(spreadsheetId, summaryData);
+
+            // Apply formatting
+            await this.applyGlobalSummaryFormatting(spreadsheetId, allChanges.length);
+
+            // Share the sheet
+            await this.shareSheet(spreadsheetId);
+
+            const sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
+
+            return {
+                success: true,
+                spreadsheetId,
+                sheetUrl,
+                rowCount: allChanges.length - 1,
+                summaryData,
+                message: 'Global changes exported successfully'
+            };
+
+        } catch (error) {
+            console.error('Error exporting global changes:', error);
+            return {
+                error: `Error exporting global changes: ${error.message}`
+            };
+        }
+    }
+
+    /**
+     * Add global summary sheet
      */
     async addGlobalSummarySheet(spreadsheetId, summaryData) {
         try {
@@ -379,318 +709,44 @@ class GoogleSheetsService {
             });
 
             // Prepare global summary data
-            const data = [
+            const globalSummaryData = [
                 ['Global Crawl Changes Summary'],
                 [''],
-                ['Export Information'],
-                ['Export Date', summaryData.exportDate.toISOString()],
-                ['Total Crawls Found', summaryData.crawlCount],
-                ['Crawls with Changes', summaryData.processedCrawlCount],
+                ['Export Date', new Date().toISOString()],
                 [''],
                 ['Overall Statistics'],
-                ['Total URLs Across All Crawls', summaryData.totalUrls],
-                ['Total Changed URLs', summaryData.totalChangedUrls],
-                ['Total New URLs', summaryData.totalNewUrls],
-                ['Total Removed URLs', summaryData.totalRemovedUrls],
+                ['Total Crawls Analyzed', summaryData.totalCrawls],
+                ['Total Changes', summaryData.totalChanges],
+                ['Total New URLs', summaryData.totalNew],
+                ['Total Removed URLs', summaryData.totalRemoved],
+                ['Total Unchanged URLs', summaryData.totalUnchanged],
                 [''],
-                ['Individual Crawl Breakdown']
+                ['Crawl Breakdown'],
+                ['Crawl Title', 'Changes', 'New', 'Removed', 'Unchanged']
             ];
 
-            // Add header for crawl breakdown
-            data.push(['Crawl Title', 'Status', 'Total URLs', 'Changed URLs', 'New URLs', 'Removed URLs', 'Unchanged URLs', 'Last Run Date']);
-
-            // Add data for each crawl
-            summaryData.crawlSummaries.forEach(crawl => {
-                data.push([
-                    crawl.crawlTitle,
-                    crawl.status,
-                    crawl.totalUrls,
-                    crawl.changedUrls,
-                    crawl.newUrls,
-                    crawl.removedUrls,
-                    crawl.unchangedUrls,
-                    crawl.lastRunDate ? new Date(crawl.lastRunDate).toLocaleString() : 'N/A'
+            // Add crawl breakdown data
+            summaryData.crawlBreakdown.forEach(crawl => {
+                globalSummaryData.push([
+                    crawl.title,
+                    crawl.changes,
+                    crawl.new,
+                    crawl.removed,
+                    crawl.unchanged
                 ]);
             });
 
-            // Write global summary data to the new sheet
+            // Write global summary data
             await this.sheets.spreadsheets.values.update({
                 spreadsheetId,
-                range: 'Global Summary!A1:H' + data.length,
+                range: 'Global Summary!A1',
                 valueInputOption: 'RAW',
-                requestBody: {
-                    values: data
-                }
+                requestBody: { values: globalSummaryData }
             });
 
-            // Apply formatting to global summary sheet
-            await this.applyGlobalSummaryFormatting(spreadsheetId, data.length);
-
+            console.log('Added global summary sheet');
         } catch (error) {
             console.error('Error adding global summary sheet:', error);
-            // Don't throw error - summary sheet failure shouldn't break the export
-        }
-    }
-
-    /**
-     * Export multiple crawls to a single sheet for comparison
-     */
-    async exportMultipleCrawls(crawlIds, options = {}) {
-        try {
-            if (!google) {
-                return {
-                    error: 'Google Sheets API not available. Please install googleapis package and configure credentials.'
-                };
-            }
-
-            const { sheetTitle = 'Multi-Crawl Comparison' } = options;
-            
-            const allChanges = [];
-            
-            // Get changes for each crawl
-            for (const crawlId of crawlIds) {
-                const changeAnalysis = await changeDetectionService.detectChanges(crawlId);
-                const sheetData = changeDetectionService.prepareForGoogleSheets(changeAnalysis.changes);
-                
-                // Add crawl identifier to each row
-                sheetData.forEach((row, index) => {
-                    if (index === 0) {
-                        row.unshift('Crawl Title');
-                    } else {
-                        row.unshift(changeAnalysis.crawlTitle);
-                    }
-                });
-                
-                allChanges.push(...sheetData.slice(1)); // Skip header for all but first
-            }
-
-            // Create combined data with header
-            const combinedData = [
-                ['Crawl Title', 'URL', 'Field', 'Current Value', 'Previous Value', 'Change Status', 'Change Type', 'Last Updated', 'Previous Date'],
-                ...allChanges
-            ];
-
-            // Create new sheet
-            const spreadsheetId = await this.createNewSheet(sheetTitle);
-            
-            // Write data
-            await this.writeDataToSheet(spreadsheetId, combinedData);
-            
-            // Apply formatting
-            await this.applyMultiCrawlFormatting(spreadsheetId);
-
-            return {
-                success: true,
-                spreadsheetId,
-                sheetUrl: `https://docs.google.com/spreadsheets/d/${spreadsheetId}`,
-                rowCount: combinedData.length - 1,
-                message: 'Multiple crawls exported successfully'
-            };
-
-        } catch (error) {
-            console.error('Error exporting multiple crawls:', error);
-            return {
-                error: `Error exporting multiple crawls: ${error.message}`
-            };
-        }
-    }
-
-    /**
-     * Export all crawls with changes to a global sheet
-     * @param {Object} options - Export options
-     * @returns {Object} Export result with sheet URL
-     */
-    async exportGlobalChanges(options = {}) {
-        try {
-            if (!google) {
-                return {
-                    error: 'Google Sheets API not available. Please install googleapis package and configure credentials.'
-                };
-            }
-
-            const {
-                userId = null,
-                includeUnchanged = false,
-                sheetTitle = null,
-                limit = 100,
-                statusFilter = null
-            } = options;
-
-            // Get all crawls with optional filters
-            const query = {};
-            if (userId) {
-                query.userId = userId;
-            }
-            if (statusFilter) {
-                query.status = statusFilter;
-            }
-
-            const Crawl = require('../models/Crawl');
-            const crawls = await Crawl.find(query)
-                .select('_id title status startTime endTime createdAt userId')
-                .sort({ createdAt: -1 })
-                .limit(parseInt(limit));
-
-            if (crawls.length === 0) {
-                return {
-                    error: 'No crawls found matching the criteria'
-                };
-            }
-
-            const allChanges = [];
-            const crawlSummaries = [];
-            let totalUrls = 0;
-            let totalChangedUrls = 0;
-            let totalNewUrls = 0;
-            let totalRemovedUrls = 0;
-
-            // Process each crawl
-            for (const crawl of crawls) {
-                try {
-                    const changeAnalysis = await changeDetectionService.detectChanges(crawl._id.toString());
-                    
-                    // Skip crawls with no changes if requested
-                    if (!includeUnchanged && 
-                        changeAnalysis.changedUrls.length === 0 && 
-                        changeAnalysis.newUrls.length === 0 && 
-                        changeAnalysis.removedUrls.length === 0) {
-                        continue;
-                    }
-
-                    const sheetData = changeDetectionService.prepareForGoogleSheets(changeAnalysis.changes);
-                    
-                    // Add crawl identifier to each row
-                    sheetData.forEach((row, index) => {
-                        if (index === 0) {
-                            row.unshift('Crawl Title');
-                        } else {
-                            row.unshift(crawl.title);
-                        }
-                    });
-                    
-                    allChanges.push(...sheetData.slice(1)); // Skip header for all but first
-
-                    // Track summary statistics
-                    totalUrls += changeAnalysis.totalUrls;
-                    totalChangedUrls += changeAnalysis.changedUrls.length;
-                    totalNewUrls += changeAnalysis.newUrls.length;
-                    totalRemovedUrls += changeAnalysis.removedUrls.length;
-
-                    crawlSummaries.push({
-                        crawlId: crawl._id.toString(),
-                        crawlTitle: crawl.title,
-                        status: crawl.status,
-                        totalUrls: changeAnalysis.totalUrls,
-                        changedUrls: changeAnalysis.changedUrls.length,
-                        newUrls: changeAnalysis.newUrls.length,
-                        removedUrls: changeAnalysis.removedUrls.length,
-                        unchangedUrls: changeAnalysis.unchangedUrls.length,
-                        lastRunDate: changeAnalysis.comparisonInfo?.currentRunDate
-                    });
-
-                } catch (error) {
-                    console.error(`Error processing crawl ${crawl._id}:`, error);
-                    // Continue with other crawls
-                }
-            }
-
-            if (allChanges.length === 0) {
-                return {
-                    error: 'No changes found in any of the selected crawls'
-                };
-            }
-
-            // Generate sheet title
-            const finalSheetTitle = sheetTitle || `Global Crawl Changes - ${new Date().toISOString().split('T')[0]}`;
-
-            // Create combined data with header
-            const combinedData = [
-                ['Crawl Title', 'URL', 'Field', 'Current Value', 'Previous Value', 'Change Status', 'Change Type', 'Last Updated', 'Previous Date'],
-                ...allChanges
-            ];
-
-            // Create new sheet
-            const spreadsheetId = await this.createNewSheet(finalSheetTitle);
-            
-            // Write data
-            await this.writeDataToSheet(spreadsheetId, combinedData);
-            
-            // Apply formatting
-            await this.applyMultiCrawlFormatting(spreadsheetId);
-
-            // Add global summary sheet
-            await this.addGlobalSummarySheet(spreadsheetId, {
-                crawlSummaries,
-                totalUrls,
-                totalChangedUrls,
-                totalNewUrls,
-                totalRemovedUrls,
-                exportDate: new Date(),
-                crawlCount: crawls.length,
-                processedCrawlCount: crawlSummaries.length
-            });
-
-            // Share the sheet
-            await this.shareSheet(spreadsheetId);
-
-            return {
-                success: true,
-                spreadsheetId,
-                sheetUrl: `https://docs.google.com/spreadsheets/d/${spreadsheetId}`,
-                rowCount: combinedData.length - 1,
-                crawlCount: crawls.length,
-                processedCrawlCount: crawlSummaries.length,
-                totalUrls,
-                totalChangedUrls,
-                totalNewUrls,
-                totalRemovedUrls,
-                message: 'Global crawl changes exported successfully'
-            };
-
-        } catch (error) {
-            console.error('Error exporting global changes:', error);
-            return {
-                error: `Error exporting global changes: ${error.message}`
-            };
-        }
-    }
-
-    /**
-     * Share the Google Sheet with the user
-     */
-    async shareSheet(spreadsheetId) {
-        try {
-            if (!this.sheets) {
-                console.warn('Google Sheets API not available for sharing');
-                return;
-            }
-
-            // Get the user email from environment variable or use a default
-            const userEmail = process.env.GOOGLE_SHARE_EMAIL || 'ryan7998@gmail.com';
-            
-            if (userEmail === 'your-email@gmail.com') {
-                console.warn('⚠️ Please set GOOGLE_SHARE_EMAIL in your .env file to automatically share sheets');
-                return;
-            }
-
-            // Use the Drive API to share the sheet
-            const drive = google.drive({ version: 'v3', auth: this.auth });
-            
-            await drive.permissions.create({
-                fileId: spreadsheetId,
-                requestBody: {
-                    role: 'writer',
-                    type: 'user',
-                    emailAddress: userEmail
-                },
-                sendNotificationEmail: false // Don't send email notification
-            });
-
-            console.log(`✅ Sheet shared with ${userEmail}`);
-            
-        } catch (error) {
-            console.error('Error sharing sheet:', error.message);
-            // Don't throw error - sharing failure shouldn't break the export
         }
     }
 
@@ -699,7 +755,6 @@ class GoogleSheetsService {
      */
     async applyMultiCrawlFormatting(spreadsheetId) {
         try {
-            // First, get the sheet metadata to get the correct sheet ID
             const sheetMetadata = await this.sheets.spreadsheets.get({
                 spreadsheetId,
                 fields: 'sheets.properties'
@@ -735,19 +790,19 @@ class GoogleSheetsService {
                             sheetId: sheetId,
                             dimension: 'COLUMNS',
                             startIndex: 0,
-                            endIndex: 9
+                            endIndex: 8
                         }
                     }
                 },
-                // Conditional formatting for change status - Green for New
+                // Green for New
                 {
                     addConditionalFormatRule: {
                         rule: {
                             ranges: [{
                                 sheetId: sheetId,
                                 startRowIndex: 1,
-                                startColumnIndex: 5,
-                                endColumnIndex: 6
+                                startColumnIndex: 4,
+                                endColumnIndex: 5
                             }],
                             booleanRule: {
                                 condition: {
@@ -768,8 +823,8 @@ class GoogleSheetsService {
                             ranges: [{
                                 sheetId: sheetId,
                                 startRowIndex: 1,
-                                startColumnIndex: 5,
-                                endColumnIndex: 6
+                                startColumnIndex: 4,
+                                endColumnIndex: 5
                             }],
                             booleanRule: {
                                 condition: {
@@ -843,8 +898,8 @@ class GoogleSheetsService {
                     repeatCell: {
                         range: {
                             sheetId: sheetId,
-                            startRowIndex: 2,
-                            endRowIndex: 3
+                            startRowIndex: 4,
+                            endRowIndex: 5
                         },
                         cell: {
                             userEnteredFormat: {
@@ -861,26 +916,8 @@ class GoogleSheetsService {
                     repeatCell: {
                         range: {
                             sheetId: sheetId,
-                            startRowIndex: 7,
-                            endRowIndex: 8
-                        },
-                        cell: {
-                            userEnteredFormat: {
-                                backgroundColor: { red: 0.9, green: 0.9, blue: 0.9 },
-                                textFormat: {
-                                    bold: true
-                                }
-                            }
-                        },
-                        fields: 'userEnteredFormat(backgroundColor,textFormat)'
-                    }
-                },
-                {
-                    repeatCell: {
-                        range: {
-                            sheetId: sheetId,
-                            startRowIndex: 12,
-                            endRowIndex: 13
+                            startRowIndex: 11,
+                            endRowIndex: 12
                         },
                         cell: {
                             userEnteredFormat: {
@@ -898,8 +935,8 @@ class GoogleSheetsService {
                     repeatCell: {
                         range: {
                             sheetId: sheetId,
-                            startRowIndex: 13,
-                            endRowIndex: 14
+                            startRowIndex: 12,
+                            endRowIndex: 13
                         },
                         cell: {
                             userEnteredFormat: {
@@ -935,23 +972,6 @@ class GoogleSheetsService {
             console.error('Error applying global summary formatting:', error);
         }
     }
-
-    /**
-     * Get Google Drive storage quota for the service account
-     */
-    async getDriveStorageQuota() {
-        try {
-            if (!google) {
-                return { error: 'Google API not available.' };
-            }
-            const drive = google.drive({ version: 'v3', auth: this.auth });
-            const res = await drive.about.get({ fields: 'storageQuota' });
-            return res.data.storageQuota;
-        } catch (error) {
-            console.error('Error fetching Drive storage quota:', error);
-            return { error: error.message };
-        }
-    }
 }
 
-module.exports = new GoogleSheetsService(); 
+module.exports = new GoogleSheetsOAuth2Service(); 

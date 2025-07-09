@@ -2,13 +2,23 @@
     <v-container>
         <div class="d-flex justify-space-between align-center mb-6">
             <h1 class="text-h4">All Crawls</h1>
-            <v-btn
-                color="primary"
-                @click="openCreateModal"
-            >
-                <v-icon start icon="mdi-plus" />
-                New Crawl
-            </v-btn>
+            <div class="d-flex gap-2">
+                <v-btn
+                    variant="outlined"
+                    color="success"
+                    @click="showGlobalExportModal = true"
+                >
+                    <v-icon start icon="mdi-download-multiple" />
+                    Global Export
+                </v-btn>
+                <v-btn
+                    color="primary"
+                    @click="openCreateModal"
+                >
+                    <v-icon start icon="mdi-plus" />
+                    New Crawl
+                </v-btn>
+            </div>
         </div>
         
         <!-- Search Bar -->
@@ -101,6 +111,12 @@
             :crawl-data="selectedCrawl"
             @crawl-created="handleCrawlCreated"
         />
+
+        <!-- Global Export Modal -->
+        <GlobalExportModal
+            v-model="showGlobalExportModal"
+            @export-success="handleGlobalExportSuccess"
+        />
     </v-container>
 </template>
 
@@ -112,6 +128,7 @@ import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
 import { formatDate, getApiUrl } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
+import GlobalExportModal from './GlobalExportModal.vue'
 
 // Initialize Pinia store
 const crawlStore = useCrawlStore()
@@ -145,6 +162,7 @@ const crawls = ref([])
 // Modal state
 const showModal = ref(false)
 const selectedCrawl = ref(null)
+const showGlobalExportModal = ref(false)
 
 // Search query
 const searchQuery = ref('')
@@ -207,6 +225,11 @@ const handleCrawlCreated = (crawl) => {
         showNotification('Crawl created successfully', 'success')
         router.push({ name: 'CrawlerDashboard', params: { crawlId: crawl._id } })
     }
+}
+
+// Handle global export success
+const handleGlobalExportSuccess = (exportResult) => {
+    showNotification('Global export completed successfully!', 'success')
 }
 
 onMounted(() => {

@@ -13,7 +13,8 @@ router.get('/test', (req, res) => {
             'GET /api/export/csv/:crawlId',
             'GET /api/export/crawls',
             'POST /api/export/google-sheets/:crawlId',
-            'POST /api/export/google-sheets/multiple'
+            'POST /api/export/google-sheets/multiple',
+            'POST /api/export/google-sheets/global'
         ]
     });
 });
@@ -21,14 +22,16 @@ router.get('/test', (req, res) => {
 // Import services with error handling
 let googleSheetsService, changeDetectionService;
 try {
-    googleSheetsService = require('../services/googleSheetsService');
+    // Use OAuth2 service instead of service account
+    googleSheetsService = require('../services/googleSheetsOAuth2Service');
     changeDetectionService = require('../services/changeDetectionService');
 } catch (error) {
     console.error('Error importing services:', error);
     // Create fallback services
     googleSheetsService = {
         exportCrawlWithChanges: async () => ({ error: 'Service not available' }),
-        exportMultipleCrawls: async () => ({ error: 'Service not available' })
+        exportMultipleCrawls: async () => ({ error: 'Service not available' }),
+        exportGlobalChanges: async () => ({ error: 'Service not available' })
     };
     changeDetectionService = {
         detectChanges: async () => ({ error: 'Service not available' }),
@@ -38,6 +41,79 @@ try {
 
 const Crawl = require('../models/Crawl');
 const CrawlData = require('../models/CrawlData');
+
+/**
+ * Export multiple crawls to a single Google Sheet
+ * POST /api/export/google-sheets/multiple
+ */
+router.post('/google-sheets/multiple', async (req, res) => {
+    try {
+        const { crawlIds, sheetTitle } = req.body;
+
+        // Validate input
+        if (!crawlIds || !Array.isArray(crawlIds) || crawlIds.length === 0) {
+            return res.status(400).json({ message: 'Crawl IDs array is required' });
+        }
+
+        // Validate that all crawls exist
+        const crawls = await Crawl.find({ _id: { $in: crawlIds } });
+        if (crawls.length !== crawlIds.length) {
+            return res.status(400).json({ message: 'One or more crawls not found' });
+        }
+
+        // Export multiple crawls
+        const result = await googleSheetsService.exportMultipleCrawls(crawlIds, {
+            sheetTitle
+        });
+
+        res.json(result);
+
+    } catch (error) {
+        console.error('Error exporting multiple crawls:', error);
+        res.status(500).json({ 
+            message: 'Error exporting multiple crawls', 
+            error: error.message 
+        });
+    }
+});
+
+/**
+ * Export all crawls with changes to a global Google Sheet
+ * POST /api/export/google-sheets/global
+ */
+router.post('/google-sheets/global', async (req, res) => {
+    try {
+        const { 
+            userId, 
+            includeUnchanged = false, 
+            sheetTitle, 
+            limit = 100,
+            statusFilter 
+        } = req.body;
+
+        // Export global changes
+        const result = await googleSheetsService.exportGlobalChanges({
+            userId,
+            includeUnchanged,
+            sheetTitle,
+            limit,
+            statusFilter
+        });
+
+        if (result.error) {
+            return res.status(500).json({ message: result.error });
+        }
+
+        res.json(result);
+
+    } catch (error) {
+        console.error('Error exporting global changes:', error);
+        res.status(500).json({ 
+            message: 'Error exporting global changes', 
+            error: error.message 
+        });
+    }
+});
 
 /**
  * Export crawl data with change tracking to Google Sheets
@@ -164,6 +240,44 @@ router.post('/google-sheets/multiple', async (req, res) => {
 });
 
 /**
+ * Export all crawls with changes to a global Google Sheet
+ * POST /api/export/google-sheets/global
+ */
+router.post('/google-sheets/global', async (req, res) => {
+    try {
+        const { 
+            userId, 
+            includeUnchanged = false, 
+            sheetTitle, 
+            limit = 100,
+            statusFilter 
+        } = req.body;
+
+        // Export global changes
+        const result = await googleSheetsService.exportGlobalChanges({
+            userId,
+            includeUnchanged,
+            sheetTitle,
+            limit,
+            statusFilter
+        });
+
+        if (result.error) {
+            return res.status(500).json({ message: result.error });
+        }
+
+        res.json(result);
+
+    } catch (error) {
+        console.error('Error exporting global changes:', error);
+        res.status(500).json({ 
+            message: 'Error exporting global changes', 
+            error: error.message 
+        });
+    }
+});
+
+/**
  * Get available crawls for comparison
  * GET /api/export/crawls
  */
@@ -244,6 +358,19 @@ router.get('/csv/:crawlId', async (req, res) => {
             message: 'Error exporting CSV', 
             error: error.message 
         });
+    }
+});
+
+/**
+ * Get Google Drive storage quota for the service account
+ * GET /api/export/google-storage
+ */
+router.get('/google-storage', async (req, res) => {
+    try {
+        const quota = await googleSheetsService.getDriveStorageQuota();
+        res.json(quota);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
