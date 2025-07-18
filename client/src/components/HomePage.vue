@@ -1,8 +1,9 @@
 <template>
-    <v-container>
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 mt-8">
         <!-- Search Bar with Stats Button -->
         <v-card class="mb-4 pa-4">
-            <div class="d-flex align-center justify-space-between">
+            <div class="d-flex align-center justify-space-between mb-4">
                 <div class="d-flex align-center flex-grow-1 mr-4">
                     <v-text-field
                         v-model="searchQuery"
@@ -17,12 +18,12 @@
                         @click:clear="handleSearch"
                     />
                     <v-chip
-                        v-if="searchQuery"
+                        v-if="searchQuery || selectedStatus !== 'all'"
                         color="primary"
                         variant="outlined"
                         class="ml-2"
                     >
-                        {{ totalCrawls }} result{{ totalCrawls !== 1 ? 's' : '' }}
+                        {{ filteredCrawls.length }} result{{ filteredCrawls.length !== 1 ? 's' : '' }}
                     </v-chip>
                 </div>
                 <v-btn
@@ -34,11 +35,41 @@
                     View Stats
                 </v-btn>
             </div>
+            
+            <!-- Status Filter -->
+            <div class="d-flex align-center">
+                <span class="text-subtitle-2 font-weight-medium mr-3">Status:</span>
+                <div class="d-flex gap-1">
+                    <v-chip
+                        v-for="status in statusOptions"
+                        :key="status.value"
+                        :color="selectedStatus === status.value ? 'primary' : 'default'"
+                        :variant="selectedStatus === status.value ? 'elevated' : 'outlined'"
+                        @click="toggleStatusFilter(status.value)"
+                        class="cursor-pointer"
+                        size="small"
+                    >
+                        <v-icon :icon="status.icon" start size="x-small" />
+                        {{ status.label }}
+                        <span class="ml-1">({{ getStatusCount(status.value) }})</span>
+                    </v-chip>
+                </div>
+                <v-spacer />
+                <v-btn
+                    v-if="selectedStatus !== 'all'"
+                    variant="text"
+                    color="primary"
+                    size="small"
+                    @click="clearStatusFilter"
+                >
+                    Clear Filter
+                </v-btn>
+            </div>
         </v-card>
         
         <v-data-table
             :headers="headers"
-            :items="crawls"
+            :items="filteredCrawls"
             :items-per-page="-1"
             hover
             class="elevation-2 rounded-lg"
@@ -97,50 +128,39 @@
 
             <!-- Custom cell for Actions column -->
             <template v-slot:item.actions="{ item }">
-                <v-btn
-                    variant="text"
-                    color="warning"
-                    size="small"
-                    @click="openEditModal(item)"
-                    class="mr-2"
-                >
-                    Edit
-                </v-btn>
-                <v-tooltip location="top">
-                  <template #activator="{ props }">
-                    <v-btn
-                      v-bind="props"
-                      variant="text"
-                      :color="item.disabled ? 'grey' : 'success'"
-                      size="small"
-                      :loading="disableLoadingId === item._id"
-                      :disabled="disableLoadingId === item._id"
-                      @click="toggleDisableCrawl(item)"
-                      class="mr-2"
-                    >
-                      <v-icon>
-                        {{ item.disabled ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch' }}
-                      </v-icon>
-                    </v-btn>
-                  </template>
-                  <span>{{ item.disabled ? 'Enable' : 'Disable' }} Crawl</span>
-                </v-tooltip>
-                <v-tooltip location="top">
-                  <template #activator="{ props }">
-                    <v-btn
-                      v-bind="props"
-                      variant="text"
-                      color="error"
-                      size="small"
-                      :loading="deleteLoadingId === item._id"
-                      :disabled="deleteLoadingId === item._id"
-                      @click="confirmDeleteCrawl(item)"
-                    >
-                      <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Delete Crawl</span>
-                </v-tooltip>
+                <v-menu>
+                    <template v-slot:activator="{ props }">
+                        <v-btn
+                            variant="text"
+                            color="primary"
+                            v-bind="props"
+                            size="small"
+                        >
+                            <v-icon>mdi-dots-vertical</v-icon>
+                        </v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-item @click="openEditModal(item)">
+                            <template v-slot:prepend>
+                                <v-icon icon="mdi-pencil" />
+                            </template>
+                            <v-list-item-title>Edit</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="toggleDisableCrawl(item)" :disabled="disableLoadingId === item._id">
+                            <template v-slot:prepend>
+                                <v-icon :icon="item.disabled ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch'" />
+                            </template>
+                            <v-list-item-title>{{ item.disabled ? 'Enable' : 'Disable' }} Crawl</v-list-item-title>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                        <v-list-item @click="confirmDeleteCrawl(item)" :disabled="deleteLoadingId === item._id">
+                            <template v-slot:prepend>
+                                <v-icon icon="mdi-delete" color="error" />
+                            </template>
+                            <v-list-item-title class="text-error">Delete Crawl</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
             </template>
 
             <!-- Custom cell for Status column -->
@@ -277,7 +297,7 @@
         >
             {{ snackbarText }}
         </v-snackbar>
-    </v-container>
+    </div>
 </template>
 
 <script setup>
@@ -338,6 +358,18 @@ const showStatsModal = ref(false)
 // Search query
 const searchQuery = ref('')
 
+// Status filter state
+const selectedStatus = ref('all')
+
+// Status filter options
+const statusOptions = [
+    { value: 'all', label: 'All', icon: 'mdi-view-list' },
+    { value: 'completed', label: 'Completed', icon: 'mdi-check-circle' },
+    { value: 'failed', label: 'Failed', icon: 'mdi-alert-circle' },
+    { value: 'in-progress', label: 'In Progress', icon: 'mdi-progress-clock' },
+    { value: 'pending', label: 'Pending', icon: 'mdi-clock-outline' }
+]
+
 // Computed properties for statistics
 const completedCrawls = computed(() => {
     return crawls.value.filter(crawl => crawl.status === 'completed').length
@@ -351,9 +383,33 @@ const inProgressCrawls = computed(() => {
     return crawls.value.filter(crawl => crawl.status === 'in-progress').length
 })
 
-// Function to get relative time
+// Computed property for filtered crawls
+const filteredCrawls = computed(() => {
+    if (selectedStatus.value === 'all') {
+        return crawls.value
+    }
+    return crawls.value.filter(crawl => crawl.status === selectedStatus.value)
+})
+
+// Function to get count for each status
+const getStatusCount = (status) => {
+    if (status === 'all') {
+        return crawls.value.length
+    }
+    return crawls.value.filter(crawl => crawl.status === status).length
+}
+
 // Debounced search function
 let searchTimeout = null
+
+// Status filter functions
+const toggleStatusFilter = (status) => {
+    selectedStatus.value = status
+}
+
+const clearStatusFilter = () => {
+    selectedStatus.value = 'all'
+}
 
 // Wrapper function to call the composable's fetchCrawls with search only
 const fetchCrawls = async () => {
