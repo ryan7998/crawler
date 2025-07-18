@@ -584,10 +584,12 @@ class GoogleSheetsOAuth2Service {
                 };
             }
 
-            const finalSheetTitle = sheetTitle || `Global Crawl Changes - ${new Date().toISOString().split('T')[0]}`;
-
-            // Create a new sheet
-            const spreadsheetId = await this.createNewSheet(finalSheetTitle, folderId);
+            // Use the fixed Google Sheet ID from env, or create a new one if not set
+            let spreadsheetId = process.env.GOOGLE_GLOBAL_EXPORT_SHEET_ID;
+            if (!spreadsheetId) {
+                const finalSheetTitle = sheetTitle || `Global Crawl Changes - ${new Date().toISOString().split('T')[0]}`;
+                spreadsheetId = await this.createNewSheet(finalSheetTitle, folderId);
+            }
 
             // Collect all changes from all crawls
             const allChanges = [];
@@ -658,7 +660,7 @@ class GoogleSheetsOAuth2Service {
                 };
             }
 
-            // Write all data to sheet
+            // Write all data to sheet (overwrites from A1)
             await this.writeDataToSheet(spreadsheetId, allChanges);
 
             // Add global summary sheet

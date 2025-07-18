@@ -53,14 +53,10 @@
                             </v-expansion-panel-title>
                             <v-expansion-panel-text>
                                 <v-row>
-                                    <v-col cols="12" md="6">
-                                        <v-text-field
-                                            v-model="sheetTitle"
-                                            label="Sheet Title (Google Sheets only)"
-                                            placeholder="Global Crawl Changes"
-                                            hint="Leave empty for auto-generated title"
-                                            persistent-hint
-                                        />
+                                    <v-col cols="12">
+                                        <v-alert type="info" variant="tonal" class="mb-2">
+                                            All exports will overwrite the same Google Sheet. You can always access the latest export using the link shown after export.
+                                        </v-alert>
                                     </v-col>
                                     <v-col cols="12" md="6">
                                         <v-text-field
@@ -213,7 +209,6 @@ const emit = defineEmits(['update:modelValue', 'export-success'])
 
 // Reactive data
 const exportType = ref('google-sheets')
-const sheetTitle = ref('')
 const limit = ref(100)
 const statusFilter = ref(null)
 const userId = ref('')
@@ -276,7 +271,6 @@ const exportData = async () => {
             const payload = {
                 userId: userId.value || null,
                 includeUnchanged: includeUnchanged.value,
-                sheetTitle: sheetTitle.value || null,
                 limit: parseInt(limit.value),
                 statusFilter: statusFilter.value
             }
