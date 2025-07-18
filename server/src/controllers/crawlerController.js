@@ -92,6 +92,7 @@ const updateCrawler = async (req, res) => {
         if (urls) crawl.urls = urls.map(url => url.trim())
         if (selectors) crawl.selectors = selectors
         if (advancedSelectors) crawl.advancedSelectors = advancedSelectors
+        if (typeof req.body.disabled === 'boolean') crawl.disabled = req.body.disabled
 
         const updatedCrawl = await crawl.save()
         res.status(200).json({ message: 'Crawl updated successfully', crawl: updatedCrawl })
@@ -190,16 +191,12 @@ const getAllCrawlers = async (req, res) => {
         
         // Implement pagination
         const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 20
+        const limit = parseInt(req.query.limit) || 100
         const skip = (page - 1) * limit
 
         // Fetch crawls from the database
         const crawls = await Crawl.find(query)
             .select('-__v') // Exclude the __v field
-            .populate({
-                path: 'results',
-                select: '-__v'
-            })
             .sort({ createdAt: -1 }) // Sort by newest first
             .skip(skip)
             .limit(limit)
@@ -390,6 +387,217 @@ const deleteCrawlDataForUrls = async (req, res) => {
     }
 }
 
+// GLOBAL RUN: Start all non-disabled crawls
+const runAllCrawls = async (req, res) => {
+    try {
+        // Find all non-disabled crawls
+        const crawls = await Crawl.find({ disabled: { $ne: true } });
+        if (!crawls.length) {
+            return res.status(200).json({ message: 'No non-disabled crawls found to start', started: [], skipped: [] });
+        }
+        const started = [];
+        const skipped = [];
+        for (const crawl of crawls) {
+            // Defensive: check again if status is in-progress (in case of race)
+            if (crawl.status === 'in-progress') {
+                skipped.push({ crawlId: crawl._id, title: crawl.title, reason: 'already in progress' });
+                continue;
+            }
+            // Use crawlWebsite logic directly
+            try {
+                // Use the same logic as crawlWebsite, but call the function directly
+                await crawlWebsite({
+                    body: {
+                        urls: crawl.urls,
+                        crawlId: crawl._id,
+                        selectors: crawl.selectors
+                    }
+                }, {
+                    json: (result) => {
+                        // Optionally collect result
+                    },
+                    status: () => ({ json: () => {} }) // Dummy for error path
+                });
+                started.push({ crawlId: crawl._id, title: crawl.title });
+            } catch (err) {
+                skipped.push({ crawlId: crawl._id, title: crawl.title, reason: err.message });
+            }
+        }
+        res.status(200).json({ message: `Started ${started.length} crawls`, started, skipped });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to start all crawls', error: error.message });
+    }
+};
+
+// Clear the queue for a specific crawl
+const clearCrawlQueue = async (req, res) => {
+    const { crawlId } = req.params;
+    try {
+        const q = crawlQueue(crawlId);
+        await q.empty();
+        res.status(200).json({ message: `Queue for crawl ${crawlId} cleared!` });
+    } catch (err) {
+        console.error('Error clearing queue:', err);
+        res.status(500).json({ message: 'Error clearing queue', error: err.message });
+    }
+};
+
+// Clear all queues
+const clearAllQueues = async (req, res) => {
+    try {
+        const Redis = require('ioredis')
+        const redis = new Redis({
+            host: process.env.REDIS_HOST || '127.0.0.1',
+            port: process.env.REDIS_PORT || 6379,
+        })
+
+        // Get all queue keys that match the pattern 'bull:crawl:*'
+        const keys = await redis.keys('bull:crawl:*')
+        
+        if (keys.length === 0) {
+            await redis.disconnect()
+            return res.status(200).json({ message: 'No queues found to clear' });
+        }
+
+        let clearedQueues = 0;
+        let totalJobsCleared = 0;
+
+        for (const key of keys) {
+            // Extract crawlId from the key (format: 'bull:crawl:crawlId')
+            const parts = key.split(':')
+            const crawlId = parts[2]
+            
+            if (!crawlId) continue
+
+            try {
+                const queue = crawlQueue(crawlId)
+                const jobs = await queue.getJobs(['waiting', 'active', 'delayed', 'failed'])
+                
+                if (jobs.length > 0) {
+                    await queue.empty()
+                    clearedQueues++
+                    totalJobsCleared += jobs.length
+                    console.log(`Cleared ${jobs.length} jobs from queue for crawl ${crawlId}`)
+                }
+
+                await queue.close()
+            } catch (err) {
+                console.log(`Error clearing queue for crawl ${crawlId}:`, err.message)
+            }
+        }
+
+        await redis.disconnect()
+
+        res.status(200).json({ 
+            message: `Cleared ${clearedQueues} queues with ${totalJobsCleared} total jobs`,
+            clearedQueues,
+            totalJobsCleared
+        });
+
+    } catch (error) {
+        console.error('Error clearing all queues:', error.message)
+        res.status(500).json({ message: 'Error clearing all queues', error: error.message })
+    }
+};
+
+// Get status of all per-crawl queues
+const getAllQueuesStatus = async (req, res) => {
+    try {
+        const Redis = require('ioredis')
+        const redis = new Redis({
+            host: process.env.REDIS_HOST || '127.0.0.1',
+            port: process.env.REDIS_PORT || 6379,
+        })
+
+        // Get all queue keys that match the pattern 'bull:crawl:*'
+        const keys = await redis.keys('bull:crawl:*')
+        
+        if (keys.length === 0) {
+            await redis.disconnect()
+            return res.json({ 
+                queues: [],
+                summary: {
+                    totalActive: 0,
+                    totalWaiting: 0,
+                    totalDelayed: 0,
+                    totalFailed: 0,
+                    totalCompleted: 0
+                }
+            })
+        }
+
+        let totalActive = 0
+        let totalWaiting = 0
+        let totalDelayed = 0
+        let totalFailed = 0
+        let totalCompleted = 0
+        const queues = []
+
+        for (const key of keys) {
+            // Extract crawlId from the key (format: 'bull:crawl:crawlId')
+            const parts = key.split(':')
+            const crawlId = parts[2]
+            
+            if (!crawlId) continue
+
+            try {
+                const queue = crawlQueue(crawlId) // Use the existing crawlQueue function
+                const waiting = await queue.getJobs(['waiting'])
+                const active = await queue.getJobs(['active'])
+                const delayed = await queue.getJobs(['delayed'])
+                const failed = await queue.getJobs(['failed'])
+                const completed = await queue.getJobs(['completed'])
+
+                const total = waiting.length + active.length + delayed.length + failed.length + completed.length
+                
+                if (total > 0) {
+                    const queueInfo = {
+                        crawlId,
+                        total,
+                        waiting: waiting.length,
+                        active: active.length,
+                        delayed: delayed.length,
+                        failed: failed.length,
+                        completed: completed.length,
+                        activeJobs: active.map(job => ({
+                            id: job.id,
+                            url: job.data.url
+                        }))
+                    }
+                    queues.push(queueInfo)
+
+                    totalActive += active.length
+                    totalWaiting += waiting.length
+                    totalDelayed += delayed.length
+                    totalFailed += failed.length
+                    totalCompleted += completed.length
+                }
+
+                await queue.close()
+            } catch (err) {
+                console.log(`Error checking queue for crawl ${crawlId}:`, err.message)
+            }
+        }
+
+        await redis.disconnect()
+
+        res.json({
+            queues,
+            summary: {
+                totalActive,
+                totalWaiting,
+                totalDelayed,
+                totalFailed,
+                totalCompleted
+            }
+        })
+
+    } catch (error) {
+        console.error('Error checking all queues:', error.message)
+        res.status(500).json({ message: 'Error checking queues', error: error.message })
+    }
+};
+
 module.exports = {
     crawlWebsite,
     createCrawler,
@@ -400,5 +608,9 @@ module.exports = {
     checkDomainSelectors,
     getQueueStatus,
     deleteCrawlData,
-    deleteCrawlDataForUrls
+    deleteCrawlDataForUrls,
+    runAllCrawls,
+    clearCrawlQueue,
+    clearAllQueues, // Export the new function
+    getAllQueuesStatus // Export the new function
 }

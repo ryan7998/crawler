@@ -46,6 +46,10 @@ const crawlSchema = new Schema({
         enum: ['pending', 'in-progress', 'completed', 'failed'],
         default: 'pending'
     },
+    disabled: {
+        type: Boolean,
+        default: false
+    },
     results: [{
         type: Schema.Types.ObjectId, // Store references to CrawlData documents
         ref: 'CrawlData'
