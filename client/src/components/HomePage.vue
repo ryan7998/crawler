@@ -118,9 +118,13 @@
                 </v-chip>
             </template>
 
-            <!-- Custom cell for Created At column -->
-            <template v-slot:item.createdAt="{ item }">
-                {{ formatDate(item.updatedAt) }}
+            <!-- Custom cell for Last Run column -->
+            <template v-slot:item.lastRun="{ item }">
+                <div class="text-center">
+                    <div class="text-body-2">
+                        {{ formatDateTime(item.endTime || item.updatedAt) }}
+                    </div>
+                </div>
             </template>
         </v-data-table>
 
@@ -179,7 +183,7 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
-import { formatDate, getApiUrl } from '../utils/commonUtils'
+import { formatDate, formatDateTime, getApiUrl } from '../utils/commonUtils'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
@@ -211,7 +215,7 @@ const {
 const headers = [
     { title: 'Title', key: 'title', align: 'center' },
     { title: 'Status', key: 'status', align: 'center' },
-    { title: 'Last Run', key: 'createdAt', align: 'center' },
+    { title: 'Last Run', key: 'lastRun', align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
 ]
 
