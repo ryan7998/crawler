@@ -119,6 +119,17 @@
                         <v-icon start icon="mdi-broom" />
                         Clear Queue
                     </v-btn>
+                    <v-btn
+                        block
+                        variant="outlined"
+                        color="success"
+                        class="mb-2"
+                        @click="showExportModal = true"
+                        :disabled="!hasCrawlData"
+                    >
+                        <v-icon start icon="mdi-download" />
+                        Export with Changes
+                    </v-btn>
                 </div>
             </div>
 
@@ -157,17 +168,6 @@
                                     Queue: {{ queueStatus.active }} active, {{ queueStatus.waiting }} waiting
                                 </span>
                             </div>
-                            <!-- Export Button -->
-                            <v-btn
-                                variant="outlined"
-                                color="success"
-                                size="small"
-                                @click="showExportModal = true"
-                                :disabled="!hasCrawlData"
-                            >
-                                <v-icon start icon="mdi-download" />
-                                Export with Changes
-                            </v-btn>
                         </div>
                     </div>
                     <v-table>
