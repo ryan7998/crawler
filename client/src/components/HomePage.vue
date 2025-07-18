@@ -33,11 +33,10 @@
         
 
         
-        <v-data-table-server
+        <v-data-table
             :headers="headers"
             :items="crawls"
-            v-model:options="options"                
-            :items-length="totalCrawls"              
+            :items-per-page="-1"
             hover
         >
             <!-- No results message -->
@@ -109,7 +108,7 @@
             <template v-slot:item.createdAt="{ item }">
                 {{ formatDate(item.updatedAt) }}
             </template>
-        </v-data-table-server>
+        </v-data-table>
 
         <!-- Create/Edit Crawl Modal -->
         <CreateCrawlModal
@@ -181,17 +180,7 @@ const headers = [
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
 ]
 
-// Vuetify server-side pagination options
-const options = ref({
-    page: 1,
-    itemsPerPage: 100,
-    sortBy: [],
-    sortDesc: [],
-    groupBy: [],
-    groupDesc: [],
-    multiSort: false,
-    mustSort: false,
-})
+// No pagination needed - showing all crawls
 
 // Modal state
 const showModal = ref(false)
@@ -205,9 +194,9 @@ const searchQuery = ref('')
 // Debounced search function
 let searchTimeout = null
 
-// Wrapper function to call the composable's fetchCrawls with current options and search
+// Wrapper function to call the composable's fetchCrawls with search only
 const fetchCrawls = async () => {
-    await fetchCrawlsFromComposable(options.value, searchQuery.value)
+    await fetchCrawlsFromComposable({ page: 1, itemsPerPage: 1000 }, searchQuery.value)
 }
 
 // Handle search with debouncing
@@ -219,14 +208,11 @@ const handleSearch = () => {
     
     // Set new timeout for debounced search
     searchTimeout = setTimeout(() => {
-        // Reset to first page when searching
-        options.value.page = 1
         fetchCrawls()
     }, 300) // 300ms delay
 }
 
-// Watch for changes in options to fetch data
-watch(options, fetchCrawls, { deep: true })
+// No need to watch options since we're not using pagination
 
 // Open create modal
 const openCreateModal = () => {
