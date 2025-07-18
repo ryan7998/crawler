@@ -151,45 +151,44 @@
                 </v-btn>
             </v-card-actions>
         </v-card>
+    </v-dialog>
 
-        <!-- Success Dialog -->
-        <v-dialog v-model="showSuccess" max-width="500px">
-            <v-card>
-                <v-card-title class="text-h6">
-                    Export Completed Successfully!
-                </v-card-title>
-                <v-card-text>
-                    <div v-if="exportResult">
-                        <p><strong>Processed:</strong> {{ exportResult.processedCrawlCount }} crawls</p>
-                        <p><strong>Total URLs:</strong> {{ exportResult.totalUrls }}</p>
-                        <p><strong>Changes Found:</strong></p>
-                        <ul>
-                            <li>New URLs: {{ exportResult.totalNewUrls }}</li>
-                            <li>Changed URLs: {{ exportResult.totalChangedUrls }}</li>
-                            <li>Removed URLs: {{ exportResult.totalRemovedUrls }}</li>
-                        </ul>
-                        <p><strong>Total Rows:</strong> {{ exportResult.rowCount }}</p>
-                        
-                        <v-btn
-                            v-if="exportResult.sheetUrl"
-                            :href="exportResult.sheetUrl"
-                            target="_blank"
-                            color="success"
-                            class="mt-3"
-                        >
-                            <v-icon start icon="mdi-open-in-new" />
-                            Open Google Sheet
-                        </v-btn>
-                    </div>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer />
-                    <v-btn @click="showSuccess = false" color="primary">
-                        Close
+    <!-- Success Dialog (moved outside main dialog) -->
+    <v-dialog v-model="showSuccess" max-width="500px">
+        <v-card>
+            <v-card-title class="text-h6">
+                Export Completed Successfully!
+            </v-card-title>
+            <v-card-text>
+                <div v-if="exportResult">
+                    <p><strong>Processed:</strong> {{ exportResult.processedCrawlCount }} crawls</p>
+                    <p><strong>Total URLs:</strong> {{ exportResult.totalUrls }}</p>
+                    <p><strong>Changes Found:</strong></p>
+                    <ul>
+                        <li>New URLs: {{ exportResult.totalNewUrls }}</li>
+                        <li>Changed URLs: {{ exportResult.totalChangedUrls }}</li>
+                        <li>Removed URLs: {{ exportResult.totalRemovedUrls }}</li>
+                    </ul>
+                    <p><strong>Total Rows:</strong> {{ exportResult.rowCount }}</p>
+                    <v-btn
+                        v-if="exportResult.sheetUrl"
+                        :href="exportResult.sheetUrl"
+                        target="_blank"
+                        color="success"
+                        class="mt-3"
+                    >
+                        <v-icon start icon="mdi-open-in-new" />
+                        Open Google Sheet
                     </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+                </div>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer />
+                <v-btn @click="showSuccess = false" color="primary">
+                    Close
+                </v-btn>
+            </v-card-actions>
+        </v-card>
     </v-dialog>
 </template>
 
