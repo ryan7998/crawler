@@ -15,7 +15,7 @@
                         color="primary"
                         :loading="runAllLoading"
                         :disabled="runAllLoading"
-                        @click="runAllCrawls"
+                        @click="showRunAllConfirm = true"
                         size="small"
                     >
                         <v-icon start icon="mdi-play-circle" />
@@ -47,7 +47,6 @@
                         <v-icon start icon="mdi-plus" />
                         New
                     </v-btn>
-                    <a class="text-gray-500 hover:text-gray-800 ml-2" href="/">Home</a>
                 </div>
             </div>
         </div>
@@ -71,6 +70,17 @@
         >
             {{ snackbarText }}
         </v-snackbar>
+        <v-dialog v-model="showRunAllConfirm" max-width="400">
+          <v-card>
+            <v-card-title class="text-h6">Confirm Run All</v-card-title>
+            <v-card-text>Are you sure you want to run all crawls? This will start all enabled crawls that are not already in progress.</v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn text @click="showRunAllConfirm = false">Cancel</v-btn>
+              <v-btn color="primary" :loading="runAllLoading" @click="confirmRunAll">Run All</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
     </nav>
 </template>
 
@@ -99,6 +109,7 @@ const showModal = ref(false)
 const selectedCrawl = ref(null)
 const showGlobalExportModal = ref(false)
 const showQueueStatusModal = ref(false)
+const showRunAllConfirm = ref(false)
 
 // Open create modal
 const openCreateModal = () => {
@@ -120,5 +131,10 @@ const handleGlobalExportSuccess = (exportResult) => {
 // Wrapper for run all crawls
 const runAllCrawls = async () => {
     await runAllCrawlsFromComposable()
+}
+
+const confirmRunAll = async () => {
+  showRunAllConfirm.value = false
+  await runAllCrawls()
 }
 </script>
