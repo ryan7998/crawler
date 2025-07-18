@@ -11,52 +11,54 @@
                 </div>
                 <div class="flex items-center space-x-2">
                     <v-btn
-                        variant="outlined"
-                        color="primary"
-                        :loading="runAllLoading"
-                        :disabled="runAllLoading"
-                        @click="showRunAllConfirm = true"
-                        size="small"
-                    >
-                        <v-icon start icon="mdi-play-circle" />
-                        Run All
-                    </v-btn>
-                    <v-btn
-                        variant="outlined"
-                        color="info"
-                        @click="showQueueStatusModal = true"
-                        size="small"
-                    >
-                        <v-icon start icon="mdi-queue" />
-                        Queue
-                    </v-btn>
-                    <v-btn
-                        variant="outlined"
-                        color="success"
-                        @click="showGlobalExportModal = true"
-                        size="small"
-                    >
-                        <v-icon start icon="mdi-download-multiple" />
-                        Export
-                    </v-btn>
-                    <v-btn
-                        variant="outlined"
-                        color="warning"
-                        @click="openGlobalSheet"
-                        size="small"
-                        :disabled="!globalSheetUrl"
-                    >
-                        <v-icon start icon="mdi-google-drive" />
-                        Sheet
-                    </v-btn>
-                    <v-btn
                         color="primary"
                         @click="openCreateModal"
                         size="small"
                     >
                         <v-icon start icon="mdi-plus" />
-                        New
+                        New Crawl
                     </v-btn>
+                    
+                    <!-- Actions Dropdown -->
+                    <v-menu>
+                        <template v-slot:activator="{ props }">
+                            <v-btn
+                                variant="outlined"
+                                color="secondary"
+                                v-bind="props"
+                                size="small"
+                            >
+                                <v-icon start icon="mdi-dots-horizontal" />
+                                Actions
+                            </v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item @click="showRunAllConfirm = true" :disabled="runAllLoading">
+                                <template v-slot:prepend>
+                                    <v-icon icon="mdi-play-circle" />
+                                </template>
+                                <v-list-item-title>Run All Crawls</v-list-item-title>
+                            </v-list-item>
+                            <v-list-item @click="showQueueStatusModal = true">
+                                <template v-slot:prepend>
+                                    <v-icon icon="mdi-queue" />
+                                </template>
+                                <v-list-item-title>Queue Status</v-list-item-title>
+                            </v-list-item>
+                            <v-list-item @click="showGlobalExportModal = true">
+                                <template v-slot:prepend>
+                                    <v-icon icon="mdi-download-multiple" />
+                                </template>
+                                <v-list-item-title>Export All</v-list-item-title>
+                            </v-list-item>
+                            <v-list-item @click="openGlobalSheet" :disabled="!globalSheetUrl">
+                                <template v-slot:prepend>
+                                    <v-icon icon="mdi-google-drive" />
+                                </template>
+                                <v-list-item-title>Open Sheet</v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
                 </div>
             </div>
         </div>
