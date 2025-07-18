@@ -41,14 +41,14 @@
                             <template v-slot:prepend>
                                 <v-icon icon="mdi-clock-start" />
                             </template>
-                            <v-list-item-title>Start Time</v-list-item-title>
+                            <v-list-item-title>Created On</v-list-item-title>
                             <v-list-item-subtitle>{{ formatDateTime(crawl.startTime) }}</v-list-item-subtitle>
                         </v-list-item>
                         <v-list-item>
                             <template v-slot:prepend>
                                 <v-icon icon="mdi-clock-end" />
                             </template>
-                            <v-list-item-title>End Time</v-list-item-title>
+                            <v-list-item-title>Last Run</v-list-item-title>
                             <v-list-item-subtitle>{{ formatDateTime(crawl.endTime) }}</v-list-item-subtitle>
                         </v-list-item>
                     </v-list>

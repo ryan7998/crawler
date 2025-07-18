@@ -180,6 +180,7 @@ import { useRouter } from 'vue-router'
 import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
 import { formatDate, getApiUrl } from '../utils/commonUtils'
+import { useCrawlManagement } from '../composables/useCrawlManagement'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
@@ -190,6 +191,21 @@ const router = useRouter()
 
 // Inject the notification function
 const showNotification = inject('showNotification')
+
+// Use the crawl management composable
+const {
+    crawls,
+    totalCrawls,
+    isSearching,
+    runAllLoading,
+    disableLoadingId,
+    showSnackbar,
+    snackbarText,
+    snackbarColor,
+    fetchCrawls: fetchCrawlsFromComposable,
+    runAllCrawls: runAllCrawlsFromComposable,
+    toggleDisableCrawl: toggleDisableCrawlFromComposable
+} = useCrawlManagement()
 
 // Table configuration
 const headers = [
@@ -202,7 +218,7 @@ const headers = [
 // Vuetify server-side pagination options
 const options = ref({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 100,
     sortBy: [],
     sortDesc: [],
     groupBy: [],
@@ -210,8 +226,6 @@ const options = ref({
     multiSort: false,
     mustSort: false,
 })
-const totalCrawls = ref(0)
-const crawls = ref([])
 
 // Modal state
 const showModal = ref(false)
@@ -221,26 +235,13 @@ const showQueueStatusModal = ref(false)
 
 // Search query
 const searchQuery = ref('')
-const isSearching = ref(false)
 
 // Debounced search function
 let searchTimeout = null
 
-// Fetch crawls with pagination and search
+// Wrapper function to call the composable's fetchCrawls with current options and search
 const fetchCrawls = async () => {
-    try {
-        isSearching.value = true
-        const { page, itemsPerPage } = options.value
-        const searchParam = searchQuery.value ? `&search=${encodeURIComponent(searchQuery.value)}` : ''
-        const response = await axios.get(`${getApiUrl()}/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`)
-        crawls.value = response.data.crawls
-        totalCrawls.value = response.data.totalCrawls
-    } catch (error) {
-        console.error('Error fetching crawls:', error)
-        showNotification('Error fetching crawls', 'error')
-    } finally {
-        isSearching.value = false
-    }
+    await fetchCrawlsFromComposable(options.value, searchQuery.value)
 }
 
 // Handle search with debouncing
@@ -287,49 +288,13 @@ const handleGlobalExportSuccess = (exportResult) => {
     showNotification('Global export completed successfully!', 'success')
 }
 
-const runAllLoading = ref(false)
-const showSnackbar = ref(false)
-const snackbarText = ref('')
-const snackbarColor = ref('success')
-
+// Wrapper functions to call the composable's functions
 const runAllCrawls = async () => {
-    runAllLoading.value = true
-    try {
-        const response = await axios.post(`${getApiUrl()}/api/runallcrawls`)
-        const { message, started, skipped } = response.data
-        snackbarText.value = `${message}. Started: ${started.length}, Skipped: ${skipped.length}`
-        snackbarColor.value = 'success'
-        showSnackbar.value = true
-    } catch (error) {
-        snackbarText.value = error.response?.data?.message || 'Failed to start all crawls'
-        snackbarColor.value = 'error'
-        showSnackbar.value = true
-    } finally {
-        runAllLoading.value = false
-    }
+    await runAllCrawlsFromComposable()
 }
 
-const disableLoadingId = ref(null)
-
 const toggleDisableCrawl = async (item) => {
-    disableLoadingId.value = item._id
-    try {
-        const response = await axios.put(`${getApiUrl()}/api/updatecrawl/${item._id}`,
-            { disabled: !item.disabled })
-        // Update the local crawl list
-        const updated = response.data.crawl
-        const idx = crawls.value.findIndex(c => c._id === item._id)
-        if (idx !== -1) crawls.value[idx] = { ...crawls.value[idx], ...updated }
-        snackbarText.value = updated.disabled ? 'Crawl disabled' : 'Crawl enabled'
-        snackbarColor.value = 'success'
-        showSnackbar.value = true
-    } catch (error) {
-        snackbarText.value = error.response?.data?.message || 'Failed to update crawl'
-        snackbarColor.value = 'error'
-        showSnackbar.value = true
-    } finally {
-        disableLoadingId.value = null
-    }
+    await toggleDisableCrawlFromComposable(item)
 }
 
 
