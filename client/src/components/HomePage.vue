@@ -2,41 +2,7 @@
     <v-container>
         <div class="d-flex justify-space-between align-center mb-6">
             <h1 class="text-h4">All Crawls</h1>
-            <div class="d-flex gap-2">
-                <v-btn
-                    variant="outlined"
-                    color="primary"
-                    :loading="runAllLoading"
-                    :disabled="runAllLoading"
-                    @click="runAllCrawls"
-                >
-                    <v-icon start icon="mdi-play-circle" />
-                    Run All Crawls
-                </v-btn>
-                <v-btn
-                    variant="outlined"
-                    color="info"
-                    @click="showQueueStatusModal = true"
-                >
-                    <v-icon start icon="mdi-queue" />
-                    Queue Status
-                </v-btn>
-                <v-btn
-                    variant="outlined"
-                    color="success"
-                    @click="showGlobalExportModal = true"
-                >
-                    <v-icon start icon="mdi-download-multiple" />
-                    Global Export
-                </v-btn>
-                <v-btn
-                    color="primary"
-                    @click="openCreateModal"
-                >
-                    <v-icon start icon="mdi-plus" />
-                    New Crawl
-                </v-btn>
-            </div>
+            <!-- Action buttons moved to Navbar.vue -->
         </div>
         
         <!-- Search Bar -->
