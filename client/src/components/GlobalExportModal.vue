@@ -13,8 +13,8 @@
             >
                 <div>
                     <strong>Google Drive Storage:</strong>
-                    <span v-if="storageQuota.usage && storageQuota.limit">
-                        {{ formatBytes(storageQuota.usage) }} used of {{ formatBytes(storageQuota.limit) }}
+                    <span v-if="storageQuota?.quota?.usage && storageQuota?.quota?.limit">
+                        {{ formatBytes(storageQuota.quota.usage) }} used of {{ formatBytes(storageQuota.quota.limit) }}
                         ({{ percentUsed }}%)
                     </span>
                     <span v-else>
@@ -236,9 +236,9 @@ const showExport = computed({
 })
 
 const percentUsed = computed(() => {
-    if(storageQuota.value.limit === '0') return 0
-    else if (!storageQuota.value || !storageQuota.value.usage || !storageQuota.value.limit) return 0
-    return ((parseInt(storageQuota.value.usage) / parseInt(storageQuota.value.limit)) * 100).toFixed(1)
+    if (!storageQuota.value?.quota?.limit || storageQuota.value.quota.limit === '0') return 0
+    if (!storageQuota.value?.quota?.usage) return 0
+    return ((parseInt(storageQuota.value.quota.usage) / parseInt(storageQuota.value.quota.limit)) * 100).toFixed(1)
 })
 
 const storageWarning = computed(() => percentUsed.value > 90)
