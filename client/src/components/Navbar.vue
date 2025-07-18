@@ -40,6 +40,16 @@
                         Export
                     </v-btn>
                     <v-btn
+                        variant="outlined"
+                        color="warning"
+                        @click="openGlobalSheet"
+                        size="small"
+                        :disabled="!globalSheetUrl"
+                    >
+                        <v-icon start icon="mdi-google-drive" />
+                        Sheet
+                    </v-btn>
+                    <v-btn
                         color="primary"
                         @click="openCreateModal"
                         size="small"
@@ -101,7 +111,8 @@ const {
     showSnackbar,
     snackbarText,
     snackbarColor,
-    runAllCrawls: runAllCrawlsFromComposable
+    runAllCrawls: runAllCrawlsFromComposable,
+    globalSheetUrl
 } = useCrawlManagement()
 
 // Modal state
@@ -136,5 +147,11 @@ const runAllCrawls = async () => {
 const confirmRunAll = async () => {
   showRunAllConfirm.value = false
   await runAllCrawls()
+}
+
+const openGlobalSheet = () => {
+  if (globalSheetUrl.value) {
+    window.open(globalSheetUrl.value, '_blank')
+  }
 }
 </script>

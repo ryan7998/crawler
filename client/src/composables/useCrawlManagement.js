@@ -12,9 +12,24 @@ export function useCrawlManagement() {
     const showSnackbar = ref(false)
     const snackbarText = ref('')
     const snackbarColor = ref('success')
+    const globalSheetUrl = ref('')
 
     // Inject the notification function
     const showNotification = inject('showNotification')
+
+    // Fetch Google Sheet URL from server
+    const fetchGoogleSheetUrl = async () => {
+        try {
+            const response = await axios.get(`${getApiUrl()}/api/export/google-sheet-id`)
+            globalSheetUrl.value = response.data.sheetUrl
+        } catch (error) {
+            console.error('Error fetching Google Sheet URL:', error)
+            // Don't show notification for this as it's not critical
+        }
+    }
+
+    // Initialize Google Sheet URL
+    fetchGoogleSheetUrl()
 
     // Fetch crawls with pagination and search
     const fetchCrawls = async (options, searchQuery) => {
@@ -83,6 +98,7 @@ export function useCrawlManagement() {
         showSnackbar,
         snackbarText,
         snackbarColor,
+        globalSheetUrl,
         
         // Functions
         fetchCrawls,

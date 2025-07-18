@@ -6,21 +6,13 @@
             <!-- Sidebar Actions -->
             <div class="w-1/4 space-y-2">
                 <div v-if="crawl" class="bg-white rounded-lg shadow-sm p-6">
-                    <h6 class="font-semibold text-gray-700 mb-4">Crawl Stats</h6>
+                    <!-- <h6 class="font-semibold text-gray-700 mb-4">Crawl Stats</h6> -->
                     <v-list>
                         <v-list-item>
-                            <template v-slot:prepend>
+                            <!-- <template v-slot:prepend>
                                 <v-icon icon="mdi-text-box-outline" />
-                            </template>
-                            <v-list-item-title>Name</v-list-item-title>
-                            <v-list-item-subtitle>{{ crawl.title }}</v-list-item-subtitle>
-                        </v-list-item>
-                        <v-list-item>
-                            <template v-slot:prepend>
-                                <v-icon icon="mdi-identifier" />
-                            </template>
-                            <v-list-item-title>Crawl Id</v-list-item-title>
-                            <v-list-item-subtitle>{{ crawlId }}</v-list-item-subtitle>
+                            </template> -->
+                            <v-list-item-title class="text-lg font-semibold text-gray-900">{{ crawl.title }}</v-list-item-title>
                         </v-list-item>
                         <v-list-item>
                             <template v-slot:prepend>
@@ -127,34 +119,6 @@
                         <v-icon start icon="mdi-broom" />
                         Clear Queue
                     </v-btn>
-                    <v-btn
-                        block
-                        variant="outlined"
-                        color="info"
-                        class="mb-2"
-                        @click="showQueueStatusModal = true"
-                    >
-                        <v-icon start icon="mdi-queue" />
-                        Queue Status
-                    </v-btn>
-                </div>
-
-                <!-- Global Export Section -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h6 class="font-semibold text-gray-700 mb-4">Global Export</h6>
-                    <v-btn
-                        block
-                        variant="outlined"
-                        color="success"
-                        class="mb-2"
-                        @click="showGlobalExportModal = true"
-                    >
-                        <v-icon start icon="mdi-download-multiple" />
-                        Export All Crawls
-                    </v-btn>
-                    <div class="text-xs text-gray-500">
-                        Export changes from all crawls to a single Google Sheet
-                    </div>
                 </div>
             </div>
 
@@ -384,17 +348,6 @@
             @export-success="handleExportSuccess"
         />
 
-        <!-- Add GlobalExportModal -->
-        <GlobalExportModal
-            v-model="showGlobalExportModal"
-            @export-success="handleGlobalExportSuccess"
-        />
-
-        <!-- Queue Status Modal -->
-        <QueueStatusModal
-            v-model="showQueueStatusModal"
-        />
-
         <!-- Add Snackbar -->
         <v-snackbar
             v-model="showSnackbar"
@@ -419,8 +372,6 @@ import { getStatusColor } from '../utils/statusUtils'
 import { getApiUrl, getSocketUrl, formatDateTime } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import ExportModal from './ExportModal.vue'
-import GlobalExportModal from './GlobalExportModal.vue'
-import QueueStatusModal from './QueueStatusModal.vue'
 import * as XLSX from 'xlsx'
 
 const baseUrl = getApiUrl()
@@ -728,18 +679,6 @@ const handleExportSuccess = (exportResult) => {
     showNotification('Export completed successfully!', 'success')
 }
 
-// Handle successful global export
-const handleGlobalExportSuccess = (exportResult) => {
-    // Save global export to localStorage
-    localStorage.setItem('global_export', JSON.stringify({
-        sheetUrl: exportResult.sheetUrl,
-        exportDate: exportResult.exportDate,
-        isGlobal: true
-    }))
-    
-    showNotification('Global export completed successfully!', 'success')
-}
-
 // Function to format selectors for better readability in exports
 const formatSelectors = (selectors) => {
     if (!selectors || !Array.isArray(selectors)) return ''
@@ -847,8 +786,6 @@ const prepareExportData = () => {
 
 // Export modal state
 const showExportModal = ref(false)
-const showGlobalExportModal = ref(false)
-const showQueueStatusModal = ref(false)
 
 // Delete crawl data functions
 const confirmDeleteCrawlData = () => {

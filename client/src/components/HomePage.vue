@@ -1,10 +1,5 @@
 <template>
     <v-container>
-        <div class="d-flex justify-space-between align-center mb-6">
-            <h1 class="text-h4">All Crawls</h1>
-            <!-- Action buttons moved to Navbar.vue -->
-        </div>
-        
         <!-- Search Bar -->
         <v-card class="mb-4 pa-4">
             <div class="d-flex align-center">

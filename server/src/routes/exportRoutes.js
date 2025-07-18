@@ -19,6 +19,33 @@ router.get('/test', (req, res) => {
     });
 });
 
+/**
+ * Get Google Sheet ID for global exports
+ * GET /api/export/google-sheet-id
+ */
+router.get('/google-sheet-id', (req, res) => {
+    try {
+        const sheetId = process.env.GOOGLE_GLOBAL_EXPORT_SHEET_ID;
+        if (!sheetId) {
+            return res.status(404).json({ 
+                message: 'Google Sheet ID not configured',
+                error: 'GOOGLE_GLOBAL_EXPORT_SHEET_ID environment variable not set'
+            });
+        }
+        
+        res.json({ 
+            sheetId,
+            sheetUrl: `https://docs.google.com/spreadsheets/d/${sheetId}/edit`
+        });
+    } catch (error) {
+        console.error('Error getting Google Sheet ID:', error);
+        res.status(500).json({ 
+            message: 'Error getting Google Sheet ID', 
+            error: error.message 
+        });
+    }
+});
+
 // Import services with error handling
 let googleSheetsService, changeDetectionService;
 try {
