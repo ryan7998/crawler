@@ -45,6 +45,12 @@
                                     :rules="[v => !!v || 'Title is required']"
                                     required
                                 ></v-text-field>
+                                <v-switch
+                                    v-if="isEditing"
+                                    v-model="disabled"
+                                    label="Disable this crawl (will not run in global run)"
+                                    class="mt-2"
+                                ></v-switch>
                             </v-form>
                         </v-stepper-window-item>
 
@@ -253,6 +259,7 @@ const loading = ref(false)
 const domainLoading = ref(false)
 const domainError = ref('')
 const domainInfo = ref(null)
+const disabled = ref(false)
 
 // Add new refs for selectors
 const localSelectors = ref([])
@@ -267,6 +274,7 @@ const initializeForm = () => {
     if (props.crawlData) {
         title.value = props.crawlData.title
         urlsText.value = props.crawlData.urls.join('\n')
+        disabled.value = !!props.crawlData.disabled
         // Initialize current selectors from crawlData with child selectors
         currentSelectors.value = props.crawlData.selectors?.map(selector => ({
             id: Math.random().toString(36).substring(2, 9),
@@ -286,6 +294,7 @@ const initializeForm = () => {
     } else {
         title.value = ''
         urlsText.value = ''
+        disabled.value = false
         currentSelectors.value = []
         advancedSelectorsText.value = ''
     }
@@ -539,7 +548,8 @@ const handleSubmit = async () => {
                 .split('\n')
                 .map(s => s.trim())
                 .filter(s => s.length > 0),
-            userId: '1'
+            userId: '1',
+            ...(isEditing.value ? { disabled: disabled.value } : {})
         }
 
         console.log('Sending request data:', requestData)

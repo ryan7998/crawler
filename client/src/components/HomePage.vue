@@ -5,6 +5,24 @@
             <div class="d-flex gap-2">
                 <v-btn
                     variant="outlined"
+                    color="primary"
+                    :loading="runAllLoading"
+                    :disabled="runAllLoading"
+                    @click="runAllCrawls"
+                >
+                    <v-icon start icon="mdi-play-circle" />
+                    Run All Crawls
+                </v-btn>
+                <v-btn
+                    variant="outlined"
+                    color="info"
+                    @click="showQueueStatusModal = true"
+                >
+                    <v-icon start icon="mdi-queue" />
+                    Queue Status
+                </v-btn>
+                <v-btn
+                    variant="outlined"
                     color="success"
                     @click="showGlobalExportModal = true"
                 >
@@ -47,6 +65,8 @@
             </div>
         </v-card>
         
+
+        
         <v-data-table-server
             :headers="headers"
             :items="crawls"
@@ -83,18 +103,38 @@
                     color="warning"
                     size="small"
                     @click="openEditModal(item)"
+                    class="mr-2"
                 >
                     Edit
                 </v-btn>
+                <v-tooltip location="top">
+                  <template #activator="{ props }">
+                    <v-btn
+                      v-bind="props"
+                      variant="text"
+                      :color="item.disabled ? 'grey' : 'success'"
+                      size="small"
+                      :loading="disableLoadingId === item._id"
+                      :disabled="disableLoadingId === item._id"
+                      @click="toggleDisableCrawl(item)"
+                    >
+                      <v-icon>
+                        {{ item.disabled ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch' }}
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>{{ item.disabled ? 'Enable' : 'Disable' }} Crawl</span>
+                </v-tooltip>
             </template>
 
             <!-- Custom cell for Status column -->
             <template v-slot:item.status="{ item }">
                 <v-chip
-                    :color="getStatusColor(item.status)"
+                    :color="item.status === 'in-progress' ? 'blue' : getStatusColor(item.status)"
                     size="small"
                     class="text-capitalize"
                 >
+                    <v-icon v-if="item.status === 'in-progress'" start icon="mdi-progress-clock" />
                     {{ item.status }}
                 </v-chip>
             </template>
@@ -117,6 +157,19 @@
             v-model="showGlobalExportModal"
             @export-success="handleGlobalExportSuccess"
         />
+
+        <!-- Queue Status Modal -->
+        <QueueStatusModal
+            v-model="showQueueStatusModal"
+        />
+
+        <v-snackbar
+            v-model="showSnackbar"
+            :color="snackbarColor"
+            timeout="3000"
+        >
+            {{ snackbarText }}
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -129,6 +182,7 @@ import { getStatusColor } from '../utils/statusUtils'
 import { formatDate, getApiUrl } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
+import QueueStatusModal from './QueueStatusModal.vue'
 
 // Initialize Pinia store
 const crawlStore = useCrawlStore()
@@ -163,6 +217,7 @@ const crawls = ref([])
 const showModal = ref(false)
 const selectedCrawl = ref(null)
 const showGlobalExportModal = ref(false)
+const showQueueStatusModal = ref(false)
 
 // Search query
 const searchQuery = ref('')
@@ -231,6 +286,53 @@ const handleCrawlCreated = (crawl) => {
 const handleGlobalExportSuccess = (exportResult) => {
     showNotification('Global export completed successfully!', 'success')
 }
+
+const runAllLoading = ref(false)
+const showSnackbar = ref(false)
+const snackbarText = ref('')
+const snackbarColor = ref('success')
+
+const runAllCrawls = async () => {
+    runAllLoading.value = true
+    try {
+        const response = await axios.post(`${getApiUrl()}/api/runallcrawls`)
+        const { message, started, skipped } = response.data
+        snackbarText.value = `${message}. Started: ${started.length}, Skipped: ${skipped.length}`
+        snackbarColor.value = 'success'
+        showSnackbar.value = true
+    } catch (error) {
+        snackbarText.value = error.response?.data?.message || 'Failed to start all crawls'
+        snackbarColor.value = 'error'
+        showSnackbar.value = true
+    } finally {
+        runAllLoading.value = false
+    }
+}
+
+const disableLoadingId = ref(null)
+
+const toggleDisableCrawl = async (item) => {
+    disableLoadingId.value = item._id
+    try {
+        const response = await axios.put(`${getApiUrl()}/api/updatecrawl/${item._id}`,
+            { disabled: !item.disabled })
+        // Update the local crawl list
+        const updated = response.data.crawl
+        const idx = crawls.value.findIndex(c => c._id === item._id)
+        if (idx !== -1) crawls.value[idx] = { ...crawls.value[idx], ...updated }
+        snackbarText.value = updated.disabled ? 'Crawl disabled' : 'Crawl enabled'
+        snackbarColor.value = 'success'
+        showSnackbar.value = true
+    } catch (error) {
+        snackbarText.value = error.response?.data?.message || 'Failed to update crawl'
+        snackbarColor.value = 'error'
+        showSnackbar.value = true
+    } finally {
+        disableLoadingId.value = null
+    }
+}
+
+
 
 onMounted(() => {
     fetchCrawls()

@@ -109,10 +109,33 @@
                         block
                         variant="outlined"
                         color="info"
+                        class="mb-2"
                         @click="startCrawl"
                     >
                         <v-icon start icon="mdi-restart" />
                         {{ crawl?.status === 'pending' ? 'Start' : 'Restart' }}
+                    </v-btn>
+                    <v-btn
+                        block
+                        variant="outlined"
+                        color="secondary"
+                        class="mb-2"
+                        :loading="clearQueueLoading"
+                        :disabled="clearQueueLoading"
+                        @click="clearCrawlQueue"
+                    >
+                        <v-icon start icon="mdi-broom" />
+                        Clear Queue
+                    </v-btn>
+                    <v-btn
+                        block
+                        variant="outlined"
+                        color="info"
+                        class="mb-2"
+                        @click="showQueueStatusModal = true"
+                    >
+                        <v-icon start icon="mdi-queue" />
+                        Queue Status
                     </v-btn>
                 </div>
 
@@ -367,6 +390,11 @@
             @export-success="handleGlobalExportSuccess"
         />
 
+        <!-- Queue Status Modal -->
+        <QueueStatusModal
+            v-model="showQueueStatusModal"
+        />
+
         <!-- Add Snackbar -->
         <v-snackbar
             v-model="showSnackbar"
@@ -392,6 +420,7 @@ import { getApiUrl, getSocketUrl, formatDateTime } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import ExportModal from './ExportModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
+import QueueStatusModal from './QueueStatusModal.vue'
 import * as XLSX from 'xlsx'
 
 const baseUrl = getApiUrl()
@@ -433,6 +462,9 @@ const showRestartSelectedConfirm = ref(false)
 // Add export tracking refs
 const latestExportLink = ref('')
 const latestExportDate = ref(null)
+
+// Add clear queue loading ref
+const clearQueueLoading = ref(false)
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -816,6 +848,7 @@ const prepareExportData = () => {
 // Export modal state
 const showExportModal = ref(false)
 const showGlobalExportModal = ref(false)
+const showQueueStatusModal = ref(false)
 
 // Delete crawl data functions
 const confirmDeleteCrawlData = () => {
@@ -923,6 +956,23 @@ const restartSelectedUrls = async () => {
         const errMsg = error.response?.data?.error || error.message
         showNotification(errMsg, 'error')
         showRestartSelectedConfirm.value = false
+    }
+}
+
+// Clear crawl queue function
+const clearCrawlQueue = async () => {
+    clearQueueLoading.value = true
+    try {
+        await axios.delete(`${apiUrl}/api/clearqueue/${crawlId.value}`)
+        snackbarText.value = 'Queue cleared!'
+        snackbarColor.value = 'success'
+        showSnackbar.value = true
+    } catch (error) {
+        snackbarText.value = error.response?.data?.message || 'Failed to clear queue'
+        snackbarColor.value = 'error'
+        showSnackbar.value = true
+    } finally {
+        clearQueueLoading.value = false
     }
 }
 
