@@ -31,8 +31,6 @@
             </div>
         </v-card>
         
-
-        
         <v-data-table
             :headers="headers"
             :items="crawls"
@@ -52,17 +50,21 @@
                 </div>
             </template>
             
-            <!-- Custom cell for Actions column -->
-            <template v-slot:item.actions="{ item }">
+            <!-- Custom cell for Title column -->
+            <template v-slot:item.title="{ item }">
                 <v-btn
                     variant="text"
                     color="primary"
                     size="small"
                     :to="{ name: 'CrawlerDashboard', params: { crawlId: item._id } }"
-                    class="mr-2"
+                    class="text-none font-weight-medium"
                 >
-                    View
+                    {{ item.title }}
                 </v-btn>
+            </template>
+
+            <!-- Custom cell for Actions column -->
+            <template v-slot:item.actions="{ item }">
                 <v-btn
                     variant="text"
                     color="warning"
@@ -82,6 +84,7 @@
                       :loading="disableLoadingId === item._id"
                       :disabled="disableLoadingId === item._id"
                       @click="toggleDisableCrawl(item)"
+                      class="mr-2"
                     >
                       <v-icon>
                         {{ item.disabled ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch' }}
@@ -89,6 +92,22 @@
                     </v-btn>
                   </template>
                   <span>{{ item.disabled ? 'Enable' : 'Disable' }} Crawl</span>
+                </v-tooltip>
+                <v-tooltip location="top">
+                  <template #activator="{ props }">
+                    <v-btn
+                      v-bind="props"
+                      variant="text"
+                      color="error"
+                      size="small"
+                      :loading="deleteLoadingId === item._id"
+                      :disabled="deleteLoadingId === item._id"
+                      @click="confirmDeleteCrawl(item)"
+                    >
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Delete Crawl</span>
                 </v-tooltip>
             </template>
 
@@ -127,6 +146,27 @@
         <QueueStatusModal
             v-model="showQueueStatusModal"
         />
+
+        <!-- Delete Confirmation Dialog -->
+        <v-dialog v-model="showDeleteConfirm" max-width="400">
+            <v-card>
+                <v-card-title class="text-h6">Confirm Delete</v-card-title>
+                <v-card-text>
+                    Are you sure you want to delete "{{ crawlToDelete?.title }}"? This action cannot be undone.
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer />
+                    <v-btn @click="showDeleteConfirm = false">Cancel</v-btn>
+                    <v-btn 
+                        color="error" 
+                        :loading="deleteLoadingId === crawlToDelete?._id"
+                        @click="deleteCrawl"
+                    >
+                        Delete
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 
         <v-snackbar
             v-model="showSnackbar"
@@ -176,7 +216,7 @@ const {
 const headers = [
     { title: 'Title', key: 'title', align: 'center' },
     { title: 'Status', key: 'status', align: 'center' },
-    { title: 'Created At', key: 'createdAt', align: 'center' },
+    { title: 'Last Run', key: 'createdAt', align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
 ]
 
@@ -187,6 +227,9 @@ const showModal = ref(false)
 const selectedCrawl = ref(null)
 const showGlobalExportModal = ref(false)
 const showQueueStatusModal = ref(false)
+const showDeleteConfirm = ref(false)
+const crawlToDelete = ref(null)
+const deleteLoadingId = ref(null)
 
 // Search query
 const searchQuery = ref('')
@@ -249,6 +292,28 @@ const toggleDisableCrawl = async (item) => {
     await toggleDisableCrawlFromComposable(item)
 }
 
+// Delete crawl functions
+const confirmDeleteCrawl = (crawl) => {
+    crawlToDelete.value = crawl
+    showDeleteConfirm.value = true
+}
+
+const deleteCrawl = async () => {
+    if (!crawlToDelete.value) return
+    
+    deleteLoadingId.value = crawlToDelete.value._id
+    try {
+        await axios.delete(`${getApiUrl()}/api/deletecrawl/${crawlToDelete.value._id}`)
+        showDeleteConfirm.value = false
+        crawlToDelete.value = null
+        showNotification('Crawl deleted successfully', 'success')
+        fetchCrawls() // Refresh the list
+    } catch (error) {
+        showNotification(error.response?.data?.message || 'Error deleting crawl', 'error')
+    } finally {
+        deleteLoadingId.value = null
+    }
+}
 
 
 onMounted(() => {
