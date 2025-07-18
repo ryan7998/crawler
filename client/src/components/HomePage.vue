@@ -1,28 +1,38 @@
 <template>
     <v-container>
-        <!-- Search Bar -->
+        <!-- Search Bar with Stats Button -->
         <v-card class="mb-4 pa-4">
-            <div class="d-flex align-center">
-                <v-text-field
-                    v-model="searchQuery"
-                    label="Search crawls by name"
-                    prepend-inner-icon="mdi-magnify"
+            <div class="d-flex align-center justify-space-between">
+                <div class="d-flex align-center flex-grow-1 mr-4">
+                    <v-text-field
+                        v-model="searchQuery"
+                        label="Search crawls by name"
+                        prepend-inner-icon="mdi-magnify"
+                        variant="outlined"
+                        clearable
+                        hide-details
+                        class="flex-grow-1"
+                        :loading="isSearching"
+                        @update:model-value="handleSearch"
+                        @click:clear="handleSearch"
+                    />
+                    <v-chip
+                        v-if="searchQuery"
+                        color="primary"
+                        variant="outlined"
+                        class="ml-2"
+                    >
+                        {{ totalCrawls }} result{{ totalCrawls !== 1 ? 's' : '' }}
+                    </v-chip>
+                </div>
+                <v-btn
                     variant="outlined"
-                    clearable
-                    hide-details
-                    class="flex-grow-1 mr-4"
-                    :loading="isSearching"
-                    @update:model-value="handleSearch"
-                    @click:clear="handleSearch"
-                />
-                <v-chip
-                    v-if="searchQuery"
-                    color="primary"
-                    variant="outlined"
-                    class="ml-2"
+                    color="info"
+                    @click="showStatsModal = true"
+                    prepend-icon="mdi-chart-box"
                 >
-                    {{ totalCrawls }} result{{ totalCrawls !== 1 ? 's' : '' }}
-                </v-chip>
+                    View Stats
+                </v-btn>
             </div>
         </v-card>
         
@@ -31,31 +41,58 @@
             :items="crawls"
             :items-per-page="-1"
             hover
+            class="elevation-2 rounded-lg"
+            density="comfortable"
         >
             <!-- No results message -->
             <template v-slot:no-data>
-                <div class="text-center pa-4">
-                    <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-magnify</v-icon>
-                    <p class="text-h6 text-grey-darken-1">
+                <div class="text-center pa-8">
+                    <v-icon size="80" color="grey-lighten-2" class="mb-4">mdi-magnify</v-icon>
+                    <h3 class="text-h5 text-grey-darken-1 mb-2">
                         {{ searchQuery ? `No crawls found matching "${searchQuery}"` : 'No crawls found' }}
+                    </h3>
+                    <p class="text-body-1 text-grey mb-4">
+                        {{ searchQuery ? 'Try adjusting your search terms or create a new crawl' : 'Get started by creating your first crawl' }}
                     </p>
-                    <p class="text-body-2 text-grey">
-                        {{ searchQuery ? 'Try adjusting your search terms' : 'Create your first crawl to get started' }}
-                    </p>
+                    <v-btn
+                        v-if="!searchQuery"
+                        color="primary"
+                        @click="openCreateModal"
+                        prepend-icon="mdi-plus"
+                    >
+                        Create Your First Crawl
+                    </v-btn>
                 </div>
             </template>
             
             <!-- Custom cell for Title column -->
             <template v-slot:item.title="{ item }">
-                <v-btn
-                    variant="text"
-                    color="primary"
-                    size="small"
-                    :to="{ name: 'CrawlerDashboard', params: { crawlId: item._id } }"
-                    class="text-none font-weight-medium"
-                >
-                    {{ item.title }}
-                </v-btn>
+                <div class="d-flex align-center">
+                    <v-btn
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        :to="{ name: 'CrawlerDashboard', params: { crawlId: item._id } }"
+                        class="text-none font-weight-medium text-left"
+                    >
+                        {{ item.title }}
+                    </v-btn>
+                    <v-chip
+                        v-if="item.disabled"
+                        size="x-small"
+                        color="grey"
+                        class="ml-2"
+                    >
+                        Disabled
+                    </v-chip>
+                </div>
+            </template>
+
+            <!-- Custom cell for URLs column -->
+            <template v-slot:item.urls="{ item }">
+                <div class="text-center">
+                    {{ item.urls ? item.urls.length : 0 }}
+                </div>
             </template>
 
             <!-- Custom cell for Actions column -->
@@ -108,21 +145,32 @@
 
             <!-- Custom cell for Status column -->
             <template v-slot:item.status="{ item }">
-                <v-chip
-                    :color="item.status === 'in-progress' ? 'blue' : getStatusColor(item.status)"
-                    size="small"
-                    class="text-capitalize"
-                >
-                    <v-icon v-if="item.status === 'in-progress'" start icon="mdi-progress-clock" />
-                    {{ item.status }}
-                </v-chip>
+                <div class="text-center">
+                    <v-chip
+                        :color="item.status === 'in-progress' ? 'blue' : getStatusColor(item.status)"
+                        size="small"
+                        class="text-capitalize mb-1"
+                    >
+                        <v-icon v-if="item.status === 'in-progress'" start icon="mdi-progress-clock" />
+                        <v-icon v-else-if="item.status === 'completed'" start icon="mdi-check-circle" />
+                        <v-icon v-else-if="item.status === 'failed'" start icon="mdi-alert-circle" />
+                        <v-icon v-else start icon="mdi-clock-outline" />
+                        {{ item.status }}
+                    </v-chip>
+                    <div v-if="item.aggregatedData" class="text-caption text-grey">
+                        {{ Object.keys(item.aggregatedData).length }} URLs
+                    </div>
+                </div>
             </template>
 
             <!-- Custom cell for Last Run column -->
             <template v-slot:item.lastRun="{ item }">
                 <div class="text-center">
                     <div class="text-body-2">
-                        {{ formatDateTime(item.endTime || item.updatedAt) }}
+                        {{ getRelativeTime(item.endTime || item.updatedAt) }}
+                    </div>
+                    <div class="text-caption text-grey">
+                        ({{ formatDateTime(item.endTime || item.updatedAt) }})
                     </div>
                 </div>
             </template>
@@ -145,6 +193,61 @@
         <QueueStatusModal
             v-model="showQueueStatusModal"
         />
+
+        <!-- Statistics Modal -->
+        <v-dialog v-model="showStatsModal" max-width="600">
+            <v-card>
+                <v-card-title class="text-h5 d-flex align-center">
+                    <v-icon icon="mdi-chart-box" class="mr-2" />
+                    Crawl Statistics
+                </v-card-title>
+                <v-card-text>
+                    <v-row>
+                        <v-col cols="12" sm="6">
+                            <v-card class="text-center pa-4" variant="outlined">
+                                <v-icon size="40" color="primary" class="mb-3">mdi-web</v-icon>
+                                <div class="text-h4 font-weight-bold text-primary">{{ totalCrawls }}</div>
+                                <div class="text-subtitle-1">Total Crawls</div>
+                            </v-card>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-card class="text-center pa-4" variant="outlined">
+                                <v-icon size="40" color="success" class="mb-3">mdi-check-circle</v-icon>
+                                <div class="text-h4 font-weight-bold text-success">{{ completedCrawls }}</div>
+                                <div class="text-subtitle-1">Completed</div>
+                            </v-card>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-card class="text-center pa-4" variant="outlined">
+                                <v-icon size="40" color="error" class="mb-3">mdi-alert-circle</v-icon>
+                                <div class="text-h4 font-weight-bold text-error">{{ failedCrawls }}</div>
+                                <div class="text-subtitle-1">Failed</div>
+                            </v-card>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-card class="text-center pa-4" variant="outlined">
+                                <v-icon size="40" color="info" class="mb-3">mdi-progress-clock</v-icon>
+                                <div class="text-h4 font-weight-bold text-info">{{ inProgressCrawls }}</div>
+                                <div class="text-subtitle-1">In Progress</div>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                    
+                    <!-- Additional Stats -->
+                    <v-divider class="my-4"></v-divider>
+                    <div class="text-center">
+                        <div class="text-h6 mb-2">Success Rate</div>
+                        <div class="text-h3 font-weight-bold text-success">
+                            {{ totalCrawls > 0 ? Math.round((completedCrawls / totalCrawls) * 100) : 0 }}%
+                        </div>
+                    </div>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer />
+                    <v-btn @click="showStatsModal = false">Close</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
 
         <!-- Delete Confirmation Dialog -->
         <v-dialog v-model="showDeleteConfirm" max-width="400">
@@ -178,12 +281,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject, watch } from 'vue'
+import { ref, onMounted, inject, watch, computed } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
-import { formatDate, formatDateTime, getApiUrl } from '../utils/commonUtils'
+import { formatDate, formatDateTime, getRelativeTime, getApiUrl } from '../utils/commonUtils'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
@@ -213,7 +316,8 @@ const {
 
 // Table configuration
 const headers = [
-    { title: 'Title', key: 'title', align: 'center' },
+    { title: 'Title', key: 'title', align: 'start' },
+    { title: 'URLs', key: 'urls', align: 'center', width: '100px' },
     { title: 'Status', key: 'status', align: 'center' },
     { title: 'Last Run', key: 'lastRun', align: 'center' },
     { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
@@ -229,10 +333,25 @@ const showQueueStatusModal = ref(false)
 const showDeleteConfirm = ref(false)
 const crawlToDelete = ref(null)
 const deleteLoadingId = ref(null)
+const showStatsModal = ref(false)
 
 // Search query
 const searchQuery = ref('')
 
+// Computed properties for statistics
+const completedCrawls = computed(() => {
+    return crawls.value.filter(crawl => crawl.status === 'completed').length
+})
+
+const failedCrawls = computed(() => {
+    return crawls.value.filter(crawl => crawl.status === 'failed').length
+})
+
+const inProgressCrawls = computed(() => {
+    return crawls.value.filter(crawl => crawl.status === 'in-progress').length
+})
+
+// Function to get relative time
 // Debounced search function
 let searchTimeout = null
 
@@ -323,7 +442,27 @@ onMounted(() => {
 <style scoped>
 .v-data-table {
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.v-data-table :deep(.v-data-table-header) {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.v-data-table :deep(.v-data-table__tr:hover) {
+    background-color: #f5f5f5;
+}
+
+.v-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease;
+}
+
+.v-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 </style> 
