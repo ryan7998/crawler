@@ -66,6 +66,19 @@
                 </v-btn>
             </div>
         </v-card>
+
+        <!-- Global Proxy Stats Widget -->
+        <div class="mb-4">
+            <ProxyStatsWidget
+                :stats="globalProxyStats"
+                :loading="globalProxyStatsLoading"
+                :error="globalProxyStatsError"
+                :show-actions="false"
+                :show-cleanup="true"
+                @refresh="fetchGlobalProxyStats"
+                @cleanup="showCleanupDialog = true"
+            />
+        </div>
         
         <v-data-table
             :headers="headers"
@@ -292,6 +305,35 @@
             </v-card>
         </v-dialog>
 
+        <!-- Cleanup Confirmation Dialog -->
+        <v-dialog v-model="showCleanupDialog" max-width="400px">
+            <v-card>
+                <v-card-title>Cleanup Old Proxy Data</v-card-title>
+                <v-card-text>
+                    <p>This will permanently delete proxy usage records older than the specified number of days.</p>
+                    <v-text-field
+                        v-model="cleanupDays"
+                        label="Days to keep"
+                        type="number"
+                        variant="outlined"
+                        density="compact"
+                        :rules="[v => v > 0 || 'Must be greater than 0']"
+                    />
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer />
+                    <v-btn variant="outlined" @click="showCleanupDialog = false">Cancel</v-btn>
+                    <v-btn
+                        color="warning"
+                        @click="performCleanup"
+                        :loading="globalProxyStatsLoading"
+                    >
+                        Cleanup
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
         <v-snackbar
             v-model="showSnackbar"
             :color="snackbarColor"
@@ -313,6 +355,8 @@ import { useCrawlManagement } from '../composables/useCrawlManagement'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
+import ProxyStatsWidget from './ui/ProxyStatsWidget.vue'
+import { useProxyStats } from '../composables/useProxyStats'
 
 // Initialize Pinia store
 const crawlStore = useCrawlStore()
@@ -356,6 +400,21 @@ const showDeleteConfirm = ref(false)
 const crawlToDelete = ref(null)
 const deleteLoadingId = ref(null)
 const showStatsModal = ref(false)
+const showCleanupDialog = ref(false)
+const cleanupDays = ref(90)
+
+// Initialize proxy stats composable
+const {
+  globalStats,
+  loading: globalProxyStatsLoading,
+  error: globalProxyStatsError,
+  fetchGlobalProxyStats,
+  formattedGlobalStats,
+  cleanupProxyUsage
+} = useProxyStats()
+
+// Computed properties for global proxy stats
+const globalProxyStats = computed(() => formattedGlobalStats.value)
 
 // Search query
 const searchQuery = ref('')
@@ -491,9 +550,21 @@ const deleteCrawl = async () => {
     }
 }
 
+// Proxy cleanup function
+const performCleanup = async () => {
+    try {
+        await cleanupProxyUsage(cleanupDays.value)
+        showCleanupDialog.value = false
+        await fetchGlobalProxyStats() // Refresh data after cleanup
+        showNotification('Proxy data cleanup completed successfully', 'success')
+    } catch (error) {
+        showNotification('Error performing cleanup', 'error')
+    }
+}
 
 onMounted(() => {
     fetchCrawls()
+    fetchGlobalProxyStats()
 })
 </script>
 

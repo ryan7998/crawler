@@ -131,6 +131,18 @@
                         Export with Changes
                     </v-btn>
                 </div>
+
+                <!-- Proxy Stats Widget -->
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <ProxyStatsWidget
+                        :stats="proxyStats"
+                        :detailed-stats="detailedProxyStats"
+                        :loading="proxyStatsLoading"
+                        :error="proxyStatsError"
+                        @refresh="fetchProxyStats"
+                        @view-details="showProxyStatsModal = true"
+                    />
+                </div>
             </div>
 
             <!-- Crawl Summary and Details -->
@@ -348,6 +360,12 @@
             @export-success="handleExportSuccess"
         />
 
+        <!-- Add ProxyStatsModal -->
+        <ProxyStatsModal
+            v-model="showProxyStatsModal"
+            :crawl-id="crawlId"
+        />
+
         <!-- Add Snackbar -->
         <v-snackbar
             v-model="showSnackbar"
@@ -372,6 +390,9 @@ import { getStatusColor } from '../utils/statusUtils'
 import { getApiUrl, getSocketUrl, formatDateTime } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import ExportModal from './ExportModal.vue'
+import ProxyStatsWidget from './ui/ProxyStatsWidget.vue'
+import ProxyStatsModal from './ProxyStatsModal.vue'
+import { useProxyStats } from '../composables/useProxyStats'
 import * as XLSX from 'xlsx'
 
 const baseUrl = getApiUrl()
@@ -416,6 +437,22 @@ const latestExportDate = ref(null)
 
 // Add clear queue loading ref
 const clearQueueLoading = ref(false)
+
+// Add proxy stats refs
+const showProxyStatsModal = ref(false)
+
+// Initialize proxy stats composable
+const {
+  proxyStats,
+  loading: proxyStatsLoading,
+  error: proxyStatsError,
+  fetchCrawlProxyStats,
+  formattedCrawlStats,
+  formattedGlobalStats
+} = useProxyStats()
+
+// Computed properties for proxy stats
+const detailedProxyStats = computed(() => proxyStats.value)
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -502,6 +539,15 @@ const fetchCrawlData = async () => {
     }
 }
 
+// Function to fetch proxy stats
+const fetchProxyStats = async () => {
+    try {
+        await fetchCrawlProxyStats(crawlId.value)
+    } catch (error) {
+        console.error('Error fetching proxy stats:', error)
+    }
+}
+
 // Function to check queue status
 // const checkQueueStatus = async () => {
 //     try {
@@ -529,6 +575,7 @@ onMounted(async () => {
         })
         
         await fetchCrawlData()
+        await fetchProxyStats()
         // await checkQueueStatus()  // Check initial queue status
 
         // Load saved export link from localStorage
