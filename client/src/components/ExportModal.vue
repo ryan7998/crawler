@@ -163,12 +163,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import axios from 'axios'
-import { getApiUrl } from '../utils/commonUtils'
+import { ref, computed, watch, inject, onMounted } from 'vue'
+import { useApiService } from '../composables/useApiService'
 
-const apiUrl = getApiUrl()
-console.log('ExportModal - API URL:', apiUrl)
+// Initialize composables
+const { get, post, loading: apiLoading, error: apiError } = useApiService()
 
 const props = defineProps({
     modelValue: Boolean,
@@ -200,8 +199,8 @@ const showExport = computed({
 // Methods
 const loadAvailableCrawls = async () => {
     try {
-        const response = await axios.get(`${apiUrl}/api/export/crawls`)
-        availableCrawls.value = response.data.crawls
+        const data = await get('/api/export/crawls')
+        availableCrawls.value = data.crawls
     } catch (error) {
         console.error('Error loading available crawls:', error)
     }
@@ -217,9 +216,9 @@ const analyzeChanges = async () => {
         }
 
         console.log('Analyzing changes for crawl:', props.crawlId, 'with params:', params)
-        const response = await axios.get(`${apiUrl}/api/export/changes/${props.crawlId}`, { params })
-        console.log('Change analysis response:', response.data)
-        changeAnalysis.value = response.data
+        const data = await get(`/api/export/changes/${props.crawlId}`, { params })
+        console.log('Change analysis response:', data)
+        changeAnalysis.value = data
     } catch (error) {
         console.error('Error analyzing changes:', error)
         changeAnalysis.value = null
@@ -242,8 +241,8 @@ const exportData = async () => {
                 existingSheetId: existingSheetId.value
             }
 
-            const response = await axios.post(`${apiUrl}/api/export/google-sheets/${props.crawlId}`, payload)
-            exportResult.value = response.data
+            const response = await post(`/api/export/google-sheets/${props.crawlId}`, payload)
+            exportResult.value = response
             showSuccess.value = true
             showExport.value = false
             
@@ -262,12 +261,12 @@ const exportData = async () => {
                 includeUnchanged: includeUnchanged.value.toString()
             })
 
-            const response = await axios.get(`${apiUrl}/api/export/csv/${props.crawlId}?${params}`, {
+            const response = await get(`/api/export/csv/${props.crawlId}?${params}`, {
                 responseType: 'blob'
             })
 
             // Create download link
-            const blob = new Blob([response.data], { type: 'text/csv' })
+            const blob = new Blob([response], { type: 'text/csv' })
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
@@ -284,8 +283,7 @@ const exportData = async () => {
     } catch (error) {
         console.error('Error exporting data:', error)
         // Show error notification
-        // You can integrate this with your notification system
-        alert('Error exporting data: ' + (error.response?.data?.message || error.message))
+        alert('Error exporting data: ' + error.message)
     } finally {
         exporting.value = false
     }

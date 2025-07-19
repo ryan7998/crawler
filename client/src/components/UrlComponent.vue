@@ -39,10 +39,12 @@
 </template>
 <script setup>
     import { ref, reactive, watch, toRef } from 'vue'
-    import axios from 'axios'
+    import { useApiService } from '../composables/useApiService'
     import CssSelector from './CssSelector.vue'
     import SlideOver from './SlideOver.vue'
-    import { getApiUrl } from '../utils/commonUtils'
+
+    // Initialize composables
+    const { post, loading: apiLoading, error: apiError } = useApiService()
 
     const props = defineProps({
         modelValue: {
@@ -60,8 +62,6 @@
     })
 
     const emit = defineEmits(['update:modelValue', 'update:selectors', 'removeUrlData'])
-
-    const apiUrl = getApiUrl()
 
     // Local reactive state
     const localUrl = ref(props.modelValue || '')
@@ -105,12 +105,12 @@
                 selectors: localSelectors || []
             }
             // Make a POST request to start the crawl
-            const { data } = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
+            const data = await post('/api/startcrawl', requestBody)
             crawledData.value = data?.extractedDatum
             console.log('Crawl started: ', data)
             // crawl.value.status = 'in-progress'
         } catch (error) {
-            console.log('Error starting crawl: ', error.response ?  error.response.data.message : error.message)
+            console.log('Error starting crawl: ', error.message)
         }
         openSlide.value = true
     }

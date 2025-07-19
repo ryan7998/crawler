@@ -222,11 +222,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, inject } from 'vue'
-import axios from 'axios'
+import { ref, reactive, watch, computed, inject } from 'vue'
 import { useRouter } from 'vue-router'
-import CssSelector from './CssSelector.vue'
+import { useApiService } from '../composables/useApiService'
 import { getApiUrl, isValidUrl } from '../utils/commonUtils'
+import CssSelector from './CssSelector.vue'
+
+// Initialize composables
+const { get, post, put, loading: apiLoading, error: apiError } = useApiService()
 
 const emit = defineEmits(['update:modelValue', 'crawl-created'])
 
@@ -344,42 +347,35 @@ const checkDomainConsistency = (urls) => {
 // Fetch domain selectors
 const fetchDomainSelectors = async (domain) => {
     try {
-        const response = await axios.get(`${apiUrl.value}/api/selectors/${domain}`)
-        console.log('Raw selectors from backend:', response.data.selectors)
+        const data = await get(`/api/selectors/${domain}`)
+        console.log('Raw selectors from backend:', data.selectors)
         
-        // Transform the selectors to match the CssSelector component format
-        const transformedSelectors = response.data.selectors.map(selector => ({
-            id: Math.random().toString(36).substring(2, 9),
-            name: selector.name, // Backend uses 'name', not 'target_element'
-            css: selector.selector, // Backend uses 'selector', not 'selector_value'
-            type: selector.type || 'text',
-            attribute: selector.attribute || null,
-            childSelectors: (selector.childSelectors || []).map(child => ({
+        if (data.selectors && Array.isArray(data.selectors)) {
+            // Transform the selectors to match our component's expected format
+            const transformedSelectors = data.selectors.map(selector => ({
                 id: Math.random().toString(36).substring(2, 9),
-                name: child.name, // Backend uses 'name'
-                selector: child.selector, // Backend uses 'selector'
-                type: child.type || 'text',
-                attribute: child.attribute || null
+                name: selector.target_element || '',
+                css: selector.selector_value || '',
+                type: selector.type || 'text',
+                attribute: selector.attribute || '',
+                childSelectors: selector.childSelectors?.map(child => ({
+                    id: Math.random().toString(36).substring(2, 9),
+                    name: child.target_element || '',
+                    selector: child.selector_value || '',
+                    type: child.type || 'text',
+                    attribute: child.attribute || ''
+                })) || []
             }))
-        }))
-        console.log('Transformed selectors for frontend:', transformedSelectors)
-        
-        localSelectors.value = transformedSelectors
-        return {
-            domain,
-            hasSelectors: true,
-            selectors: transformedSelectors
+            
+            currentSelectors.value = transformedSelectors
+            console.log('Transformed selectors:', transformedSelectors)
+        } else {
+            console.warn('No selectors found for domain:', domain)
+            currentSelectors.value = []
         }
     } catch (error) {
-        if (error.response?.status === 404) {
-            localSelectors.value = []
-            return {
-                domain,
-                hasSelectors: false,
-                selectors: null
-            }
-        }
-        throw error
+        console.error('Error fetching domain selectors:', error)
+        currentSelectors.value = []
     }
 }
 
@@ -555,15 +551,14 @@ const handleSubmit = async () => {
         console.log('Sending request data:', requestData)
 
         const response = isEditing.value
-            ? await axios.put(`${apiUrl.value}/api/updatecrawl/${props.crawlData._id}`, requestData)
-            : await axios.post(`${apiUrl.value}/api/createcrawler`, requestData)
+            ? await put(`/api/updatecrawl/${props.crawlData._id}`, requestData)
+            : await post('/api/createcrawler', requestData)
         
         showNotification(isEditing.value ? 'Crawl updated successfully' : 'Crawl created successfully', 'success')
-        emit('crawl-created', isEditing.value ? response.data.crawl : { _id: response.data.crawlId })
+        emit('crawl-created', isEditing.value ? response.crawl : { _id: response.crawlId })
         closeDialog()
     } catch (error) {
-        console.error('Error creating/updating crawl:', error)
-        showNotification(error.response?.data?.message || 'An error occurred', 'error')
+        showNotification(error.message, 'error')
     } finally {
         loading.value = false
     }

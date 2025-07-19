@@ -189,12 +189,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import axios from 'axios'
-import { getApiUrl } from '../utils/commonUtils'
+import { ref, computed, watch, inject, onMounted } from 'vue'
+import { useApiService } from '../composables/useApiService'
 
-// API configuration
-const apiUrl = getApiUrl()
+// Initialize composables
+const { get, post, loading: apiLoading, error: apiError } = useApiService()
 
 // Props
 const props = defineProps({
@@ -250,9 +249,9 @@ const getPreviewInfo = async () => {
         if (userId.value) params.append('userId', userId.value)
         if (limit.value) params.append('limit', limit.value.toString())
         
-        const response = await axios.get(`${apiUrl}/api/export/crawls?${params}`)
+        const data = await get(`/api/export/crawls?${params}`)
         previewInfo.value = {
-            crawlCount: response.data.total
+            crawlCount: data.total
         }
     } catch (error) {
         console.error('Error getting preview info:', error)
@@ -275,8 +274,8 @@ const exportData = async () => {
                 statusFilter: statusFilter.value
             }
 
-            const response = await axios.post(`${apiUrl}/api/export/google-sheets/global`, payload)
-            exportResult.value = response.data
+            const response = await post(`/api/export/google-sheets/global`, payload)
+            exportResult.value = response
             showSuccess.value = true
             showExport.value = false
             
@@ -298,7 +297,7 @@ const exportData = async () => {
 
     } catch (error) {
         console.error('Error exporting global data:', error)
-        alert('Error exporting global data: ' + (error.response?.data?.message || error.message))
+        alert('Error exporting global data: ' + error.message)
     } finally {
         exporting.value = false
     }
@@ -307,10 +306,10 @@ const exportData = async () => {
 const checkStorage = async () => {
     checkingStorage.value = true
     try {
-        const response = await axios.get(`${apiUrl}/api/export/google-storage`)
-        storageQuota.value = response.data
+        const data = await get(`/api/export/google-storage`)
+        storageQuota.value = data
     } catch (error) {
-        storageQuota.value = { error: error.response?.data?.error || error.message }
+        storageQuota.value = { error: error.message }
     } finally {
         checkingStorage.value = false
     }
