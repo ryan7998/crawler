@@ -73,9 +73,10 @@
                 :stats="globalProxyStats"
                 :loading="globalProxyStatsLoading"
                 :error="globalProxyStatsError"
-                :show-actions="false"
+                :show-actions="true"
                 :show-cleanup="true"
                 @refresh="fetchGlobalProxyStats"
+                @view-details="showGlobalProxyStatsModal = true"
                 @cleanup="showCleanupDialog = true"
             />
         </div>
@@ -305,6 +306,11 @@
             </v-card>
         </v-dialog>
 
+        <!-- Global Proxy Stats Modal -->
+        <GlobalProxyStatsModal
+            v-model="showGlobalProxyStatsModal"
+        />
+
         <!-- Cleanup Confirmation Dialog -->
         <v-dialog v-model="showCleanupDialog" max-width="400px">
             <v-card>
@@ -356,6 +362,7 @@ import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
 import ProxyStatsWidget from './ui/ProxyStatsWidget.vue'
+import GlobalProxyStatsModal from './GlobalProxyStatsModal.vue'
 import { useProxyStats } from '../composables/useProxyStats'
 
 // Initialize Pinia store
@@ -400,6 +407,7 @@ const showDeleteConfirm = ref(false)
 const crawlToDelete = ref(null)
 const deleteLoadingId = ref(null)
 const showStatsModal = ref(false)
+const showGlobalProxyStatsModal = ref(false)
 const showCleanupDialog = ref(false)
 const cleanupDays = ref(90)
 
