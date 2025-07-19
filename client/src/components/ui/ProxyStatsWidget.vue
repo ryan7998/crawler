@@ -127,7 +127,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { useFormatting } from '@/composables/useFormatting'
 
 const props = defineProps({
   stats: {
@@ -162,48 +162,14 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh', 'view-details', 'cleanup'])
 
-// Helper functions
-const formatNumber = (value) => {
-  return new Intl.NumberFormat('en-US').format(value || 0)
-}
-
-const formatCost = (cost) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 4
-  }).format(cost)
-}
-
-const formatPercentage = (value) => {
-  return `${(value || 0).toFixed(1)}%`
-}
-
-const formatDate = (date) => {
-  if (!date) return 'Never'
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(date))
-}
-
-const getRelativeTime = (date) => {
-  if (!date) return 'Never'
-  
-  const now = new Date()
-  const targetDate = new Date(date)
-  const diffInSeconds = Math.floor((now - targetDate) / 1000)
-  
-  if (diffInSeconds < 60) return 'Just now'
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`
-  
-  return `${Math.floor(diffInSeconds / 2592000)}mo ago`
-}
+// Use centralized formatting utilities
+const {
+  formatNumber,
+  formatCost,
+  formatPercentage,
+  formatDate,
+  getRelativeTime
+} = useFormatting()
 </script>
 
 <style scoped>
@@ -211,8 +177,7 @@ const getRelativeTime = (date) => {
   background: white;
   border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .widget-header {
@@ -225,7 +190,6 @@ const getRelativeTime = (date) => {
 .widget-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #374151;
   margin: 0;
   display: flex;
   align-items: center;
@@ -237,64 +201,61 @@ const getRelativeTime = (date) => {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  color: #6b7280;
+  color: #666;
 }
 
 .widget-error {
-  color: #dc2626;
+  color: #d32f2f;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 16px;
 }
 
 .stat-card {
   text-align: center;
   padding: 12px;
-  background: #f9fafb;
+  background: #f8f9fa;
   border-radius: 6px;
-  border: 1px solid #e5e7eb;
 }
 
 .stat-value {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 4px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1976d2;
+  line-height: 1.2;
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
+  color: #666;
+  margin-top: 4px;
 }
 
 .last-used {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
-  background: #f3f4f6;
-  border-radius: 6px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #666;
   margin-bottom: 16px;
 }
 
 .performance-section {
   margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
 }
 
 .section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #374151;
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
+  color: #333;
 }
 
 .performance-list {
@@ -305,13 +266,11 @@ const getRelativeTime = (date) => {
 
 .performance-item {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: #f9fafb;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  background: #f8f9fa;
+  border-radius: 4px;
 }
 
 .proxy-info {
@@ -319,77 +278,72 @@ const getRelativeTime = (date) => {
 }
 
 .proxy-id {
-  font-weight: 600;
-  color: #111827;
+  font-weight: 500;
   font-size: 0.875rem;
 }
 
 .proxy-location {
   font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 2px;
+  color: #666;
 }
 
 .proxy-stats {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
 .stat {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  font-size: 0.75rem;
 }
 
 .stat-label {
-  font-size: 0.75rem;
-  color: #6b7280;
+  color: #666;
+  margin-bottom: 2px;
 }
 
 .stat-value {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 500;
 }
 
 .no-data {
   text-align: center;
-  padding: 24px;
-  color: #6b7280;
+  padding: 32px 16px;
+  color: #666;
 }
 
 .no-data p {
-  margin: 8px 0 0 0;
+  margin-top: 8px;
   font-size: 0.875rem;
 }
 
 .widget-actions {
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: center;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e0e0e0;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
   
-  .performance-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+  .stat-value {
+    font-size: 1.25rem;
   }
   
   .proxy-stats {
-    width: 100%;
-    justify-content: space-between;
+    gap: 8px;
   }
   
-  .stat {
-    align-items: flex-start;
+  .widget-actions {
+    flex-direction: column;
   }
 }
 </style> 

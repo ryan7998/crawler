@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import { getApiUrl } from '@/utils/commonUtils'
+import { useFormatting } from './useFormatting'
 
 export function useProxyStats() {
   const proxyStats = ref(null)
@@ -8,6 +9,16 @@ export function useProxyStats() {
   const costAnalysis = ref(null)
   const loading = ref(false)
   const error = ref(null)
+
+  // Use centralized formatting utilities
+  const {
+    formatNumber,
+    formatCost,
+    formatPercentage,
+    formatDate,
+    getRelativeTime,
+    getSuccessRateColor
+  } = useFormatting()
 
   // Get proxy stats for a specific crawl
   const fetchCrawlProxyStats = async (crawlId) => {
@@ -84,7 +95,7 @@ export function useProxyStats() {
           totalProxyRequests: 0,
           uniqueProxiesUsed: 0,
           totalCost: 0,
-          averageProxySuccessRate: 0
+          averageSuccessRate: 0
         },
         topProxies: [],
         recentUsage: []
@@ -145,23 +156,23 @@ export function useProxyStats() {
     error.value = null
     
     try {
-      const response = await axios.get(`${getApiUrl()}/api/proxy-stats/url?url=${encodeURIComponent(url)}`)
+      const response = await axios.get(`${getApiUrl()}/api/proxy-stats/url-usage?url=${encodeURIComponent(url)}`)
       
       // Check if response is HTML (error page) instead of JSON
       if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-        throw new Error('URL proxy usage endpoint not available - server may not be running or endpoint not configured')
+        throw new Error('URL usage endpoint not available - server may not be running or endpoint not configured')
       }
       
       return response.data
     } catch (err) {
       if (err.response?.status === 404) {
-        error.value = 'URL proxy usage endpoint not found - ensure server is running with proxy tracking enabled'
-      } else if (err.message.includes('URL proxy usage endpoint not available')) {
+        error.value = 'URL usage endpoint not found - ensure server is running with proxy tracking enabled'
+      } else if (err.message.includes('URL usage endpoint not available')) {
         error.value = err.message
       } else {
-        error.value = err.response?.data?.message || 'Failed to fetch URL proxy usage'
+        error.value = err.response?.data?.message || 'Failed to fetch URL usage'
       }
-      console.error('Error fetching URL proxy usage:', err)
+      console.error('Error fetching URL usage:', err)
       throw err
     } finally {
       loading.value = false
@@ -230,7 +241,7 @@ export function useProxyStats() {
       totalRequests: summary.totalProxyRequests || 0,
       uniqueProxies: summary.uniqueProxiesUsed || 0,
       totalCost: summary.totalCost || 0,
-      successRate: summary.averageProxySuccessRate || 0
+      successRate: summary.averageSuccessRate || 0
     }
   })
 
@@ -247,49 +258,6 @@ export function useProxyStats() {
       dailyCosts: costAnalysis.value.dailyCosts || []
     }
   })
-
-  // Helper functions for formatting
-  const formatCost = (cost) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 4
-    }).format(cost)
-  }
-
-  const formatPercentage = (value) => {
-    return `${(value || 0).toFixed(1)}%`
-  }
-
-  const formatNumber = (value) => {
-    return new Intl.NumberFormat('en-US').format(value || 0)
-  }
-
-  const formatDate = (date) => {
-    if (!date) return 'Never'
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(date))
-  }
-
-  const getRelativeTime = (date) => {
-    if (!date) return 'Never'
-    
-    const now = new Date()
-    const targetDate = new Date(date)
-    const diffInSeconds = Math.floor((now - targetDate) / 1000)
-    
-    if (diffInSeconds < 60) return 'Just now'
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`
-    
-    return `${Math.floor(diffInSeconds / 2592000)}mo ago`
-  }
 
   return {
     // State
@@ -311,11 +279,12 @@ export function useProxyStats() {
     formattedGlobalStats,
     formattedCostAnalysis,
     
-    // Helpers
+    // Formatting utilities (from useFormatting)
+    formatNumber,
     formatCost,
     formatPercentage,
-    formatNumber,
     formatDate,
-    getRelativeTime
+    getRelativeTime,
+    getSuccessRateColor
   }
 } 
