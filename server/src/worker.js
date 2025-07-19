@@ -10,6 +10,7 @@ const { extractHtml, determineCrawlStatus } = require('../utils/helperFunctions'
 const getCrawlQueue   = require('./queues/getCrawlQueue');
 const { initializeSocket, getSocket } = require('../utils/socket');
 const Seed            = require('./classes/Seed');
+const proxyUsageService = require('./services/proxyUsageService');
 require('dotenv').config();
 
 // —————————————— APP & SOCKET.IO SETUP ——————————————
@@ -143,11 +144,49 @@ async function ensureProcessor(crawlId) {
       const seed = new Seed({ url, advancedSelectors: crawl.advancedSelectors });
       if (!seed.isValid()) throw new Error(`Invalid URL: ${url}`);
 
+      // Track proxy usage start time
+      const startTime = Date.now();
+      let proxyUsed = false;
+      let proxyId = null;
+      let proxyLocation = null;
+
       const crawlThrottle = getThrottle(crawlId)
-      const throttled = crawlThrottle(async () => await seed.loadHTMLContent())
-      const html = await throttled()
+      const throttled = crawlThrottle(async () => {
+        // Check if proxy is enabled and track usage
+        const proxyStatus = seed.getProxyStatus();
+        if (proxyStatus.enabled) {
+          proxyUsed = true;
+          // Extract proxy ID from server configuration (you may need to adjust this based on your proxy setup)
+          proxyId = proxyStatus.config.server || 'default';
+          proxyLocation = proxyStatus.config.location || 'unknown';
+        }
+        
+        return await seed.loadHTMLContent();
+      });
+      
+      const html = await throttled();
+      const responseTime = Date.now() - startTime;
+      
       console.log(`[${crawlId}] Loaded HTML content for ${url}, Extracting Data...`);
       const data = await extractHtml(html, (crawl.selectors));
+
+      // Track proxy usage if proxy was used
+      if (proxyUsed) {
+        try {
+          await proxyUsageService.trackProxyUsage(
+            crawlId,
+            url,
+            proxyId,
+            proxyLocation,
+            true, // success
+            responseTime,
+            0.001 // cost per request (adjust as needed)
+          );
+          console.log(`[${crawlId}] Tracked successful proxy usage for ${url}`);
+        } catch (proxyError) {
+          console.error(`[${crawlId}] Error tracking proxy usage:`, proxyError.message);
+        }
+      }
 
       // Save to database
       const newCrawlData = new CrawlData({ url, data, crawlId, status: 'success' })
@@ -165,6 +204,25 @@ async function ensureProcessor(crawlId) {
     } catch (err) {
       const msg = err.message || String(err);
       console.error(`[${crawlId}] Job ${job.id} failed:`, msg);
+      
+      // Track proxy usage for failed requests
+      if (proxyUsed) {
+        try {
+          await proxyUsageService.trackProxyUsage(
+            crawlId,
+            url,
+            proxyId,
+            proxyLocation,
+            false, // failure
+            responseTime,
+            0.001 // cost per request (adjust as needed)
+          );
+          console.log(`[${crawlId}] Tracked failed proxy usage for ${url}`);
+        } catch (proxyError) {
+          console.error(`[${crawlId}] Error tracking proxy usage:`, proxyError.message);
+        }
+      }
+      
       io.to(crawlIdStr).emit('crawlLog', {
         jobId: job.id,
         url,
