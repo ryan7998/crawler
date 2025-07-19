@@ -135,7 +135,7 @@
                 <!-- Proxy Stats Widget -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <ProxyStatsWidget
-                        :stats="proxyStats"
+                        :stats="formattedCrawlStats"
                         :detailed-stats="detailedProxyStats"
                         :loading="proxyStatsLoading"
                         :error="proxyStatsError"

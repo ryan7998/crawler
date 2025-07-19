@@ -153,20 +153,21 @@ async function ensureProcessor(crawlId) {
 
       const crawlThrottle = getThrottle(crawlId)
       const throttled = crawlThrottle(async () => {
-        // Check if proxy is enabled and track usage
-        const proxyStatus = seed.getProxyStatus();
-        if (proxyStatus.enabled) {
-          proxyUsed = true;
-          // Extract proxy ID from server configuration (you may need to adjust this based on your proxy setup)
-          proxyId = proxyStatus.config.server || 'default';
-          proxyLocation = proxyStatus.config.location || 'unknown';
-        }
-        
         return await seed.loadHTMLContent();
       });
       
       const html = await throttled();
       responseTime = Date.now() - startTime;
+      
+      // Check proxy status AFTER the request is complete (proxy might have been enabled during retry)
+      const proxyStatus = seed.getProxyStatus();
+      if (proxyStatus.enabled) {
+        proxyUsed = true;
+        // Extract proxy ID from server configuration
+        proxyId = proxyStatus.config.server || 'default';
+        proxyLocation = proxyStatus.config.location || 'unknown';
+        console.log(`[${crawlId}] Proxy was used for ${url}: ${proxyId}`);
+      }
       
       console.log(`[${crawlId}] Loaded HTML content for ${url}, Extracting Data...`);
       const data = await extractHtml(html, (crawl.selectors));

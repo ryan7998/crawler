@@ -67,7 +67,7 @@
       </div>
 
       <!-- Performance Chart (if detailed data available) -->
-      <div v-if="detailedStats && detailedStats.proxyPerformance?.length" class="performance-section">
+      <div v-if="detailedStats && detailedStats.proxyPerformance?.length > 0" class="performance-section">
         <h4 class="section-title">Proxy Performance</h4>
         <div class="performance-list">
           <div
@@ -76,8 +76,8 @@
             class="performance-item"
           >
             <div class="proxy-info">
-              <div class="proxy-id">{{ proxy.proxyId }}</div>
-              <div class="proxy-location">{{ proxy.location }}</div>
+              <div class="proxy-id">{{ proxy.proxyId || 'Unknown Proxy' }}</div>
+              <div class="proxy-location">{{ proxy.location || 'Unknown Location' }}</div>
             </div>
             <div class="proxy-stats">
               <div class="stat">
@@ -305,6 +305,7 @@ const getRelativeTime = (date) => {
 
 .performance-item {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;

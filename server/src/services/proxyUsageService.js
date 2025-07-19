@@ -35,6 +35,8 @@ class ProxyUsageService {
                     averageResponseTime: responseTime,
                     totalCost: costPerRequest
                 });
+                // Save the new record
+                await proxyUsage.save();
             } else {
                 // Update existing record
                 await proxyUsage.updateUsage(success, responseTime);

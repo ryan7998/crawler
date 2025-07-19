@@ -110,7 +110,8 @@ proxyUsageSchema.statics.getCrawlSummary = async function(crawlId) {
                 totalProxyRequests: { $sum: '$totalRequests' },
                 uniqueProxiesUsed: { $addToSet: '$proxyId' },
                 totalCost: { $sum: '$totalCost' },
-                averageSuccessRate: { $avg: { $divide: ['$successCount', '$totalRequests'] } },
+                totalSuccessCount: { $sum: '$successCount' },
+                totalFailureCount: { $sum: '$failureCount' },
                 lastProxyUsed: { $max: '$lastUsed' }
             }
         }
@@ -128,7 +129,13 @@ proxyUsageSchema.statics.getCrawlSummary = async function(crawlId) {
     
     const result = summary[0];
     result.uniqueProxiesUsed = result.uniqueProxiesUsed.length;
-    result.averageSuccessRate = (result.averageSuccessRate * 100).toFixed(2);
+    
+    // Calculate overall success rate based on total successes vs total requests
+    if (result.totalProxyRequests > 0) {
+        result.averageSuccessRate = ((result.totalSuccessCount / result.totalProxyRequests) * 100).toFixed(2);
+    } else {
+        result.averageSuccessRate = 0;
+    }
     
     return result;
 };
@@ -142,7 +149,8 @@ proxyUsageSchema.statics.getGlobalSummary = async function() {
                 totalProxyRequests: { $sum: '$totalRequests' },
                 uniqueProxiesUsed: { $addToSet: '$proxyId' },
                 totalCost: { $sum: '$totalCost' },
-                averageSuccessRate: { $avg: { $divide: ['$successCount', '$totalRequests'] } },
+                totalSuccessCount: { $sum: '$successCount' },
+                totalFailureCount: { $sum: '$failureCount' },
                 lastProxyUsed: { $max: '$lastUsed' }
             }
         }
@@ -160,7 +168,13 @@ proxyUsageSchema.statics.getGlobalSummary = async function() {
     
     const result = summary[0];
     result.uniqueProxiesUsed = result.uniqueProxiesUsed.length;
-    result.averageSuccessRate = (result.averageSuccessRate * 100).toFixed(2);
+    
+    // Calculate overall success rate based on total successes vs total requests
+    if (result.totalProxyRequests > 0) {
+        result.averageSuccessRate = ((result.totalSuccessCount / result.totalProxyRequests) * 100).toFixed(2);
+    } else {
+        result.averageSuccessRate = 0;
+    }
     
     return result;
 };

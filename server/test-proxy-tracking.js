@@ -105,8 +105,8 @@ async function testProxyTracking() {
         // Cleanup test data
         console.log('\n🧹 Cleaning up test data...');
         const ProxyUsage = require('./src/models/ProxyUsage');
-        await ProxyUsage.deleteMany({ crawlId: testCrawlId });
-        console.log('✅ Test data cleaned up');
+        // await ProxyUsage.deleteMany({ crawlId: testCrawlId });
+        // console.log('✅ Test data cleaned up');
 
     } catch (error) {
         console.error('❌ Test failed:', error.message);
