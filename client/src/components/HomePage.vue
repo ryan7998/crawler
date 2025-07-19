@@ -72,7 +72,7 @@
             :items="filteredCrawls"
             :items-per-page="-1"
             hover
-            class="elevation-2 rounded-lg"
+            class="elevation-2 rounded-lg custom-table"
             density="comfortable"
         >
             <!-- No results message -->
@@ -104,7 +104,7 @@
                         color="primary"
                         size="small"
                         :to="{ name: 'CrawlerDashboard', params: { crawlId: item._id } }"
-                        class="text-none font-weight-medium text-left"
+                        class="text-none font-weight-medium text-left text-body-2"
                     >
                         {{ item.title }}
                     </v-btn>
@@ -121,7 +121,7 @@
 
             <!-- Custom cell for URLs column -->
             <template v-slot:item.urls="{ item }">
-                <div class="text-center">
+                <div class="text-center text-body-2">
                     {{ item.urls ? item.urls.length : 0 }}
                 </div>
             </template>
@@ -169,7 +169,7 @@
                     <v-chip
                         :color="item.status === 'in-progress' ? 'blue' : getStatusColor(item.status)"
                         size="small"
-                        class="text-capitalize mb-1"
+                        class="text-capitalize mb-1 text-body-2"
                     >
                         <v-icon v-if="item.status === 'in-progress'" start icon="mdi-progress-clock" />
                         <v-icon v-else-if="item.status === 'completed'" start icon="mdi-check-circle" />
@@ -185,14 +185,16 @@
 
             <!-- Custom cell for Last Run column -->
             <template v-slot:item.lastRun="{ item }">
-                <div class="text-center">
-                    <div class="text-body-2">
-                        {{ getRelativeTime(item.endTime || item.updatedAt) }}
-                    </div>
-                    <div class="text-caption text-grey">
-                        ({{ formatDateTime(item.endTime || item.updatedAt) }})
-                    </div>
-                </div>
+                <v-tooltip location="top">
+                    <template #activator="{ props }">
+                        <div v-bind="props" class="text-center cursor-pointer">
+                            <div class="text-body-2">
+                                {{ getRelativeTime(item.endTime || item.updatedAt) }}
+                            </div>
+                        </div>
+                    </template>
+                    <span>{{ formatDateTime(item.endTime || item.updatedAt) }}</span>
+                </v-tooltip>
             </template>
         </v-data-table>
 
@@ -520,5 +522,23 @@ onMounted(() => {
 
 .v-card:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.custom-table :deep(.v-data-table-header) {
+    min-height: 60px;
+}
+
+.custom-table :deep(.v-data-table__tr) {
+    min-height: 60px;
+}
+
+.custom-table :deep(.v-data-table__td) {
+    padding: 16px 8px;
+    vertical-align: middle;
+}
+
+.custom-table :deep(.v-data-table__th) {
+    padding: 16px 8px;
+    vertical-align: middle;
 }
 </style> 
