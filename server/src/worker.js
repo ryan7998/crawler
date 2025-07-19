@@ -133,6 +133,13 @@ async function ensureProcessor(crawlId) {
     const { url } = job.data;
     console.log(`[${crawlId}] Processing job ${job.id} for URL: ${url}`);
     
+    // Track proxy usage variables (declare outside try block to avoid undefined errors)
+    const startTime = Date.now();
+    let proxyUsed = false;
+    let proxyId = null;
+    let proxyLocation = null;
+    let responseTime = 0;
+    
     try {
       console.log(`[${crawlId}] Job ${job.id} started: ${url}`);
       io.to(crawlIdStr).emit('crawlLog', { jobId: job.id, url, status: 'started' });
@@ -143,12 +150,6 @@ async function ensureProcessor(crawlId) {
       // Playwright or axios fetch
       const seed = new Seed({ url, advancedSelectors: crawl.advancedSelectors });
       if (!seed.isValid()) throw new Error(`Invalid URL: ${url}`);
-
-      // Track proxy usage start time
-      const startTime = Date.now();
-      let proxyUsed = false;
-      let proxyId = null;
-      let proxyLocation = null;
 
       const crawlThrottle = getThrottle(crawlId)
       const throttled = crawlThrottle(async () => {
@@ -165,7 +166,7 @@ async function ensureProcessor(crawlId) {
       });
       
       const html = await throttled();
-      const responseTime = Date.now() - startTime;
+      responseTime = Date.now() - startTime;
       
       console.log(`[${crawlId}] Loaded HTML content for ${url}, Extracting Data...`);
       const data = await extractHtml(html, (crawl.selectors));
