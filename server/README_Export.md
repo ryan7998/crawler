@@ -19,25 +19,33 @@ This document describes the export functionality that allows you to export crawl
 
 ## Setup
 
-### 1. Google Sheets API Setup
+### 1. Google Sheets API Setup (OAuth2)
 
 1. **Create Google Cloud Project**:
 
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create a new project or select existing one
-   - Enable Google Sheets API
+   - Enable Google Sheets API and Google Drive API
 
-2. **Create Service Account**:
+2. **Create OAuth2 Credentials**:
 
    - Go to "APIs & Services" > "Credentials"
-   - Click "Create Credentials" > "Service Account"
-   - Fill in service account details
-   - Download the JSON key file
+   - Click "Create Credentials" > "OAuth 2.0 Client IDs"
+   - Choose "Desktop application" for development
+   - Download the JSON credentials file
 
 3. **Configure Environment**:
+
    ```bash
    # Add to your .env file
-   GOOGLE_SERVICE_ACCOUNT_KEY=./path/to/your/service-account-key.json
+   GOOGLE_OAUTH2_CREDENTIALS=./oauth2-credentials.json
+   GOOGLE_DRIVE_FOLDER_ID=your-folder-id  # Optional: for organized exports
+   ```
+
+4. **Authenticate**:
+   ```bash
+   # Run authentication flow
+   node oauth2-auth.js
    ```
 
 ### 2. Install Dependencies

@@ -7,7 +7,7 @@ require('dotenv').config();
 const cors = require('cors');
 
 // Import routes with error handling
-let crawlerRoutes, exportRoutes;
+let crawlerRoutes, exportRoutes, oauth2Routes;
 try {
     crawlerRoutes = require('./routes/crawlerRoutes');
     console.log('✅ Crawler routes loaded successfully');
@@ -22,6 +22,14 @@ try {
 } catch (error) {
     console.error('❌ Error loading export routes:', error.message);
     exportRoutes = express.Router();
+}
+
+try {
+    oauth2Routes = require('./routes/oauth2Routes');
+    console.log('✅ OAuth2 routes loaded successfully');
+} catch (error) {
+    console.error('❌ Error loading OAuth2 routes:', error.message);
+    oauth2Routes = express.Router();
 }
 
 const app = express();
@@ -54,6 +62,7 @@ app.use((req, res, next) => {
    ——————————————————— */
 app.use('/api', crawlerRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/oauth2', oauth2Routes);
 
 // Add a test route to verify the server is working
 app.get('/test', (req, res) => {
@@ -64,6 +73,7 @@ app.get('/test', (req, res) => {
 console.log('🚀 Routes registered:');
 console.log('   - /api/* (crawler routes)');
 console.log('   - /api/export/* (export routes)');
+console.log('   - /api/oauth2/* (OAuth2 routes)');
 console.log('   - /test (test route)');
 
 /* ———————————————————
