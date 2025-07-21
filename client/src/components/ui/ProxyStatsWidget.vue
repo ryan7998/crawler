@@ -39,11 +39,6 @@
         </div>
         
         <div class="stat-card">
-          <div class="stat-value">{{ formatCost(stats.totalCost) }}</div>
-          <div class="stat-label">Total Cost</div>
-        </div>
-        
-        <div class="stat-card">
           <div class="stat-value">{{ formatPercentage(stats.successRate) }}</div>
           <div class="stat-label">Success Rate</div>
         </div>
@@ -87,10 +82,6 @@
               <div class="stat">
                 <span class="stat-label">Success:</span>
                 <span class="stat-value">{{ formatPercentage(proxy.successRate) }}</span>
-              </div>
-              <div class="stat">
-                <span class="stat-label">Cost:</span>
-                <span class="stat-value">{{ formatCost(proxy.totalCost) }}</span>
               </div>
             </div>
           </div>
