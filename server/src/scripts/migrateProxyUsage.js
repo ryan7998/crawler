@@ -5,7 +5,7 @@ require('dotenv').config();
 async function migrateProxyUsage() {
     try {
         // Connect to MongoDB
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/crawler');
+        await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/crawler');
         console.log('✅ Connected to MongoDB');
 
         // Find all crawl documents that don't have proxyUsageStats
