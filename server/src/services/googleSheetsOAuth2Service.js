@@ -696,7 +696,32 @@ class GoogleSheetsOAuth2Service {
      */
     async addGlobalSummarySheet(spreadsheetId, summaryData) {
         try {
-            // Create global summary sheet
+            // Check if Global Summary sheet already exists
+            const sheetMetadata = await this.sheets.spreadsheets.get({
+                spreadsheetId,
+                fields: 'sheets.properties'
+            });
+
+            const existingSheet = sheetMetadata.data.sheets.find(sheet => 
+                sheet.properties.title === 'Global Summary'
+            );
+
+            if (existingSheet) {
+                // Delete existing Global Summary sheet
+                await this.sheets.spreadsheets.batchUpdate({
+                    spreadsheetId,
+                    requestBody: {
+                        requests: [{
+                            deleteSheet: {
+                                sheetId: existingSheet.properties.sheetId
+                            }
+                        }]
+                    }
+                });
+                console.log('Deleted existing Global Summary sheet');
+            }
+
+            // Create new global summary sheet
             await this.sheets.spreadsheets.batchUpdate({
                 spreadsheetId,
                 requestBody: {

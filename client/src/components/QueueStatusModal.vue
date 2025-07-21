@@ -141,8 +141,7 @@
 
 <script setup>
 import { ref, watch, inject } from 'vue'
-import axios from 'axios'
-import { getApiUrl } from '../utils/commonUtils'
+import { useApiService } from '../composables/useApiService'
 
 const props = defineProps({
     modelValue: {
@@ -152,6 +151,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+// Initialize composables
+const { get, del, loading: apiLoading, error: apiError } = useApiService()
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -182,8 +184,8 @@ const closeModal = () => {
 const fetchQueueStatus = async () => {
     loading.value = true
     try {
-        const response = await axios.get(`${getApiUrl()}/api/allqueuesstatus`)
-        queueStatusData.value = response.data
+        const data = await get('/api/allqueuesstatus')
+        queueStatusData.value = data
     } catch (error) {
         console.error('Error fetching queue status:', error)
         queueStatusData.value = null
@@ -199,7 +201,7 @@ const refreshQueueStatus = () => {
 const clearQueue = async (crawlId) => {
     clearingQueue.value = crawlId
     try {
-        await axios.delete(`${getApiUrl()}/api/clearqueue/${crawlId}`)
+        await del(`/api/clearqueue/${crawlId}`)
         // Refresh the queue status after clearing
         await fetchQueueStatus()
     } catch (error) {
@@ -212,8 +214,8 @@ const clearQueue = async (crawlId) => {
 const clearAllQueues = async () => {
     clearingAll.value = true
     try {
-        const response = await axios.delete(`${getApiUrl()}/api/clearallqueues`)
-        showNotification(response.data.message, 'success')
+        const response = await del('/api/clearallqueues')
+        showNotification(response.message, 'success')
         await fetchQueueStatus()
     } catch (error) {
         console.error('Error clearing all queues:', error)

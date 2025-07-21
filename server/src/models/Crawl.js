@@ -70,6 +70,29 @@ const crawlSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    // Proxy usage statistics
+    proxyUsageStats: {
+        totalProxyRequests: {
+            type: Number,
+            default: 0
+        },
+        uniqueProxiesUsed: {
+            type: Number,
+            default: 0
+        },
+        lastProxyUsed: {
+            type: Date,
+            default: null
+        },
+        proxyCostEstimate: {
+            type: Number,
+            default: 0 // in USD
+        },
+        averageProxySuccessRate: {
+            type: Number,
+            default: 0 // percentage
+        }
+    }
 })
 
 // Add an index on 'userId' to allow querying by userId

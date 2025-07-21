@@ -13,7 +13,13 @@ const {
     runAllCrawls,
     clearCrawlQueue,
     clearAllQueues,
-    getAllQueuesStatus
+    getAllQueuesStatus,
+    // Proxy usage endpoints
+    getCrawlProxyStats,
+    getGlobalProxyStats,
+    getProxyUsageForUrl,
+    getProxyCostAnalysis,
+    cleanupProxyUsage
 } = require('../controllers/crawlerController')
 const { crawlQueue } = require('../queues/crawlQueue')
 
@@ -34,5 +40,12 @@ router.get('/queuestatus/:crawlId', getQueueStatus)
 router.delete('/clearqueue/:crawlId', clearCrawlQueue)
 router.delete('/clearallqueues', clearAllQueues)
 router.get('/allqueuesstatus', getAllQueuesStatus)
+
+// —————————————— PROXY USAGE ROUTES ——————————————
+router.get('/crawls/:id/proxy-stats', getCrawlProxyStats)
+router.get('/proxy-stats/global', getGlobalProxyStats)
+router.get('/proxy-stats/url', getProxyUsageForUrl)
+router.get('/proxy-stats/cost-analysis', getProxyCostAnalysis)
+router.delete('/proxy-stats/cleanup', cleanupProxyUsage)
 
 module.exports = router

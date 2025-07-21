@@ -296,7 +296,7 @@ class Seed {
                 // Check if we should retry with proxy
                 if (errorAnalysis.retryWithProxy && !this.useProxy) {
                     console.log('Error suggests retry with proxy. Enabling proxy for next attempt...');
-                    // this.enableProxy(); // Enable proxy with default configuration
+                    this.enableProxy(); // Enable proxy with default configuration
                 }
                 
                 // Increment attempt counter and retry

@@ -6,6 +6,7 @@ const CrawlData = require('../models/CrawlData')
 const Selectors = require('../models/Selectors')
 const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions')
 const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
+const proxyUsageService = require('../services/proxyUsageService')
 
 const crawlWebsite = async (req, res) => {
     const { urls, crawlId, selectors } = req.body
@@ -598,6 +599,102 @@ const getAllQueuesStatus = async (req, res) => {
     }
 };
 
+// —————————————— PROXY USAGE ENDPOINTS ——————————————
+
+/**
+ * Get proxy usage statistics for a specific crawl
+ * @route GET /api/crawls/:id/proxy-stats
+ */
+const getCrawlProxyStats = async (req, res) => {
+    const { id } = req.params;
+
+    // Validate crawlId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid crawlId' });
+    }
+
+    try {
+        const stats = await proxyUsageService.getCrawlProxyStats(id);
+        res.status(200).json(stats);
+    } catch (error) {
+        console.error('Error getting crawl proxy stats:', error.message);
+        res.status(500).json({ message: 'Error getting proxy stats', error: error.message });
+    }
+};
+
+/**
+ * Get global proxy usage statistics
+ * @route GET /api/proxy-stats/global
+ */
+const getGlobalProxyStats = async (req, res) => {
+    try {
+        const stats = await proxyUsageService.getGlobalProxyStats();
+        res.status(200).json(stats);
+    } catch (error) {
+        console.error('Error getting global proxy stats:', error.message);
+        res.status(500).json({ message: 'Error getting global proxy stats', error: error.message });
+    }
+};
+
+/**
+ * Get proxy usage for a specific URL
+ * @route GET /api/proxy-stats/url
+ */
+const getProxyUsageForUrl = async (req, res) => {
+    const { url } = req.query;
+
+    if (!url) {
+        return res.status(400).json({ message: 'URL parameter is required' });
+    }
+
+    try {
+        const usage = await proxyUsageService.getProxyUsageForUrl(url);
+        res.status(200).json(usage);
+    } catch (error) {
+        console.error('Error getting proxy usage for URL:', error.message);
+        res.status(500).json({ message: 'Error getting proxy usage for URL', error: error.message });
+    }
+};
+
+/**
+ * Get cost analysis for proxy usage
+ * @route GET /api/proxy-stats/cost-analysis
+ */
+const getProxyCostAnalysis = async (req, res) => {
+    const { crawlId, startDate, endDate } = req.query;
+
+    try {
+        const analysis = await proxyUsageService.getCostAnalysis(
+            crawlId || null,
+            startDate ? new Date(startDate) : null,
+            endDate ? new Date(endDate) : null
+        );
+        res.status(200).json(analysis);
+    } catch (error) {
+        console.error('Error getting proxy cost analysis:', error.message);
+        res.status(500).json({ message: 'Error getting cost analysis', error: error.message });
+    }
+};
+
+/**
+ * Clean up old proxy usage records
+ * @route DELETE /api/proxy-stats/cleanup
+ */
+const cleanupProxyUsage = async (req, res) => {
+    const { daysOld = 90 } = req.query;
+
+    try {
+        const deletedCount = await proxyUsageService.cleanupOldRecords(parseInt(daysOld));
+        res.status(200).json({ 
+            message: `Cleaned up ${deletedCount} old proxy usage records`,
+            deletedCount 
+        });
+    } catch (error) {
+        console.error('Error cleaning up proxy usage records:', error.message);
+        res.status(500).json({ message: 'Error cleaning up proxy usage records', error: error.message });
+    }
+};
+
 module.exports = {
     crawlWebsite,
     createCrawler,
@@ -612,5 +709,11 @@ module.exports = {
     runAllCrawls,
     clearCrawlQueue,
     clearAllQueues, // Export the new function
-    getAllQueuesStatus // Export the new function
+    getAllQueuesStatus, // Export the new function
+    // Proxy usage endpoints
+    getCrawlProxyStats,
+    getGlobalProxyStats,
+    getProxyUsageForUrl,
+    getProxyCostAnalysis,
+    cleanupProxyUsage
 }

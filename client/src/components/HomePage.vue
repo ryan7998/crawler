@@ -66,6 +66,20 @@
                 </v-btn>
             </div>
         </v-card>
+
+        <!-- Global Proxy Stats Widget -->
+        <div class="mb-4">
+            <ProxyStatsWidget
+                :stats="globalProxyStats"
+                :loading="globalProxyStatsLoading"
+                :error="globalProxyStatsError"
+                :show-actions="true"
+                :show-cleanup="true"
+                @refresh="fetchGlobalProxyStats"
+                @view-details="showGlobalProxyStatsModal = true"
+                @cleanup="showCleanupDialog = true"
+            />
+        </div>
         
         <v-data-table
             :headers="headers"
@@ -272,21 +286,47 @@
         </v-dialog>
 
         <!-- Delete Confirmation Dialog -->
-        <v-dialog v-model="showDeleteConfirm" max-width="400">
+        <ConfirmationModal
+            v-model="showDeleteConfirm"
+            title="Confirm Delete"
+            :message="deleteConfirmMessage"
+            confirm-text="Delete"
+            cancel-text="Cancel"
+            color="error"
+            icon="mdi-delete"
+            :loading="deleteLoadingId === crawlToDelete?._id"
+            @confirm="deleteCrawl"
+        />
+
+        <!-- Global Proxy Stats Modal -->
+        <GlobalProxyStatsModal
+            v-model="showGlobalProxyStatsModal"
+        />
+
+        <!-- Cleanup Confirmation Dialog -->
+        <v-dialog v-model="showCleanupDialog" max-width="400px">
             <v-card>
-                <v-card-title class="text-h6">Confirm Delete</v-card-title>
+                <v-card-title>Cleanup Old Proxy Data</v-card-title>
                 <v-card-text>
-                    Are you sure you want to delete "{{ crawlToDelete?.title }}"? This action cannot be undone.
+                    <p>This will permanently delete proxy usage records older than the specified number of days.</p>
+                    <v-text-field
+                        v-model="cleanupDays"
+                        label="Days to keep"
+                        type="number"
+                        variant="outlined"
+                        density="compact"
+                        :rules="[v => v > 0 || 'Must be greater than 0']"
+                    />
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer />
-                    <v-btn @click="showDeleteConfirm = false">Cancel</v-btn>
-                    <v-btn 
-                        color="error" 
-                        :loading="deleteLoadingId === crawlToDelete?._id"
-                        @click="deleteCrawl"
+                    <v-btn variant="outlined" @click="showCleanupDialog = false">Cancel</v-btn>
+                    <v-btn
+                        color="warning"
+                        @click="performCleanup"
+                        :loading="globalProxyStatsLoading"
                     >
-                        Delete
+                        Cleanup
                     </v-btn>
                 </v-card-actions>
             </v-card>
@@ -304,15 +344,22 @@
 
 <script setup>
 import { ref, onMounted, inject, watch, computed } from 'vue'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
-import { formatDate, formatDateTime, getRelativeTime, getApiUrl } from '../utils/commonUtils'
+import { formatDate, formatDateTime, getRelativeTime } from '../utils/commonUtils'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
+import ProxyStatsWidget from './ui/ProxyStatsWidget.vue'
+import GlobalProxyStatsModal from './GlobalProxyStatsModal.vue'
+import ConfirmationModal from './ui/ConfirmationModal.vue'
+import { useProxyStats } from '../composables/useProxyStats'
+import { useApiService } from '../composables/useApiService'
+
+// Initialize composables
+const { del, loading: apiLoading, error: apiError } = useApiService()
 
 // Initialize Pinia store
 const crawlStore = useCrawlStore()
@@ -356,6 +403,27 @@ const showDeleteConfirm = ref(false)
 const crawlToDelete = ref(null)
 const deleteLoadingId = ref(null)
 const showStatsModal = ref(false)
+const showGlobalProxyStatsModal = ref(false)
+const showCleanupDialog = ref(false)
+const cleanupDays = ref(90)
+
+// Initialize proxy stats composable
+const {
+  globalStats,
+  loading: globalProxyStatsLoading,
+  error: globalProxyStatsError,
+  fetchGlobalProxyStats,
+  formattedGlobalStats,
+  cleanupProxyUsage
+} = useProxyStats()
+
+// Computed properties for global proxy stats
+const globalProxyStats = computed(() => formattedGlobalStats.value)
+
+// Computed property for delete confirmation message
+const deleteConfirmMessage = computed(() => {
+    return `Are you sure you want to delete "${crawlToDelete.value?.title}"? This action cannot be undone.`
+})
 
 // Search query
 const searchQuery = ref('')
@@ -479,21 +547,33 @@ const deleteCrawl = async () => {
     
     deleteLoadingId.value = crawlToDelete.value._id
     try {
-        await axios.delete(`${getApiUrl()}/api/deletecrawl/${crawlToDelete.value._id}`)
+        await del(`/api/deletecrawl/${crawlToDelete.value._id}`)
         showDeleteConfirm.value = false
         crawlToDelete.value = null
         showNotification('Crawl deleted successfully', 'success')
         fetchCrawls() // Refresh the list
     } catch (error) {
-        showNotification(error.response?.data?.message || 'Error deleting crawl', 'error')
+        showNotification(error.message, 'error')
     } finally {
         deleteLoadingId.value = null
     }
 }
 
+// Proxy cleanup function
+const performCleanup = async () => {
+    try {
+        await cleanupProxyUsage(cleanupDays.value)
+        showCleanupDialog.value = false
+        await fetchGlobalProxyStats() // Refresh data after cleanup
+        showNotification('Proxy data cleanup completed successfully', 'success')
+    } catch (error) {
+        showNotification('Error performing cleanup', 'error')
+    }
+}
 
 onMounted(() => {
     fetchCrawls()
+    fetchGlobalProxyStats()
 })
 </script>
 
