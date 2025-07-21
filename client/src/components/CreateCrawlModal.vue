@@ -65,8 +65,8 @@
                                     :rules="[
                                         v => {
                                             const urls = parseUrls(v);
-                                            if (urls.length === 0) return 'Please enter at least one URL';
-                                            const invalidUrls = urls.filter(url => !isValidUrl(url));
+                                            if (urls.length === 0) return 'Please enter at least one URL';  
+                                            const invalidUrls = urls.filter(url => !isValidUrl(url));       
                                             if (invalidUrls.length > 0) {
                                                 return `Invalid URL(s): ${invalidUrls.join(', ')}`;
                                             }
@@ -82,11 +82,11 @@
                             <!-- Current Selectors Section -->
                             <div class="flex flex-col gap-4">
                                 <div>
-                                    <h6 class="text-gray-700 font-semibold mb-4">Current Selectors</h6>
+                                    <h6 class="text-gray-700 font-semibold mb-4">Current Selectors</h6>     
                                     <div class="space-y-4">
-                                        <CssSelector 
-                                            v-for="selector in currentSelectors" 
-                                            :key="selector.id" 
+                                        <CssSelector
+                                            v-for="selector in currentSelectors"
+                                            :key="selector.id"
                                             :selector="selector"
                                             @removeSelector="removeCurrentSelectorHandler"
                                             @updateSelector="updateCurrentSelectorHandler"
@@ -222,14 +222,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed, inject } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
+import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { useApiService } from '../composables/useApiService'
-import { getApiUrl, isValidUrl } from '../utils/commonUtils'
 import CssSelector from './CssSelector.vue'
-
-// Initialize composables
-const { get, post, put, loading: apiLoading, error: apiError } = useApiService()
+import { getApiUrl, isValidUrl } from '../utils/commonUtils'
 
 const emit = defineEmits(['update:modelValue', 'crawl-created'])
 
@@ -337,45 +334,52 @@ const extractDomain = (url) => {
 const checkDomainConsistency = (urls) => {
     const domains = urls.map(url => extractDomain(url)).filter(Boolean)
     if (domains.length === 0) return null
-    
+
     const firstDomain = domains[0]
     const allSameDomain = domains.every(domain => domain === firstDomain)
-    
+
     return allSameDomain ? firstDomain : null
 }
 
 // Fetch domain selectors
 const fetchDomainSelectors = async (domain) => {
     try {
-        const data = await get(`/api/selectors/${domain}`)
-        console.log('Raw selectors from backend:', data.selectors)
-        
-        if (data.selectors && Array.isArray(data.selectors)) {
-            // Transform the selectors to match our component's expected format
-            const transformedSelectors = data.selectors.map(selector => ({
+        const response = await axios.get(`${apiUrl.value}/api/selectors/${domain}`)
+        console.log('Raw selectors from backend:', response.data.selectors)
+
+        // Transform the selectors to match the CssSelector component format
+        const transformedSelectors = response.data.selectors.map(selector => ({
+            id: Math.random().toString(36).substring(2, 9),
+            name: selector.name, // Backend uses 'name', not 'target_element'
+            css: selector.selector, // Backend uses 'selector', not 'selector_value'
+            type: selector.type || 'text',
+            attribute: selector.attribute || null,
+            childSelectors: (selector.childSelectors || []).map(child => ({
                 id: Math.random().toString(36).substring(2, 9),
-                name: selector.target_element || '',
-                css: selector.selector_value || '',
-                type: selector.type || 'text',
-                attribute: selector.attribute || '',
-                childSelectors: selector.childSelectors?.map(child => ({
-                    id: Math.random().toString(36).substring(2, 9),
-                    name: child.target_element || '',
-                    selector: child.selector_value || '',
-                    type: child.type || 'text',
-                    attribute: child.attribute || ''
-                })) || []
+                name: child.name, // Backend uses 'name'
+                selector: child.selector, // Backend uses 'selector'
+                type: child.type || 'text',
+                attribute: child.attribute || null
             }))
-            
-            currentSelectors.value = transformedSelectors
-            console.log('Transformed selectors:', transformedSelectors)
-        } else {
-            console.warn('No selectors found for domain:', domain)
-            currentSelectors.value = []
+        }))
+        console.log('Transformed selectors for frontend:', transformedSelectors)
+
+        localSelectors.value = transformedSelectors
+        return {
+            domain,
+            hasSelectors: true,
+            selectors: transformedSelectors
         }
     } catch (error) {
-        console.error('Error fetching domain selectors:', error)
-        currentSelectors.value = []
+        if (error.response?.status === 404) {
+            localSelectors.value = []
+            return {
+                domain,
+                hasSelectors: false,
+                selectors: null
+            }
+        }
+        throw error
     }
 }
 
@@ -406,7 +410,7 @@ const removeDomainSelectorHandler = (selectorId) => {
 // Add function to add domain selector to current selectors
 const addDomainSelectorToCurrent = (selector) => {
     // Check if selector already exists in current selectors
-    const exists = currentSelectors.value.some(s => 
+    const exists = currentSelectors.value.some(s =>
         s.name === selector.name && s.css === selector.css
     )
     if (!exists) {
@@ -434,7 +438,7 @@ const validateSelectors = () => {
         return false
     }
 
-    const emptySelectors = currentSelectors.value.filter(selector => 
+    const emptySelectors = currentSelectors.value.filter(selector =>
         !selector.name.trim() || !selector.css.trim()
     )
 
@@ -502,7 +506,7 @@ const handleBack = () => {
 // Handle form submission
 const handleSubmit = async () => {
     const urls = parseUrls(urlsText.value)
-    
+
     if (urls.length === 0) {
         showNotification('Please enter at least one URL', 'error')
         return
@@ -551,14 +555,15 @@ const handleSubmit = async () => {
         console.log('Sending request data:', requestData)
 
         const response = isEditing.value
-            ? await put(`/api/updatecrawl/${props.crawlData._id}`, requestData)
-            : await post('/api/createcrawler', requestData)
-        
+            ? await axios.put(`${apiUrl.value}/api/updatecrawl/${props.crawlData._id}`, requestData)        
+            : await axios.post(`${apiUrl.value}/api/createcrawler`, requestData)
+
         showNotification(isEditing.value ? 'Crawl updated successfully' : 'Crawl created successfully', 'success')
-        emit('crawl-created', isEditing.value ? response.crawl : { _id: response.crawlId })
+        emit('crawl-created', isEditing.value ? response.data.crawl : { _id: response.data.crawlId })       
         closeDialog()
     } catch (error) {
-        showNotification(error.message, 'error')
+        console.error('Error creating/updating crawl:', error)
+        showNotification(error.response?.data?.message || 'An error occurred', 'error')
     } finally {
         loading.value = false
     }
