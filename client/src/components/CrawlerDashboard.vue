@@ -271,78 +271,64 @@
                 </div>
             </div>
         </div>
-        <!-- Confirmation Modal -->
-        <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white p-6 rounded-lg">
-                <h3 class="text-lg font-semibold">Confirm Deletion</h3>
-                <p>Are you sure you want to delete this crawl? This action cannot be undone.</p>
-                <div class="flex justify-end mt-4 space-x-2">
-                    <button @click="deleteCrawl" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
-                    <button @click="cancelDelete" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
-                </div>
-            </div>
-        </div>
+        <!-- Confirmation Modals -->
+        <ConfirmationModal
+            v-model="showConfirm"
+            title="Confirm Deletion"
+            message="Are you sure you want to delete this crawl? This action cannot be undone."
+            confirm-text="Delete"
+            cancel-text="Cancel"
+            color="error"
+            icon="mdi-delete"
+            @confirm="deleteCrawl"
+        />
         
-        <!-- Delete Crawl Data Confirmation Modal -->
-        <div v-if="showDeleteDataConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white p-6 rounded-lg max-w-md">
-                <h3 class="text-lg font-semibold">Clear Crawl Data</h3>
-                <p>Are you sure you want to clear all crawled data for this crawl? The crawl configuration will remain intact, but all collected data will be deleted.</p>
-                <div class="flex justify-end mt-4 space-x-2">
-                    <button @click="deleteCrawlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
-                    <button @click="cancelDeleteData" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
-                </div>
-            </div>
-        </div>
+        <ConfirmationModal
+            v-model="showDeleteDataConfirm"
+            title="Clear Crawl Data"
+            message="Are you sure you want to clear all crawled data for this crawl? The crawl configuration will remain intact, but all collected data will be deleted."
+            confirm-text="Clear Data"
+            cancel-text="Cancel"
+            color="warning"
+            icon="mdi-delete-sweep"
+            @confirm="deleteCrawlData"
+        />
 
-        <!-- Delete URL Data Confirmation Modal -->
-        <div v-if="showDeleteUrlDataConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white p-6 rounded-lg max-w-md">
-                <h3 class="text-lg font-semibold">Clear URL Data</h3>
-                <p>Are you sure you want to clear the crawled data for this URL?</p>
-                <p class="text-sm text-gray-600 mt-2 break-all">{{ urlToDelete }}</p>
-                <div class="flex justify-end mt-4 space-x-2">
-                    <button @click="deleteUrlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
-                    <button @click="cancelDeleteUrlData" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
-                </div>
-            </div>
-        </div>
+        <ConfirmationModal
+            v-model="showDeleteUrlDataConfirm"
+            title="Clear URL Data"
+            message="Are you sure you want to clear the crawled data for this URL?"
+            :details="urlToDelete"
+            confirm-text="Clear Data"
+            cancel-text="Cancel"
+            color="warning"
+            icon="mdi-delete-sweep"
+            @confirm="deleteUrlData"
+        />
 
-        <!-- Bulk Delete Confirmation Modal -->
-        <div v-if="showBulkDeleteConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white p-6 rounded-lg max-w-md">
-                <h3 class="text-lg font-semibold">Clear Selected URL Data</h3>
-                <p>Are you sure you want to clear the crawled data for {{ selectedUrls.length }} selected URLs?</p>
-                <div class="max-h-32 overflow-y-auto mt-2">
-                    <p class="text-sm text-gray-600">Selected URLs:</p>
-                    <ul class="text-xs text-gray-500 mt-1">
-                        <li v-for="url in selectedUrls" :key="url" class="break-all">{{ url }}</li>
-                    </ul>
-                </div>
-                <div class="flex justify-end mt-4 space-x-2">
-                    <button @click="bulkDeleteUrlData" class="bg-orange-500 text-white px-4 py-2 rounded">Clear Data</button>
-                    <button @click="cancelBulkDelete" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
-                </div>
-            </div>
-        </div>
+        <ConfirmationModal
+            v-model="showBulkDeleteConfirm"
+            title="Clear Selected URL Data"
+            message="Are you sure you want to clear the crawled data for the selected URLs?"
+            :items="selectedUrls"
+            confirm-text="Clear Data"
+            cancel-text="Cancel"
+            color="warning"
+            icon="mdi-delete-sweep"
+            @confirm="bulkDeleteUrlData"
+        />
 
-        <!-- Restart Selected Confirmation Modal -->
-        <div v-if="showRestartSelectedConfirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white p-6 rounded-lg max-w-md">
-                <h3 class="text-lg font-semibold">Restart Selected URLs</h3>
-                <p>Are you sure you want to restart the crawl for {{ selectedUrls.length }} selected URLs?</p>
-                <div class="max-h-32 overflow-y-auto mt-2">
-                    <p class="text-sm text-gray-600">Selected URLs:</p>
-                    <ul class="text-xs text-gray-500 mt-1">
-                        <li v-for="url in selectedUrls" :key="url" class="break-all">{{ url }}</li>
-                    </ul>
-                </div>
-                <div class="flex justify-end mt-4 space-x-2">
-                    <button @click="restartSelectedUrls" class="bg-blue-500 text-white px-4 py-2 rounded">Restart</button>
-                    <button @click="cancelRestartSelected" class="bg-gray-300 text-gray-700 px-4 py-2 rounded">Cancel</button>
-                </div>
-            </div>
-        </div>
+        <ConfirmationModal
+            v-model="showRestartSelectedConfirm"
+            title="Restart Selected URLs"
+            message="Are you sure you want to restart the crawl for the selected URLs?"
+            :items="selectedUrls"
+            confirm-text="Restart"
+            cancel-text="Cancel"
+            color="info"
+            icon="mdi-restart"
+            @confirm="restartSelectedUrls"
+        />
 
         <!-- Add CreateCrawlModal -->
         <CreateCrawlModal
@@ -379,27 +365,27 @@
 
 <script setup>
 import { onMounted, ref, watch, inject, computed, onUnmounted } from 'vue'
-import { io } from "socket.io-client"
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
 import { useCrawlStore } from '../stores/crawlStore'
 import ViewResult from './ViewResult.vue'
 import { useExcerpts } from '../composables/useExcerpts'
 import SlideOver from './SlideOver.vue'
 import { getStatusColor } from '../utils/statusUtils'
-import { getApiUrl, getSocketUrl, formatDateTime } from '../utils/commonUtils'
+import { formatDateTime } from '../utils/commonUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import ExportModal from './ExportModal.vue'
 import ProxyStatsWidget from './ui/ProxyStatsWidget.vue'
 import ProxyStatsModal from './ProxyStatsModal.vue'
+import ConfirmationModal from './ui/ConfirmationModal.vue'
 import { useProxyStats } from '../composables/useProxyStats'
-import * as XLSX from 'xlsx'
+import { useSocketConnection } from '../composables/useSocketConnection'
+import { useApiService } from '../composables/useApiService'
+import { prepareCrawlExportData, exportToExcel, generateFilename, saveExportMetadata, loadExportMetadata } from '../utils/exportUtils'
 
-const baseUrl = getApiUrl()
-const apiUrl = getApiUrl()
-const socketUrl = getSocketUrl()
-const logs = ref([])  // Reactive state for successful crawl results
-const socket = ref()  // Ref for the socket instance
+// Initialize composables
+const { socket, isConnected, logs, joinRoom, on, disconnect } = useSocketConnection()
+const { get, post, del, loading: apiLoading, error: apiError } = useApiService()
+
 const route = useRoute()  // Access the crawl ID from the URL
 const router = useRouter()
 const crawlId = ref(route.params.crawlId)  // Get crawlId from URL
@@ -512,8 +498,8 @@ const onCloseSlideOver = (url) => {
 // Function to fetch crawl data from the server
 const fetchCrawlData = async () => {
     try {
-        const response = await axios.get(`${apiUrl}/api/getcrawler/${crawlId.value}`)
-        crawl.value = response.data
+        const data = await get(`/api/getcrawler/${crawlId.value}`)
+        crawl.value = data
 
         // Initialize aggregatedData if it doesn't exist
         if (!crawl.value.aggregatedData) {
@@ -535,7 +521,7 @@ const fetchCrawlData = async () => {
             clearLiveStatusDictionary()
         }
     } catch (error) {
-        errorMessage.value = error.response ? error.response.data.message : 'Error fetching data'
+        errorMessage.value = error.message
     }
 }
 
@@ -563,38 +549,21 @@ onMounted(async () => {
     crawlId.value = route.params.crawlId
 
     try {
-        // Log the socket URL for debugging
-        console.log('Connecting to socket at:', socketUrl)
-        
-        socket.value = io(socketUrl, {
-            path: "/socket.io/",
-            transports: ["websocket", "polling"],
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
-        })
-        
         await fetchCrawlData()
         await fetchProxyStats()
-        // await checkQueueStatus()  // Check initial queue status
 
         // Load saved export link from localStorage
-        const savedExport = localStorage.getItem(`export_${crawlId.value}`)
+        const savedExport = loadExportMetadata(crawlId.value)
         if (savedExport) {
-            try {
-                const exportData = JSON.parse(savedExport)
-                latestExportLink.value = exportData.sheetUrl
-                latestExportDate.value = new Date(exportData.exportDate)
-            } catch (error) {
-                console.error('Error loading saved export data:', error)
-            }
+            latestExportLink.value = savedExport.sheetUrl
+            latestExportDate.value = new Date(savedExport.exportDate)
         }
 
         // Join the room for the specific crawl ID
-        socket.value.emit('joinCrawl', crawlId.value)
+        joinRoom(crawlId.value)
         
         // Listen for crawl logs
-        socket.value.on("crawlLog", async (data) => {
+        on("crawlLog", async (data) => {
             console.log('Received crawl log:', data)  // Add logging
             logs.value.push(data)
             
@@ -624,35 +593,18 @@ onMounted(async () => {
             if (data.status === 'success') {
                 crawl.value.aggregatedData[data.url]
                     .push({ data: data.result, date: new Date(), status: data.status })
-                // await checkQueueStatus()  // Check queue status after each successful crawl
             }
         })
 
-        socket.value.on('connect', () => {
-            console.log('Connected to Socket.io server')
-        })
-
-        socket.value.on('connect_error', (error) => {
-            console.error('Socket connection error:', error)
-        })
-
-        socket.value.on('disconnect', (reason) => {
-            console.log('Disconnected from Socket.io server:', reason)
-        })
-
     } catch (error) {
-        console.error('Socket initialization error:', error)
-        errorMessage.value = error.response ? error.response.data.message : 'Error initializing socket connection'
+        console.error('Component initialization error:', error)
+        errorMessage.value = error.message
     }
 })
 
 // Cleanup function when component unmounts
 onUnmounted(() => {
-    if (socket.value) {
-        console.log('Cleaning up socket connection...')
-        socket.value.disconnect()
-        socket.value = null
-    }
+    disconnect()
     // Clear live status dictionary
     clearLiveStatusDictionary()
 })
@@ -669,12 +621,11 @@ const startCrawl = async () => {
             selectors: crawl.value.selectors || []
         }
         // Make a POST request to start the crawl
-        const response = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
+        await post('/api/startcrawl', requestBody)
         crawl.value.status = 'in-progress'
         showNotification('Crawl started successfully', 'success')
     } catch (error) {
-        const errMsg = error.response?.data?.error || error.message
-        showNotification(errMsg, 'error')
+        showNotification(error.message, 'error')
     }
 }
 
@@ -683,18 +634,14 @@ const confirmDelete = () => {
     showConfirm.value = true
 }
 
-const cancelDelete = () => {
-    showConfirm.value = false
-}
-
 const deleteCrawl = async () => {
     try {
-        await axios.delete(`${apiUrl}/api/deletecrawl/${crawlId.value}`)
+        await del(`/api/deletecrawl/${crawlId.value}`)
         showConfirm.value = false
         showNotification('Crawl deleted successfully', 'success')
         router.push('/')  // Redirect to homepage
     } catch (error) {
-        showNotification(error.response?.data?.message || 'Error deleting crawl', 'error')
+        showNotification(error.message, 'error')
         showConfirm.value = false
     }
 }
@@ -718,10 +665,10 @@ const handleExportSuccess = (exportResult) => {
     latestExportDate.value = exportResult.exportDate
     
     // Save to localStorage for persistence
-    localStorage.setItem(`export_${crawlId.value}`, JSON.stringify({
+    saveExportMetadata(crawlId.value, {
         sheetUrl: exportResult.sheetUrl,
         exportDate: exportResult.exportDate
-    }))
+    })
     
     showNotification('Export completed successfully!', 'success')
 }
@@ -839,18 +786,14 @@ const confirmDeleteCrawlData = () => {
     showDeleteDataConfirm.value = true
 }
 
-const cancelDeleteData = () => {
-    showDeleteDataConfirm.value = false
-}
-
 const deleteCrawlData = async () => {
     try {
-        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}`)
+        const response = await del(`/api/deletecrawldata/${crawlId.value}`)
         showDeleteDataConfirm.value = false
-        showNotification(`Crawl data cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        showNotification(`Crawl data cleared successfully. Deleted ${response.deletedDataCount} entries.`, 'success')
         await fetchCrawlData() // Refresh the data
     } catch (error) {
-        showNotification(error.response?.data?.message || 'Error clearing crawl data', 'error')
+        showNotification(error.message, 'error')
         showDeleteDataConfirm.value = false
     }
 }
@@ -860,24 +803,19 @@ const confirmDeleteUrlData = (url) => {
     showDeleteUrlDataConfirm.value = true
 }
 
-const cancelDeleteUrlData = () => {
-    showDeleteUrlDataConfirm.value = false
-    urlToDelete.value = ''
-}
-
 const deleteUrlData = async () => {
     try {
-        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}/urls`, {
+        const response = await del(`/api/deletecrawldata/${crawlId.value}/urls`, {
             data: {
                 urls: [urlToDelete.value]
             }
         })
         showDeleteUrlDataConfirm.value = false
         urlToDelete.value = ''
-        showNotification(`URL data cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        showNotification(`URL data cleared successfully. Deleted ${response.deletedDataCount} entries.`, 'success')
         await fetchCrawlData() // Refresh the data
     } catch (error) {
-        showNotification(error.response?.data?.message || 'Error clearing URL data', 'error')
+        showNotification(error.message, 'error')
         showDeleteUrlDataConfirm.value = false
     }
 }
@@ -887,15 +825,9 @@ const confirmBulkDelete = () => {
     showBulkDeleteConfirm.value = true
 }
 
-const cancelBulkDelete = () => {
-    showBulkDeleteConfirm.value = false
-    selectedUrls.value = []
-    selectAll.value = false
-}
-
 const bulkDeleteUrlData = async () => {
     try {
-        const response = await axios.delete(`${apiUrl}/api/deletecrawldata/${crawlId.value}/urls`, {
+        const response = await del(`/api/deletecrawldata/${crawlId.value}/urls`, {
             data: {
                 urls: selectedUrls.value
             }
@@ -903,10 +835,10 @@ const bulkDeleteUrlData = async () => {
         showBulkDeleteConfirm.value = false
         selectedUrls.value = []
         selectAll.value = false
-        showNotification(`Selected URLs cleared successfully. Deleted ${response.data.deletedDataCount} entries.`, 'success')
+        showNotification(`Selected URLs cleared successfully. Deleted ${response.deletedDataCount} entries.`, 'success')
         await fetchCrawlData() // Refresh the data
     } catch (error) {
-        showNotification(error.response?.data?.message || 'Error clearing selected URLs', 'error')
+        showNotification(error.message, 'error')
         showBulkDeleteConfirm.value = false
     }
 }
@@ -914,12 +846,6 @@ const bulkDeleteUrlData = async () => {
 // Restart selected functions
 const confirmRestartSelected = () => {
     showRestartSelectedConfirm.value = true
-}
-
-const cancelRestartSelected = () => {
-    showRestartSelectedConfirm.value = false
-    selectedUrls.value = []
-    selectAll.value = false
 }
 
 const restartSelectedUrls = async () => {
@@ -930,15 +856,14 @@ const restartSelectedUrls = async () => {
             selectors: crawl.value.selectors || []
         }
         // Make a POST request to start the crawl with selected URLs
-        const response = await axios.post(`${apiUrl}/api/startcrawl`, requestBody)
+        await post('/api/startcrawl', requestBody)
         crawl.value.status = 'in-progress'
         showRestartSelectedConfirm.value = false
         selectedUrls.value = []
         selectAll.value = false
         showNotification(`Restarted crawl for ${requestBody.urls.length} selected URLs`, 'success')
     } catch (error) {
-        const errMsg = error.response?.data?.error || error.message
-        showNotification(errMsg, 'error')
+        showNotification(error.message, 'error')
         showRestartSelectedConfirm.value = false
     }
 }
@@ -947,12 +872,12 @@ const restartSelectedUrls = async () => {
 const clearCrawlQueue = async () => {
     clearQueueLoading.value = true
     try {
-        await axios.delete(`${apiUrl}/api/clearqueue/${crawlId.value}`)
+        await del(`/api/clearqueue/${crawlId.value}`)
         snackbarText.value = 'Queue cleared!'
         snackbarColor.value = 'success'
         showSnackbar.value = true
     } catch (error) {
-        snackbarText.value = error.response?.data?.message || 'Failed to clear queue'
+        snackbarText.value = error.message
         snackbarColor.value = 'error'
         showSnackbar.value = true
     } finally {

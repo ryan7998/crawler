@@ -1,8 +1,10 @@
 import { ref, inject } from 'vue'
-import axios from 'axios'
-import { getApiUrl } from '../utils/commonUtils.js'
+import { useApiService } from './useApiService'
 
 export function useCrawlManagement() {
+    // Initialize composables
+    const { get, post, put, loading: apiLoading, error: apiError } = useApiService()
+
     // Reactive state
     const crawls = ref([])
     const totalCrawls = ref(0)
@@ -20,16 +22,21 @@ export function useCrawlManagement() {
     // Fetch Google Sheet URL from server
     const fetchGoogleSheetUrl = async () => {
         try {
-            const response = await axios.get(`${getApiUrl()}/api/export/google-sheet-id`)
-            globalSheetUrl.value = response.data.sheetUrl
+            const data = await get('/api/export/google-sheet-id')
+            globalSheetUrl.value = data.sheetUrl
         } catch (error) {
             console.error('Error fetching Google Sheet URL:', error)
             // Don't show notification for this as it's not critical
+            // Set a default value to prevent undefined issues
+            globalSheetUrl.value = ''
         }
     }
 
-    // Initialize Google Sheet URL
-    fetchGoogleSheetUrl()
+    // Initialize Google Sheet URL - make it non-blocking
+    // Use setTimeout to avoid blocking the component initialization
+    setTimeout(() => {
+        fetchGoogleSheetUrl()
+    }, 100)
 
     // Fetch crawls with pagination and search
     const fetchCrawls = async (options, searchQuery) => {
@@ -37,9 +44,9 @@ export function useCrawlManagement() {
             isSearching.value = true
             const { page, itemsPerPage } = options
             const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''
-            const response = await axios.get(`${getApiUrl()}/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`)
-            crawls.value = response.data.crawls
-            totalCrawls.value = response.data.totalCrawls
+            const data = await get(`/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`)
+            crawls.value = data.crawls
+            totalCrawls.value = data.totalCrawls
         } catch (error) {
             console.error('Error fetching crawls:', error)
             showNotification('Error fetching crawls', 'error')
@@ -52,13 +59,13 @@ export function useCrawlManagement() {
     const runAllCrawls = async () => {
         runAllLoading.value = true
         try {
-            const response = await axios.post(`${getApiUrl()}/api/runallcrawls`)
-            const { message, started, skipped } = response.data
+            const data = await post('/api/runallcrawls')
+            const { message, started, skipped } = data
             snackbarText.value = `${message}. Started: ${started.length}, Skipped: ${skipped.length}`
             snackbarColor.value = 'success'
             showSnackbar.value = true
         } catch (error) {
-            snackbarText.value = error.response?.data?.message || 'Failed to start all crawls'
+            snackbarText.value = error.message
             snackbarColor.value = 'error'
             showSnackbar.value = true
         } finally {
@@ -70,17 +77,17 @@ export function useCrawlManagement() {
     const toggleDisableCrawl = async (item) => {
         disableLoadingId.value = item._id
         try {
-            const response = await axios.put(`${getApiUrl()}/api/updatecrawl/${item._id}`,
+            const data = await put(`/api/updatecrawl/${item._id}`,
                 { disabled: !item.disabled })
             // Update the local crawl list
-            const updated = response.data.crawl
+            const updated = data.crawl
             const idx = crawls.value.findIndex(c => c._id === item._id)
             if (idx !== -1) crawls.value[idx] = { ...crawls.value[idx], ...updated }
             snackbarText.value = updated.disabled ? 'Crawl disabled' : 'Crawl enabled'
             snackbarColor.value = 'success'
             showSnackbar.value = true
         } catch (error) {
-            snackbarText.value = error.response?.data?.message || 'Failed to update crawl'
+            snackbarText.value = error.message
             snackbarColor.value = 'error'
             showSnackbar.value = true
         } finally {

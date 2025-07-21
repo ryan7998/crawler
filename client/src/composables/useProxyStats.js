@@ -1,13 +1,25 @@
 import { ref, computed } from 'vue'
-import axios from 'axios'
-import { getApiUrl } from '@/utils/commonUtils'
+import { useApiService } from './useApiService'
+import { useFormatting } from './useFormatting'
 
 export function useProxyStats() {
+  // Initialize composables
+  const { get, del, loading: apiLoading, error: apiError } = useApiService()
   const proxyStats = ref(null)
   const globalStats = ref(null)
   const costAnalysis = ref(null)
   const loading = ref(false)
   const error = ref(null)
+
+  // Use centralized formatting utilities
+  const {
+    formatNumber,
+    formatCost,
+    formatPercentage,
+    formatDate,
+    getRelativeTime,
+    getSuccessRateColor
+  } = useFormatting()
 
   // Get proxy stats for a specific crawl
   const fetchCrawlProxyStats = async (crawlId) => {
@@ -15,22 +27,22 @@ export function useProxyStats() {
     error.value = null
     
     try {
-      const response = await axios.get(`${getApiUrl()}/api/crawls/${crawlId}/proxy-stats`)
+      const data = await get(`/api/crawls/${crawlId}/proxy-stats`)
       
       // Check if response is HTML (error page) instead of JSON
-      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+      if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
         throw new Error('Proxy stats endpoint not available - server may not be running or endpoint not configured')
       }
       
-      proxyStats.value = response.data
-      return response.data
+      proxyStats.value = data
+      return data
     } catch (err) {
       if (err.response?.status === 404) {
         error.value = 'Proxy stats endpoint not found - ensure server is running with proxy tracking enabled'
       } else if (err.message.includes('Proxy stats endpoint not available')) {
         error.value = err.message
       } else {
-        error.value = err.response?.data?.message || 'Failed to fetch proxy stats'
+        error.value = err.message || 'Failed to fetch proxy stats'
       }
       console.error('Error fetching crawl proxy stats:', err)
       
@@ -59,22 +71,22 @@ export function useProxyStats() {
     error.value = null
     
     try {
-      const response = await axios.get(`${getApiUrl()}/api/proxy-stats/global`)
+      const data = await get('/api/proxy-stats/global')
       
       // Check if response is HTML (error page) instead of JSON
-      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+      if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
         throw new Error('Global proxy stats endpoint not available - server may not be running or endpoint not configured')
       }
       
-      globalStats.value = response.data
-      return response.data
+      globalStats.value = data
+      return data
     } catch (err) {
       if (err.response?.status === 404) {
         error.value = 'Global proxy stats endpoint not found - ensure server is running with proxy tracking enabled'
       } else if (err.message.includes('Global proxy stats endpoint not available')) {
         error.value = err.message
       } else {
-        error.value = err.response?.data?.message || 'Failed to fetch global proxy stats'
+        error.value = err.message || 'Failed to fetch global proxy stats'
       }
       console.error('Error fetching global proxy stats:', err)
       
@@ -84,7 +96,7 @@ export function useProxyStats() {
           totalProxyRequests: 0,
           uniqueProxiesUsed: 0,
           totalCost: 0,
-          averageProxySuccessRate: 0
+          averageSuccessRate: 0
         },
         topProxies: [],
         recentUsage: []
@@ -107,22 +119,22 @@ export function useProxyStats() {
       if (params.startDate) queryParams.append('startDate', params.startDate)
       if (params.endDate) queryParams.append('endDate', params.endDate)
       
-      const response = await axios.get(`${getApiUrl()}/api/proxy-stats/cost-analysis?${queryParams}`)
+      const data = await get(`/api/proxy-stats/cost-analysis?${queryParams}`)
       
       // Check if response is HTML (error page) instead of JSON
-      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+      if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
         throw new Error('Cost analysis endpoint not available - server may not be running or endpoint not configured')
       }
       
-      costAnalysis.value = response.data
-      return response.data
+      costAnalysis.value = data
+      return data
     } catch (err) {
       if (err.response?.status === 404) {
         error.value = 'Cost analysis endpoint not found - ensure server is running with proxy tracking enabled'
       } else if (err.message.includes('Cost analysis endpoint not available')) {
         error.value = err.message
       } else {
-        error.value = err.response?.data?.message || 'Failed to fetch cost analysis'
+        error.value = err.message || 'Failed to fetch cost analysis'
       }
       console.error('Error fetching cost analysis:', err)
       
@@ -145,23 +157,23 @@ export function useProxyStats() {
     error.value = null
     
     try {
-      const response = await axios.get(`${getApiUrl()}/api/proxy-stats/url?url=${encodeURIComponent(url)}`)
+      const data = await get(`/api/proxy-stats/url-usage?url=${encodeURIComponent(url)}`)
       
       // Check if response is HTML (error page) instead of JSON
-      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
-        throw new Error('URL proxy usage endpoint not available - server may not be running or endpoint not configured')
+      if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
+        throw new Error('URL usage endpoint not available - server may not be running or endpoint not configured')
       }
       
-      return response.data
+      return data
     } catch (err) {
       if (err.response?.status === 404) {
-        error.value = 'URL proxy usage endpoint not found - ensure server is running with proxy tracking enabled'
-      } else if (err.message.includes('URL proxy usage endpoint not available')) {
+        error.value = 'URL usage endpoint not found - ensure server is running with proxy tracking enabled'
+      } else if (err.message.includes('URL usage endpoint not available')) {
         error.value = err.message
       } else {
-        error.value = err.response?.data?.message || 'Failed to fetch URL proxy usage'
+        error.value = err.message || 'Failed to fetch URL usage'
       }
-      console.error('Error fetching URL proxy usage:', err)
+      console.error('Error fetching URL usage:', err)
       throw err
     } finally {
       loading.value = false
@@ -174,21 +186,21 @@ export function useProxyStats() {
     error.value = null
     
     try {
-      const response = await axios.delete(`${getApiUrl()}/api/proxy-stats/cleanup?daysOld=${daysOld}`)
+      const data = await del(`/api/proxy-stats/cleanup?daysOld=${daysOld}`)
       
       // Check if response is HTML (error page) instead of JSON
-      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+      if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
         throw new Error('Cleanup endpoint not available - server may not be running or endpoint not configured')
       }
       
-      return response.data
+      return data
     } catch (err) {
       if (err.response?.status === 404) {
         error.value = 'Cleanup endpoint not found - ensure server is running with proxy tracking enabled'
       } else if (err.message.includes('Cleanup endpoint not available')) {
         error.value = err.message
       } else {
-        error.value = err.response?.data?.message || 'Failed to cleanup proxy usage'
+        error.value = err.message || 'Failed to cleanup proxy usage'
       }
       console.error('Error cleaning up proxy usage:', err)
       throw err
@@ -230,7 +242,7 @@ export function useProxyStats() {
       totalRequests: summary.totalProxyRequests || 0,
       uniqueProxies: summary.uniqueProxiesUsed || 0,
       totalCost: summary.totalCost || 0,
-      successRate: summary.averageProxySuccessRate || 0
+      successRate: summary.averageSuccessRate || 0
     }
   })
 
@@ -247,49 +259,6 @@ export function useProxyStats() {
       dailyCosts: costAnalysis.value.dailyCosts || []
     }
   })
-
-  // Helper functions for formatting
-  const formatCost = (cost) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 4
-    }).format(cost)
-  }
-
-  const formatPercentage = (value) => {
-    return `${(value || 0).toFixed(1)}%`
-  }
-
-  const formatNumber = (value) => {
-    return new Intl.NumberFormat('en-US').format(value || 0)
-  }
-
-  const formatDate = (date) => {
-    if (!date) return 'Never'
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(date))
-  }
-
-  const getRelativeTime = (date) => {
-    if (!date) return 'Never'
-    
-    const now = new Date()
-    const targetDate = new Date(date)
-    const diffInSeconds = Math.floor((now - targetDate) / 1000)
-    
-    if (diffInSeconds < 60) return 'Just now'
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`
-    
-    return `${Math.floor(diffInSeconds / 2592000)}mo ago`
-  }
 
   return {
     // State
@@ -311,11 +280,12 @@ export function useProxyStats() {
     formattedGlobalStats,
     formattedCostAnalysis,
     
-    // Helpers
+    // Formatting utilities (from useFormatting)
+    formatNumber,
     formatCost,
     formatPercentage,
-    formatNumber,
     formatDate,
-    getRelativeTime
+    getRelativeTime,
+    getSuccessRateColor
   }
 } 

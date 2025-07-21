@@ -51,14 +51,6 @@
                 </v-col>
                 <v-col cols="6" md="3">
                   <div class="text-center">
-                    <div class="text-h4 font-weight-bold text-warning">
-                      {{ formatCost(globalStats.summary.totalCost || 0) }}
-                    </div>
-                    <div class="text-caption text-medium-emphasis">Total Cost</div>
-                  </div>
-                </v-col>
-                <v-col cols="6" md="3">
-                  <div class="text-center">
                     <div class="text-h4 font-weight-bold text-info">
                       {{ formatPercentage(parseFloat(globalStats.summary.averageSuccessRate) || 0) }}
                     </div>
@@ -115,9 +107,6 @@
                         {{ formatPercentage(item.successRate || 0) }}
                       </v-chip>
                     </template>
-                    <template v-slot:item.totalCost="{ item }">
-                      {{ formatCost(item.totalCost || 0) }}
-                    </template>
                     <template v-slot:item.lastUsed="{ item }">
                       {{ getRelativeTime(item.lastUsed) }}
                     </template>
@@ -166,9 +155,6 @@
                     <template v-slot:item.failureCount="{ item }">
                       <span class="text-error">{{ formatNumber(item.failureCount || 0) }}</span>
                     </template>
-                    <template v-slot:item.totalCost="{ item }">
-                      {{ formatCost(item.totalCost || 0) }}
-                    </template>
                     <template v-slot:item.lastUsed="{ item }">
                       {{ getRelativeTime(item.lastUsed) }}
                     </template>
@@ -204,14 +190,6 @@
                   <!-- Cost Summary -->
                   <div class="cost-summary">
                     <v-row>
-                      <v-col cols="4">
-                        <div class="text-center">
-                          <div class="text-h5 font-weight-bold text-warning">
-                            {{ formatCost(costAnalysis.totalCost || 0) }}
-                          </div>
-                          <div class="text-caption text-medium-emphasis">Total Cost</div>
-                        </div>
-                      </v-col>
                       <v-col cols="4">
                         <div class="text-center">
                           <div class="text-h5 font-weight-bold text-primary">
@@ -264,9 +242,6 @@
                   >
                     <template v-slot:item.date="{ item }">
                       {{ formatDate(item.date) }}
-                    </template>
-                    <template v-slot:item.totalCost="{ item }">
-                      {{ formatCost(item.totalCost || 0) }}
                     </template>
                     <template v-slot:item.totalRequests="{ item }">
                       {{ formatNumber(item.totalRequests || 0) }}
@@ -365,7 +340,6 @@ const performanceHeaders = [
   { title: 'Proxy ID', key: 'proxyId', sortable: true },
   { title: 'Total Requests', key: 'totalRequests', sortable: true },
   { title: 'Success Rate', key: 'successRate', sortable: true },
-  { title: 'Total Cost', key: 'totalCost', sortable: true },
   { title: 'Last Used', key: 'lastUsed', sortable: true }
 ]
 
@@ -375,13 +349,11 @@ const usageHeaders = [
   { title: 'Total Requests', key: 'totalRequests', sortable: true },
   { title: 'Success', key: 'successCount', sortable: true },
   { title: 'Failures', key: 'failureCount', sortable: true },
-  { title: 'Total Cost', key: 'totalCost', sortable: true },
   { title: 'Last Used', key: 'lastUsed', sortable: true }
 ]
 
 const costHeaders = [
   { title: 'Date', key: 'date', sortable: true },
-  { title: 'Total Cost', key: 'totalCost', sortable: true },
   { title: 'Total Requests', key: 'totalRequests', sortable: true },
   { title: 'Unique Proxies', key: 'uniqueProxies', sortable: true }
 ]

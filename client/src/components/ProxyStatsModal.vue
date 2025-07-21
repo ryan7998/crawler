@@ -50,14 +50,6 @@
                 </v-col>
                 <v-col cols="6" md="3">
                   <div class="text-center">
-                    <div class="text-h4 font-weight-bold text-warning">
-                      {{ formatCost(proxyStats.summary.totalCost) }}
-                    </div>
-                    <div class="text-caption text-medium-emphasis">Total Cost</div>
-                  </div>
-                </v-col>
-                <v-col cols="6" md="3">
-                  <div class="text-center">
                     <div class="text-h4 font-weight-bold text-info">
                       {{ formatPercentage(proxyStats.summary.averageProxySuccessRate) }}
                     </div>
@@ -72,7 +64,6 @@
           <v-tabs v-model="activeTab" class="mb-4">
             <v-tab value="performance">Proxy Performance</v-tab>
             <v-tab value="usage">Detailed Usage</v-tab>
-            <v-tab value="costs">Cost Analysis</v-tab>
           </v-tabs>
 
           <v-window v-model="activeTab">
@@ -116,9 +107,6 @@
                     </template>
                     <template v-slot:item.averageResponseTime="{ item }">
                       {{ formatResponseTime(item.averageResponseTime) }}
-                    </template>
-                    <template v-slot:item.totalCost="{ item }">
-                      {{ formatCost(item.totalCost) }}
                     </template>
                     <template v-slot:item.lastUsed="{ item }">
                       {{ getRelativeTime(item.lastUsed) }}
@@ -168,117 +156,8 @@
                     <template v-slot:item.failureCount="{ item }">
                       <span class="text-error">{{ formatNumber(item.failureCount) }}</span>
                     </template>
-                    <template v-slot:item.totalCost="{ item }">
-                      {{ formatCost(item.totalCost) }}
-                    </template>
                     <template v-slot:item.lastUsed="{ item }">
                       {{ getRelativeTime(item.lastUsed) }}
-                    </template>
-                  </v-data-table>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
-
-            <!-- Cost Analysis Tab -->
-            <v-window-item value="costs">
-              <v-card variant="outlined">
-                <v-card-title class="d-flex justify-space-between align-center">
-                  Cost Analysis
-                  <div class="d-flex gap-2">
-                    <v-btn
-                      icon="mdi-refresh"
-                      size="small"
-                      variant="text"
-                      :loading="loading"
-                      @click="refreshData"
-                    />
-                    <v-btn
-                      size="small"
-                      variant="outlined"
-                      color="warning"
-                      @click="showCleanupDialog = true"
-                    >
-                      Cleanup Old Data
-                    </v-btn>
-                  </div>
-                </v-card-title>
-                <v-card-text>
-                  <div class="mb-4">
-                    <v-row>
-                      <v-col cols="12" md="6">
-                        <v-text-field
-                          v-model="costAnalysisParams.startDate"
-                          label="Start Date"
-                          type="date"
-                          variant="outlined"
-                          density="compact"
-                        />
-                      </v-col>
-                      <v-col cols="12" md="6">
-                        <v-text-field
-                          v-model="costAnalysisParams.endDate"
-                          label="End Date"
-                          type="date"
-                          variant="outlined"
-                          density="compact"
-                        />
-                      </v-col>
-                    </v-row>
-                    <v-btn
-                      color="primary"
-                      @click="updateCostAnalysis"
-                      :loading="loading"
-                    >
-                      Update Analysis
-                    </v-btn>
-                  </div>
-
-                  <div v-if="costAnalysis" class="cost-summary">
-                    <v-row>
-                      <v-col cols="4">
-                        <div class="text-center">
-                          <div class="text-h5 font-weight-bold text-warning">
-                            {{ formatCost(costAnalysis.totalCost) }}
-                          </div>
-                          <div class="text-caption">Total Cost</div>
-                        </div>
-                      </v-col>
-                      <v-col cols="4">
-                        <div class="text-center">
-                          <div class="text-h5 font-weight-bold text-primary">
-                            {{ formatNumber(costAnalysis.totalRequests) }}
-                          </div>
-                          <div class="text-caption">Total Requests</div>
-                        </div>
-                      </v-col>
-                      <v-col cols="4">
-                        <div class="text-center">
-                          <div class="text-h5 font-weight-bold text-info">
-                            {{ formatCost(costAnalysis.totalCost / Math.max(costAnalysis.totalRequests, 1)) }}
-                          </div>
-                          <div class="text-caption">Avg Cost/Request</div>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </div>
-
-                  <v-data-table
-                    v-if="costAnalysis?.dailyCosts?.length"
-                    :headers="costHeaders"
-                    :items="costAnalysis.dailyCosts"
-                    class="elevation-0 mt-4"
-                  >
-                    <template v-slot:item.date="{ item }">
-                      {{ formatDate(item.date) }}
-                    </template>
-                    <template v-slot:item.totalCost="{ item }">
-                      {{ formatCost(item.totalCost) }}
-                    </template>
-                    <template v-slot:item.totalRequests="{ item }">
-                      {{ formatNumber(item.totalRequests) }}
-                    </template>
-                    <template v-slot:item.uniqueProxies="{ item }">
-                      {{ formatNumber(item.uniqueProxies) }}
                     </template>
                   </v-data-table>
                 </v-card-text>
@@ -376,7 +255,6 @@ const performanceHeaders = [
   { title: 'Total Requests', key: 'totalRequests', sortable: true },
   { title: 'Success Rate', key: 'successRate', sortable: true },
   { title: 'Avg Response Time', key: 'averageResponseTime', sortable: true },
-  { title: 'Total Cost', key: 'totalCost', sortable: true },
   { title: 'Last Used', key: 'lastUsed', sortable: true }
 ]
 
@@ -386,7 +264,6 @@ const usageHeaders = [
   { title: 'Total Requests', key: 'totalRequests', sortable: true },
   { title: 'Success', key: 'successCount', sortable: true },
   { title: 'Failures', key: 'failureCount', sortable: true },
-  { title: 'Total Cost', key: 'totalCost', sortable: true },
   { title: 'Last Used', key: 'lastUsed', sortable: true }
 ]
 

@@ -1,7 +1,19 @@
 const ProxyUsage = require('../models/ProxyUsage');
 const Crawl = require('../models/Crawl');
+const BaseService = require('./BaseService');
+const {
+    buildProxyPerformancePipeline,
+    buildCostAnalysisPipeline,
+    buildSummaryPipeline,
+    createDateRangeMatch,
+    createCrawlMatch
+} = require('../utils/aggregationPipelines');
 
-class ProxyUsageService {
+class ProxyUsageService extends BaseService {
+    constructor() {
+        super(ProxyUsage);
+    }
+
     /**
      * Track proxy usage when a proxy is used for crawling
      * @param {string} crawlId - The crawl ID
@@ -16,7 +28,7 @@ class ProxyUsageService {
     async trackProxyUsage(crawlId, url, proxyId, proxyLocation, success = true, responseTime = 0, costPerRequest = 0.001) {
         try {
             // Find existing proxy usage record or create new one
-            let proxyUsage = await ProxyUsage.findOne({
+            let proxyUsage = await this.findOne({
                 crawlId,
                 url,
                 proxyId
@@ -24,7 +36,7 @@ class ProxyUsageService {
 
             if (!proxyUsage) {
                 // Create new proxy usage record
-                proxyUsage = new ProxyUsage({
+                proxyUsage = await this.create({
                     crawlId,
                     url,
                     proxyId,
@@ -35,8 +47,6 @@ class ProxyUsageService {
                     averageResponseTime: responseTime,
                     totalCost: costPerRequest
                 });
-                // Save the new record
-                await proxyUsage.save();
             } else {
                 // Update existing record
                 await proxyUsage.updateUsage(success, responseTime);
@@ -47,34 +57,7 @@ class ProxyUsageService {
 
             return proxyUsage;
         } catch (error) {
-            console.error('Error tracking proxy usage:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Update crawl's proxy usage statistics
-     * @param {string} crawlId - The crawl ID
-     * @returns {Promise<Object>} Updated crawl document
-     */
-    async updateCrawlProxyStats(crawlId) {
-        try {
-            const summary = await ProxyUsage.getCrawlSummary(crawlId);
-            
-            await Crawl.findByIdAndUpdate(crawlId, {
-                $set: {
-                    'proxyUsageStats.totalProxyRequests': summary.totalProxyRequests,
-                    'proxyUsageStats.uniqueProxiesUsed': summary.uniqueProxiesUsed,
-                    'proxyUsageStats.lastProxyUsed': summary.lastProxyUsed,
-                    'proxyUsageStats.proxyCostEstimate': summary.totalCost,
-                    'proxyUsageStats.averageProxySuccessRate': summary.averageSuccessRate
-                }
-            });
-
-            return summary;
-        } catch (error) {
-            console.error('Error updating crawl proxy stats:', error);
-            throw error;
+            this.handleError('trackProxyUsage', error);
         }
     }
 
@@ -86,18 +69,16 @@ class ProxyUsageService {
     async getCrawlProxyStats(crawlId) {
         try {
             const summary = await ProxyUsage.getCrawlSummary(crawlId);
-            const detailedUsage = await ProxyUsage.find({ crawlId })
-                .sort({ lastUsed: -1 })
-                .limit(50);
+            const proxyPerformance = await this.getProxyPerformanceForCrawl(crawlId);
+            const detailedUsage = await this.getDetailedUsageForCrawl(crawlId);
 
             return {
                 summary,
-                detailedUsage,
-                proxyPerformance: await this.getProxyPerformanceForCrawl(crawlId)
+                proxyPerformance,
+                detailedUsage
             };
         } catch (error) {
-            console.error('Error getting crawl proxy stats:', error);
-            throw error;
+            this.handleError('getCrawlProxyStats', error);
         }
     }
 
@@ -108,46 +89,16 @@ class ProxyUsageService {
     async getGlobalProxyStats() {
         try {
             const summary = await ProxyUsage.getGlobalSummary();
-            const topProxies = await ProxyUsage.aggregate([
-                {
-                    $group: {
-                        _id: '$proxyId',
-                        totalRequests: { $sum: '$totalRequests' },
-                        successCount: { $sum: '$successCount' },
-                        failureCount: { $sum: '$failureCount' },
-                        totalCost: { $sum: '$totalCost' },
-                        lastUsed: { $max: '$lastUsed' },
-                        location: { $first: '$proxyLocation' }
-                    }
-                },
-                {
-                    $project: {
-                        proxyId: '$_id',
-                        totalRequests: 1,
-                        successRate: {
-                            $cond: [
-                                { $eq: ['$totalRequests', 0] },
-                                0,
-                                { $multiply: [{ $divide: ['$successCount', '$totalRequests'] }, 100] }
-                            ]
-                        },
-                        totalCost: 1,
-                        lastUsed: 1,
-                        location: 1
-                    }
-                },
-                { $sort: { totalRequests: -1 } },
-                { $limit: 10 }
-            ]);
+            const topProxies = await this.getTopProxies();
+            const recentUsage = await this.getRecentProxyUsage();
 
             return {
                 summary,
                 topProxies,
-                recentUsage: await this.getRecentProxyUsage()
+                recentUsage
             };
         } catch (error) {
-            console.error('Error getting global proxy stats:', error);
-            throw error;
+            this.handleError('getGlobalProxyStats', error);
         }
     }
 
@@ -158,131 +109,105 @@ class ProxyUsageService {
      */
     async getProxyPerformanceForCrawl(crawlId) {
         try {
-            return await ProxyUsage.aggregate([
-                { $match: { crawlId: new ProxyUsage.base.Types.ObjectId(crawlId) } },
-                {
-                    $group: {
-                        _id: '$proxyId',
-                        location: { $first: '$proxyLocation' },
-                        totalRequests: { $sum: '$totalRequests' },
-                        successCount: { $sum: '$successCount' },
-                        failureCount: { $sum: '$failureCount' },
-                        averageResponseTime: { $avg: '$averageResponseTime' },
-                        totalCost: { $sum: '$totalCost' },
-                        lastUsed: { $max: '$lastUsed' }
-                    }
-                },
+            const matchStage = createCrawlMatch(crawlId);
+            const pipeline = buildProxyPerformancePipeline({ matchStage });
+            return await this.aggregate(pipeline);
+        } catch (error) {
+            this.handleError('getProxyPerformanceForCrawl', error);
+        }
+    }
+
+    /**
+     * Get top performing proxies globally
+     * @param {number} limit - Number of proxies to return
+     * @returns {Promise<Array>} Top proxies data
+     */
+    async getTopProxies(limit = 10) {
+        try {
+            const pipeline = buildProxyPerformancePipeline({ limit });
+            return await this.aggregate(pipeline);
+        } catch (error) {
+            this.handleError('getTopProxies', error);
+        }
+    }
+
+    /**
+     * Get detailed usage for a specific crawl
+     * @param {string} crawlId - The crawl ID
+     * @returns {Promise<Array>} Detailed usage data
+     */
+    async getDetailedUsageForCrawl(crawlId) {
+        try {
+            const matchStage = createCrawlMatch(crawlId);
+            const pipeline = [
+                { $match: matchStage },
                 {
                     $project: {
-                        proxyId: '$_id',
-                        location: 1,
+                        url: 1,
+                        proxyId: 1,
+                        proxyLocation: 1,
                         totalRequests: 1,
-                        successRate: {
-                            $cond: [
-                                { $eq: ['$totalRequests', 0] },
-                                0,
-                                { $multiply: [{ $divide: ['$successCount', '$totalRequests'] }, 100] }
-                            ]
-                        },
-                        averageResponseTime: { $round: ['$averageResponseTime', 2] },
+                        successCount: 1,
+                        failureCount: 1,
                         totalCost: { $round: ['$totalCost', 4] },
                         lastUsed: 1
                     }
                 },
-                { $sort: { totalRequests: -1 } }
-            ]);
+                { $sort: { lastUsed: -1 } }
+            ];
+            
+            return await this.aggregate(pipeline);
         } catch (error) {
-            console.error('Error getting proxy performance for crawl:', error);
-            throw error;
+            this.handleError('getDetailedUsageForCrawl', error);
         }
     }
 
     /**
-     * Get recent proxy usage across all crawls
-     * @param {number} limit - Number of recent records to return
-     * @returns {Promise<Array>} Recent proxy usage records
+     * Get recent proxy usage globally
+     * @param {number} limit - Number of records to return
+     * @returns {Promise<Array>} Recent usage data
      */
     async getRecentProxyUsage(limit = 20) {
         try {
-            return await ProxyUsage.find()
-                .sort({ lastUsed: -1 })
-                .limit(limit)
-                .populate('crawlId', 'title status')
-                .lean();
+            const pipeline = [
+                {
+                    $project: {
+                        url: 1,
+                        proxyId: 1,
+                        proxyLocation: 1,
+                        totalRequests: 1,
+                        successCount: 1,
+                        failureCount: 1,
+                        totalCost: { $round: ['$totalCost', 4] },
+                        lastUsed: 1
+                    }
+                },
+                { $sort: { lastUsed: -1 } },
+                { $limit: limit }
+            ];
+            
+            return await this.aggregate(pipeline);
         } catch (error) {
-            console.error('Error getting recent proxy usage:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Get proxy usage for a specific URL
-     * @param {string} url - The URL to check
-     * @returns {Promise<Array>} Proxy usage records for the URL
-     */
-    async getProxyUsageForUrl(url) {
-        try {
-            return await ProxyUsage.find({ url })
-                .sort({ lastUsed: -1 })
-                .populate('crawlId', 'title status')
-                .lean();
-        } catch (error) {
-            console.error('Error getting proxy usage for URL:', error);
-            throw error;
+            this.handleError('getRecentProxyUsage', error);
         }
     }
 
     /**
      * Get cost analysis for proxy usage
      * @param {string} crawlId - Optional crawl ID to filter by
-     * @param {Date} startDate - Start date for analysis
-     * @param {Date} endDate - End date for analysis
+     * @param {Date} startDate - Optional start date
+     * @param {Date} endDate - Optional end date
      * @returns {Promise<Object>} Cost analysis data
      */
     async getCostAnalysis(crawlId = null, startDate = null, endDate = null) {
         try {
-            const matchStage = {};
-            
-            if (crawlId) {
-                matchStage.crawlId = new ProxyUsage.base.Types.ObjectId(crawlId);
-            }
-            
-            if (startDate || endDate) {
-                matchStage.lastUsed = {};
-                if (startDate) matchStage.lastUsed.$gte = new Date(startDate);
-                if (endDate) matchStage.lastUsed.$lte = new Date(endDate);
-            }
+            const matchStage = {
+                ...createCrawlMatch(crawlId),
+                ...createDateRangeMatch(startDate, endDate)
+            };
 
-            const costAnalysis = await ProxyUsage.aggregate([
-                { $match: matchStage },
-                {
-                    $group: {
-                        _id: {
-                            year: { $year: '$lastUsed' },
-                            month: { $month: '$lastUsed' },
-                            day: { $dayOfMonth: '$lastUsed' }
-                        },
-                        totalCost: { $sum: '$totalCost' },
-                        totalRequests: { $sum: '$totalRequests' },
-                        uniqueProxies: { $addToSet: '$proxyId' }
-                    }
-                },
-                {
-                    $project: {
-                        date: {
-                            $dateFromParts: {
-                                year: '$_id.year',
-                                month: '$_id.month',
-                                day: '$_id.day'
-                            }
-                        },
-                        totalCost: { $round: ['$totalCost', 4] },
-                        totalRequests: 1,
-                        uniqueProxies: { $size: '$uniqueProxies' }
-                    }
-                },
-                { $sort: { date: 1 } }
-            ]);
+            const pipeline = buildCostAnalysisPipeline({ matchStage });
+            const costAnalysis = await this.aggregate(pipeline);
 
             return {
                 dailyCosts: costAnalysis,
@@ -290,30 +215,87 @@ class ProxyUsageService {
                 totalRequests: costAnalysis.reduce((sum, day) => sum + day.totalRequests, 0)
             };
         } catch (error) {
-            console.error('Error getting cost analysis:', error);
-            throw error;
+            this.handleError('getCostAnalysis', error);
         }
     }
 
     /**
-     * Clean up old proxy usage records (for maintenance)
-     * @param {number} daysOld - Remove records older than this many days
-     * @returns {Promise<number>} Number of records deleted
+     * Get proxy usage for a specific URL
+     * @param {string} url - The URL to get usage for
+     * @returns {Promise<Array>} Proxy usage data for the URL
+     */
+    async getProxyUsageForUrl(url) {
+        try {
+            const pipeline = buildProxyPerformancePipeline({
+                matchStage: { url },
+                sortBy: 'lastUsed'
+            });
+            
+            return await this.aggregate(pipeline);
+        } catch (error) {
+            this.handleError('getProxyUsageForUrl', error);
+        }
+    }
+
+    /**
+     * Cleanup old proxy usage records
+     * @param {number} daysOld - Number of days to keep
+     * @returns {Promise<Object>} Cleanup result
      */
     async cleanupOldRecords(daysOld = 90) {
         try {
             const cutoffDate = new Date();
             cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-            const result = await ProxyUsage.deleteMany({
+            const result = await this.deleteMany({
                 lastUsed: { $lt: cutoffDate }
             });
 
             console.log(`Cleaned up ${result.deletedCount} old proxy usage records`);
-            return result.deletedCount;
+            return result;
         } catch (error) {
-            console.error('Error cleaning up old proxy usage records:', error);
-            throw error;
+            this.handleError('cleanupOldRecords', error);
+        }
+    }
+
+    /**
+     * Update crawl's proxy usage statistics
+     * @param {string} crawlId - The crawl ID
+     * @returns {Promise<void>}
+     */
+    async updateCrawlProxyStats(crawlId) {
+        try {
+            const summary = await ProxyUsage.getCrawlSummary(crawlId);
+            
+            await Crawl.findByIdAndUpdate(crawlId, {
+                'proxyUsageStats.totalProxyRequests': summary.totalProxyRequests,
+                'proxyUsageStats.uniqueProxiesUsed': summary.uniqueProxiesUsed,
+                'proxyUsageStats.lastProxyUsed': summary.lastProxyUsed,
+                'proxyUsageStats.proxyCostEstimate': summary.totalCost,
+                'proxyUsageStats.averageProxySuccessRate': summary.averageSuccessRate
+            });
+        } catch (error) {
+            this.handleError('updateCrawlProxyStats', error);
+        }
+    }
+
+    /**
+     * Get proxy usage summary for multiple crawls
+     * @param {Array} crawlIds - Array of crawl IDs
+     * @returns {Promise<Array>} Summary data for each crawl
+     */
+    async getMultipleCrawlSummaries(crawlIds) {
+        try {
+            const summaries = await Promise.all(
+                crawlIds.map(async (crawlId) => {
+                    const summary = await ProxyUsage.getCrawlSummary(crawlId);
+                    return { crawlId, ...summary };
+                })
+            );
+            
+            return summaries;
+        } catch (error) {
+            this.handleError('getMultipleCrawlSummaries', error);
         }
     }
 }
