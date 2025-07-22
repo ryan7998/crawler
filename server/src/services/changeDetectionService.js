@@ -293,7 +293,7 @@ class ChangeDetectionService {
     /**
      * Prepare data for Google Sheets export
      */
-    prepareForGoogleSheets(changes, crawlTitle = '') {
+    prepareForGoogleSheets(changes, crawlTitle = '', comparisonSelectors = null) {
         const rows = [];
         // New headers: Crawl Title, Title, URL, Suite Number, Change Type, Crawled On
         rows.push([
@@ -322,44 +322,75 @@ class ChangeDetectionService {
             return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         };
 
-        // Helper to extract suite_numbers from vacancy_data (array of objects)
-        const extractSuiteNumbers = (data) => {
+        // Helper to extract values from container data based on selected child selectors
+        const extractComparisonValues = (data) => {
             if (!data || typeof data !== 'object') return [];
-            const vacancy = data.vacancy_data;
-            if (!Array.isArray(vacancy)) return [];
-            // Try common keys: suite_number, suite, unit_suite, unit
-            return vacancy.map(row =>
-                row.suite_number || row.suite || row.unit_suite || row.unit || null
-            ).filter(Boolean);
+            // Find all container fields (e.g., vacancy_data, suite_data, available_units, etc.)
+            const containerKeys = Object.keys(data).filter(key => Array.isArray(data[key]));
+            let results = [];
+            for (const key of containerKeys) {
+                const arr = data[key];
+                if (!Array.isArray(arr)) continue;
+                // Determine which child fields to use for comparison
+                let childNames = null;
+                if (comparisonSelectors && comparisonSelectors[key]) {
+                    childNames = comparisonSelectors[key];
+                }
+                // If not specified, default to suite_number, suite, unit_suite, unit
+                if (!childNames || childNames.length === 0) {
+                    childNames = ['suite_number', 'suite', 'unit_suite', 'unit'];
+                }
+                arr.forEach(row => {
+                    for (const childName of childNames) {
+                        if (row[childName]) {
+                            results.push(row[childName]);
+                        }
+                    }
+                });
+            }
+            return results;
         };
 
-        // Helper to build a map of suite_number -> row for lookup
-        const buildSuiteMap = (data) => {
+        // Helper to build a map of value -> row for lookup
+        const buildComparisonMap = (data) => {
             if (!data || typeof data !== 'object') return {};
-            const vacancy = data.vacancy_data;
-            if (!Array.isArray(vacancy)) return {};
+            const containerKeys = Object.keys(data).filter(key => Array.isArray(data[key]));
             const map = {};
-            vacancy.forEach(row => {
-                const key = row.suite_number || row.suite || row.unit_suite || row.unit || null;
-                if (key) map[key] = row;
-            });
+            for (const key of containerKeys) {
+                const arr = data[key];
+                if (!Array.isArray(arr)) continue;
+                let childNames = null;
+                if (comparisonSelectors && comparisonSelectors[key]) {
+                    childNames = comparisonSelectors[key];
+                }
+                if (!childNames || childNames.length === 0) {
+                    childNames = ['suite_number', 'suite', 'unit_suite', 'unit'];
+                }
+                arr.forEach(row => {
+                    for (const childName of childNames) {
+                        if (row[childName]) {
+                            map[row[childName]] = row;
+                        }
+                    }
+                });
+            }
             return map;
         };
 
-        // For each URL, compare suite_numbers in current and previous data
-        const processUrlSuites = (url, currentData, previousData, currentDate, previousDate, title) => {
-            const currentSuites = extractSuiteNumbers(currentData);
-            const previousSuites = extractSuiteNumbers(previousData);
-            const currentMap = buildSuiteMap(currentData);
-            const previousMap = buildSuiteMap(previousData);
-            const allSuites = new Set([...currentSuites, ...previousSuites]);
-            allSuites.forEach(suiteNum => {
+        // For each URL, compare values in current and previous data
+        const processUrlComparisons = (url, currentData, previousData, currentDate, previousDate, title) => {
+            const currentVals = extractComparisonValues(currentData);
+            const previousVals = extractComparisonValues(previousData);
+            const currentMap = buildComparisonMap(currentData);
+            const previousMap = buildComparisonMap(previousData);
+            const allVals = new Set([...currentVals, ...previousVals]);
+            allVals.forEach(val => {
                 let changeType = '';
                 let crawledOn = '';
-                if (currentSuites.includes(suiteNum) && !previousSuites.includes(suiteNum)) {
+                if (currentVals.includes(val) && !previousVals.includes(val)) {
                     changeType = 'New';
                     crawledOn = formatDate(currentDate);
-                } else if (!currentSuites.includes(suiteNum) && previousSuites.includes(suiteNum)) {
+                } else if (!currentVals.includes(val) && previousVals.includes(val)) {
                     changeType = 'Removed';
                     crawledOn = formatDate(previousDate); // fallback to previousDate for removed
                 } else {
@@ -369,7 +400,7 @@ class ChangeDetectionService {
                 addRow([
                     title,
                     url,
-                    suiteNum,
+                    val,
                     changeType,
                     crawledOn
                 ]);
@@ -378,7 +409,7 @@ class ChangeDetectionService {
 
         // New URLs
         changes.newUrls.forEach(item => {
-            processUrlSuites(
+            processUrlComparisons(
                 item.url,
                 item.currentData,
                 null,
@@ -390,7 +421,7 @@ class ChangeDetectionService {
 
         // Removed URLs
         changes.removedUrls.forEach(item => {
-            processUrlSuites(
+            processUrlComparisons(
                 item.url,
                 null,
                 item.previousData,
@@ -402,7 +433,7 @@ class ChangeDetectionService {
 
         // Changed URLs
         changes.changedUrls.forEach(item => {
-            processUrlSuites(
+            processUrlComparisons(
                 item.url,
                 item.currentData,
                 item.previousData,
@@ -414,7 +445,7 @@ class ChangeDetectionService {
 
         // Unchanged URLs (optional, can be omitted if not needed)
         changes.unchangedUrls.forEach(item => {
-            processUrlSuites(
+            processUrlComparisons(
                 item.url,
                 item.data,
                 item.data,

@@ -194,8 +194,10 @@ class GoogleSheetsOAuth2Service {
     async exportCrawlWithChanges(crawlId, options = {}) {
         if (!this.isAuthenticated()) return { error: 'OAuth2 authentication required. Please run the authentication flow first.' };
         const { compareWith = null, includeUnchanged = false, sheetTitle = null, updateExisting = false, existingSheetId = null, folderId = process.env.GOOGLE_DRIVE_FOLDER_ID || null } = options;
+        const Crawl = require('../models/Crawl');
+        const crawl = await Crawl.findById(crawlId);
         const changeAnalysis = await changeDetectionService.detectChanges(crawlId, compareWith);
-        const sheetData = changeDetectionService.prepareForGoogleSheets(changeAnalysis.changes);
+        const sheetData = changeDetectionService.prepareForGoogleSheets(changeAnalysis.changes, changeAnalysis.crawlTitle, crawl?.comparisonSelectors || null);
         let filteredData = sheetData;
         if (!includeUnchanged) {
             filteredData = sheetData.filter(row => row.length > 4 && row[4] !== 'Unchanged');
@@ -271,7 +273,7 @@ class GoogleSheetsOAuth2Service {
                 changeAnalysis.changes.unchangedUrls.length > 0
             )) {
                 crawlsWithData++;
-                const crawlRows = changeDetectionService.prepareForGoogleSheets(changeAnalysis.changes, changeAnalysis.crawlTitle);
+                const crawlRows = changeDetectionService.prepareForGoogleSheets(changeAnalysis.changes, changeAnalysis.crawlTitle, crawl.comparisonSelectors || null);
                 let filteredRows = crawlRows;
                 if (!includeUnchanged) {
                     const headerRow = filteredRows[0];

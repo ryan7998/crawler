@@ -37,6 +37,10 @@ const crawlSchema = new Schema({
         type: [String], // Array of advanced CSS selectors
         default: []
     },
+    comparisonSelectors: {
+        type: Schema.Types.Mixed, // { [selectorId]: [childName, ...] }
+        default: {}
+    },
     userId: {
         type: String, // Placeholder for userId
         required: true,
