@@ -295,30 +295,18 @@ class ChangeDetectionService {
      */
     prepareForGoogleSheets(changes, crawlTitle = '') {
         const rows = [];
-        // Add headers with Crawl Title and Title as first columns, and Selectors column
+        // New headers: Crawl Title, Title, URL, Suite Number, Change Type, Crawled On
         rows.push([
             'Crawl Title',
             'Title',
             'URL',
-            'Selectors',
-            'Current Value',
-            'Previous Value',
+            'Suite Number',
             'Change Type',
-            'Last Updated',
-            'Previous Date'
+            'Crawled On'
         ]);
 
         // Helper to add a row
         const addRow = (row) => rows.push([crawlTitle, ...row]);
-
-        // Helper to combine selectors/attributes into a string
-        const combineSelectors = (data) => {
-            if (!data || typeof data !== 'object') return '';
-            return Object.entries(data)
-                .filter(([key]) => key.toLowerCase() !== 'title')
-                .map(([field, value]) => `${field}: ${this.formatValue(value)}`)
-                .join('; ');
-        };
 
         // Helper to get title (case-insensitive)
         const getTitle = (data) => {
@@ -334,77 +322,107 @@ class ChangeDetectionService {
             return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         };
 
-        // For each URL, only one row per run, combine selectors/attributes
-        const processUrls = (items, changeType, getCurrent, getPrevious, getCurrentDate, getPreviousDate) => {
-            const seen = new Set();
-            items.forEach(item => {
-                if (seen.has(item.url)) return;
-                seen.add(item.url);
-                const currentData = getCurrent(item);
-                const previousData = getPrevious(item);
-                const title = getTitle(currentData) || getTitle(previousData);
-                const selectorsStr = combineSelectors(currentData || previousData);
+        // Helper to extract suite_numbers from vacancy_data (array of objects)
+        const extractSuiteNumbers = (data) => {
+            if (!data || typeof data !== 'object') return [];
+            const vacancy = data.vacancy_data;
+            if (!Array.isArray(vacancy)) return [];
+            // Try common keys: suite_number, suite, unit_suite, unit
+            return vacancy.map(row =>
+                row.suite_number || row.suite || row.unit_suite || row.unit || null
+            ).filter(Boolean);
+        };
+
+        // Helper to build a map of suite_number -> row for lookup
+        const buildSuiteMap = (data) => {
+            if (!data || typeof data !== 'object') return {};
+            const vacancy = data.vacancy_data;
+            if (!Array.isArray(vacancy)) return {};
+            const map = {};
+            vacancy.forEach(row => {
+                const key = row.suite_number || row.suite || row.unit_suite || row.unit || null;
+                if (key) map[key] = row;
+            });
+            return map;
+        };
+
+        // For each URL, compare suite_numbers in current and previous data
+        const processUrlSuites = (url, currentData, previousData, currentDate, previousDate, title) => {
+            const currentSuites = extractSuiteNumbers(currentData);
+            const previousSuites = extractSuiteNumbers(previousData);
+            const currentMap = buildSuiteMap(currentData);
+            const previousMap = buildSuiteMap(previousData);
+            const allSuites = new Set([...currentSuites, ...previousSuites]);
+            allSuites.forEach(suiteNum => {
+                let changeType = '';
+                let crawledOn = '';
+                if (currentSuites.includes(suiteNum) && !previousSuites.includes(suiteNum)) {
+                    changeType = 'New';
+                    crawledOn = formatDate(currentDate);
+                } else if (!currentSuites.includes(suiteNum) && previousSuites.includes(suiteNum)) {
+                    changeType = 'Removed';
+                    crawledOn = formatDate(previousDate); // fallback to previousDate for removed
+                } else {
+                    changeType = 'Unchanged';
+                    crawledOn = formatDate(currentDate);
+                }
                 addRow([
                     title,
-                    item.url,
-                    selectorsStr,
-                    this.formatValue(currentData),
-                    this.formatValue(previousData),
+                    url,
+                    suiteNum,
                     changeType,
-                    formatDate(getCurrentDate(item)),
-                    formatDate(getPreviousDate(item))
+                    crawledOn
                 ]);
             });
         };
 
         // New URLs
-        processUrls(
-            changes.newUrls,
-            'New',
-            item => item.currentData,
-            () => '',
-            item => item.currentDate,
-            () => ''
-        );
-
-        // Removed URLs
-        processUrls(
-            changes.removedUrls,
-            'Removed',
-            () => '',
-            item => item.previousData,
-            () => '',
-            item => item.previousDate
-        );
-
-        // Changed URLs (combine all field changes into one string)
-        const seenChanged = new Set();
-        changes.changedUrls.forEach(item => {
-            if (seenChanged.has(item.url)) return;
-            seenChanged.add(item.url);
-            const title = getTitle(item.currentData) || getTitle(item.previousData);
-            const selectorsStr = item.fieldChanges.filter(change => change.field.toLowerCase() !== 'title').map(change => `${change.field}: ${change.currentValue}`).join('; ');
-            addRow([
-                title,
+        changes.newUrls.forEach(item => {
+            processUrlSuites(
                 item.url,
-                selectorsStr,
-                item.fieldChanges.filter(change => change.field.toLowerCase() !== 'title').map(change => this.formatValue(change.currentValue)).join('; '),
-                item.fieldChanges.filter(change => change.field.toLowerCase() !== 'title').map(change => this.formatValue(change.previousValue)).join('; '),
-                'Changed',
-                formatDate(item.currentDate),
-                formatDate(item.previousDate)
-            ]);
+                item.currentData,
+                null,
+                item.currentDate,
+                null,
+                getTitle(item.currentData)
+            );
         });
 
-        // Unchanged URLs (optional)
-        processUrls(
-            changes.unchangedUrls,
-            'Unchanged',
-            item => item.data,
-            item => item.data,
-            item => item.date,
-            item => item.date
-        );
+        // Removed URLs
+        changes.removedUrls.forEach(item => {
+            processUrlSuites(
+                item.url,
+                null,
+                item.previousData,
+                null,
+                item.previousDate,
+                getTitle(item.previousData)
+            );
+        });
+
+        // Changed URLs
+        changes.changedUrls.forEach(item => {
+            processUrlSuites(
+                item.url,
+                item.currentData,
+                item.previousData,
+                item.currentDate,
+                item.previousDate,
+                getTitle(item.currentData) || getTitle(item.previousData)
+            );
+        });
+
+        // Unchanged URLs (optional, can be omitted if not needed)
+        changes.unchangedUrls.forEach(item => {
+            processUrlSuites(
+                item.url,
+                item.data,
+                item.data,
+                item.date,
+                item.date,
+                getTitle(item.data)
+            );
+        });
 
         return rows;
     }

@@ -241,14 +241,17 @@ class GoogleSheetsOAuth2Service {
         if (statusFilter) query.status = statusFilter;
         const crawls = await Crawl.find(query).limit(limit).sort({ createdAt: -1 });
         if (crawls.length === 0) return { error: 'No crawls found matching the criteria' };
+        // Filter out disabled crawls
+        const enabledCrawls = crawls.filter(crawl => !crawl.disabled);
+        if (enabledCrawls.length === 0) return { error: 'No enabled crawls found matching the criteria' };
         let spreadsheetId = process.env.GOOGLE_GLOBAL_EXPORT_SHEET_ID;
         if (!spreadsheetId) {
             spreadsheetId = await this.createNewSheet(sheetTitle || `Global Crawl Changes - ${new Date().toISOString().split('T')[0]}`, folderId);
         }
         let allChanges = [];
-        const summaryData = { totalCrawls: crawls.length, totalChanges: 0, totalNew: 0, totalRemoved: 0, totalUnchanged: 0, crawlBreakdown: [] };
+        const summaryData = { totalCrawls: enabledCrawls.length, totalChanges: 0, totalNew: 0, totalRemoved: 0, totalUnchanged: 0, crawlBreakdown: [] };
         let crawlsWithData = 0;
-        for (const crawl of crawls) {
+        for (const crawl of enabledCrawls) {
             let changeAnalysis;
             try {
                 changeAnalysis = await changeDetectionService.detectChanges(crawl._id.toString());
