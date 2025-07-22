@@ -441,6 +441,8 @@ const clearCrawlQueue = async (req, res) => {
     try {
         const q = crawlQueue(crawlId);
         await q.empty();
+        // Set crawl status to pending
+        await Crawl.findByIdAndUpdate(crawlId, { status: 'pending', startTime: null, endTime: null });
         res.status(200).json({ message: `Queue for crawl ${crawlId} cleared!` });
     } catch (err) {
         console.error('Error clearing queue:', err);
