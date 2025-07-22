@@ -20,12 +20,17 @@ class ChangeDetectionService {
             const allCrawlData = await CrawlData.find({ crawlId })
                 .sort({ createdAt: -1 });
 
+            // DEBUG LOGGING
+            console.log('DEBUG: allCrawlData.length =', allCrawlData.length);
+            console.log('DEBUG: allCrawlData URLs =', allCrawlData.map(d => d.url));
+
             if (allCrawlData.length === 0) {
                 throw new Error('No crawl data found for this crawl');
             }
 
             // Group by URL and get the latest data for each URL (most recent run)
             const currentDataByUrl = this.groupByUrlAndGetLatest(allCrawlData);
+            console.log('DEBUG: currentDataByUrl keys =', Object.keys(currentDataByUrl));
 
             // Get previous crawl data for comparison
             let previousDataByUrl = {};
@@ -41,6 +46,7 @@ class ChangeDetectionService {
                     previousDataByUrl = this.groupByUrlAndGetLatest(previousRunData);
                 }
             }
+            console.log('DEBUG: previousDataByUrl keys =', Object.keys(previousDataByUrl));
 
             // Analyze changes
             const changes = this.analyzeChanges(currentDataByUrl, previousDataByUrl);
@@ -287,103 +293,118 @@ class ChangeDetectionService {
     /**
      * Prepare data for Google Sheets export
      */
-    prepareForGoogleSheets(changes) {
+    prepareForGoogleSheets(changes, crawlTitle = '') {
         const rows = [];
-        
-        // Add headers
+        // Add headers with Crawl Title and Title as first columns, and Selectors column
         rows.push([
+            'Crawl Title',
+            'Title',
             'URL',
-            'Field',
+            'Selectors',
             'Current Value',
             'Previous Value',
-            'Change Status',
             'Change Type',
             'Last Updated',
             'Previous Date'
         ]);
 
-        // Process new URLs
-        changes.newUrls.forEach(item => {
-            if (item.currentData) {
-                Object.entries(item.currentData).forEach(([field, value]) => {
-                    rows.push([
-                        item.url,
-                        field,
-                        this.formatValue(value),
-                        '',
-                        'New',
-                        'new',
-                        item.currentDate,
-                        ''
-                    ]);
-                });
-            }
-        });
+        // Helper to add a row
+        const addRow = (row) => rows.push([crawlTitle, ...row]);
 
-        // Process removed URLs
-        changes.removedUrls.forEach(item => {
-            if (item.previousData) {
-                Object.entries(item.previousData).forEach(([field, value]) => {
-                    rows.push([
-                        item.url,
-                        field,
-                        '',
-                        this.formatValue(value),
-                        'Removed',
-                        'removed',
-                        '',
-                        item.previousDate
-                    ]);
-                });
-            }
-        });
+        // Helper to combine selectors/attributes into a string
+        const combineSelectors = (data) => {
+            if (!data || typeof data !== 'object') return '';
+            return Object.entries(data)
+                .filter(([key]) => key.toLowerCase() !== 'title')
+                .map(([field, value]) => `${field}: ${this.formatValue(value)}`)
+                .join('; ');
+        };
 
-        // Process changed URLs - show as two separate rows: removed and new
-        changes.changedUrls.forEach(item => {
-            item.fieldChanges.forEach(change => {
-                // First row: Previous value as "Removed" (highlighted in red)
-                rows.push([
+        // Helper to get title (case-insensitive)
+        const getTitle = (data) => {
+            if (!data) return '';
+            return data.title || data.Title || '';
+        };
+
+        // Helper to format date as 'YYYY-MM-DD HH:mm:ss'
+        const formatDate = (date) => {
+            if (!date) return '';
+            const d = new Date(date);
+            const pad = n => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        };
+
+        // For each URL, only one row per run, combine selectors/attributes
+        const processUrls = (items, changeType, getCurrent, getPrevious, getCurrentDate, getPreviousDate) => {
+            const seen = new Set();
+            items.forEach(item => {
+                if (seen.has(item.url)) return;
+                seen.add(item.url);
+                const currentData = getCurrent(item);
+                const previousData = getPrevious(item);
+                const title = getTitle(currentData) || getTitle(previousData);
+                const selectorsStr = combineSelectors(currentData || previousData);
+                addRow([
+                    title,
                     item.url,
-                    change.field,
-                    '', // Current value empty for removed row
-                    change.previousValue,
-                    'Removed',
-                    'removed',
-                    '', // Current date empty for removed row
-                    item.previousDate
-                ]);
-                
-                // Second row: Current value as "New" (highlighted in green)
-                rows.push([
-                    item.url,
-                    change.field,
-                    change.currentValue,
-                    '', // Previous value empty for new row
-                    'New',
-                    'new',
-                    item.currentDate,
-                    '' // Previous date empty for new row
+                    selectorsStr,
+                    this.formatValue(currentData),
+                    this.formatValue(previousData),
+                    changeType,
+                    formatDate(getCurrentDate(item)),
+                    formatDate(getPreviousDate(item))
                 ]);
             });
+        };
+
+        // New URLs
+        processUrls(
+            changes.newUrls,
+            'New',
+            item => item.currentData,
+            () => '',
+            item => item.currentDate,
+            () => ''
+        );
+
+        // Removed URLs
+        processUrls(
+            changes.removedUrls,
+            'Removed',
+            () => '',
+            item => item.previousData,
+            () => '',
+            item => item.previousDate
+        );
+
+        // Changed URLs (combine all field changes into one string)
+        const seenChanged = new Set();
+        changes.changedUrls.forEach(item => {
+            if (seenChanged.has(item.url)) return;
+            seenChanged.add(item.url);
+            const title = getTitle(item.currentData) || getTitle(item.previousData);
+            const selectorsStr = item.fieldChanges.filter(change => change.field.toLowerCase() !== 'title').map(change => `${change.field}: ${change.currentValue}`).join('; ');
+            addRow([
+                title,
+                item.url,
+                selectorsStr,
+                item.fieldChanges.filter(change => change.field.toLowerCase() !== 'title').map(change => this.formatValue(change.currentValue)).join('; '),
+                item.fieldChanges.filter(change => change.field.toLowerCase() !== 'title').map(change => this.formatValue(change.previousValue)).join('; '),
+                'Changed',
+                formatDate(item.currentDate),
+                formatDate(item.previousDate)
+            ]);
         });
 
-        // Process unchanged URLs (optional - can be filtered out)
-        changes.unchangedUrls.forEach(item => {
-            if (item.data) {
-                Object.entries(item.data).forEach(([field, value]) => {
-                    rows.push([
-                        item.url,
-                        field,
-                        this.formatValue(value),
-                        this.formatValue(value),
-                        'Unchanged',
-                        'unchanged',
-                        item.date,
-                        item.date
-                    ]);
-                });
-            }
-        });
+        // Unchanged URLs (optional)
+        processUrls(
+            changes.unchangedUrls,
+            'Unchanged',
+            item => item.data,
+            item => item.data,
+            item => item.date,
+            item => item.date
+        );
 
         return rows;
     }
@@ -398,24 +419,22 @@ class ChangeDetectionService {
         if (allCrawlData.length === 0) {
             return [];
         }
-
-        // Find the most recent data entry
-        const mostRecentEntry = allCrawlData[0];
-        const mostRecentTime = mostRecentEntry.createdAt;
-
-        // Find all data entries that are older than the most recent entry
-        // This represents the previous run(s)
-        const previousRunData = allCrawlData.filter(entry => 
-            entry.createdAt < mostRecentTime
-        );
-
-        // If we have previous run data, return it
-        if (previousRunData.length > 0) {
-            return previousRunData;
-        }
-
-        // If no previous run data found, return empty array
-        return [];
+        // Group by runId
+        const runs = {};
+        allCrawlData.forEach(entry => {
+            if (!entry.runId) return; // skip if missing
+            if (!runs[entry.runId]) runs[entry.runId] = [];
+            runs[entry.runId].push(entry);
+        });
+        // Sort runIds by latest createdAt in each run (descending)
+        const sortedRunIds = Object.keys(runs).sort((a, b) => {
+            const aMax = Math.max(...runs[a].map(e => new Date(e.createdAt).getTime()));
+            const bMax = Math.max(...runs[b].map(e => new Date(e.createdAt).getTime()));
+            return bMax - aMax;
+        });
+        // The first runId is the latest run, the second is the previous run
+        if (sortedRunIds.length < 2) return [];
+        return runs[sortedRunIds[1]];
     }
 }
 

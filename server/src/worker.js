@@ -130,7 +130,7 @@ async function ensureProcessor(crawlId) {
       throw new Error('Invalid job data');
     }
     
-    const { url } = job.data;
+    const { url, crawlId, runId } = job.data;
     console.log(`[${crawlId}] Processing job ${job.id} for URL: ${url}`);
     
     // Track proxy usage variables (declare outside try block to avoid undefined errors)
@@ -190,8 +190,8 @@ async function ensureProcessor(crawlId) {
         }
       }
 
-      // Save to database
-      const newCrawlData = new CrawlData({ url, data, crawlId, status: 'success' })
+      // Save to database (success)
+      const newCrawlData = new CrawlData({ url, data, crawlId, runId, status: 'success' })
       await newCrawlData.save()
 
       io.to(crawlIdStr).emit('crawlLog', {
@@ -232,7 +232,7 @@ async function ensureProcessor(crawlId) {
         error: msg
       });
       // save failure
-      await new CrawlData({ url, crawlId, status: 'failed', error: msg }).save();
+      await new CrawlData({ url, crawlId, runId, status: 'failed', error: msg }).save();
       console.log(`[${crawlId}] Job ${job.id} marked as failed and saved to database`);
       throw err;
     }

@@ -42,8 +42,11 @@ const crawlWebsite = async (req, res) => {
             return res.json({ message: 'Crawl jobs already exist in queue', urls })
         }
 
+        // Generate a unique runId for this crawl run
+        const runId = Date.now().toString();
+
         for (const url of urls) {
-            await q.add({ url, crawlId })
+            await q.add({ url, crawlId, runId })
         }
         res.json({ message: 'Crawl jobs added to queue', urls })
     } catch (error) {
