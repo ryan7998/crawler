@@ -1,17 +1,18 @@
 const mongoose = require('mongoose')
-const Crawl = require('../models/Crawl')
+// const Crawl = require('./models/Crawl')
 require('dotenv').config()
+const Crawl           = require('../models/Crawl');
 
 const migrateSelectors = async () => {
     try {
         // Connect to MongoDB
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/crawler')
+        await mongoose.connect('mongodb://127.0.0.1:27017/crawler_db', {
+            useNewUrlParser:    true,
+            useUnifiedTopology: true,
+          })
+
         console.log('Connected to MongoDB')
-
-        // Get all crawls
         const crawls = await Crawl.find({})
-        console.log(`Found ${crawls.length} crawls to migrate`)
-
         let updatedCount = 0
         let skippedCount = 0
 
@@ -23,21 +24,26 @@ const migrateSelectors = async () => {
                     !selector.type || !selector.childSelectors
                 )
 
+                // Check if advancedSelectors is missing
+                const needsAdvanced = typeof crawl.advancedSelectors === 'undefined'
+                
+                // Build update object
+                const updateObj = {}
                 if (needsMigration) {
-                    // Update selectors to new format
-                    const updatedSelectors = crawl.selectors.map(selector => ({
+                    updateObj.selectors = crawl.selectors.map(selector => ({
                         target_element: selector.target_element,
                         selector_value: selector.selector_value,
                         type: 'text', // Default type for existing selectors
                         attribute: null,
                         childSelectors: []
                     }))
+                }
+                if (needsAdvanced) {
+                    updateObj.advancedSelectors = []
+                }
 
-                    // Update the crawl document
-                    await Crawl.findByIdAndUpdate(crawl._id, {
-                        $set: { selectors: updatedSelectors }
-                    })
-
+                if (Object.keys(updateObj).length > 0) {
+                    await Crawl.findByIdAndUpdate(crawl._id, { $set: updateObj })
                     updatedCount++
                     console.log(`Migrated crawl: ${crawl.title}`)
                 } else {

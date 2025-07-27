@@ -6,7 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "concurrently \"node src/app.js\" \"node src/worker.js\"",
-    "dev": "concurrently \"nodemon src/app.js\" \"nodemon src/worker.js\""
+    "dev": "concurrently \"nodemon src/app.js\" \"nodemon src/worker.js\"",
+    "migrate:proxy-usage": "node src/scripts/migrateProxyUsage.js",
+    "test:proxy-endpoints": "node test-proxy-endpoints.js",
+    "run-global-crawls": "node src/scripts/runGlobalCrawls.js",
+    "clear-all-data": "node src/scripts/clearAllCrawlData.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +32,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "googleapis": "^133.0.0",
     "mongoose": "^8.6.1",
     "moondream": "^0.0.5",
     "p-throttle": "^6.2.0",
