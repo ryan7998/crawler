@@ -493,7 +493,7 @@ class ErrorHandler {
     }
 
     // Detect anti-bot mechanisms on a page
-    async detectAntiBotMechanisms(page) {
+    async detectAntiBotMechanisms(page, advancedSelectors = []) {
         try {
             // Check for common captcha indicators
             const captchaSelectors = [
@@ -511,9 +511,30 @@ class ErrorHandler {
             ];
 
             for (const selector of captchaSelectors) {
-                const element = await page.$(selector);
-                if (element) {
-                    return `Captcha detected (selector: ${selector})`;
+                const captchaElements = await page.$$(selector);
+                for (const captchaElement of captchaElements) {
+                    let isInsideAdvanced = false;
+                    for (const advSelector of advancedSelectors) {
+                        // Check if captchaElement is inside any advanced selector (return boolean directly)
+                        const isDescendant = await captchaElement.evaluate((el, sel) => {
+                            let node = el;
+                            let debugPath = [];
+                            while (node) {
+                                if (node.matches && node.matches(sel)) {
+                                    return true;
+                                }
+                                node = node.parentElement;
+                            }
+                            return false;
+                        }, advSelector);
+                        if (isDescendant) {
+                            isInsideAdvanced = true;
+                            break;
+                        }
+                    }
+                    if (!isInsideAdvanced) {
+                        return `Captcha detected (selector: ${selector})`;
+                    }
                 }
             }
 
@@ -531,30 +552,6 @@ class ErrorHandler {
                     return 'Cloudflare protection detected';
                 }
             }
-
-            // Check for common anti-bot messages
-            // const antiBotTexts = [
-            //     'access denied',
-            //     'blocked',
-            //     'suspicious activity',
-            //     'bot detected',
-            //     'automated access',
-            //     'please verify',
-            //     'security check',
-            //     'human verification',
-            //     'challenge',
-            //     'rate limit',
-            //     'too many requests'
-            // ];
-
-            // const pageText = await page.textContent('body');
-            // const lowerText = pageText.toLowerCase();
-            
-            // for (const text of antiBotTexts) {
-            //     if (lowerText.includes(text)) {
-            //         return `Anti-bot text detected: "${text}"`;
-            //     }
-            // }
 
             // Check for JavaScript challenges
             const jsChallenge = await page.evaluate(() => {

@@ -33,6 +33,14 @@ const crawlSchema = new Schema({
         required: true 
     },
     selectors: [selectorSchema], // Array of selector objects with child selectors
+    advancedSelectors: {
+        type: [String], // Array of advanced CSS selectors
+        default: []
+    },
+    comparisonSelectors: {
+        type: Schema.Types.Mixed, // { [selectorId]: [childName, ...] }
+        default: {}
+    },
     userId: {
         type: String, // Placeholder for userId
         required: true,
@@ -41,6 +49,10 @@ const crawlSchema = new Schema({
         type: String,
         enum: ['pending', 'in-progress', 'completed', 'failed'],
         default: 'pending'
+    },
+    disabled: {
+        type: Boolean,
+        default: false
     },
     results: [{
         type: Schema.Types.ObjectId, // Store references to CrawlData documents
@@ -62,6 +74,29 @@ const crawlSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    // Proxy usage statistics
+    proxyUsageStats: {
+        totalProxyRequests: {
+            type: Number,
+            default: 0
+        },
+        uniqueProxiesUsed: {
+            type: Number,
+            default: 0
+        },
+        lastProxyUsed: {
+            type: Date,
+            default: null
+        },
+        proxyCostEstimate: {
+            type: Number,
+            default: 0 // in USD
+        },
+        averageProxySuccessRate: {
+            type: Number,
+            default: 0 // percentage
+        }
+    }
 })
 
 // Add an index on 'userId' to allow querying by userId

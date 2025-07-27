@@ -1,14 +1,17 @@
 const { Schema, model } = require('mongoose')
 const Crawl = require('./Crawl') // Import the Crawl model
+const { determineCrawlStatus } = require('../../utils/helperFunctions')
 
 const CrawlDataSchema = new Schema({
-    url: { type: {}, required: true },
-    data: { type: Object },
+    crawlId: { type: Schema.Types.ObjectId, ref: 'Crawl', required: true },
+    url: { type: String, required: true },
+    data: { type: Schema.Types.Mixed, default: {} },
+    status: { type: String, default: 'pending' },
+    error: { type: String, default: '' },
     createdAt: { type: Date, default: Date.now },
-    crawlId: { type: String, required: true },
-    status: { type: String, default: 'failed' },
-    error: { type: String, default: null}
-})
+    // Add runId field
+    runId: { type: String, required: true },
+});
 
 // Post middleware for cleanup after a CrawlData document is deleted
 CrawlDataSchema.post('findOneAndDelete', async function (doc) {
@@ -39,14 +42,14 @@ CrawlDataSchema.post('save', async function (doc) {
         
         // If all URLs have been crawled (success or failed)
         if (allCrawlData.length === crawl.urls.length) {
-            // Check if any URLs failed
-            const hasFailures = allCrawlData.some(data => data.status === 'failed')
-            
-            // Update crawl status
-            await Crawl.findByIdAndUpdate(doc.crawlId, {
-                status: hasFailures ? 'failed' : 'completed',
-                endTime: new Date()
-            })
+          // Determine status based on latest attempts
+          const statusInfo = determineCrawlStatus(allCrawlData);
+          
+          // Update crawl status
+          await Crawl.findByIdAndUpdate(doc.crawlId, {
+            status: statusInfo.status,
+            endTime: new Date()
+          })
         }
     } catch (error) {
         console.error('Error in CrawlData post-save middleware:', error)

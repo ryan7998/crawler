@@ -6,6 +6,7 @@ const CrawlData = require('../models/CrawlData')
 const Selectors = require('../models/Selectors')
 const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions')
 const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
+const proxyUsageService = require('../services/proxyUsageService')
 
 const crawlWebsite = async (req, res) => {
     const { urls, crawlId, selectors } = req.body
@@ -41,8 +42,11 @@ const crawlWebsite = async (req, res) => {
             return res.json({ message: 'Crawl jobs already exist in queue', urls })
         }
 
+        // Generate a unique runId for this crawl run
+        const runId = Date.now().toString();
+
         for (const url of urls) {
-            await q.add({ url, crawlId })
+            await q.add({ url, crawlId, runId })
         }
         res.json({ message: 'Crawl jobs added to queue', urls })
     } catch (error) {
@@ -52,7 +56,7 @@ const crawlWebsite = async (req, res) => {
 }
 
 const createCrawler = async (req, res) => {
-    const { title, urls, selectors, userId } = req.body
+    const { title, urls, selectors, userId, advancedSelectors, comparisonSelectors } = req.body
 
     try {
         // Create new crawl entry
@@ -60,8 +64,10 @@ const createCrawler = async (req, res) => {
             title,
             urls: urls.map(url => url.trim()), // Convert to array of strings
             selectors: selectors || [], // Use provided selectors or empty array
+            advancedSelectors: advancedSelectors || [],
             userId,
             status: 'pending',
+            comparisonSelectors: comparisonSelectors || {},
         })
         console.log('newCrawl: ', newCrawl)
         // Save to database
@@ -74,7 +80,7 @@ const createCrawler = async (req, res) => {
 
 const updateCrawler = async (req, res) => {
     const { id } = req.params
-    const { title, urls, selectors } = req.body
+    const { title, urls, selectors, advancedSelectors, comparisonSelectors } = req.body
 
     // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -90,6 +96,9 @@ const updateCrawler = async (req, res) => {
         if (title) crawl.title = title
         if (urls) crawl.urls = urls.map(url => url.trim())
         if (selectors) crawl.selectors = selectors
+        if (advancedSelectors) crawl.advancedSelectors = advancedSelectors
+        if (typeof req.body.disabled === 'boolean') crawl.disabled = req.body.disabled
+        if (comparisonSelectors) crawl.comparisonSelectors = comparisonSelectors
 
         const updatedCrawl = await crawl.save()
         res.status(200).json({ message: 'Crawl updated successfully', crawl: updatedCrawl })
@@ -178,20 +187,22 @@ const getCrawler = async (req, res) => {
 const getAllCrawlers = async (req, res) => {
 
     try {
-        // Biuld the query
+        // Build the query
         let query = {}
+        
+        // Add search functionality
+        if (req.query.search) {
+            query.title = { $regex: req.query.search, $options: 'i' } // Case-insensitive search
+        }
+        
         // Implement pagination
         const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 20
+        const limit = parseInt(req.query.limit) || 100
         const skip = (page - 1) * limit
 
         // Fetch crawls from the database
         const crawls = await Crawl.find(query)
             .select('-__v') // Exclude the __v field
-            .populate({
-                path: 'results',
-                select: '-__v'
-            })
             .sort({ createdAt: -1 }) // Sort by newest first
             .skip(skip)
             .limit(limit)
@@ -382,6 +393,315 @@ const deleteCrawlDataForUrls = async (req, res) => {
     }
 }
 
+// GLOBAL RUN: Start all non-disabled crawls
+const runAllCrawls = async (req, res) => {
+    try {
+        // Find all non-disabled crawls
+        const crawls = await Crawl.find({ disabled: { $ne: true } });
+        if (!crawls.length) {
+            return res.status(200).json({ message: 'No non-disabled crawls found to start', started: [], skipped: [] });
+        }
+        const started = [];
+        const skipped = [];
+        for (const crawl of crawls) {
+            // Defensive: check again if status is in-progress (in case of race)
+            if (crawl.status === 'in-progress') {
+                skipped.push({ crawlId: crawl._id, title: crawl.title, reason: 'already in progress' });
+                continue;
+            }
+            // Use crawlWebsite logic directly
+            try {
+                // Use the same logic as crawlWebsite, but call the function directly
+                await crawlWebsite({
+                    body: {
+                        urls: crawl.urls,
+                        crawlId: crawl._id,
+                        selectors: crawl.selectors
+                    }
+                }, {
+                    json: (result) => {
+                        // Optionally collect result
+                    },
+                    status: () => ({ json: () => {} }) // Dummy for error path
+                });
+                started.push({ crawlId: crawl._id, title: crawl.title });
+            } catch (err) {
+                skipped.push({ crawlId: crawl._id, title: crawl.title, reason: err.message });
+            }
+        }
+        res.status(200).json({ message: `Started ${started.length} crawls`, started, skipped });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to start all crawls', error: error.message });
+    }
+};
+
+// Clear the queue for a specific crawl
+const clearCrawlQueue = async (req, res) => {
+    const { crawlId } = req.params;
+    try {
+        const q = crawlQueue(crawlId);
+        await q.empty();
+        // Set crawl status to pending
+        await Crawl.findByIdAndUpdate(crawlId, { status: 'pending', startTime: null, endTime: null });
+        res.status(200).json({ message: `Queue for crawl ${crawlId} cleared!` });
+    } catch (err) {
+        console.error('Error clearing queue:', err);
+        res.status(500).json({ message: 'Error clearing queue', error: err.message });
+    }
+};
+
+// Clear all queues
+const clearAllQueues = async (req, res) => {
+    try {
+        const Redis = require('ioredis')
+        const redis = new Redis({
+            host: process.env.REDIS_HOST || '127.0.0.1',
+            port: process.env.REDIS_PORT || 6379,
+        })
+
+        // Get all queue keys that match the pattern 'bull:crawl:*'
+        const keys = await redis.keys('bull:crawl:*')
+        
+        if (keys.length === 0) {
+            await redis.disconnect()
+            return res.status(200).json({ message: 'No queues found to clear' });
+        }
+
+        let clearedQueues = 0;
+        let totalJobsCleared = 0;
+
+        for (const key of keys) {
+            // Extract crawlId from the key (format: 'bull:crawl:crawlId')
+            const parts = key.split(':')
+            const crawlId = parts[2]
+            
+            if (!crawlId) continue
+
+            try {
+                const queue = crawlQueue(crawlId)
+                const jobs = await queue.getJobs(['waiting', 'active', 'delayed', 'failed'])
+                
+                if (jobs.length > 0) {
+                    await queue.empty()
+                    clearedQueues++
+                    totalJobsCleared += jobs.length
+                    console.log(`Cleared ${jobs.length} jobs from queue for crawl ${crawlId}`)
+                }
+
+                await queue.close()
+            } catch (err) {
+                console.log(`Error clearing queue for crawl ${crawlId}:`, err.message)
+            }
+        }
+
+        await redis.disconnect()
+
+        res.status(200).json({ 
+            message: `Cleared ${clearedQueues} queues with ${totalJobsCleared} total jobs`,
+            clearedQueues,
+            totalJobsCleared
+        });
+
+    } catch (error) {
+        console.error('Error clearing all queues:', error.message)
+        res.status(500).json({ message: 'Error clearing all queues', error: error.message })
+    }
+};
+
+// Get status of all per-crawl queues
+const getAllQueuesStatus = async (req, res) => {
+    try {
+        const Redis = require('ioredis')
+        const redis = new Redis({
+            host: process.env.REDIS_HOST || '127.0.0.1',
+            port: process.env.REDIS_PORT || 6379,
+        })
+
+        // Get all queue keys that match the pattern 'bull:crawl:*'
+        const keys = await redis.keys('bull:crawl:*')
+        
+        if (keys.length === 0) {
+            await redis.disconnect()
+            return res.json({ 
+                queues: [],
+                summary: {
+                    totalActive: 0,
+                    totalWaiting: 0,
+                    totalDelayed: 0,
+                    totalFailed: 0,
+                    totalCompleted: 0
+                }
+            })
+        }
+
+        let totalActive = 0
+        let totalWaiting = 0
+        let totalDelayed = 0
+        let totalFailed = 0
+        let totalCompleted = 0
+        const queues = []
+
+        for (const key of keys) {
+            // Extract crawlId from the key (format: 'bull:crawl:crawlId')
+            const parts = key.split(':')
+            const crawlId = parts[2]
+            
+            if (!crawlId) continue
+
+            try {
+                const queue = crawlQueue(crawlId) // Use the existing crawlQueue function
+                const waiting = await queue.getJobs(['waiting'])
+                const active = await queue.getJobs(['active'])
+                const delayed = await queue.getJobs(['delayed'])
+                const failed = await queue.getJobs(['failed'])
+                const completed = await queue.getJobs(['completed'])
+
+                const total = waiting.length + active.length + delayed.length + failed.length + completed.length
+                
+                if (total > 0) {
+                    const queueInfo = {
+                        crawlId,
+                        total,
+                        waiting: waiting.length,
+                        active: active.length,
+                        delayed: delayed.length,
+                        failed: failed.length,
+                        completed: completed.length,
+                        activeJobs: active.map(job => ({
+                            id: job.id,
+                            url: job.data.url
+                        }))
+                    }
+                    queues.push(queueInfo)
+
+                    totalActive += active.length
+                    totalWaiting += waiting.length
+                    totalDelayed += delayed.length
+                    totalFailed += failed.length
+                    totalCompleted += completed.length
+                }
+
+                await queue.close()
+            } catch (err) {
+                console.log(`Error checking queue for crawl ${crawlId}:`, err.message)
+            }
+        }
+
+        await redis.disconnect()
+
+        res.json({
+            queues,
+            summary: {
+                totalActive,
+                totalWaiting,
+                totalDelayed,
+                totalFailed,
+                totalCompleted
+            }
+        })
+
+    } catch (error) {
+        console.error('Error checking all queues:', error.message)
+        res.status(500).json({ message: 'Error checking queues', error: error.message })
+    }
+};
+
+// —————————————— PROXY USAGE ENDPOINTS ——————————————
+
+/**
+ * Get proxy usage statistics for a specific crawl
+ * @route GET /api/crawls/:id/proxy-stats
+ */
+const getCrawlProxyStats = async (req, res) => {
+    const { id } = req.params;
+
+    // Validate crawlId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid crawlId' });
+    }
+
+    try {
+        const stats = await proxyUsageService.getCrawlProxyStats(id);
+        res.status(200).json(stats);
+    } catch (error) {
+        console.error('Error getting crawl proxy stats:', error.message);
+        res.status(500).json({ message: 'Error getting proxy stats', error: error.message });
+    }
+};
+
+/**
+ * Get global proxy usage statistics
+ * @route GET /api/proxy-stats/global
+ */
+const getGlobalProxyStats = async (req, res) => {
+    try {
+        const stats = await proxyUsageService.getGlobalProxyStats();
+        res.status(200).json(stats);
+    } catch (error) {
+        console.error('Error getting global proxy stats:', error.message);
+        res.status(500).json({ message: 'Error getting global proxy stats', error: error.message });
+    }
+};
+
+/**
+ * Get proxy usage for a specific URL
+ * @route GET /api/proxy-stats/url
+ */
+const getProxyUsageForUrl = async (req, res) => {
+    const { url } = req.query;
+
+    if (!url) {
+        return res.status(400).json({ message: 'URL parameter is required' });
+    }
+
+    try {
+        const usage = await proxyUsageService.getProxyUsageForUrl(url);
+        res.status(200).json(usage);
+    } catch (error) {
+        console.error('Error getting proxy usage for URL:', error.message);
+        res.status(500).json({ message: 'Error getting proxy usage for URL', error: error.message });
+    }
+};
+
+/**
+ * Get cost analysis for proxy usage
+ * @route GET /api/proxy-stats/cost-analysis
+ */
+const getProxyCostAnalysis = async (req, res) => {
+    const { crawlId, startDate, endDate } = req.query;
+
+    try {
+        const analysis = await proxyUsageService.getCostAnalysis(
+            crawlId || null,
+            startDate ? new Date(startDate) : null,
+            endDate ? new Date(endDate) : null
+        );
+        res.status(200).json(analysis);
+    } catch (error) {
+        console.error('Error getting proxy cost analysis:', error.message);
+        res.status(500).json({ message: 'Error getting cost analysis', error: error.message });
+    }
+};
+
+/**
+ * Clean up old proxy usage records
+ * @route DELETE /api/proxy-stats/cleanup
+ */
+const cleanupProxyUsage = async (req, res) => {
+    const { daysOld = 90 } = req.query;
+
+    try {
+        const deletedCount = await proxyUsageService.cleanupOldRecords(parseInt(daysOld));
+        res.status(200).json({ 
+            message: `Cleaned up ${deletedCount} old proxy usage records`,
+            deletedCount 
+        });
+    } catch (error) {
+        console.error('Error cleaning up proxy usage records:', error.message);
+        res.status(500).json({ message: 'Error cleaning up proxy usage records', error: error.message });
+    }
+};
+
 module.exports = {
     crawlWebsite,
     createCrawler,
@@ -392,5 +712,15 @@ module.exports = {
     checkDomainSelectors,
     getQueueStatus,
     deleteCrawlData,
-    deleteCrawlDataForUrls
+    deleteCrawlDataForUrls,
+    runAllCrawls,
+    clearCrawlQueue,
+    clearAllQueues, // Export the new function
+    getAllQueuesStatus, // Export the new function
+    // Proxy usage endpoints
+    getCrawlProxyStats,
+    getGlobalProxyStats,
+    getProxyUsageForUrl,
+    getProxyCostAnalysis,
+    cleanupProxyUsage
 }

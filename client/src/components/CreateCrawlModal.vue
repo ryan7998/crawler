@@ -45,6 +45,12 @@
                                     :rules="[v => !!v || 'Title is required']"
                                     required
                                 ></v-text-field>
+                                <v-switch
+                                    v-if="isEditing"
+                                    v-model="disabled"
+                                    label="Disable this crawl (will not run in global run)"
+                                    class="mt-2"
+                                ></v-switch>
                             </v-form>
                         </v-stepper-window-item>
 
@@ -59,8 +65,8 @@
                                     :rules="[
                                         v => {
                                             const urls = parseUrls(v);
-                                            if (urls.length === 0) return 'Please enter at least one URL';
-                                            const invalidUrls = urls.filter(url => !isValidUrl(url));
+                                            if (urls.length === 0) return 'Please enter at least one URL';  
+                                            const invalidUrls = urls.filter(url => !isValidUrl(url));       
                                             if (invalidUrls.length > 0) {
                                                 return `Invalid URL(s): ${invalidUrls.join(', ')}`;
                                             }
@@ -76,11 +82,11 @@
                             <!-- Current Selectors Section -->
                             <div class="flex flex-col gap-4">
                                 <div>
-                                    <h6 class="text-gray-700 font-semibold mb-4">Current Selectors</h6>
+                                    <h6 class="text-gray-700 font-semibold mb-4">Current Selectors</h6>     
                                     <div class="space-y-4">
-                                        <CssSelector 
-                                            v-for="selector in currentSelectors" 
-                                            :key="selector.id" 
+                                        <CssSelector
+                                            v-for="selector in currentSelectors"
+                                            :key="selector.id"
                                             :selector="selector"
                                             @removeSelector="removeCurrentSelectorHandler"
                                             @updateSelector="updateCurrentSelectorHandler"
@@ -154,6 +160,22 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Advanced Section -->
+                            <v-expansion-panels class="mt-6">
+                                <v-expansion-panel>
+                                    <v-expansion-panel-title>Advanced</v-expansion-panel-title>
+                                    <v-expansion-panel-text>
+                                        <v-textarea
+                                            v-model="advancedSelectorsText"
+                                            label="Advanced CSS Selectors (one per line)"
+                                            hint="These selectors will be used to scope captcha checks. If a captcha is inside any of these, it will be ignored."
+                                            persistent-hint
+                                            rows="3"
+                                            auto-grow
+                                        ></v-textarea>
+                                    </v-expansion-panel-text>
+                                </v-expansion-panel>
+                            </v-expansion-panels>
                         </v-stepper-window-item>
                     </v-stepper-window>
                 </v-stepper>
@@ -237,10 +259,12 @@ const loading = ref(false)
 const domainLoading = ref(false)
 const domainError = ref('')
 const domainInfo = ref(null)
+const disabled = ref(false)
 
 // Add new refs for selectors
 const localSelectors = ref([])
 const currentSelectors = ref([])
+const advancedSelectorsText = ref('')
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -250,6 +274,7 @@ const initializeForm = () => {
     if (props.crawlData) {
         title.value = props.crawlData.title
         urlsText.value = props.crawlData.urls.join('\n')
+        disabled.value = !!props.crawlData.disabled
         // Initialize current selectors from crawlData with child selectors
         currentSelectors.value = props.crawlData.selectors?.map(selector => ({
             id: Math.random().toString(36).substring(2, 9),
@@ -264,11 +289,14 @@ const initializeForm = () => {
                 type: child.type || 'text',
                 attribute: child.attribute || null
             }))
-        })) || []
+        })) || [],
+        advancedSelectorsText.value = (props.crawlData.advancedSelectors || []).join('\n')
     } else {
         title.value = ''
         urlsText.value = ''
+        disabled.value = false
         currentSelectors.value = []
+        advancedSelectorsText.value = ''
     }
 }
 
@@ -306,10 +334,10 @@ const extractDomain = (url) => {
 const checkDomainConsistency = (urls) => {
     const domains = urls.map(url => extractDomain(url)).filter(Boolean)
     if (domains.length === 0) return null
-    
+
     const firstDomain = domains[0]
     const allSameDomain = domains.every(domain => domain === firstDomain)
-    
+
     return allSameDomain ? firstDomain : null
 }
 
@@ -318,7 +346,7 @@ const fetchDomainSelectors = async (domain) => {
     try {
         const response = await axios.get(`${apiUrl.value}/api/selectors/${domain}`)
         console.log('Raw selectors from backend:', response.data.selectors)
-        
+
         // Transform the selectors to match the CssSelector component format
         const transformedSelectors = response.data.selectors.map(selector => ({
             id: Math.random().toString(36).substring(2, 9),
@@ -335,7 +363,7 @@ const fetchDomainSelectors = async (domain) => {
             }))
         }))
         console.log('Transformed selectors for frontend:', transformedSelectors)
-        
+
         localSelectors.value = transformedSelectors
         return {
             domain,
@@ -382,7 +410,7 @@ const removeDomainSelectorHandler = (selectorId) => {
 // Add function to add domain selector to current selectors
 const addDomainSelectorToCurrent = (selector) => {
     // Check if selector already exists in current selectors
-    const exists = currentSelectors.value.some(s => 
+    const exists = currentSelectors.value.some(s =>
         s.name === selector.name && s.css === selector.css
     )
     if (!exists) {
@@ -410,7 +438,7 @@ const validateSelectors = () => {
         return false
     }
 
-    const emptySelectors = currentSelectors.value.filter(selector => 
+    const emptySelectors = currentSelectors.value.filter(selector =>
         !selector.name.trim() || !selector.css.trim()
     )
 
@@ -478,7 +506,7 @@ const handleBack = () => {
 // Handle form submission
 const handleSubmit = async () => {
     const urls = parseUrls(urlsText.value)
-    
+
     if (urls.length === 0) {
         showNotification('Please enter at least one URL', 'error')
         return
@@ -516,17 +544,22 @@ const handleSubmit = async () => {
                     attribute: child.attribute
                 })) || []
             })),
-            userId: '1'
+            advancedSelectors: advancedSelectorsText.value
+                .split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0),
+            userId: '1',
+            ...(isEditing.value ? { disabled: disabled.value } : {})
         }
 
         console.log('Sending request data:', requestData)
 
         const response = isEditing.value
-            ? await axios.put(`${apiUrl.value}/api/updatecrawl/${props.crawlData._id}`, requestData)
+            ? await axios.put(`${apiUrl.value}/api/updatecrawl/${props.crawlData._id}`, requestData)        
             : await axios.post(`${apiUrl.value}/api/createcrawler`, requestData)
-        
+
         showNotification(isEditing.value ? 'Crawl updated successfully' : 'Crawl created successfully', 'success')
-        emit('crawl-created', isEditing.value ? response.data.crawl : { _id: response.data.crawlId })
+        emit('crawl-created', isEditing.value ? response.data.crawl : { _id: response.data.crawlId })       
         closeDialog()
     } catch (error) {
         console.error('Error creating/updating crawl:', error)

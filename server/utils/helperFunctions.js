@@ -160,4 +160,26 @@ const getCleanHtml = (sourceCode) => {
 const sanitizeFilename = (str) => {
     return str.replace(/[^a-z0-9]/gi, '_')
 }
-module.exports = { extractHtml, aggregateDashboard, getCleanHtml, sanitizeFilename }
+
+// Helper function to determine crawl status based on latest attempts
+const determineCrawlStatus = (allCrawlData) => {
+    // Group by URL and get the latest attempt for each URL
+    const urlGroups = {};
+    allCrawlData.forEach(data => {
+        if (!urlGroups[data.url] || data.createdAt > urlGroups[data.url].createdAt) {
+            urlGroups[data.url] = data;
+        }
+    });
+    
+    // Check if any of the latest attempts failed
+    const latestAttempts = Object.values(urlGroups);
+    const hasFailures = latestAttempts.some(data => data.status === 'failed');
+    
+    return {
+        status: hasFailures ? 'failed' : 'completed',
+        latestAttempts,
+        totalUrls: Object.keys(urlGroups).length
+    };
+}
+
+module.exports = { extractHtml, aggregateDashboard, getCleanHtml, sanitizeFilename, determineCrawlStatus }

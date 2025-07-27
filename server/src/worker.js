@@ -6,10 +6,11 @@ const http            = require('http');
 const mongoose        = require('mongoose');
 const CrawlData       = require('./models/CrawlData');
 const Crawl           = require('./models/Crawl');
-const { extractHtml } = require('../utils/helperFunctions');
+const { extractHtml, determineCrawlStatus } = require('../utils/helperFunctions');
 const getCrawlQueue   = require('./queues/getCrawlQueue');
 const { initializeSocket, getSocket } = require('../utils/socket');
 const Seed            = require('./classes/Seed');
+const proxyUsageService = require('./services/proxyUsageService');
 require('dotenv').config();
 
 // —————————————— APP & SOCKET.IO SETUP ——————————————
@@ -79,14 +80,17 @@ async function ensureProcessor(crawlId) {
     
     if (state.completed === state.total) {
       const allData = await CrawlData.find({ crawlId });
-      const hasFail = allData.some(d => d.status === 'failed');
+      
+      // Determine status based on latest attempts
+      const statusInfo = determineCrawlStatus(allData);
+      
       await Crawl.findByIdAndUpdate(crawlId, {
-        status:  hasFail ? 'failed' : 'completed',
+        status: statusInfo.status,
         endTime: new Date()
       });
       io.to(crawlIdStr).emit('crawlLog', {
-        status:  hasFail ? 'failed' : 'completed',
-        message: hasFail ? 'Some URLs failed' : 'All URLs done'
+        status: statusInfo.status,
+        message: statusInfo.status === 'failed' ? 'Some URLs failed' : 'All URLs done'
       });
       cleanupCrawl(crawlId);
     }
@@ -102,14 +106,17 @@ async function ensureProcessor(crawlId) {
     
     if (state.completed === state.total) {
       const allData = await CrawlData.find({ crawlId });
-      const hasFail = allData.some(d => d.status === 'failed');
+      
+      // Determine status based on latest attempts
+      const statusInfo = determineCrawlStatus(allData);
+      
       await Crawl.findByIdAndUpdate(crawlId, {
-        status:  hasFail ? 'failed' : 'completed',
+        status: statusInfo.status,
         endTime: new Date()
       });
       io.to(crawlIdStr).emit('crawlLog', {
-        status:  hasFail ? 'failed' : 'completed',
-        message: hasFail ? 'Some URLs failed' : 'All URLs done'
+        status: statusInfo.status,
+        message: statusInfo.status === 'failed' ? 'Some URLs failed' : 'All URLs done'
       });
       cleanupCrawl(crawlId);
     }
@@ -123,8 +130,15 @@ async function ensureProcessor(crawlId) {
       throw new Error('Invalid job data');
     }
     
-    const { url } = job.data;
+    const { url, crawlId, runId } = job.data;
     console.log(`[${crawlId}] Processing job ${job.id} for URL: ${url}`);
+    
+    // Track proxy usage variables (declare outside try block to avoid undefined errors)
+    const startTime = Date.now();
+    let proxyUsed = false;
+    let proxyId = null;
+    let proxyLocation = null;
+    let responseTime = 0;
     
     try {
       console.log(`[${crawlId}] Job ${job.id} started: ${url}`);
@@ -134,17 +148,50 @@ async function ensureProcessor(crawlId) {
       await new Promise(r => setTimeout(r, 1000 + Math.random()*2000));
 
       // Playwright or axios fetch
-      const seed = new Seed({ url });
+      const seed = new Seed({ url, advancedSelectors: crawl.advancedSelectors });
       if (!seed.isValid()) throw new Error(`Invalid URL: ${url}`);
 
       const crawlThrottle = getThrottle(crawlId)
-      const throttled = crawlThrottle(async () => await seed.loadHTMLContent())
-      const html = await throttled()
+      const throttled = crawlThrottle(async () => {
+        return await seed.loadHTMLContent();
+      });
+      
+      const html = await throttled();
+      responseTime = Date.now() - startTime;
+      
+      // Check proxy status AFTER the request is complete (proxy might have been enabled during retry)
+      const proxyStatus = seed.getProxyStatus();
+      if (proxyStatus.enabled) {
+        proxyUsed = true;
+        // Extract proxy ID from server configuration
+        proxyId = proxyStatus.config.server || 'default';
+        proxyLocation = proxyStatus.config.location || 'unknown';
+        console.log(`[${crawlId}] Proxy was used for ${url}: ${proxyId}`);
+      }
+      
       console.log(`[${crawlId}] Loaded HTML content for ${url}, Extracting Data...`);
       const data = await extractHtml(html, (crawl.selectors));
 
-      // Save to database
-      const newCrawlData = new CrawlData({ url, data, crawlId, status: 'success' })
+      // Track proxy usage if proxy was used
+      if (proxyUsed) {
+        try {
+          await proxyUsageService.trackProxyUsage(
+            crawlId,
+            url,
+            proxyId,
+            proxyLocation,
+            true, // success
+            responseTime,
+            0.001 // cost per request (adjust as needed)
+          );
+          console.log(`[${crawlId}] Tracked successful proxy usage for ${url}`);
+        } catch (proxyError) {
+          console.error(`[${crawlId}] Error tracking proxy usage:`, proxyError.message);
+        }
+      }
+
+      // Save to database (success)
+      const newCrawlData = new CrawlData({ url, data, crawlId, runId, status: 'success' })
       await newCrawlData.save()
 
       io.to(crawlIdStr).emit('crawlLog', {
@@ -159,6 +206,25 @@ async function ensureProcessor(crawlId) {
     } catch (err) {
       const msg = err.message || String(err);
       console.error(`[${crawlId}] Job ${job.id} failed:`, msg);
+      
+      // Track proxy usage for failed requests
+      if (proxyUsed) {
+        try {
+          await proxyUsageService.trackProxyUsage(
+            crawlId,
+            url,
+            proxyId,
+            proxyLocation,
+            false, // failure
+            responseTime,
+            0.001 // cost per request (adjust as needed)
+          );
+          console.log(`[${crawlId}] Tracked failed proxy usage for ${url}`);
+        } catch (proxyError) {
+          console.error(`[${crawlId}] Error tracking proxy usage:`, proxyError.message);
+        }
+      }
+      
       io.to(crawlIdStr).emit('crawlLog', {
         jobId: job.id,
         url,
@@ -166,7 +232,7 @@ async function ensureProcessor(crawlId) {
         error: msg
       });
       // save failure
-      await new CrawlData({ url, crawlId, status: 'failed', error: msg }).save();
+      await new CrawlData({ url, crawlId, runId, status: 'failed', error: msg }).save();
       console.log(`[${crawlId}] Job ${job.id} marked as failed and saved to database`);
       throw err;
     }
