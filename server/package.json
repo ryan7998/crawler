@@ -8,7 +8,9 @@
     "start": "concurrently \"node src/app.js\" \"node src/worker.js\"",
     "dev": "concurrently \"nodemon src/app.js\" \"nodemon src/worker.js\"",
     "migrate:proxy-usage": "node src/scripts/migrateProxyUsage.js",
-    "test:proxy-endpoints": "node test-proxy-endpoints.js"
+    "test:proxy-endpoints": "node test-proxy-endpoints.js",
+    "run-global-crawls": "node src/scripts/runGlobalCrawls.js",
+    "clear-all-data": "node src/scripts/clearAllCrawlData.js"
   },
   "repository": {
     "type": "git",

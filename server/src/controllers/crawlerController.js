@@ -42,8 +42,11 @@ const crawlWebsite = async (req, res) => {
             return res.json({ message: 'Crawl jobs already exist in queue', urls })
         }
 
+        // Generate a unique runId for this crawl run
+        const runId = Date.now().toString();
+
         for (const url of urls) {
-            await q.add({ url, crawlId })
+            await q.add({ url, crawlId, runId })
         }
         res.json({ message: 'Crawl jobs added to queue', urls })
     } catch (error) {
@@ -53,7 +56,7 @@ const crawlWebsite = async (req, res) => {
 }
 
 const createCrawler = async (req, res) => {
-    const { title, urls, selectors, userId, advancedSelectors } = req.body
+    const { title, urls, selectors, userId, advancedSelectors, comparisonSelectors } = req.body
 
     try {
         // Create new crawl entry
@@ -64,6 +67,7 @@ const createCrawler = async (req, res) => {
             advancedSelectors: advancedSelectors || [],
             userId,
             status: 'pending',
+            comparisonSelectors: comparisonSelectors || {},
         })
         console.log('newCrawl: ', newCrawl)
         // Save to database
@@ -76,7 +80,7 @@ const createCrawler = async (req, res) => {
 
 const updateCrawler = async (req, res) => {
     const { id } = req.params
-    const { title, urls, selectors, advancedSelectors } = req.body
+    const { title, urls, selectors, advancedSelectors, comparisonSelectors } = req.body
 
     // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -94,6 +98,7 @@ const updateCrawler = async (req, res) => {
         if (selectors) crawl.selectors = selectors
         if (advancedSelectors) crawl.advancedSelectors = advancedSelectors
         if (typeof req.body.disabled === 'boolean') crawl.disabled = req.body.disabled
+        if (comparisonSelectors) crawl.comparisonSelectors = comparisonSelectors
 
         const updatedCrawl = await crawl.save()
         res.status(200).json({ message: 'Crawl updated successfully', crawl: updatedCrawl })
@@ -436,6 +441,8 @@ const clearCrawlQueue = async (req, res) => {
     try {
         const q = crawlQueue(crawlId);
         await q.empty();
+        // Set crawl status to pending
+        await Crawl.findByIdAndUpdate(crawlId, { status: 'pending', startTime: null, endTime: null });
         res.status(200).json({ message: `Queue for crawl ${crawlId} cleared!` });
     } catch (err) {
         console.error('Error clearing queue:', err);

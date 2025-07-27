@@ -20,12 +20,17 @@ class ChangeDetectionService {
             const allCrawlData = await CrawlData.find({ crawlId })
                 .sort({ createdAt: -1 });
 
+            // DEBUG LOGGING
+            console.log('DEBUG: allCrawlData.length =', allCrawlData.length);
+            console.log('DEBUG: allCrawlData URLs =', allCrawlData.map(d => d.url));
+
             if (allCrawlData.length === 0) {
                 throw new Error('No crawl data found for this crawl');
             }
 
             // Group by URL and get the latest data for each URL (most recent run)
             const currentDataByUrl = this.groupByUrlAndGetLatest(allCrawlData);
+            console.log('DEBUG: currentDataByUrl keys =', Object.keys(currentDataByUrl));
 
             // Get previous crawl data for comparison
             let previousDataByUrl = {};
@@ -41,6 +46,7 @@ class ChangeDetectionService {
                     previousDataByUrl = this.groupByUrlAndGetLatest(previousRunData);
                 }
             }
+            console.log('DEBUG: previousDataByUrl keys =', Object.keys(previousDataByUrl));
 
             // Analyze changes
             const changes = this.analyzeChanges(currentDataByUrl, previousDataByUrl);
@@ -287,102 +293,166 @@ class ChangeDetectionService {
     /**
      * Prepare data for Google Sheets export
      */
-    prepareForGoogleSheets(changes) {
+    prepareForGoogleSheets(changes, crawlTitle = '', comparisonSelectors = null) {
         const rows = [];
-        
-        // Add headers
+        // New headers: Crawl Title, Title, URL, Suite Number, Change Type, Crawled On
         rows.push([
+            'Crawl Title',
+            'Title',
             'URL',
-            'Field',
-            'Current Value',
-            'Previous Value',
-            'Change Status',
+            'Suite Number',
             'Change Type',
-            'Last Updated',
-            'Previous Date'
+            'Crawled On'
         ]);
 
-        // Process new URLs
-        changes.newUrls.forEach(item => {
-            if (item.currentData) {
-                Object.entries(item.currentData).forEach(([field, value]) => {
-                    rows.push([
-                        item.url,
-                        field,
-                        this.formatValue(value),
-                        '',
-                        'New',
-                        'new',
-                        item.currentDate,
-                        ''
-                    ]);
+        // Helper to add a row
+        const addRow = (row) => rows.push([crawlTitle, ...row]);
+
+        // Helper to get title (case-insensitive)
+        const getTitle = (data) => {
+            if (!data) return '';
+            return data.title || data.Title || '';
+        };
+
+        // Helper to format date as 'YYYY-MM-DD HH:mm:ss'
+        const formatDate = (date) => {
+            if (!date) return '';
+            const d = new Date(date);
+            const pad = n => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        };
+
+        // Helper to extract values from container data based on selected child selectors
+        const extractComparisonValues = (data) => {
+            if (!data || typeof data !== 'object') return [];
+            // Find all container fields (e.g., vacancy_data, suite_data, available_units, etc.)
+            const containerKeys = Object.keys(data).filter(key => Array.isArray(data[key]));
+            let results = [];
+            for (const key of containerKeys) {
+                const arr = data[key];
+                if (!Array.isArray(arr)) continue;
+                // Determine which child fields to use for comparison
+                let childNames = null;
+                if (comparisonSelectors && comparisonSelectors[key]) {
+                    childNames = comparisonSelectors[key];
+                }
+                // If not specified, default to suite_number, suite, unit_suite, unit
+                if (!childNames || childNames.length === 0) {
+                    childNames = ['suite_number', 'suite', 'unit_suite', 'unit'];
+                }
+                arr.forEach(row => {
+                    for (const childName of childNames) {
+                        if (row[childName]) {
+                            results.push(row[childName]);
+                        }
+                    }
                 });
             }
-        });
+            return results;
+        };
 
-        // Process removed URLs
-        changes.removedUrls.forEach(item => {
-            if (item.previousData) {
-                Object.entries(item.previousData).forEach(([field, value]) => {
-                    rows.push([
-                        item.url,
-                        field,
-                        '',
-                        this.formatValue(value),
-                        'Removed',
-                        'removed',
-                        '',
-                        item.previousDate
-                    ]);
+        // Helper to build a map of value -> row for lookup
+        const buildComparisonMap = (data) => {
+            if (!data || typeof data !== 'object') return {};
+            const containerKeys = Object.keys(data).filter(key => Array.isArray(data[key]));
+            const map = {};
+            for (const key of containerKeys) {
+                const arr = data[key];
+                if (!Array.isArray(arr)) continue;
+                let childNames = null;
+                if (comparisonSelectors && comparisonSelectors[key]) {
+                    childNames = comparisonSelectors[key];
+                }
+                if (!childNames || childNames.length === 0) {
+                    childNames = ['suite_number', 'suite', 'unit_suite', 'unit'];
+                }
+                arr.forEach(row => {
+                    for (const childName of childNames) {
+                        if (row[childName]) {
+                            map[row[childName]] = row;
+                        }
+                    }
                 });
             }
-        });
+            return map;
+        };
 
-        // Process changed URLs - show as two separate rows: removed and new
-        changes.changedUrls.forEach(item => {
-            item.fieldChanges.forEach(change => {
-                // First row: Previous value as "Removed" (highlighted in red)
-                rows.push([
-                    item.url,
-                    change.field,
-                    '', // Current value empty for removed row
-                    change.previousValue,
-                    'Removed',
-                    'removed',
-                    '', // Current date empty for removed row
-                    item.previousDate
-                ]);
-                
-                // Second row: Current value as "New" (highlighted in green)
-                rows.push([
-                    item.url,
-                    change.field,
-                    change.currentValue,
-                    '', // Previous value empty for new row
-                    'New',
-                    'new',
-                    item.currentDate,
-                    '' // Previous date empty for new row
+        // For each URL, compare values in current and previous data
+        const processUrlComparisons = (url, currentData, previousData, currentDate, previousDate, title) => {
+            const currentVals = extractComparisonValues(currentData);
+            const previousVals = extractComparisonValues(previousData);
+            const currentMap = buildComparisonMap(currentData);
+            const previousMap = buildComparisonMap(previousData);
+            const allVals = new Set([...currentVals, ...previousVals]);
+            allVals.forEach(val => {
+                let changeType = '';
+                let crawledOn = '';
+                if (currentVals.includes(val) && !previousVals.includes(val)) {
+                    changeType = 'New';
+                    crawledOn = formatDate(currentDate);
+                } else if (!currentVals.includes(val) && previousVals.includes(val)) {
+                    changeType = 'Removed';
+                    crawledOn = formatDate(previousDate); // fallback to previousDate for removed
+                } else {
+                    changeType = 'Unchanged';
+                    crawledOn = formatDate(currentDate);
+                }
+                addRow([
+                    title,
+                    url,
+                    val,
+                    changeType,
+                    crawledOn
                 ]);
             });
+        };
+
+        // New URLs
+        changes.newUrls.forEach(item => {
+            processUrlComparisons(
+                item.url,
+                item.currentData,
+                null,
+                item.currentDate,
+                null,
+                getTitle(item.currentData)
+            );
         });
 
-        // Process unchanged URLs (optional - can be filtered out)
+        // Removed URLs
+        changes.removedUrls.forEach(item => {
+            processUrlComparisons(
+                item.url,
+                null,
+                item.previousData,
+                null,
+                item.previousDate,
+                getTitle(item.previousData)
+            );
+        });
+
+        // Changed URLs
+        changes.changedUrls.forEach(item => {
+            processUrlComparisons(
+                item.url,
+                item.currentData,
+                item.previousData,
+                item.currentDate,
+                item.previousDate,
+                getTitle(item.currentData) || getTitle(item.previousData)
+            );
+        });
+
+        // Unchanged URLs (optional, can be omitted if not needed)
         changes.unchangedUrls.forEach(item => {
-            if (item.data) {
-                Object.entries(item.data).forEach(([field, value]) => {
-                    rows.push([
-                        item.url,
-                        field,
-                        this.formatValue(value),
-                        this.formatValue(value),
-                        'Unchanged',
-                        'unchanged',
-                        item.date,
-                        item.date
-                    ]);
-                });
-            }
+            processUrlComparisons(
+                item.url,
+                item.data,
+                item.data,
+                item.date,
+                item.date,
+                getTitle(item.data)
+            );
         });
 
         return rows;
@@ -398,24 +468,22 @@ class ChangeDetectionService {
         if (allCrawlData.length === 0) {
             return [];
         }
-
-        // Find the most recent data entry
-        const mostRecentEntry = allCrawlData[0];
-        const mostRecentTime = mostRecentEntry.createdAt;
-
-        // Find all data entries that are older than the most recent entry
-        // This represents the previous run(s)
-        const previousRunData = allCrawlData.filter(entry => 
-            entry.createdAt < mostRecentTime
-        );
-
-        // If we have previous run data, return it
-        if (previousRunData.length > 0) {
-            return previousRunData;
-        }
-
-        // If no previous run data found, return empty array
-        return [];
+        // Group by runId
+        const runs = {};
+        allCrawlData.forEach(entry => {
+            if (!entry.runId) return; // skip if missing
+            if (!runs[entry.runId]) runs[entry.runId] = [];
+            runs[entry.runId].push(entry);
+        });
+        // Sort runIds by latest createdAt in each run (descending)
+        const sortedRunIds = Object.keys(runs).sort((a, b) => {
+            const aMax = Math.max(...runs[a].map(e => new Date(e.createdAt).getTime()));
+            const bMax = Math.max(...runs[b].map(e => new Date(e.createdAt).getTime()));
+            return bMax - aMax;
+        });
+        // The first runId is the latest run, the second is the previous run
+        if (sortedRunIds.length < 2) return [];
+        return runs[sortedRunIds[1]];
     }
 }
 
