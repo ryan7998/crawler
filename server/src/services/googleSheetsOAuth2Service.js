@@ -277,7 +277,7 @@ class GoogleSheetsOAuth2Service {
                 let filteredRows = crawlRows;
                 if (!includeUnchanged) {
                     const headerRow = filteredRows[0];
-                    const dataRows = filteredRows.slice(1).filter(row => row.length > 5 && row[5] !== 'Unchanged');
+                    const dataRows = filteredRows.slice(1).filter(row => row.length > 4 && row[4] !== 'Unchanged');
                     filteredRows = [headerRow, ...dataRows];
                 }
                 if (allChanges.length === 0) {

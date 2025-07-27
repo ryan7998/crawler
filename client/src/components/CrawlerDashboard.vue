@@ -564,7 +564,7 @@ onMounted(async () => {
         
         // Listen for crawl logs
         on("crawlLog", async (data) => {
-            console.log('Received crawl log:', data)  // Add logging
+            // console.log('Received crawl log:', data)  // Add logging
             logs.value.push(data)
             
             // Update crawl status if it's a final status update
