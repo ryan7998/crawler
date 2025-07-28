@@ -1,0 +1,6086 @@
+[
+  {
+    "_id": "68864f845282235fe5b7d38f",
+    "crawlId": "685bd8a412ef4a50e1e5b393",
+    "url": "https://canderel.findspace.com/building/1075-bay/",
+    "data": {
+      "Title": "1075 Bay Street",
+      "vacancy_data": [
+        {
+          "suite_number": "200200"
+        },
+        {
+          "suite_number": "300300"
+        },
+        {
+          "suite_number": "400400"
+        },
+        {
+          "suite_number": "500500"
+        },
+        {
+          "suite_number": "605605"
+        },
+        {
+          "suite_number": "801801"
+        },
+        {
+          "suite_number": "900900"
+        },
+        {
+          "suite_number": "10001000"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562848",
+    "createdAt": "2025-07-27T16:10:45.438Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f855282235fe5b7d391",
+    "crawlId": "685bd8a412ef4a50e1e5b393",
+    "url": "https://canderel.findspace.com/building/777-bay-street/",
+    "data": {
+      "Title": "777 Bay Street (Office)",
+      "vacancy_data": [
+        {
+          "suite_number": "M201M201"
+        },
+        {
+          "suite_number": "M205M205"
+        },
+        {
+          "suite_number": "M207 BM207 B"
+        },
+        {
+          "suite_number": "23012301"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562848",
+    "createdAt": "2025-07-27T16:10:45.715Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f865282235fe5b7d39d",
+    "crawlId": "685bdab5846c120d29ce222c",
+    "url": "https://capitolbuildings.com/building-info/40",
+    "data": {
+      "Title": "The Tower Building",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite 1000"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562823",
+    "createdAt": "2025-07-27T16:10:46.702Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f885282235fe5b7d3ac",
+    "crawlId": "68836b556eb59a65122d5381",
+    "url": "https://www.jilanigroup.com/availability/295-the-west-mall/5100-orbitor-drive/",
+    "data": {
+      "Title": null,
+      "vacancy_data": [
+        {
+          "suite_number": "Suite 100: 4,654 SF ​"
+        },
+        {
+          "suite_number": "Suite 305: 1,695 SF (Model Suite)"
+        },
+        {
+          "suite_number": "Suite 403: 1,442 SF ​"
+        },
+        {
+          "suite_number": "Suite 406: 3,162 SF ​ ​"
+        },
+        {
+          "suite_number": "Suite 100: 4,654 SF ​"
+        },
+        {
+          "suite_number": "Suite 305: 1,695 SF (Model Suite)"
+        },
+        {
+          "suite_number": "Suite 403: 1,442 SF ​"
+        },
+        {
+          "suite_number": "Suite 406: 3,162 SF ​ ​"
+        },
+        {
+          "suite_number": "Suite 100: 4,654 SF ​"
+        },
+        {
+          "suite_number": "Suite 305: 1,695 SF (Model Suite)"
+        },
+        {
+          "suite_number": "Suite 403: 1,442 SF ​"
+        },
+        {
+          "suite_number": "Suite 406: 3,162 SF ​ ​"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565386",
+    "createdAt": "2025-07-27T16:10:48.652Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f885282235fe5b7d3ae",
+    "crawlId": "685be83025c5ac2ccee81e59",
+    "url": "https://www.crownrealtypartners.com/properties/400-university-avenue/",
+    "data": {
+      "Title": "400 University Avenue",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite1503"
+        },
+        {
+          "suite_number": "Suite1620"
+        },
+        {
+          "suite_number": "Suite1701Furnished"
+        },
+        {
+          "suite_number": "Suite2200"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562840",
+    "createdAt": "2025-07-27T16:10:48.743Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f895282235fe5b7d3b3",
+    "crawlId": "68836b556eb59a65122d5381",
+    "url": "https://www.jilanigroup.com/availability/295-the-west-mall/5100-orbitor-drive/7420-airport-road/",
+    "data": {
+      "Title": null,
+      "vacancy_data": [
+        {
+          "suite_number": null
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565386",
+    "createdAt": "2025-07-27T16:10:49.203Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f895282235fe5b7d3b5",
+    "crawlId": "685bdab5846c120d29ce222c",
+    "url": "https://capitolbuildings.com/building-info/41",
+    "data": {
+      "Title": "The Capitol Building",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite LL01"
+        },
+        {
+          "suite_number": "Suite 404"
+        },
+        {
+          "suite_number": "Suite 201"
+        },
+        {
+          "suite_number": "Suite 602"
+        },
+        {
+          "suite_number": "Suite 603"
+        },
+        {
+          "suite_number": "Suite 607"
+        },
+        {
+          "suite_number": "Suite LL04"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562823",
+    "createdAt": "2025-07-27T16:10:49.284Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f8a5282235fe5b7d3cc",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/scotiabank-north-tower-at-bay-adelaide-centre-179/",
+    "data": {
+      "Title": "Scotiabank North Tower - Bay Adelaide Centre",
+      "vacancy_data": [
+        {
+          "suite_number": "19 Floor"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:10:50.635Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f8a5282235fe5b7d3ce",
+    "crawlId": "685bbf5e6e47ec5f403e69ad",
+    "url": "https://quadreal.findspace.com/building/commerce-court-south-commerce-court/",
+    "data": {
+      "Title": "30 Wellington Street, Commerce Court South",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562805",
+    "createdAt": "2025-07-27T16:10:50.654Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f895282235fe5b7d3b7",
+    "crawlId": "685582aef21f306b34c36fc2",
+    "url": "https://adgarcanada.com/properties/300-town-centre-boulevard/",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "202"
+        },
+        {
+          "suite_number": "203"
+        }
+      ],
+      "Title": "300 Town Centre BoulevardMarkham, Downtown"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562843",
+    "createdAt": "2025-07-27T16:10:49.450Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f895282235fe5b7d3b9",
+    "crawlId": "685be79525c5ac2ccee81db0",
+    "url": "https://crestpoint.cclgroup.com/properties/121-king-street/",
+    "data": {
+      "Title": "121 King Street",
+      "Description": "Located in the heart of Toronto’s financial district, this 540,000 square foot Class A office building is close to the corner of King and Bay Street with direct access to the path. This 25 storey office tower is recently renovated and LEED EB Gold and BOMA BEST Gold. The property has a roster of quality tenants and is well-served by a variety of retail amenities and transportation options."
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562835",
+    "createdAt": "2025-07-27T16:10:49.851Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f8b5282235fe5b7d3e4",
+    "crawlId": "685582aef21f306b34c36fc2",
+    "url": "https://adgarcanada.com/properties/302-town-centre-boulevard/",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "400"
+        }
+      ],
+      "Title": "302 Town Centre BoulevardMarkham, Downtown"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562843",
+    "createdAt": "2025-07-27T16:10:51.409Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f925282235fe5b7d423",
+    "crawlId": "685bc74220e91fb64988dd40",
+    "url": "https://www.cushmanwakefield.com/en/canada/properties/for-lease/office/on/toronto/109-117-george-street/s119704664-l",
+    "data": {
+      "Title": null,
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562820",
+    "createdAt": "2025-07-27T16:10:58.256Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864f935282235fe5b7d428",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/bay-adelaide-east-tower-178/",
+    "data": {
+      "Title": "Bay Adelaide Centre - East Tower",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:10:59.005Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fa15282235fe5b7d444",
+    "crawlId": "685bff9c78d6b1b057fc051f",
+    "url": "https://www.fidelitypm.com/commercial/815-Danforth-Avenue",
+    "data": {
+      "Title": "815 Danforth Avenue",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565275",
+    "createdAt": "2025-07-27T16:11:13.371Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fa15282235fe5b7d446",
+    "crawlId": "6885ede922e777f57fb51371",
+    "url": "https://leasing.triovest.com/building/3329819921595067609/?search=&min=0&max=480000&type=O",
+    "data": {
+      "Title": "6275 Northam Drive",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574892",
+    "createdAt": "2025-07-27T16:11:13.382Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fa75282235fe5b7d45a",
+    "crawlId": "68836b556eb59a65122d5381",
+    "url": "https://www.jilanigroup.com/availability/295-the-west-mall/5100-orbitor-drive/7420-airport-road/2576-matheson-blvd/",
+    "data": {
+      "Title": null,
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565386",
+    "createdAt": "2025-07-27T16:11:19.649Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fa85282235fe5b7d45c",
+    "crawlId": "685bbf5e6e47ec5f403e69ad",
+    "url": "https://quadreal.findspace.com/building/commerce-court-north-commerce-court/",
+    "data": {
+      "Title": "25 King Street West, Commerce Court North",
+      "vacancy_data": [
+        {
+          "suite_number": "400400"
+        },
+        {
+          "suite_number": "500500"
+        },
+        {
+          "suite_number": "800800"
+        },
+        {
+          "suite_number": "900900"
+        },
+        {
+          "suite_number": "12001200"
+        },
+        {
+          "suite_number": "13001300"
+        },
+        {
+          "suite_number": "14001400"
+        },
+        {
+          "suite_number": "16001600"
+        },
+        {
+          "suite_number": "18001800"
+        },
+        {
+          "suite_number": "25002500"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562805",
+    "createdAt": "2025-07-27T16:11:20.089Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fa85282235fe5b7d460",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/330-bay-street/",
+    "data": {
+      "Title": "330 Bay Street",
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "507"
+        },
+        {
+          "suite_number": "509"
+        },
+        {
+          "suite_number": "510"
+        },
+        {
+          "suite_number": "610"
+        },
+        {
+          "suite_number": "800"
+        },
+        {
+          "suite_number": "812"
+        },
+        {
+          "suite_number": "1200"
+        },
+        {
+          "suite_number": "1400"
+        },
+        {
+          "suite_number": "1401"
+        },
+        {
+          "suite_number": "1600"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:11:20.517Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fa95282235fe5b7d462",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/150-york-st/",
+    "data": {
+      "Title": "150 York Street",
+      "vacancy_data": [
+        {
+          "suite_number": "600"
+        },
+        {
+          "suite_number": "700"
+        },
+        {
+          "suite_number": "702"
+        },
+        {
+          "suite_number": "1015"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "1204"
+        },
+        {
+          "suite_number": "1206"
+        },
+        {
+          "suite_number": "1702"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:11:21.136Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fad5282235fe5b7d486",
+    "crawlId": "6885e4c74c69d87bb5131891",
+    "url": "https://www.downingstreet.com/commercial/37-advance/",
+    "data": {
+      "Title": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574648",
+    "createdAt": "2025-07-27T16:11:25.885Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fae5282235fe5b7d488",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/building-2273/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "40 University Avenue",
+      "vacancy_data": [
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "201"
+        },
+        {
+          "suite_number": "250"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "410"
+        },
+        {
+          "suite_number": "507"
+        },
+        {
+          "suite_number": "510"
+        },
+        {
+          "suite_number": "551"
+        },
+        {
+          "suite_number": "600"
+        },
+        {
+          "suite_number": "601"
+        },
+        {
+          "suite_number": "707"
+        },
+        {
+          "suite_number": "800"
+        },
+        {
+          "suite_number": "900"
+        },
+        {
+          "suite_number": "1002"
+        },
+        {
+          "suite_number": "1007"
+        },
+        {
+          "suite_number": "1010"
+        },
+        {
+          "suite_number": "1110"
+        },
+        {
+          "suite_number": "1200"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:11:26.112Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fae5282235fe5b7d48a",
+    "crawlId": "6885e4c74c69d87bb5131891",
+    "url": "https://www.downingstreet.com/commercial/187-parliament/",
+    "data": {
+      "Title": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574648",
+    "createdAt": "2025-07-27T16:11:26.129Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864faf5282235fe5b7d48f",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/building-2583/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "1333 Dorval Dr",
+      "vacancy_data": [
+        {
+          "suite_number": "Basement"
+        },
+        {
+          "suite_number": "102"
+        },
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "300"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:11:27.289Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fd75282235fe5b7d4aa",
+    "crawlId": "685bdab5846c120d29ce222c",
+    "url": "https://capitolbuildings.com/building-info/39",
+    "data": {
+      "Title": "The Commodore Building",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite 700"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562823",
+    "createdAt": "2025-07-27T16:12:07.570Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fd85282235fe5b7d4b5",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/145-king-street-west/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "200200"
+        },
+        {
+          "suite_number": "600600"
+        },
+        {
+          "suite_number": "10051005"
+        },
+        {
+          "suite_number": "16001600"
+        },
+        {
+          "suite_number": "19001900"
+        },
+        {
+          "suite_number": "21002100"
+        },
+        {
+          "suite_number": "22002200"
+        }
+      ],
+      "Title": "145 King Street West"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:12:08.862Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fdc5282235fe5b7d4c0",
+    "crawlId": "6885a6f29af4893717b03728",
+    "url": "https://www.commercialcafe.com/commercial-property/ca/on/toronto/scotia-plaza-44-king-street-west-1/",
+    "data": {
+      "title": "Scotia Plaza - 44 King Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "C00104"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565924",
+    "createdAt": "2025-07-27T16:12:12.366Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fdc5282235fe5b7d4c2",
+    "crawlId": "6885bde797a816ba51e85959",
+    "url": "https://nwhproperties.com/properties/greater-toronto-area/jerry-coughlan-health-wellness-centre/",
+    "data": {
+      "title ": "Jerry Coughlan Health and Wellness Centre",
+      "vacancy_data": [
+        {
+          "suite_number": "200-220"
+        },
+        {
+          "suite_number": "230A"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568978",
+    "createdAt": "2025-07-27T16:12:12.485Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fdc5282235fe5b7d4c4",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/88-queens-quay-west",
+    "data": {
+      "Title": "RBC WaterPark PlaceToronto",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:12:12.686Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fdc5282235fe5b7d4c6",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/320-bay-street",
+    "data": {
+      "Title": "320 Bay Street"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:12:12.727Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fdc5282235fe5b7d4ca",
+    "crawlId": "6885e28b4c69d87bb5131772",
+    "url": "https://www.sterlingkaramar.com/commercial/465-davis-drive",
+    "data": {
+      "Title": "465 Davis Drive",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569557",
+    "createdAt": "2025-07-27T16:12:12.855Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fdc5282235fe5b7d4cc",
+    "crawlId": "6885cb8aea80cca922abcf24",
+    "url": "https://commercialme.orlandocorp.com/commercial-property/ca/on/mississauga/5800-hurontario-street-2/",
+    "data": {
+      "Title": "5800 Hurontario Street",
+      "vacancy_data": [
+        {
+          "suite_number": "1201"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569022",
+    "createdAt": "2025-07-27T16:12:12.864Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fdd5282235fe5b7d4ce",
+    "crawlId": "68837618dbfb3316032ec289",
+    "url": "https://www.cbre.ca/properties/office/details/CA-Plus-622/scotia-plaza-40-king-street-w-toronto-ontario-m5h-3y2",
+    "data": {
+      "Title": "40 King Street W, Scotia Plaza, Toronto40 King Street W, Scotia Plaza, Toronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Gross RentPrice is Negotiable"
+        },
+        {
+          "suite_number": "Gross RentPrice is Negotiable"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565843",
+    "createdAt": "2025-07-27T16:12:13.229Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fe15282235fe5b7d50a",
+    "crawlId": "6885e28b4c69d87bb5131772",
+    "url": "https://www.sterlingkaramar.com/commercial/10-unionville-gate",
+    "data": {
+      "Title": "10 Unionville Gate",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569557",
+    "createdAt": "2025-07-27T16:12:17.113Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fe75282235fe5b7d51d",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/100-queens-quay-east",
+    "data": {
+      "Title": "100 Queens Quay East"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:12:23.522Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fe75282235fe5b7d51f",
+    "crawlId": "68837618dbfb3316032ec289",
+    "url": "https://www.cbre.ca/properties/office/details/CA-Plus-321886/18-king-street-e-toronto-ontario-m5c-1c4",
+    "data": {
+      "Title": "400,18 King Street E, Toronto400,18 King Street E, Toronto",
+      "vacancy_data": [
+        {
+          "suite_number": "AvailableNow"
+        },
+        {
+          "suite_number": "AvailableNow"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565843",
+    "createdAt": "2025-07-27T16:12:23.602Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fe75282235fe5b7d521",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/150-eglinton-ave-e/",
+    "data": {
+      "Title": "150 Eglinton Ave. E",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:12:23.803Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fea5282235fe5b7d529",
+    "crawlId": "6885ede922e777f57fb51371",
+    "url": "https://leasing.triovest.com/building/building-1518/?search=&min=0&max=480000&type=A",
+    "data": {
+      "Title": "Atrium - Office",
+      "vacancy_data": [
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "300B"
+        },
+        {
+          "suite_number": "320"
+        },
+        {
+          "suite_number": "401"
+        },
+        {
+          "suite_number": "403"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "601"
+        },
+        {
+          "suite_number": "700"
+        },
+        {
+          "suite_number": "804"
+        },
+        {
+          "suite_number": "900"
+        },
+        {
+          "suite_number": "1036"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "MODEL1200"
+        },
+        {
+          "suite_number": "1204"
+        },
+        {
+          "suite_number": "1400"
+        },
+        {
+          "suite_number": "1401"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574892",
+    "createdAt": "2025-07-27T16:12:26.918Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864feb5282235fe5b7d52b",
+    "crawlId": "6885bde797a816ba51e85959",
+    "url": "https://nwhproperties.com/properties/greater-toronto-area/queensway-professional-centre-89/",
+    "data": {
+      "title ": "Queensway Professional Centre - 89",
+      "vacancy_data": [
+        {
+          "suite_number": "520"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568978",
+    "createdAt": "2025-07-27T16:12:27.030Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864feb5282235fe5b7d52d",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/10-bay-street",
+    "data": {
+      "Title": "WaterPark PlaceToronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite814"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:12:27.038Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864feb5282235fe5b7d52f",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/67-richmond-st-e/",
+    "data": {
+      "Title": "67 Richmond Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "600"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:12:27.047Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fec5282235fe5b7d540",
+    "crawlId": "6885e28b4c69d87bb5131772",
+    "url": "https://www.sterlingkaramar.com/commercial/521-523-victoria-park-avenue",
+    "data": {
+      "Title": "521-523 Victoria Park Avenue",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569557",
+    "createdAt": "2025-07-27T16:12:28.643Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fec5282235fe5b7d542",
+    "crawlId": "685be83025c5ac2ccee81e59",
+    "url": "https://www.crownrealtypartners.com/properties/dundas-edward-centre/",
+    "data": {
+      "Title": "Dundas Edward Centre",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite410"
+        },
+        {
+          "suite_number": "Suite420"
+        },
+        {
+          "suite_number": "Suite440"
+        },
+        {
+          "suite_number": "Suite1000"
+        },
+        {
+          "suite_number": "Suite1200"
+        },
+        {
+          "suite_number": "Suite1300"
+        },
+        {
+          "suite_number": "Suite1301Model Suite"
+        },
+        {
+          "suite_number": "Suite1501"
+        },
+        {
+          "suite_number": "Suite1503"
+        },
+        {
+          "suite_number": "Suite1508"
+        },
+        {
+          "suite_number": "Suite1600"
+        },
+        {
+          "suite_number": "Suite1703Model Suite"
+        },
+        {
+          "suite_number": "Suite1801"
+        },
+        {
+          "suite_number": "Suite2004"
+        },
+        {
+          "suite_number": "Suite2005Furnished"
+        },
+        {
+          "suite_number": "Suite2103"
+        },
+        {
+          "suite_number": "Suite2200"
+        },
+        {
+          "suite_number": "Suite2405"
+        },
+        {
+          "suite_number": "Suite2600Model Suite"
+        },
+        {
+          "suite_number": "Suite2605Model Suite"
+        },
+        {
+          "suite_number": "Suite305"
+        },
+        {
+          "suite_number": "Suite928"
+        },
+        {
+          "suite_number": "Suite1101"
+        },
+        {
+          "suite_number": "Suite1103"
+        },
+        {
+          "suite_number": "Suite1107"
+        },
+        {
+          "suite_number": "Suite1118"
+        },
+        {
+          "suite_number": "Suite1210"
+        },
+        {
+          "suite_number": "Suite1301"
+        },
+        {
+          "suite_number": "Suite1404Model Suite"
+        },
+        {
+          "suite_number": "Suite1500"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562840",
+    "createdAt": "2025-07-27T16:12:28.712Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fed5282235fe5b7d560",
+    "crawlId": "685bff9c78d6b1b057fc051f",
+    "url": "https://www.fidelitypm.com/commercial/250-Merton-Street",
+    "data": {
+      "Title": "250 Merton Street",
+      "vacancy_data": [
+        {
+          "suite_number": "OFFICE"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565275",
+    "createdAt": "2025-07-27T16:12:29.686Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fee5282235fe5b7d57f",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/20-bay-street",
+    "data": {
+      "Title": "WaterPark PlaceToronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite300"
+        },
+        {
+          "suite_number": "Suite2400"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:12:30.562Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864fef5282235fe5b7d58a",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/90-eglinton-ave-e/",
+    "data": {
+      "Title": "90 Eglinton Ave. E",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:12:31.248Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ff35282235fe5b7d59d",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/8175779927176517284/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "MCC (55 City Centre Drive)",
+      "vacancy_data": [
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "403"
+        },
+        {
+          "suite_number": "404"
+        },
+        {
+          "suite_number": "405"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "501"
+        },
+        {
+          "suite_number": "701"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:12:35.245Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ff65282235fe5b7d5a8",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/commerce-court-north-commerce-court/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "400400"
+        },
+        {
+          "suite_number": "500500"
+        },
+        {
+          "suite_number": "800800"
+        },
+        {
+          "suite_number": "900900"
+        },
+        {
+          "suite_number": "12001200"
+        },
+        {
+          "suite_number": "13001300"
+        },
+        {
+          "suite_number": "14001400"
+        },
+        {
+          "suite_number": "16001600"
+        },
+        {
+          "suite_number": "18001800"
+        },
+        {
+          "suite_number": "25002500"
+        }
+      ],
+      "Title": "25 King Street West, Commerce Court North"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:12:38.179Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ff75282235fe5b7d5ab",
+    "crawlId": "6885bde797a816ba51e85959",
+    "url": "https://nwhproperties.com/properties/greater-toronto-area/dundas-centre-medical/",
+    "data": {
+      "title ": "Dundas-Centre Medical",
+      "vacancy_data": [
+        {
+          "suite_number": "102"
+        },
+        {
+          "suite_number": "301"
+        },
+        {
+          "suite_number": "302A"
+        },
+        {
+          "suite_number": "401B"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568978",
+    "createdAt": "2025-07-27T16:12:39.038Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ff85282235fe5b7d5be",
+    "crawlId": "6885cb8aea80cca922abcf24",
+    "url": "https://commercialme.orlandocorp.com/commercial-property/ca/on/mississauga/5900-hurontario-street-2/",
+    "data": {
+      "Title": "5900 Hurontario Street",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569022",
+    "createdAt": "2025-07-27T16:12:40.309Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ff85282235fe5b7d5c0",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/td-north-tower/",
+    "data": {
+      "Title": "TD North Tower",
+      "vacancy_data": [
+        {
+          "suite_number": "4230"
+        },
+        {
+          "suite_number": "4220"
+        },
+        {
+          "suite_number": "3740"
+        },
+        {
+          "suite_number": "3600"
+        },
+        {
+          "suite_number": "3200"
+        },
+        {
+          "suite_number": "3110"
+        },
+        {
+          "suite_number": "3000"
+        },
+        {
+          "suite_number": "2900"
+        },
+        {
+          "suite_number": "2800"
+        },
+        {
+          "suite_number": "2400"
+        },
+        {
+          "suite_number": "2010"
+        },
+        {
+          "suite_number": "1900"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:12:40.468Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ff85282235fe5b7d5c2",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/commerce-court-east-commerce-court/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "200200"
+        },
+        {
+          "suite_number": "300300"
+        },
+        {
+          "suite_number": "400400"
+        },
+        {
+          "suite_number": "500500"
+        },
+        {
+          "suite_number": "600600"
+        },
+        {
+          "suite_number": "700700"
+        },
+        {
+          "suite_number": "800800"
+        },
+        {
+          "suite_number": "900900"
+        },
+        {
+          "suite_number": "10001000"
+        }
+      ],
+      "Title": "21 Melinda Street, Commerce Court East"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:12:40.575Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ff85282235fe5b7d5c4",
+    "crawlId": "68837618dbfb3316032ec289",
+    "url": "https://www.cbre.ca/properties/office/details/CA-Plus-385927/bay-adelaide-centre-east-22-adelaide-street-w-toronto-ontario-m5h-1l6",
+    "data": {
+      "Title": "4220,22 Adelaide Street W, Bay Adelaide Centre East, Toronto4220,22 Adelaide Street W, Bay Adelaide Centre East, Toronto",
+      "vacancy_data": [
+        {
+          "suite_number": "AvailableNow"
+        },
+        {
+          "suite_number": "AvailableNow"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565843",
+    "createdAt": "2025-07-27T16:12:40.643Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ff85282235fe5b7d5ca",
+    "crawlId": "685bff9c78d6b1b057fc051f",
+    "url": "https://www.fidelitypm.com/commercial/145-Front-Street-East",
+    "data": {
+      "Title": "145 Front Street East",
+      "vacancy_data": [
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565275",
+    "createdAt": "2025-07-27T16:12:40.732Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffa5282235fe5b7d5f9",
+    "crawlId": "68836b556eb59a65122d5381",
+    "url": "https://www.jilanigroup.com/availability/295-the-west-mall/5100-orbitor-drive/7420-airport-road/2576-matheson-blvd/110-eglinton-avenue-west/",
+    "data": {
+      "Title": null,
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565386",
+    "createdAt": "2025-07-27T16:12:42.104Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d609",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/oakville/1295-cornwall-road/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:12:43.227Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d60b",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/160-eglinton-ave-e/",
+    "data": {
+      "Title": "160 Eglinton Ave. E",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:12:43.238Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d60d",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/1-eglinton-avenue-east-65",
+    "data": {
+      "Title": "1 Eglinton Avenue East, Toronto, ON,M4P 3A1",
+      "vacancy_data": [
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:12:43.251Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d612",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/bay-adelaide-west-tower-1862/",
+    "data": {
+      "Title": "Bay Adelaide Centre - West Tower",
+      "vacancy_data": [
+        {
+          "suite_number": "16 Floor"
+        },
+        {
+          "suite_number": "37 Floor"
+        },
+        {
+          "suite_number": "7 Floor"
+        },
+        {
+          "suite_number": "6 Floor"
+        },
+        {
+          "suite_number": "11 Floor"
+        },
+        {
+          "suite_number": "12 Floor"
+        },
+        {
+          "suite_number": "11 Floor"
+        },
+        {
+          "suite_number": "7 Floor"
+        },
+        {
+          "suite_number": "18 Floor"
+        },
+        {
+          "suite_number": "12 Floor"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:12:43.405Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d621",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/td-west-tower/",
+    "data": {
+      "Title": "TD West Tower",
+      "vacancy_data": [
+        {
+          "suite_number": "3150"
+        },
+        {
+          "suite_number": "3130"
+        },
+        {
+          "suite_number": "2300"
+        },
+        {
+          "suite_number": "2101"
+        },
+        {
+          "suite_number": "2000"
+        },
+        {
+          "suite_number": "1800"
+        },
+        {
+          "suite_number": "1205"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "700"
+        },
+        {
+          "suite_number": "510"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:12:43.503Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d623",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/25-adelaide-street-east-44-victoria-street-57/",
+    "data": {
+      "Title": "25 Adelaide Street East, Toronto, ON,M5C 3A1",
+      "vacancy_data": [
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:12:43.512Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d625",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/td-bank-tower/",
+    "data": {
+      "Title": "TD Bank Tower",
+      "vacancy_data": [
+        {
+          "suite_number": "4400"
+        },
+        {
+          "suite_number": "3800"
+        },
+        {
+          "suite_number": "3410"
+        },
+        {
+          "suite_number": "3300"
+        },
+        {
+          "suite_number": "3200"
+        },
+        {
+          "suite_number": "3100"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:12:43.568Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d627",
+    "crawlId": "685bbf5e6e47ec5f403e69ad",
+    "url": "https://quadreal.findspace.com/building/commerce-court-west-commerce-court/",
+    "data": {
+      "Title": "199 Bay Street, Commerce Court West",
+      "vacancy_data": [
+        {
+          "suite_number": "LEASED1530LEASED1530"
+        },
+        {
+          "suite_number": "28102810"
+        },
+        {
+          "suite_number": "47004700"
+        },
+        {
+          "suite_number": "50505050"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562805",
+    "createdAt": "2025-07-27T16:12:43.579Z",
+    "__v": 0
+  },
+  {
+    "_id": "68864ffb5282235fe5b7d629",
+    "crawlId": "6885ede922e777f57fb51371",
+    "url": "https://leasing.triovest.com/building/building-2381/?search=&min=0&max=480000&type=O",
+    "data": {
+      "Title": "1180-1196 Martin Grove Rd",
+      "vacancy_data": [
+        {
+          "suite_number": "1182A"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574892",
+    "createdAt": "2025-07-27T16:12:43.622Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650005282235fe5b7d66c",
+    "crawlId": "6885f1eb9381ce1daf4f1a83",
+    "url": "http://wtfgroup.com/property/140-spadina/",
+    "data": {
+      "Title": null,
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753609002776",
+    "createdAt": "2025-07-27T16:12:48.956Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500a5282235fe5b7d677",
+    "crawlId": "68836b556eb59a65122d5381",
+    "url": "https://www.jilanigroup.com/availability/295-the-west-mall/",
+    "data": {
+      "Title": null,
+      "vacancy_data": [
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": "​ 1,520 SF"
+        },
+        {
+          "suite_number": "3,566 SF"
+        },
+        {
+          "suite_number": "Suite 701: 1,520 SF"
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": "​ 1,520 SF"
+        },
+        {
+          "suite_number": "3,566 SF"
+        },
+        {
+          "suite_number": "Suite 701: 1,520 SF"
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": "​ 5,006 SF"
+        },
+        {
+          "suite_number": "3,566 SF"
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": "Suite 401: 967 SF"
+        },
+        {
+          "suite_number": "Suite 501: 1,991 SF"
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": "​ 1,520 SF"
+        },
+        {
+          "suite_number": "3,566 SF"
+        },
+        {
+          "suite_number": "Suite 701: 1,520 SF"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565386",
+    "createdAt": "2025-07-27T16:12:58.476Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500b5282235fe5b7d688",
+    "crawlId": "685bdab5846c120d29ce222c",
+    "url": "https://capitolbuildings.com/building-info/42",
+    "data": {
+      "Title": "40-46 Spadina Avenue",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite 400"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562823",
+    "createdAt": "2025-07-27T16:12:59.373Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500b5282235fe5b7d68a",
+    "crawlId": "6885e4c74c69d87bb5131891",
+    "url": "https://www.downingstreet.com/commercial/212-216-norseman/",
+    "data": {
+      "Title": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574648",
+    "createdAt": "2025-07-27T16:12:59.401Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500c5282235fe5b7d6a1",
+    "crawlId": "6885f1eb9381ce1daf4f1a83",
+    "url": "http://wtfgroup.com/property/king-west-centre/",
+    "data": {
+      "Title": null,
+      "vacancy_data": [
+        {
+          "suite_number": "2P204"
+        },
+        {
+          "suite_number": "2P302"
+        },
+        {
+          "suite_number": "6P001"
+        },
+        {
+          "suite_number": "F014"
+        },
+        {
+          "suite_number": "F101"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753609002776",
+    "createdAt": "2025-07-27T16:13:00.073Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500c5282235fe5b7d6a3",
+    "crawlId": "6885f1eb9381ce1daf4f1a83",
+    "url": "http://wtfgroup.com/property/26-soho/",
+    "data": {
+      "Title": null,
+      "vacancy_data": [
+        {
+          "suite_number": ""
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753609002776",
+    "createdAt": "2025-07-27T16:13:00.080Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500c5282235fe5b7d6a6",
+    "crawlId": "6885e4c74c69d87bb5131891",
+    "url": "https://www.downingstreet.com/commercial/190-norseman-fs/",
+    "status": "failed",
+    "error": "cheerio.load() expects a string",
+    "runId": "1753632574648",
+    "createdAt": "2025-07-27T16:13:00.103Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500e5282235fe5b7d6c5",
+    "crawlId": "688362efb8f08dd5389899e4",
+    "url": "http://www.humboldproperties.com/project/1118-1126-finch-avenue-west-toronto/",
+    "data": {
+      "Title": "1118 – 1126 Finch Avenue West, Toronto",
+      "vacancy_data": [
+        {
+          "suite_number": "104"
+        },
+        {
+          "suite_number": "201"
+        },
+        {
+          "suite_number": "202"
+        },
+        {
+          "suite_number": "205"
+        },
+        {
+          "suite_number": "300A"
+        },
+        {
+          "suite_number": "301"
+        },
+        {
+          "suite_number": "305"
+        },
+        {
+          "suite_number": "401"
+        },
+        {
+          "suite_number": "504"
+        },
+        {
+          "suite_number": "507"
+        },
+        {
+          "suite_number": "608"
+        },
+        {
+          "suite_number": "610"
+        },
+        {
+          "suite_number": "800"
+        },
+        {
+          "suite_number": "9 - 10"
+        },
+        {
+          "suite_number": ""
+        },
+        {
+          "suite_number": "7-10"
+        },
+        {
+          "suite_number": "7-9"
+        },
+        {
+          "suite_number": "10"
+        },
+        {
+          "suite_number": "16-17"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565240",
+    "createdAt": "2025-07-27T16:13:02.099Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500e5282235fe5b7d6d2",
+    "crawlId": "688362efb8f08dd5389899e4",
+    "url": "http://www.humboldproperties.com/project/214-king-street-west-toronto/",
+    "data": {
+      "Title": "214 King Street West, Toronto",
+      "vacancy_data": [
+        {
+          "suite_number": "612"
+        },
+        {
+          "suite_number": "601"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "414"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "216"
+        },
+        {
+          "suite_number": "212A"
+        },
+        {
+          "suite_number": "Restaurant - Lower Level"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565240",
+    "createdAt": "2025-07-27T16:13:02.167Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886500f5282235fe5b7d6e9",
+    "crawlId": "6885e4c74c69d87bb5131891",
+    "url": "https://www.downingstreet.com/commercial/1125-1129-leslie-street/",
+    "data": {
+      "Title": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574648",
+    "createdAt": "2025-07-27T16:13:03.405Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650125282235fe5b7d6f5",
+    "crawlId": "6885bcd097a816ba51e8580e",
+    "url": "https://www.montezcorp.com/select-investment/herons-hill/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632568628",
+    "createdAt": "2025-07-27T16:13:06.711Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650175282235fe5b7d6fc",
+    "crawlId": "685bbf5e6e47ec5f403e69ad",
+    "url": "https://quadreal.findspace.com/building/18-york/",
+    "data": {
+      "Title": "18 York Street, Southcore Financial Centre",
+      "vacancy_data": [
+        {
+          "suite_number": "400400"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562805",
+    "createdAt": "2025-07-27T16:13:11.918Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650175282235fe5b7d6fe",
+    "crawlId": "6885a8fa7ac378ec6f1fae7b",
+    "url": "https://lisgardev.ca/properties/royal-building/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632566061",
+    "createdAt": "2025-07-27T16:13:11.926Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d718",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/350-bay-street/",
+    "data": {
+      "Title": "350 Bay Street",
+      "vacancy_data": [
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "700"
+        },
+        {
+          "suite_number": "800"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "1200"
+        },
+        {
+          "suite_number": "1201"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:13:12.033Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d71c",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/360-bay-street/",
+    "data": {
+      "Title": "360 Bay Street",
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "401"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "700"
+        },
+        {
+          "suite_number": "900"
+        },
+        {
+          "suite_number": "901"
+        },
+        {
+          "suite_number": "1000"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:13:12.062Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d71e",
+    "crawlId": "685bbf5e6e47ec5f403e69ad",
+    "url": "https://quadreal.findspace.com/building/120-bremner/",
+    "data": {
+      "Title": "120 Bremner Blvd, Southcore Financial Centre SFC",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562805",
+    "createdAt": "2025-07-27T16:13:12.070Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d720",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/2-bloor-east-320/",
+    "data": {
+      "Title": "2 Bloor East",
+      "vacancy_data": [
+        {
+          "suite_number": "19 Floor"
+        },
+        {
+          "suite_number": "32 Floor"
+        },
+        {
+          "suite_number": "27 Floor"
+        },
+        {
+          "suite_number": "23 Floor"
+        },
+        {
+          "suite_number": "20 Floor"
+        },
+        {
+          "suite_number": "16 Floor"
+        },
+        {
+          "suite_number": "12 Floor"
+        },
+        {
+          "suite_number": "11 Floor"
+        },
+        {
+          "suite_number": "33 Floor"
+        },
+        {
+          "suite_number": "07 Floor"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:13:12.099Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d725",
+    "crawlId": "688362efb8f08dd5389899e4",
+    "url": "http://www.humboldproperties.com/project/72-steeles-avenue-west-vaughan/",
+    "data": {
+      "Title": "72 Steeles Avenue West, Vaughan",
+      "vacancy_data": [
+        {
+          "suite_number": "6"
+        },
+        {
+          "suite_number": "214"
+        },
+        {
+          "suite_number": "205"
+        },
+        {
+          "suite_number": "203"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565240",
+    "createdAt": "2025-07-27T16:13:12.102Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d72d",
+    "crawlId": "6885ede922e777f57fb51371",
+    "url": "https://leasing.triovest.com/building/building-1488/?search=&min=0&max=480000&type=O",
+    "data": {
+      "Title": "2 Bloor St W - Office",
+      "vacancy_data": [
+        {
+          "suite_number": "6th Floor"
+        },
+        {
+          "suite_number": "901"
+        },
+        {
+          "suite_number": "1501"
+        },
+        {
+          "suite_number": "1702"
+        },
+        {
+          "suite_number": "1901"
+        },
+        {
+          "suite_number": "2002"
+        },
+        {
+          "suite_number": "2005"
+        },
+        {
+          "suite_number": "2510"
+        },
+        {
+          "suite_number": "2600"
+        },
+        {
+          "suite_number": "2602"
+        },
+        {
+          "suite_number": "2700"
+        },
+        {
+          "suite_number": "2701"
+        },
+        {
+          "suite_number": "3100"
+        },
+        {
+          "suite_number": "3400"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574892",
+    "createdAt": "2025-07-27T16:13:12.130Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d72f",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/6494671049124942355/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "77 Bloor Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "700"
+        },
+        {
+          "suite_number": "1200"
+        },
+        {
+          "suite_number": "1205"
+        },
+        {
+          "suite_number": "1500"
+        },
+        {
+          "suite_number": "1701"
+        },
+        {
+          "suite_number": "1702"
+        },
+        {
+          "suite_number": "1803"
+        },
+        {
+          "suite_number": "1904"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:13:12.150Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d741",
+    "crawlId": "6885bcd097a816ba51e8580e",
+    "url": "https://www.montezcorp.com/select-investment/120-bloor-street-east/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632568628",
+    "createdAt": "2025-07-27T16:13:12.173Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d743",
+    "crawlId": "685be83025c5ac2ccee81e59",
+    "url": "https://www.crownrealtypartners.com/properties/5255-yonge-street/",
+    "data": {
+      "Title": "5255 Yonge Street",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite300Sublease"
+        },
+        {
+          "suite_number": "Suite400"
+        },
+        {
+          "suite_number": "Suite410Model Suite"
+        },
+        {
+          "suite_number": "Suite500"
+        },
+        {
+          "suite_number": "Suite600Furnished"
+        },
+        {
+          "suite_number": "Suite705"
+        },
+        {
+          "suite_number": "Suite707"
+        },
+        {
+          "suite_number": "Suite709"
+        },
+        {
+          "suite_number": "Suite900Furnished"
+        },
+        {
+          "suite_number": "Suite1000Model Suite"
+        },
+        {
+          "suite_number": "Suite1050"
+        },
+        {
+          "suite_number": "Suite1203"
+        },
+        {
+          "suite_number": "Suite1205Model Suite"
+        },
+        {
+          "suite_number": "Suite1400Furnished"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562840",
+    "createdAt": "2025-07-27T16:13:12.186Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d745",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/oakville/132-allan-street/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:13:12.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d762",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/8849191519512647986/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "MCC (201 City Centre Drive)",
+      "vacancy_data": [
+        {
+          "suite_number": "201"
+        },
+        {
+          "suite_number": "303"
+        },
+        {
+          "suite_number": "304"
+        },
+        {
+          "suite_number": "403"
+        },
+        {
+          "suite_number": "606"
+        },
+        {
+          "suite_number": "701"
+        },
+        {
+          "suite_number": "900"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "1101"
+        },
+        {
+          "suite_number": "1102"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:13:12.227Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d782",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/exchange-tower-272/",
+    "data": {
+      "Title": "Exchange Tower",
+      "vacancy_data": [
+        {
+          "suite_number": "35 Floor"
+        },
+        {
+          "suite_number": "33 Floor"
+        },
+        {
+          "suite_number": "27 Floor"
+        },
+        {
+          "suite_number": "21 Floor"
+        },
+        {
+          "suite_number": "18 Floor"
+        },
+        {
+          "suite_number": "12 Floor"
+        },
+        {
+          "suite_number": "7 Floor"
+        },
+        {
+          "suite_number": "7 Floor"
+        },
+        {
+          "suite_number": "29 Floor"
+        },
+        {
+          "suite_number": "5 Floor"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:13:12.413Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d764",
+    "crawlId": "685bff9c78d6b1b057fc051f",
+    "url": "https://www.fidelitypm.com/commercial/250-Consumers-Road",
+    "data": {
+      "Title": "250 Consumers Road",
+      "vacancy_data": [
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565275",
+    "createdAt": "2025-07-27T16:13:12.264Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650185282235fe5b7d796",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/citigroup-place",
+    "data": {
+      "Title": "Citigroup PlaceToronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite310"
+        },
+        {
+          "suite_number": "Suite902"
+        },
+        {
+          "suite_number": "Suite909"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:13:12.464Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650195282235fe5b7d7bf",
+    "crawlId": "6885bd5697a816ba51e858fb",
+    "url": "https://www.northamleasingbrokerage.com/office-and-retail-properties/2-carlton-st",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632569125",
+    "createdAt": "2025-07-27T16:13:13.168Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650195282235fe5b7d7c1",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/oakville/136-allan-street/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:13:13.172Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650195282235fe5b7d7d3",
+    "crawlId": "685582aef21f306b34c36fc2",
+    "url": "https://adgarcanada.com/properties/306-town-centre-boulevard/",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "201"
+        }
+      ],
+      "Title": "306 Town Centre BoulevardMarkham, Downtown"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562843",
+    "createdAt": "2025-07-27T16:13:13.249Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650195282235fe5b7d7df",
+    "crawlId": "6885bd5697a816ba51e858fb",
+    "url": "https://www.northamleasingbrokerage.com/office-and-retail-properties/133-145-king-st-e",
+    "data": {
+      "Title": "133 - 145 King St. E."
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569125",
+    "createdAt": "2025-07-27T16:13:13.297Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650195282235fe5b7d7fa",
+    "crawlId": "6885a8fa7ac378ec6f1fae7b",
+    "url": "https://lisgardev.ca/properties/emerald-business-centre/",
+    "data": {
+      "Title": "EMERALD BUSINESS CENTRE",
+      "vacancy_data": [
+        {
+          "field": "BUILT:",
+          "value": "1988"
+        },
+        {
+          "field": "BUILDING SIZE:",
+          "value": "132,000 square feet"
+        },
+        {
+          "field": "NUMBER OF FLOORS:",
+          "value": "8 – office"
+        },
+        {
+          "field": "FLOOR PLATE SIZE:",
+          "value": "18,000 square feet (approx.)"
+        },
+        {
+          "field": "PARKING:",
+          "value": "Underground (monthly fee) andsurface parking (3 stalls per 1,000square feet)"
+        },
+        {
+          "field": "RENT:",
+          "value": "Net Rent: $15.00/sq ftAdditional Rent: $16.74"
+        },
+        {
+          "field": "PHONE / INTERNET:",
+          "value": "Fiber OpticsRogersBell"
+        },
+        {
+          "field": "ELEVATORS:",
+          "value": "3"
+        },
+        {
+          "field": "HVAC:",
+          "value": "Engineered Air Roof Top units"
+        },
+        {
+          "field": "HVAC HOURS:",
+          "value": "7:00 am to 7:00 pm. Can be extended at an additional costProgrammable card access (after hours & parking garage)"
+        },
+        {
+          "field": "SECURITY:",
+          "value": "Third party security patrolled CCTV covering entry points"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566061",
+    "createdAt": "2025-07-27T16:13:13.347Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886501a5282235fe5b7d80c",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/one-york-street",
+    "data": {
+      "Title": "One York Street"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:13:14.066Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886501a5282235fe5b7d813",
+    "crawlId": "6885bde797a816ba51e85959",
+    "url": "https://nwhproperties.com/properties/greater-toronto-area/queensway-professional-centre-101/",
+    "data": {
+      "title ": "Queensway Professional Centre - 101",
+      "vacancy_data": [
+        {
+          "suite_number": "101"
+        },
+        {
+          "suite_number": "130"
+        },
+        {
+          "suite_number": "410"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568978",
+    "createdAt": "2025-07-27T16:13:14.130Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886501a5282235fe5b7d81e",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/25-york-street",
+    "data": {
+      "Title": "25 York Street"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:13:14.402Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886501b5282235fe5b7d825",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/5075-yonge-street",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Network connection error",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:13:15.072Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650325282235fe5b7d830",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/6985-financial-drive/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "200200"
+        },
+        {
+          "suite_number": "301301"
+        }
+      ],
+      "Title": "6985 Financial Drive"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:13:38.242Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650325282235fe5b7d833",
+    "crawlId": "6885e28b4c69d87bb5131772",
+    "url": "https://www.sterlingkaramar.com/commercial/890-yonge-street",
+    "data": {
+      "Title": "890 Yonge Street",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569557",
+    "createdAt": "2025-07-27T16:13:38.291Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650345282235fe5b7d846",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/366-bay-street/",
+    "data": {
+      "Title": "366 Bay Street",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:13:40.724Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650385282235fe5b7d851",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/2200-yonge-street",
+    "data": {
+      "Title": "Canada SquareToronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite214A"
+        },
+        {
+          "suite_number": "Suite1500"
+        },
+        {
+          "suite_number": "Suite1601"
+        },
+        {
+          "suite_number": "Suite1702"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:13:44.919Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886503b5282235fe5b7d85c",
+    "crawlId": "685be83025c5ac2ccee81e59",
+    "url": "https://www.crownrealtypartners.com/properties/5000-yonge-street",
+    "data": {
+      "Title": "5000 Yonge Street",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite501"
+        },
+        {
+          "suite_number": "Suite600Model Suite"
+        },
+        {
+          "suite_number": "Suite1403"
+        },
+        {
+          "suite_number": "Suite1409Furnished"
+        },
+        {
+          "suite_number": "Suite1703"
+        },
+        {
+          "suite_number": "Suite1708"
+        },
+        {
+          "suite_number": "Suite2100"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562840",
+    "createdAt": "2025-07-27T16:13:47.395Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886503c5282235fe5b7d867",
+    "crawlId": "6885e28b4c69d87bb5131772",
+    "url": "https://www.sterlingkaramar.com/commercial/228-queens-quay-west",
+    "data": {
+      "Title": "228 Queens Quay West",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569557",
+    "createdAt": "2025-07-27T16:13:48.530Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886503e5282235fe5b7d872",
+    "crawlId": "6885bcd097a816ba51e8580e",
+    "url": "https://www.montezcorp.com/select-investment/1243-islington-avenue/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632568628",
+    "createdAt": "2025-07-27T16:13:50.479Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886503e5282235fe5b7d874",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/2190-yonge-street",
+    "data": {
+      "Title": "Canada SquareToronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite300"
+        },
+        {
+          "suite_number": "Suite400"
+        },
+        {
+          "suite_number": "Suite500"
+        },
+        {
+          "suite_number": "Suite600"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:13:50.493Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886503e5282235fe5b7d876",
+    "crawlId": "685be306d59a882e372e0b8c",
+    "url": "https://www.avisonyoung.ca/properties/366-adelaide-street-east",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632562831",
+    "createdAt": "2025-07-27T16:13:50.498Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886503e5282235fe5b7d887",
+    "crawlId": "68837618dbfb3316032ec289",
+    "url": "https://www.cbre.ca/properties/office/details/CA-Plus-312377/700-bay-street-toronto-ontario-m5g-1z6",
+    "data": {
+      "Title": "2400,700 Bay Street, Toronto2400,700 Bay Street, Toronto",
+      "vacancy_data": [
+        {
+          "suite_number": "AvailableNow"
+        },
+        {
+          "suite_number": "AvailableNow"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565843",
+    "createdAt": "2025-07-27T16:13:50.740Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650415282235fe5b7d8a8",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/9052739370809312404/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "123 Commerce Valley",
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "600"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:13:53.009Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650425282235fe5b7d8b3",
+    "crawlId": "685be83025c5ac2ccee81e59",
+    "url": "https://www.crownrealtypartners.com/properties/901-king-street-west/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632562840",
+    "createdAt": "2025-07-27T16:13:54.453Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650425282235fe5b7d8b5",
+    "crawlId": "6885bde797a816ba51e85959",
+    "url": "https://nwhproperties.com/properties/greater-toronto-area/trafalgar-professional-centre/",
+    "data": {
+      "title ": "Trafalgar Professional Centre",
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "302"
+        },
+        {
+          "suite_number": "304"
+        },
+        {
+          "suite_number": "314"
+        },
+        {
+          "suite_number": "B1"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568978",
+    "createdAt": "2025-07-27T16:13:54.474Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650435282235fe5b7d8cf",
+    "crawlId": "6885e28b4c69d87bb5131772",
+    "url": "https://www.sterlingkaramar.com/commercial/600-and-620-the-east-mall",
+    "data": {
+      "Title": "600 & 620 The East Mall",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569557",
+    "createdAt": "2025-07-27T16:13:55.173Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650435282235fe5b7d8d1",
+    "crawlId": "6885ede922e777f57fb51371",
+    "url": "https://leasing.triovest.com/building/building-611/?search=&min=0&max=480000&type=O",
+    "data": {
+      "Title": "720 King St W - Office",
+      "vacancy_data": [
+        {
+          "suite_number": "2nd Floor"
+        },
+        {
+          "suite_number": "4th Floor"
+        },
+        {
+          "suite_number": "6th Floor"
+        },
+        {
+          "suite_number": "305"
+        },
+        {
+          "suite_number": "MODEL520"
+        },
+        {
+          "suite_number": "710"
+        },
+        {
+          "suite_number": "800A"
+        },
+        {
+          "suite_number": "800"
+        },
+        {
+          "suite_number": "810"
+        },
+        {
+          "suite_number": "900"
+        },
+        {
+          "suite_number": "905"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574892",
+    "createdAt": "2025-07-27T16:13:55.333Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650435282235fe5b7d8d8",
+    "crawlId": "6885ede922e777f57fb51371",
+    "url": "https://leasing.triovest.com/building/building-1521/?search=&min=0&max=480000&type=O",
+    "data": {
+      "Title": "700 University Ave - Office",
+      "vacancy_data": [
+        {
+          "suite_number": "Floors 21-24"
+        },
+        {
+          "suite_number": "500"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574892",
+    "createdAt": "2025-07-27T16:13:55.578Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650435282235fe5b7d8db",
+    "crawlId": "68559258dd96daac3fc263bf",
+    "url": "https://alliedreit.com/properties/185-spadina-avenue/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753614407394",
+    "createdAt": "2025-07-27T16:13:55.592Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650435282235fe5b7d8dd",
+    "crawlId": "68559258dd96daac3fc263bf",
+    "url": "https://alliedreit.com/properties/200-adelaide-street-w/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753614407394",
+    "createdAt": "2025-07-27T16:13:55.595Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650435282235fe5b7d8f1",
+    "crawlId": "6885a8fa7ac378ec6f1fae7b",
+    "url": "https://lisgardev.ca/properties/cornwall-business-centre/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632566061",
+    "createdAt": "2025-07-27T16:13:55.717Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650435282235fe5b7d903",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/200-king-street-west/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "600600"
+        },
+        {
+          "suite_number": "900900"
+        },
+        {
+          "suite_number": "17051705"
+        },
+        {
+          "suite_number": "MODEL1910MODEL1910"
+        }
+      ],
+      "Title": "200 King Street West"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:13:55.813Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650435282235fe5b7d910",
+    "crawlId": "6885bd5697a816ba51e858fb",
+    "url": "https://www.northamleasingbrokerage.com/office-and-retail-properties/483-bay-st",
+    "data": {
+      "Title": "483 Bay St."
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569125",
+    "createdAt": "2025-07-27T16:13:55.879Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650445282235fe5b7d92a",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/td-south-tower/",
+    "data": {
+      "Title": "TD South Tower",
+      "vacancy_data": [
+        {
+          "suite_number": "1800"
+        },
+        {
+          "suite_number": "1700"
+        },
+        {
+          "suite_number": "1630"
+        },
+        {
+          "suite_number": "1610"
+        },
+        {
+          "suite_number": "[CF Office][TD South Tower] Suite 1400"
+        },
+        {
+          "suite_number": "1250"
+        },
+        {
+          "suite_number": "1240"
+        },
+        {
+          "suite_number": "Suite 1210"
+        },
+        {
+          "suite_number": "710"
+        },
+        {
+          "suite_number": "705"
+        },
+        {
+          "suite_number": "600"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:13:56.409Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650455282235fe5b7d935",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/95-wellington-street-west/",
+    "data": {
+      "Title": "95 Wellington St W.",
+      "vacancy_data": [
+        {
+          "suite_number": "1900"
+        },
+        {
+          "suite_number": "1800"
+        },
+        {
+          "suite_number": "1700"
+        },
+        {
+          "suite_number": "1600"
+        },
+        {
+          "suite_number": "1500"
+        },
+        {
+          "suite_number": "1010"
+        },
+        {
+          "suite_number": "600"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "200"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:13:57.320Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650455282235fe5b7d93c",
+    "crawlId": "685bff9c78d6b1b057fc051f",
+    "url": "https://www.fidelitypm.com/commercial/1110-Finch-Avenue-West",
+    "data": {
+      "Title": "1110 Finch Avenue West",
+      "vacancy_data": [
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Office"
+        },
+        {
+          "suite_number": "Retail Space"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565275",
+    "createdAt": "2025-07-27T16:13:57.504Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650455282235fe5b7d93e",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/6775-financial-drive/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "103103"
+        },
+        {
+          "suite_number": "200200"
+        }
+      ],
+      "Title": "6775 Financial Drive"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:13:57.521Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650455282235fe5b7d946",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/212-king-st-w/",
+    "data": {
+      "Title": "212 King Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "203"
+        },
+        {
+          "suite_number": "205"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "400"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:13:57.827Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650475282235fe5b7d96a",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/222-bay-st/",
+    "data": {
+      "Title": "222 Bay St.",
+      "vacancy_data": [
+        {
+          "suite_number": "2401"
+        },
+        {
+          "suite_number": "1710"
+        },
+        {
+          "suite_number": "1600"
+        },
+        {
+          "suite_number": "1500"
+        },
+        {
+          "suite_number": "1405"
+        },
+        {
+          "suite_number": "1200"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "1000"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:13:59.875Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650495282235fe5b7d975",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/90-eglinton-ave-w/",
+    "data": {
+      "Title": "90 Eglinton Ave. W",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:14:01.144Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886504b5282235fe5b7d980",
+    "crawlId": "68837618dbfb3316032ec289",
+    "url": "https://www.cbre.ca/properties/office/details/CA-Plus-318590/8-king-street-e-toronto-ontario-m5c-1b5",
+    "data": {
+      "Title": "710,8 King Street E, Toronto710,8 King Street E, Toronto",
+      "vacancy_data": [
+        {
+          "suite_number": "AvailableNow"
+        },
+        {
+          "suite_number": "AvailableNow"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565843",
+    "createdAt": "2025-07-27T16:14:03.455Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886504b5282235fe5b7d98b",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/164-eglinton-ave-e/",
+    "data": {
+      "Title": "164 Eglinton Ave. E",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:14:03.846Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886504c5282235fe5b7d996",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/2490-2514-yonge-st/",
+    "data": {
+      "Title": "2490-2514 Yonge St.",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:14:04.105Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886504e5282235fe5b7d9a1",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/north-york-corporate-centre-10",
+    "data": {
+      "Title": "4576 Yonge Street, Toronto, ON,M2N 6N4",
+      "vacancy_data": [
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:14:06.663Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886504e5282235fe5b7d9ac",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/northbridge-place/",
+    "data": {
+      "Title": "Northbridge Place",
+      "vacancy_data": [
+        {
+          "suite_number": "11 Floor"
+        },
+        {
+          "suite_number": "9 Floor"
+        },
+        {
+          "suite_number": "12 Floor"
+        },
+        {
+          "suite_number": "10 Floor"
+        },
+        {
+          "suite_number": "9 Floor"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:14:06.962Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650505282235fe5b7d9b7",
+    "crawlId": "685be83025c5ac2ccee81e59",
+    "url": "https://www.crownrealtypartners.com/properties/1500-don-mills",
+    "data": {
+      "Title": "1500 Don Mills Road",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite105"
+        },
+        {
+          "suite_number": "Suite200"
+        },
+        {
+          "suite_number": "Suite205"
+        },
+        {
+          "suite_number": "Suite300"
+        },
+        {
+          "suite_number": "Suite402"
+        },
+        {
+          "suite_number": "Suite404"
+        },
+        {
+          "suite_number": "Suite501"
+        },
+        {
+          "suite_number": "Suite502"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562840",
+    "createdAt": "2025-07-27T16:14:08.302Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650505282235fe5b7d9c2",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/2180-yonge-street",
+    "data": {
+      "Title": "Canada SquareToronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite200A"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:14:08.450Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650525282235fe5b7d9cd",
+    "crawlId": "6885ede922e777f57fb51371",
+    "url": "https://leasing.triovest.com/building/909078812586436500/?search=&min=0&max=480000&type=O",
+    "data": {
+      "Title": "85 Prologis",
+      "vacancy_data": [
+        {
+          "suite_number": "1"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574892",
+    "createdAt": "2025-07-27T16:14:10.493Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650535282235fe5b7d9d8",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/the-davisville-centre-52",
+    "data": {
+      "Title": "1910-1920 Yonge Street, Toronto, ON,M4S 3E2",
+      "vacancy_data": [
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:14:11.072Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650575282235fe5b7d9e3",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/state-street-financial-centre/",
+    "data": {
+      "Title": "State Street Financial Centre",
+      "vacancy_data": [
+        {
+          "suite_number": "30"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "600"
+        },
+        {
+          "suite_number": "801"
+        },
+        {
+          "suite_number": "1600"
+        },
+        {
+          "suite_number": "1700"
+        },
+        {
+          "suite_number": "1800"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:14:15.206Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650575282235fe5b7d9ea",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/5651049464998995760/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "200 Yorkland Blvd",
+      "vacancy_data": [
+        {
+          "suite_number": "NEW101"
+        },
+        {
+          "suite_number": "102"
+        },
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "601"
+        },
+        {
+          "suite_number": "606"
+        },
+        {
+          "suite_number": "710"
+        },
+        {
+          "suite_number": "900"
+        },
+        {
+          "suite_number": "960"
+        },
+        {
+          "suite_number": "1000"
+        },
+        {
+          "suite_number": "1102"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:14:15.226Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650575282235fe5b7d9f0",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/brookfield-place-22-front-street-200/",
+    "data": {
+      "Title": "Brookfield Place - 22 Front Street",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:14:15.251Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650575282235fe5b7da04",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/2323-Yonge-Street/default.aspx",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:14:15.300Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650585282235fe5b7da0f",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/1293-Bloor-Street-West/default.aspx",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:14:16.098Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650585282235fe5b7da1a",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/36-toronto-street-2/",
+    "data": {
+      "Title": "36 Toronto Street",
+      "vacancy_data": [
+        {
+          "suite_number": "104G"
+        },
+        {
+          "suite_number": "107G"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "301"
+        },
+        {
+          "suite_number": "502"
+        },
+        {
+          "suite_number": "505"
+        },
+        {
+          "suite_number": "750"
+        },
+        {
+          "suite_number": "800"
+        },
+        {
+          "suite_number": "910"
+        },
+        {
+          "suite_number": "1150"
+        },
+        {
+          "suite_number": "1200"
+        },
+        {
+          "suite_number": "1210"
+        },
+        {
+          "suite_number": "1310"
+        },
+        {
+          "suite_number": "1320"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:14:16.241Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650585282235fe5b7da21",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/4711-yonge-street",
+    "data": {
+      "Title": "4711 Yonge Street"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:14:16.343Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650595282235fe5b7da2c",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/673398602240036661/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "65 Overlea Boulevard",
+      "vacancy_data": [
+        {
+          "suite_number": "108"
+        },
+        {
+          "suite_number": "240"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "410"
+        },
+        {
+          "suite_number": "420"
+        },
+        {
+          "suite_number": "500"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:14:17.498Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650595282235fe5b7da37",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/1650---1660-Carling-Avenue/default.aspx",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:14:17.860Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886505b5282235fe5b7da42",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/brookfield-place-bay-wellington-tower-203/",
+    "data": {
+      "Title": "Brookfield Place - Bay Wellington Tower",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:14:19.730Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886505b5282235fe5b7da4d",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/111-richmond-st-west",
+    "data": {
+      "Title": "Richmond-Adelaide Centre - 111 RichmondToronto",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:14:19.854Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886505b5282235fe5b7da58",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/2375-skymark-ave",
+    "data": {
+      "Title": "2375 Skymark Ave"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:14:19.909Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886505d5282235fe5b7da5f",
+    "crawlId": "68837618dbfb3316032ec289",
+    "url": "https://www.cbre.ca/properties/office/details/CA-Plus-385832/474-bathurst-street-toronto-ontario-m5t-2s6",
+    "data": {
+      "Title": "200,474 Bathurst Street, Toronto200,474 Bathurst Street, Toronto",
+      "vacancy_data": [
+        {
+          "suite_number": "AvailableNow"
+        },
+        {
+          "suite_number": "AvailableNow"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565843",
+    "createdAt": "2025-07-27T16:14:21.448Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650625282235fe5b7da6a",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/maclean-hunter-building-80",
+    "data": {
+      "Title": "481 University Avenue, Toronto, ON,M5G 2E9",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:14:26.546Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650655282235fe5b7da7b",
+    "crawlId": "6885ed1822e777f57fb512f0",
+    "url": "https://www.triovest.com/case-studies/mississauga-gateway-centre-mississauga-on/",
+    "data": {
+      "Title": "Mississauga GatewayCentre, Mississauga"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574749",
+    "createdAt": "2025-07-27T16:14:29.198Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650655282235fe5b7da87",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/commerce-court-west-commerce-court/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "LEASED1530LEASED1530"
+        },
+        {
+          "suite_number": "28102810"
+        },
+        {
+          "suite_number": "47004700"
+        },
+        {
+          "suite_number": "50505050"
+        }
+      ],
+      "Title": "199 Bay Street, Commerce Court West"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:14:29.637Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650655282235fe5b7da8e",
+    "crawlId": "685be83025c5ac2ccee81e59",
+    "url": "https://www.crownrealtypartners.com/properties/111-peter-street",
+    "data": {
+      "Title": "111 Peter Street",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite200"
+        },
+        {
+          "suite_number": "Suite406B"
+        },
+        {
+          "suite_number": "Suite407"
+        },
+        {
+          "suite_number": "Suite500"
+        },
+        {
+          "suite_number": "Suite501"
+        },
+        {
+          "suite_number": "Suite502"
+        },
+        {
+          "suite_number": "Suite505"
+        },
+        {
+          "suite_number": "Suite540"
+        },
+        {
+          "suite_number": "Suite602Furnished"
+        },
+        {
+          "suite_number": "Suite605"
+        },
+        {
+          "suite_number": "Suite606"
+        },
+        {
+          "suite_number": "Suite621Model Suite"
+        },
+        {
+          "suite_number": "Suite630"
+        },
+        {
+          "suite_number": "Suite706"
+        },
+        {
+          "suite_number": "Suite900"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562840",
+    "createdAt": "2025-07-27T16:14:29.696Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650655282235fe5b7da99",
+    "crawlId": "68837618dbfb3316032ec289",
+    "url": "https://www.cbre.ca/properties/office/details/CA-Plus-1950/190-liberty-street-toronto-ontario-m6k-3l5",
+    "data": {
+      "Title": null,
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565843",
+    "createdAt": "2025-07-27T16:14:29.829Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650655282235fe5b7daad",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/4436281808315234025/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "586 Argus Road",
+      "vacancy_data": [
+        {
+          "suite_number": "200"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:14:29.998Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650665282235fe5b7dac5",
+    "crawlId": "6885ede922e777f57fb51371",
+    "url": "https://leasing.triovest.com/building/building-2258/?search=&min=0&max=480000&type=O",
+    "data": {
+      "Title": "485 Queen St W - Office",
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574892",
+    "createdAt": "2025-07-27T16:14:30.117Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650665282235fe5b7dad9",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/160-front/",
+    "data": {
+      "Title": "160 Front",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:14:30.311Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650665282235fe5b7dadb",
+    "crawlId": "68559258dd96daac3fc263bf",
+    "url": "https://alliedreit.com/properties/184-front-street-e/",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753614407394",
+    "createdAt": "2025-07-27T16:14:30.316Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650665282235fe5b7dae9",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/waterfront-innovation-centre",
+    "status": "failed",
+    "error": "Unable to load Content after 2 attempts: Page load timeout",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:14:30.390Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650665282235fe5b7daef",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/rbc-centre/",
+    "data": {
+      "Title": "RBC Centre",
+      "vacancy_data": [
+        {
+          "suite_number": "3610"
+        },
+        {
+          "suite_number": "2920"
+        },
+        {
+          "suite_number": "2901"
+        },
+        {
+          "suite_number": "2800"
+        },
+        {
+          "suite_number": "2700"
+        },
+        {
+          "suite_number": "2600"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:14:30.714Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650675282235fe5b7daff",
+    "crawlId": "6885e28b4c69d87bb5131772",
+    "url": "https://www.sterlingkaramar.com/commercial/658-danforth-avenue",
+    "data": {
+      "Title": "658 Danforth Avenue",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569557",
+    "createdAt": "2025-07-27T16:14:31.324Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650685282235fe5b7db0a",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/56-temperance-street/",
+    "data": {
+      "Title": "56 Temperance Street",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:14:32.215Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886506b5282235fe5b7db15",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/16-york/",
+    "data": {
+      "Title": "16 York",
+      "vacancy_data": [
+        {
+          "suite_number": "2200"
+        },
+        {
+          "suite_number": "2100"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "1000"
+        },
+        {
+          "suite_number": "900"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:14:35.270Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886506d5282235fe5b7db20",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/building-1582/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "300300"
+        }
+      ],
+      "Title": "1 Grosvenor Street, IMMIX"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:14:37.582Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886506d5282235fe5b7db2b",
+    "crawlId": "6885e28b4c69d87bb5131772",
+    "url": "https://www.sterlingkaramar.com/commercial/245-ouellette-avenue",
+    "data": {
+      "Title": "245 Ouellette Avenue",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569557",
+    "createdAt": "2025-07-27T16:14:37.666Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886506d5282235fe5b7db47",
+    "crawlId": "688362efb8f08dd5389899e4",
+    "url": "http://www.humboldproperties.com/project/534-536-eglinton-avenue-west-toronto/",
+    "data": {
+      "Title": "534 – 536 Eglinton Avenue West, Toronto",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565240",
+    "createdAt": "2025-07-27T16:14:37.866Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886506e5282235fe5b7db5b",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/18-york/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": [
+        {
+          "suite_number": "400400"
+        }
+      ],
+      "Title": "18 York Street, Southcore Financial Centre"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:14:38.305Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886506f5282235fe5b7db66",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/15-toronto-st/",
+    "data": {
+      "Title": "15 Toronto St.",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:14:39.220Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886507a5282235fe5b7db71",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/1940-eglinton-ave-e/",
+    "data": {
+      "Title": "1940 Eglinton Ave. E",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:14:50.340Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886507b5282235fe5b7db7c",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/victory-building/",
+    "data": {
+      "Title": "Victory Building",
+      "vacancy_data": [
+        {
+          "suite_number": "202"
+        },
+        {
+          "suite_number": "204"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "509"
+        },
+        {
+          "suite_number": "801"
+        },
+        {
+          "suite_number": "804"
+        },
+        {
+          "suite_number": "808"
+        },
+        {
+          "suite_number": "903"
+        },
+        {
+          "suite_number": "905"
+        },
+        {
+          "suite_number": "MODEL1000"
+        },
+        {
+          "suite_number": "1205"
+        },
+        {
+          "suite_number": "1401"
+        },
+        {
+          "suite_number": "1402"
+        },
+        {
+          "suite_number": "1500"
+        },
+        {
+          "suite_number": "1601"
+        },
+        {
+          "suite_number": "1605"
+        },
+        {
+          "suite_number": "1800"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:14:51.896Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886507d5282235fe5b7db87",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/4575178569230496753/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "2041-2071 McCowan Rd",
+      "vacancy_data": [
+        {
+          "suite_number": "2061-209"
+        },
+        {
+          "suite_number": "2061-206"
+        },
+        {
+          "suite_number": "2061-201"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:14:53.460Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650805282235fe5b7db92",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/100-adelaide-st-west",
+    "data": {
+      "Title": "Richmond-Adelaide Centre - EY TowerToronto",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:14:56.828Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650805282235fe5b7db95",
+    "crawlId": "685bd58e35e72f38fc96218e",
+    "url": "https://www.brookfieldproperties.com/en/our-properties/first-canadian-place-284/",
+    "data": {
+      "Title": "First Canadian Place",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632562846",
+    "createdAt": "2025-07-27T16:14:56.869Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650815282235fe5b7dbb1",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/789-don-mills-road",
+    "data": {
+      "Title": "789 Don Mills Road"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:14:57.042Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650825282235fe5b7dbc0",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/oakville/1300-1320-cornwall-road/",
+    "data": {
+      "title": "1300 - 1320 Cornwall Road",
+      "vacancy_data": [
+        {
+          "suite_number": "1320 Cornwall Road, Unit 203"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:14:58.916Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650835282235fe5b7dbcb",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/7215923531414912922/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "MCC (77 City Centre Drive)",
+      "vacancy_data": [
+        {
+          "suite_number": "101"
+        },
+        {
+          "suite_number": "150"
+        },
+        {
+          "suite_number": "401"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "602"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:14:59.160Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650855282235fe5b7dbd6",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/20-toronto-street-and-33-victoria-street/",
+    "data": {
+      "Title": "20 Toronto Street",
+      "vacancy_data": [
+        {
+          "suite_number": "160"
+        },
+        {
+          "suite_number": "870"
+        },
+        {
+          "suite_number": "1400"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:01.906Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650885282235fe5b7dbe1",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/building-2492/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "5985 Explorer Drive (FedEx)",
+      "vacancy_data": [
+        {
+          "suite_number": "S001"
+        },
+        {
+          "suite_number": "100"
+        },
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "300"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:15:04.025Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886508a5282235fe5b7dbec",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/north-york-corporate-centre-10",
+    "data": {
+      "Title": "4576 Yonge Street, Toronto, ON,M2N 6N4",
+      "vacancy_data": [
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:15:06.489Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886508a5282235fe5b7dbef",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/sterling-tower-66",
+    "data": {
+      "Title": "372 Bay Street, Toronto, ON,M5H 2W9",
+      "vacancy_data": [
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:15:06.756Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886508a5282235fe5b7dbf1",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/simcoe-place/",
+    "data": {
+      "Title": "Simcoe Place",
+      "vacancy_data": [
+        {
+          "suite_number": "2910"
+        },
+        {
+          "suite_number": "2710"
+        },
+        {
+          "suite_number": "2600"
+        },
+        {
+          "suite_number": "2506"
+        },
+        {
+          "suite_number": "2304"
+        },
+        {
+          "suite_number": "2303"
+        },
+        {
+          "suite_number": "2300"
+        },
+        {
+          "suite_number": "2203"
+        },
+        {
+          "suite_number": "2201"
+        },
+        {
+          "suite_number": "200 - 1800"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:15:06.822Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886508a5282235fe5b7dbf3",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/250-dundas-street-w/",
+    "data": {
+      "Title": "250 Dundas Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "101"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "605"
+        },
+        {
+          "suite_number": "800"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:06.832Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886508d5282235fe5b7dc18",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/2-queen-west/",
+    "data": {
+      "Title": "2 Queen West",
+      "vacancy_data": [
+        {
+          "suite_number": "PH"
+        },
+        {
+          "suite_number": "600"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "Ground floor"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:15:09.657Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886508d5282235fe5b7dc23",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/6990-creditview-road-2/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": null,
+      "Title": "6990 Creditview Road (Office)"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:15:09.877Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886508e5282235fe5b7dc2e",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/20-queen-west/",
+    "data": {
+      "Title": "Cadillac Fairview Tower",
+      "vacancy_data": [
+        {
+          "suite_number": "3400"
+        },
+        {
+          "suite_number": "3302"
+        },
+        {
+          "suite_number": "3301"
+        },
+        {
+          "suite_number": "3300"
+        },
+        {
+          "suite_number": "3100"
+        },
+        {
+          "suite_number": "1101"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "602"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:15:10.489Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886508e5282235fe5b7dc31",
+    "crawlId": "6885ae04973c56c25cb0a406",
+    "url": "https://madisongroup.ca/commercial/367-369-rimrock-rd/",
+    "data": {
+      "Title": "367-369 Rimrock Rd.",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566020",
+    "createdAt": "2025-07-27T16:15:10.540Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650905282235fe5b7dc4d",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/120-adelaide-st-west",
+    "data": {
+      "Title": "Richmond-Adelaide Centre - 120 AdelaideToronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite900"
+        },
+        {
+          "suite_number": "Suite920"
+        },
+        {
+          "suite_number": "Suite1200"
+        },
+        {
+          "suite_number": "Suite1501"
+        },
+        {
+          "suite_number": "Suite1510"
+        },
+        {
+          "suite_number": "Suite1902"
+        },
+        {
+          "suite_number": "Suite2000"
+        },
+        {
+          "suite_number": "Suite2110"
+        },
+        {
+          "suite_number": "Suite2308"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:15:12.412Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650905282235fe5b7dc4f",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/building-1073/?search=toronto&min=0&max=377250&type=O",
+    "data": {
+      "Title": "76 Stafford St",
+      "vacancy_data": [
+        {
+          "suite_number": "B1"
+        },
+        {
+          "suite_number": "Floor 1"
+        },
+        {
+          "suite_number": "Floor 2"
+        },
+        {
+          "suite_number": "Floor 3"
+        },
+        {
+          "suite_number": "850 Adelaide - Suite A"
+        },
+        {
+          "suite_number": "850 Adelaide - Suite B"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:12.425Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650905282235fe5b7dc51",
+    "crawlId": "6885d347d921b622a96973d0",
+    "url": "https://www.oxfordproperties.com/lease/office/130-adelaide-st-west",
+    "data": {
+      "Title": "Richmond-Adelaide Centre - 130 AdelaideToronto",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite1700"
+        },
+        {
+          "suite_number": "Suite1703"
+        },
+        {
+          "suite_number": "Suite1800"
+        },
+        {
+          "suite_number": "Suite2101"
+        },
+        {
+          "suite_number": "Suite3302"
+        },
+        {
+          "suite_number": "Suite3500"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569752",
+    "createdAt": "2025-07-27T16:15:12.461Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650905282235fe5b7dc7b",
+    "crawlId": "6885b120713be737405a9498",
+    "url": "https://www.menkes.com/commercial/projects/4800-yonge-street-office",
+    "data": {
+      "Title": "4800 Yonge Street"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568514",
+    "createdAt": "2025-07-27T16:15:12.746Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650905282235fe5b7dc8f",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/oakville/1405-1435-cornwall-road/",
+    "data": {
+      "title": "1405 - 1435 Cornwall Road",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:15:12.985Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650905282235fe5b7dc92",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/priszm-building-2/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": null,
+      "Title": "101 Exchange Way"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:15:12.999Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650915282235fe5b7dca5",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/120-bremner/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": null,
+      "Title": "120 Bremner Blvd, Southcore Financial Centre SFC"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:15:13.872Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650925282235fe5b7dcb0",
+    "crawlId": "685beb1e4ca0761e67133787",
+    "url": "https://davpart.ca/office/67-yonge-street-11",
+    "data": {
+      "Title": "67 Yonge Street, Toronto, ON,M5E 1J8",
+      "vacancy_data": [
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        },
+        {
+          "suite_number": null
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565088",
+    "createdAt": "2025-07-27T16:15:14.763Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650925282235fe5b7dcc4",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/2955-Bloor-Street-West/default.aspx",
+    "data": {
+      "Title": "2955 Bloor Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "1"
+        },
+        {
+          "suite_number": "2"
+        },
+        {
+          "suite_number": "3"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:15:14.921Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650935282235fe5b7dccf",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/8259425197180862605/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "60 Bloor Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "210"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "310"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "601"
+        },
+        {
+          "suite_number": "605"
+        },
+        {
+          "suite_number": "700"
+        },
+        {
+          "suite_number": "1000"
+        },
+        {
+          "suite_number": "1540"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:15:15.314Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650935282235fe5b7dcda",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/602-606-King-Street-West/default.aspx",
+    "data": {
+      "Title": "602-606 King Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "B01"
+        },
+        {
+          "suite_number": "B02"
+        },
+        {
+          "suite_number": "B03"
+        },
+        {
+          "suite_number": "101"
+        },
+        {
+          "suite_number": "102"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:15:15.657Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650965282235fe5b7dce5",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/8318931002772183451/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "2920 Matheson Boulevard E",
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:15:18.681Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650965282235fe5b7dcf0",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/2453-Yonge-Street/default.aspx",
+    "data": {
+      "Title": "2453 Yonge Street",
+      "vacancy_data": [
+        {
+          "suite_number": "1"
+        },
+        {
+          "suite_number": "2"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:15:18.932Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886509b5282235fe5b7dcfb",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/425-bloor-street-east/?search=toronto&min=0&max=377250&type=O",
+    "data": {
+      "Title": "425 Bloor Street East",
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "301"
+        },
+        {
+          "suite_number": "510"
+        },
+        {
+          "suite_number": "520"
+        },
+        {
+          "suite_number": "100"
+        },
+        {
+          "suite_number": "101"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:23.052Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886509b5282235fe5b7dd0c",
+    "crawlId": "6885bd5697a816ba51e858fb",
+    "url": "https://www.northamleasingbrokerage.com/office-and-retail-properties/235-yorkland-blvd",
+    "data": {
+      "Title": "235 Yorkland Blvd."
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569125",
+    "createdAt": "2025-07-27T16:15:23.190Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886509b5282235fe5b7dd13",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/8318931002772183451/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "2920 Matheson Boulevard E",
+      "vacancy_data": [
+        {
+          "suite_number": "300"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:15:23.220Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886509b5282235fe5b7dd26",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/oakville/145-reynolds-street/",
+    "data": {
+      "title": "145 Reynolds Street",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:15:23.278Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a05282235fe5b7dd31",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/250-yonge/",
+    "data": {
+      "Title": "250 Yonge",
+      "vacancy_data": [
+        {
+          "suite_number": "3102"
+        },
+        {
+          "suite_number": "2701"
+        },
+        {
+          "suite_number": "2601"
+        },
+        {
+          "suite_number": "2302"
+        },
+        {
+          "suite_number": "2201"
+        },
+        {
+          "suite_number": "2200"
+        },
+        {
+          "suite_number": "1801"
+        },
+        {
+          "suite_number": "1602"
+        },
+        {
+          "suite_number": "1600"
+        },
+        {
+          "suite_number": "600"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:15:28.161Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a15282235fe5b7dd3c",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/1-dundas-west/",
+    "data": {
+      "Title": "1 Dundas West",
+      "vacancy_data": [
+        {
+          "suite_number": "2900"
+        },
+        {
+          "suite_number": "2800"
+        },
+        {
+          "suite_number": "2700"
+        },
+        {
+          "suite_number": "2102"
+        },
+        {
+          "suite_number": "1200"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "300"
+        },
+        {
+          "suite_number": "200"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:15:29.663Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a15282235fe5b7dd47",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/dbrs-tower/",
+    "data": {
+      "Title": "181 University Avenue (DBRS Tower)",
+      "vacancy_data": [
+        {
+          "suite_number": "G10"
+        },
+        {
+          "suite_number": "210"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "1101"
+        },
+        {
+          "suite_number": "MODEL1402"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:29.723Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a25282235fe5b7dd52",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/dbrs-tower/?search=toronto&min=0&max=377250&type=O",
+    "data": {
+      "Title": "181 University Avenue (DBRS Tower)",
+      "vacancy_data": [
+        {
+          "suite_number": "210"
+        },
+        {
+          "suite_number": "1100"
+        },
+        {
+          "suite_number": "1101"
+        },
+        {
+          "suite_number": "MODEL1402"
+        },
+        {
+          "suite_number": "G10"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:30.141Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a35282235fe5b7dd5d",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/commerce-court-south-commerce-court/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": null,
+      "Title": "30 Wellington Street, Commerce Court South"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:15:31.667Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a45282235fe5b7dd68",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/ennisclare-corporate-centre/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": null,
+      "Title": "1075 North Service Road West (Ennisclare Corporate Centre)"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:15:32.434Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a45282235fe5b7dd7c",
+    "crawlId": "6885a8fa7ac378ec6f1fae7b",
+    "url": "https://lisgardev.ca/properties/robert-speck-parkway/",
+    "data": {
+      "Title": "ROBERT SPECK PARKWAY",
+      "vacancy_data": [
+        {
+          "field": "BUILT:",
+          "value": "1987"
+        },
+        {
+          "field": "BUILDING SIZE:",
+          "value": "44,000 square feet (office)"
+        },
+        {
+          "field": "NUMBER OF FLOORS:",
+          "value": "2"
+        },
+        {
+          "field": "FLOOR PLATE SIZE:",
+          "value": "5,500 square feet (approx.)"
+        },
+        {
+          "field": "PARKING:",
+          "value": "Surface parking (2.5 stalls per 1,000 square feet)"
+        },
+        {
+          "field": "RENT:",
+          "value": "Net Rent: $16.00/sq ftAdditional Rent: $13.05"
+        },
+        {
+          "field": "PHONE / INTERNET:",
+          "value": "Fiber OpticsBell"
+        },
+        {
+          "field": "ELEVATORS:",
+          "value": "N/A"
+        },
+        {
+          "field": "HVAC:",
+          "value": "Engineered Air Roof Top units"
+        },
+        {
+          "field": "HVAC HOURS:",
+          "value": "7:00 am to 7:00 pm. Can be extended at an additional cost"
+        },
+        {
+          "field": "SECURITY:",
+          "value": "Programmable card access (after hours) Third party security patrolled CCTV covering entry points"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632566061",
+    "createdAt": "2025-07-27T16:15:32.831Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a55282235fe5b7dd94",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/4100-yonge/",
+    "data": {
+      "Title": "4100 Yonge",
+      "vacancy_data": [
+        {
+          "suite_number": "610"
+        },
+        {
+          "suite_number": "601"
+        },
+        {
+          "suite_number": "513"
+        },
+        {
+          "suite_number": "505"
+        },
+        {
+          "suite_number": "502"
+        },
+        {
+          "suite_number": "406"
+        },
+        {
+          "suite_number": "120"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:15:33.253Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a55282235fe5b7dd9f",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/2251-north-sheridan-way/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "2251 North Sheridan Way",
+      "vacancy_data": [
+        {
+          "suite_number": "100"
+        },
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "300"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:15:33.669Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a65282235fe5b7ddaa",
+    "crawlId": "6885bd0c97a816ba51e85877",
+    "url": "https://morguardleasing.com/building/6111828941606038449/?search=&min=0&max=183000&type=O",
+    "data": {
+      "Title": "MCC (33 City Centre Drive)",
+      "vacancy_data": [
+        {
+          "suite_number": "142"
+        },
+        {
+          "suite_number": "202"
+        },
+        {
+          "suite_number": "210"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "480"
+        },
+        {
+          "suite_number": "602"
+        },
+        {
+          "suite_number": "640"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632568876",
+    "createdAt": "2025-07-27T16:15:34.234Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650a95282235fe5b7ddbe",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/meadowvale-north-business-park/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": null,
+      "Title": "6696 Financial Drive"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:15:37.545Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650ab5282235fe5b7ddc9",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/45-west-wilmot-street/?search=toronto&min=0&max=377250&type=O",
+    "data": {
+      "Title": "45 West Wilmot Street",
+      "vacancy_data": [
+        {
+          "suite_number": "A207"
+        },
+        {
+          "suite_number": "A208 - 209"
+        },
+        {
+          "suite_number": "A210-215"
+        },
+        {
+          "suite_number": "A210"
+        },
+        {
+          "suite_number": "A211"
+        },
+        {
+          "suite_number": "A212"
+        },
+        {
+          "suite_number": "A213"
+        },
+        {
+          "suite_number": "A214"
+        },
+        {
+          "suite_number": "A215"
+        },
+        {
+          "suite_number": "B014"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:39.492Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650ad5282235fe5b7ddda",
+    "crawlId": "6885bd5697a816ba51e858fb",
+    "url": "https://www.northamleasingbrokerage.com/office-and-retail-properties/245-yorkland-blvd",
+    "data": {
+      "Title": "245 Yorkland Blvd."
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569125",
+    "createdAt": "2025-07-27T16:15:41.986Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650af5282235fe5b7dde1",
+    "crawlId": "6885e2f04c69d87bb5131803",
+    "url": "https://www.cadillacfairview.com/office/properties/4120-yonge/",
+    "data": {
+      "Title": "4120 Yonge",
+      "vacancy_data": [
+        {
+          "suite_number": "314"
+        },
+        {
+          "suite_number": "312"
+        },
+        {
+          "suite_number": "308"
+        },
+        {
+          "suite_number": "307"
+        },
+        {
+          "suite_number": "302"
+        },
+        {
+          "suite_number": "200"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632570569",
+    "createdAt": "2025-07-27T16:15:43.126Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650af5282235fe5b7ddf5",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/2200-eglinton-ave-e/?search=toronto&min=0&max=377250&type=O",
+    "data": {
+      "Title": "2200 Eglinton Avenue East",
+      "vacancy_data": [
+        {
+          "suite_number": "101"
+        },
+        {
+          "suite_number": "200"
+        },
+        {
+          "suite_number": "300"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:43.623Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650b15282235fe5b7de06",
+    "crawlId": "6885bd5697a816ba51e858fb",
+    "url": "https://www.northamleasingbrokerage.com/office-and-retail-properties/250-university-ave",
+    "data": {
+      "Title": "250 University Ave."
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569125",
+    "createdAt": "2025-07-27T16:15:45.261Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650b25282235fe5b7de0d",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/642-King-Street-West/default.aspx",
+    "data": {
+      "Title": "642 King Street West",
+      "vacancy_data": [
+        {
+          "suite_number": "0101"
+        },
+        {
+          "suite_number": "0102"
+        },
+        {
+          "suite_number": "0103"
+        },
+        {
+          "suite_number": "0104"
+        },
+        {
+          "suite_number": "201"
+        },
+        {
+          "suite_number": "202"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:15:46.241Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650b25282235fe5b7de18",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/building-41/",
+    "data": {
+      "Title": "6 Adelaide Street East",
+      "vacancy_data": [
+        {
+          "suite_number": "310"
+        },
+        {
+          "suite_number": "350"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "410"
+        },
+        {
+          "suite_number": "420"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:46.868Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650b35282235fe5b7de23",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/6990-creditview-road/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": null,
+      "Title": "6990 Creditview Road (Industrial)"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:15:47.342Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650b35282235fe5b7de2e",
+    "crawlId": "6885dc9b4c69d87bb513157e",
+    "url": "https://quadreal.findspace.com/building/7125-mississauga-road/?search=&min=0&max=1120750&type=O",
+    "data": {
+      "vacancy_data": null,
+      "Title": "7125 Mississauga Road, Mississauga"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569322",
+    "createdAt": "2025-07-27T16:15:47.946Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650b45282235fe5b7de42",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/649-Queen-St-West/default.aspx",
+    "data": {
+      "Title": "649 Queen St West",
+      "vacancy_data": [
+        {
+          "suite_number": "1"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:15:48.490Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650b55282235fe5b7de4d",
+    "crawlId": "6885f5b2b6e55bd2b16ca8f0",
+    "url": "https://www.riocan.com/English/our-properties/leasing/details/2016/ePlace/default.aspx",
+    "data": {
+      "Title": "ePlace",
+      "vacancy_data": [
+        {
+          "suite_number": "M01"
+        },
+        {
+          "suite_number": "P201"
+        },
+        {
+          "suite_number": "P202"
+        },
+        {
+          "suite_number": "RU01"
+        },
+        {
+          "suite_number": "RU02"
+        },
+        {
+          "suite_number": "RU03"
+        },
+        {
+          "suite_number": "RU04"
+        },
+        {
+          "suite_number": "RU05"
+        },
+        {
+          "suite_number": "RU06"
+        },
+        {
+          "suite_number": "RU4A/RU4B"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632574867",
+    "createdAt": "2025-07-27T16:15:49.569Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650b85282235fe5b7de61",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/137-yonge-street-and-74-victoria-street/?search=toronto&min=0&max=377250&type=O",
+    "data": {
+      "Title": "74 Victoria Street & 137 Yonge Street",
+      "vacancy_data": [
+        {
+          "suite_number": "115"
+        },
+        {
+          "suite_number": "500"
+        },
+        {
+          "suite_number": "600"
+        },
+        {
+          "suite_number": "700"
+        },
+        {
+          "suite_number": "800"
+        },
+        {
+          "suite_number": "900"
+        },
+        {
+          "suite_number": "1000"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:52.260Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650bc5282235fe5b7de6c",
+    "crawlId": "685bec7d4ca0761e6713382d",
+    "url": "https://leasing.dream.ca/building/building-41/?search=toronto&min=0&max=377250&type=O",
+    "data": {
+      "Title": "6 Adelaide Street East",
+      "vacancy_data": [
+        {
+          "suite_number": "310"
+        },
+        {
+          "suite_number": "350"
+        },
+        {
+          "suite_number": "400"
+        },
+        {
+          "suite_number": "410"
+        },
+        {
+          "suite_number": "420"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565382",
+    "createdAt": "2025-07-27T16:15:56.134Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650bd5282235fe5b7de88",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/vaughan/8800-dufferin-street/",
+    "data": {
+      "title": "8800 Dufferin Street",
+      "vacancy_data": [
+        {
+          "suite_number": "Suite 204"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:15:57.060Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650db5282235fe5b7de9b",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/vaughan/8395-jane-street/",
+    "data": {
+      "title": "8395 Jane Street",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:16:27.642Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650dc5282235fe5b7deac",
+    "crawlId": "6885bd5697a816ba51e858fb",
+    "url": "https://www.northamleasingbrokerage.com/office-and-retail-properties/207-queen-quay-w",
+    "data": {
+      "Title": "207 Queens Quay"
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569125",
+    "createdAt": "2025-07-27T16:16:28.347Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650e15282235fe5b7debb",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/vaughan/110-jardin-drive/",
+    "data": {
+      "title": "110 Jardin Drive",
+      "vacancy_data": [
+        {
+          "suite_number": "Unit 1 & 2"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:16:33.646Z",
+    "__v": 0
+  },
+  {
+    "_id": "688650e85282235fe5b7decc",
+    "crawlId": "6885bd5697a816ba51e858fb",
+    "url": "https://www.northamleasingbrokerage.com/office-and-retail-properties/8-market-st-87-front-st",
+    "data": {
+      "Title": "8 Market St., 87 Front St."
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632569125",
+    "createdAt": "2025-07-27T16:16:40.609Z",
+    "__v": 0
+  },
+  {
+    "_id": "688651005282235fe5b7dee0",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/vaughan/150-jardin-drive/",
+    "data": {
+      "title": "150 Jardin Drive",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:17:04.236Z",
+    "__v": 0
+  },
+  {
+    "_id": "6886512d5282235fe5b7def3",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/vaughan/9131-9135-keele-street/",
+    "data": {
+      "title": "9131 - 9135 Keele Street",
+      "vacancy_data": null
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:17:49.255Z",
+    "__v": 0
+  },
+  {
+    "_id": "688651325282235fe5b7df06",
+    "crawlId": "6885ae88973c56c25cb0a47f",
+    "url": "https://melroseinvestments.com/leasing/vaughan/180-jardin-drive/",
+    "data": {
+      "title": "180 Jardin Drive",
+      "vacancy_data": [
+        {
+          "suite_number": "180 Jardin - Unit 4"
+        }
+      ]
+    },
+    "status": "success",
+    "error": "",
+    "runId": "1753632565296",
+    "createdAt": "2025-07-27T16:17:54.136Z",
+    "__v": 0
+  }
+]

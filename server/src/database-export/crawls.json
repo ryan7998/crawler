@@ -1,0 +1,2811 @@
+[
+  {
+    "_id": "685582aef21f306b34c36fc2",
+    "title": "Properties-Adgar Canada",
+    "urls": [
+      "https://adgarcanada.com/properties/300-town-centre-boulevard/",
+      "https://adgarcanada.com/properties/302-town-centre-boulevard/",
+      "https://adgarcanada.com/properties/306-town-centre-boulevard/"
+    ],
+    "selectors": [
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "#vacancy_table table tbody tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "td[data-label='Suite #']",
+            "type": "text",
+            "attribute": null,
+            "_id": "687eaa294847a857d3af055e"
+          }
+        ],
+        "_id": "687eaa294847a857d3af055d"
+      },
+      {
+        "target_element": "Title",
+        "selector_value": "p[role=\"heading\"]",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687eaa294847a857d3af055f"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864f895282235fe5b7d3b7",
+      "68864f8b5282235fe5b7d3e4",
+      "688650195282235fe5b7d7d3"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:00:48.902Z",
+    "__v": 8,
+    "endTime": "2025-07-27T16:13:13.359Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 100,
+      "lastProxyUsed": "2025-07-27T16:13:13.085Z",
+      "proxyCostEstimate": 0.001,
+      "totalProxyRequests": 1,
+      "uniqueProxiesUsed": 1
+    }
+  },
+  {
+    "_id": "68559258dd96daac3fc263bf",
+    "title": "Properties-alliedreit",
+    "urls": [
+      "https://alliedreit.com/properties/106-front-street-e/",
+      "https://alliedreit.com/properties/110-yonge-street-jv/",
+      "https://alliedreit.com/properties/116-simcoe-street/",
+      "https://alliedreit.com/properties/175-bloor-street-e-jv/",
+      "https://alliedreit.com/properties/179-john-street/",
+      "https://alliedreit.com/properties/183-bathurst-street/",
+      "https://alliedreit.com/properties/184-front-street-e/",
+      "https://alliedreit.com/properties/185-spadina-avenue/",
+      "https://alliedreit.com/properties/200-adelaide-street-w/",
+      "https://alliedreit.com/properties/204-214-king-street-e/",
+      "https://alliedreit.com/properties/217-richmond-street-w/",
+      "https://alliedreit.com/properties/241-spadina-avenue/",
+      "https://alliedreit.com/properties/252-264-adelaide-street-e/",
+      "https://alliedreit.com/properties/257-adelaide-street-w/",
+      "https://alliedreit.com/properties/312-adelaide-street-w-2/",
+      "https://alliedreit.com/properties/331-333-adelaide-w/",
+      "https://alliedreit.com/properties/358-360-adelaide-street-w/",
+      "https://alliedreit.com/properties/379-adelaide-street-w/",
+      "https://alliedreit.com/properties/41-45-front-street-e/",
+      "https://alliedreit.com/properties/425-adelaide-street-w/",
+      "https://alliedreit.com/properties/425-439-king-street-w/",
+      "https://alliedreit.com/properties/445-455-king-street-w/",
+      "https://alliedreit.com/properties/45-55-colborne-street/",
+      "https://alliedreit.com/properties/460-king-street-w/",
+      "https://alliedreit.com/properties/461-king-street-w/",
+      "https://alliedreit.com/properties/468-king-street-w/",
+      "https://alliedreit.com/properties/469-king-street-w/",
+      "https://alliedreit.com/properties/489-queen-street-e/",
+      "https://alliedreit.com/properties/500-king-street-w/",
+      "https://alliedreit.com/properties/522-king-street-w/",
+      "https://alliedreit.com/properties/525-university-avenue-2/",
+      "https://alliedreit.com/properties/555-richmond-street-w/",
+      "https://alliedreit.com/properties/college-manning-559-563-college-street-jv/",
+      "https://alliedreit.com/properties/56-the-esplanade/",
+      "https://alliedreit.com/properties/60-adelaide-street-e/",
+      "https://alliedreit.com/properties/65-front-street-e/",
+      "https://alliedreit.com/properties/70-richmond-street-e/",
+      "https://alliedreit.com/properties/70-the-esplanade/",
+      "https://alliedreit.com/properties/82-peter-street/",
+      "https://alliedreit.com/properties/96-spadina-avenue/",
+      "https://alliedreit.com/properties/99-spadina-avenue-2/",
+      "https://alliedreit.com/properties/dominion-square-468-queen-n/",
+      "https://alliedreit.com/properties/kpc-602-604-king-street-w-jv/",
+      "https://alliedreit.com/properties/kpc-642-king-street-w-jv/",
+      "https://alliedreit.com/properties/qrc-east-111-queen-e/",
+      "https://alliedreit.com/properties/qrc-west-134-peter-street/"
+    ],
+    "selectors": [
+      {
+        "target_element": "vacancy_data",
+        "selector_value": ".accordion-06-item",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".accordion-button h3.number",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea4da4847a857d3aef99d"
+          }
+        ],
+        "_id": "687ea4da4847a857d3aef99c"
+      }
+    ],
+    "userId": "1",
+    "status": "in-progress",
+    "results": [
+      "688650435282235fe5b7d8dd",
+      "688650435282235fe5b7d8db",
+      "688650665282235fe5b7dadb"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:00:51.272Z",
+    "__v": 6,
+    "endTime": null,
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685bbf5e6e47ec5f403e69ad",
+    "title": "Properties- quadreal",
+    "urls": [
+      "https://quadreal.findspace.com/building/commerce-court-west-commerce-court/",
+      "https://quadreal.findspace.com/building/commerce-court-north-commerce-court/",
+      "https://quadreal.findspace.com/building/commerce-court-south-commerce-court/",
+      "https://quadreal.findspace.com/building/18-york/",
+      "https://quadreal.findspace.com/building/120-bremner/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea5314847a857d3aefa36"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.SuiteListItem_suiteInfoContainer__NTfk0",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".SuiteListItem_suiteNameAndTag__FBNmQ",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea5314847a857d3aefa38"
+          }
+        ],
+        "_id": "687ea5314847a857d3aefa37"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864f8a5282235fe5b7d3ce",
+      "68864fa85282235fe5b7d45c",
+      "68864ffb5282235fe5b7d627",
+      "688650175282235fe5b7d6fc",
+      "688650185282235fe5b7d71e"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T20:38:09.114Z",
+    "__v": 3,
+    "endTime": "2025-07-27T16:13:12.835Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685bc74220e91fb64988dd40",
+    "title": "Properties- cushmanwakefield",
+    "urls": [
+      "https://www.cushmanwakefield.com/en/canada/properties/for-lease/office/on/toronto/109-117-george-street/s119704664-l"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1.updated-page-title-main",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea5534847a857d3aefb4c"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.availabilities-container",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "div.availabilities-title p.blue-color-title span:last-child",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea5534847a857d3aefb4e"
+          }
+        ],
+        "_id": "687ea5534847a857d3aefb4d"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864f925282235fe5b7d423"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:01:12.002Z",
+    "__v": 3,
+    "endTime": "2025-07-27T16:11:11.250Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685bd58e35e72f38fc96218e",
+    "title": "Properties- brookfieldproperties",
+    "urls": [
+      "https://www.brookfieldproperties.com/en/our-properties/scotiabank-north-tower-at-bay-adelaide-centre-179/",
+      "https://www.brookfieldproperties.com/en/our-properties/bay-adelaide-east-tower-178/",
+      "https://www.brookfieldproperties.com/en/our-properties/bay-adelaide-west-tower-1862/",
+      "https://www.brookfieldproperties.com/en/our-properties/2-bloor-east-320/",
+      "https://www.brookfieldproperties.com/en/our-properties/exchange-tower-272/",
+      "https://www.brookfieldproperties.com/en/our-properties/northbridge-place/",
+      "https://www.brookfieldproperties.com/en/our-properties/brookfield-place-bay-wellington-tower-203/",
+      "https://www.brookfieldproperties.com/en/our-properties/brookfield-place-22-front-street-200/",
+      "https://www.brookfieldproperties.com/en/our-properties/first-canadian-place-284/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1#pdpTitle",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885ec9e22e777f57fb5125e"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.b-property-details__vts-grid",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "div.b-property-details__vts-grid-item-floor span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ec9e22e777f57fb51260"
+          }
+        ],
+        "_id": "6885ec9e22e777f57fb5125f"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864f8a5282235fe5b7d3cc",
+      "68864f935282235fe5b7d428",
+      "68864ffb5282235fe5b7d612",
+      "688650185282235fe5b7d720",
+      "688650185282235fe5b7d782",
+      "6886504e5282235fe5b7d9ac",
+      "688650575282235fe5b7d9f0",
+      "6886505b5282235fe5b7da42",
+      "688650805282235fe5b7db95"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:08:46.956Z",
+    "__v": 5,
+    "endTime": "2025-07-27T16:14:56.923Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685bd8a412ef4a50e1e5b393",
+    "title": "Properties- canderel",
+    "urls": [
+      "https://canderel.findspace.com/building/777-bay-street/",
+      "https://canderel.findspace.com/building/1075-bay/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea5d54847a857d3aefd7b"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.SuiteListItem_suiteInfoContainer__NTfk0",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".SuiteListItem_suiteNameAndTag__FBNmQ",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea5d54847a857d3aefd7d"
+          }
+        ],
+        "_id": "687ea5d54847a857d3aefd7c"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864f845282235fe5b7d38f",
+      "68864f855282235fe5b7d391"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T20:40:53.541Z",
+    "__v": 3,
+    "endTime": "2025-07-27T16:10:53.571Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685bdab5846c120d29ce222c",
+    "title": "Properties- capitolbuildings",
+    "urls": [
+      "https://capitolbuildings.com/building-info/41",
+      "https://capitolbuildings.com/building-info/39",
+      "https://capitolbuildings.com/building-info/40",
+      "https://capitolbuildings.com/building-info/42"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea5f84847a857d3aefe72"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "#available-suites .office-space-card",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".content-area h3.title",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea5f84847a857d3aefe74"
+          }
+        ],
+        "_id": "687ea5f84847a857d3aefe73"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864f865282235fe5b7d39d",
+      "68864f895282235fe5b7d3b5",
+      "68864fd75282235fe5b7d4aa",
+      "6886500b5282235fe5b7d688"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T20:41:28.184Z",
+    "__v": 9,
+    "endTime": "2025-07-27T16:13:02.096Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685be306d59a882e372e0b8c",
+    "title": "Properties- avisonyoung",
+    "urls": [
+      "https://www.avisonyoung.ca/properties/366-adelaide-street-east"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea6304847a857d3aeff69"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": ".availability-card-v2",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".availability-card-info-item:contains('Unit/Suite') .availability-card-info-item-value",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea6304847a857d3aeff6b"
+          }
+        ],
+        "_id": "687ea6304847a857d3aeff6a"
+      }
+    ],
+    "userId": "1",
+    "status": "failed",
+    "results": [
+      "6886503e5282235fe5b7d876"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:02:15.969Z",
+    "__v": 4,
+    "endTime": "2025-07-27T16:13:52.620Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685be79525c5ac2ccee81db0",
+    "title": "Properties- crestpoint",
+    "urls": [
+      "https://crestpoint.cclgroup.com/properties/121-king-street/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "article.article h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "685be79525c5ac2ccee81db1"
+      },
+      {
+        "target_element": "Description",
+        "selector_value": "article.article .content",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "685be79525c5ac2ccee81db2"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864f895282235fe5b7d3b9"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:02:30.936Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:10:57.723Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685be83025c5ac2ccee81e59",
+    "title": "Properties- crownrealtypartners",
+    "urls": [
+      "https://www.crownrealtypartners.com/properties/901-king-street-west/",
+      "https://www.crownrealtypartners.com/properties/400-university-avenue/",
+      "https://www.crownrealtypartners.com/properties/dundas-edward-centre/",
+      "https://www.crownrealtypartners.com/properties/5255-yonge-street/",
+      "https://www.crownrealtypartners.com/properties/5000-yonge-street",
+      "https://www.crownrealtypartners.com/properties/1500-don-mills",
+      "https://www.crownrealtypartners.com/properties/111-peter-street"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "div#property-title h1.property-h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea6a84847a857d3af0069"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "#property-suites .vts-single-listing[id^=\"vsl-\"]",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".vts-single-listing__data-suite",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea6a84847a857d3af006b"
+          }
+        ],
+        "_id": "687ea6a84847a857d3af006a"
+      }
+    ],
+    "userId": "1",
+    "status": "failed",
+    "results": [
+      "68864f885282235fe5b7d3ae",
+      "68864fec5282235fe5b7d542",
+      "688650185282235fe5b7d743",
+      "6886503b5282235fe5b7d85c",
+      "688650425282235fe5b7d8b3",
+      "688650505282235fe5b7d9b7",
+      "688650655282235fe5b7da8e"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:07:55.315Z",
+    "__v": 3,
+    "endTime": "2025-07-27T16:14:30.008Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685beb1e4ca0761e67133787",
+    "title": "Properties- davpart",
+    "urls": [
+      "https://davpart.ca/office/25-adelaide-street-east-44-victoria-street-57/",
+      "https://davpart.ca/office/1-eglinton-avenue-east-65",
+      "https://davpart.ca/office/5075-yonge-street",
+      "https://davpart.ca/office/the-davisville-centre-52",
+      "https://davpart.ca/office/north-york-corporate-centre-10",
+      "https://davpart.ca/office/maclean-hunter-building-80",
+      "https://davpart.ca/office/sterling-tower-66",
+      "https://davpart.ca/office/north-york-corporate-centre-10",
+      "https://davpart.ca/office/67-yonge-street-11"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1.details-header-property-address",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea6cf4847a857d3af00e8"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "section.details-available-units .row.details-available-units-content",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".col-sm-3.col-lg-1:nth-of-type(1) p",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea6cf4847a857d3af00ea"
+          }
+        ],
+        "_id": "687ea6cf4847a857d3af00e9"
+      }
+    ],
+    "userId": "1",
+    "status": "failed",
+    "results": [
+      "68864ffb5282235fe5b7d60d",
+      "68864ffb5282235fe5b7d623",
+      "6886501b5282235fe5b7d825",
+      "6886504e5282235fe5b7d9a1",
+      "688650535282235fe5b7d9d8",
+      "688650625282235fe5b7da6a",
+      "6886508a5282235fe5b7dbec",
+      "6886508a5282235fe5b7dbef",
+      "688650925282235fe5b7dcb0"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:08:00.152Z",
+    "__v": 3,
+    "endTime": "2025-07-27T16:15:14.896Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685bec7d4ca0761e6713382d",
+    "title": "Properties- leasing dream",
+    "urls": [
+      "https://leasing.dream.ca/building/67-richmond-st-e/",
+      "https://leasing.dream.ca/building/150-york-st/",
+      "https://leasing.dream.ca/building/330-bay-street/",
+      "https://leasing.dream.ca/building/350-bay-street/",
+      "https://leasing.dream.ca/building/360-bay-street/",
+      "https://leasing.dream.ca/building/366-bay-street/",
+      "https://leasing.dream.ca/building/212-king-st-w/",
+      "https://leasing.dream.ca/building/state-street-financial-centre/",
+      "https://leasing.dream.ca/building/36-toronto-street-2/",
+      "https://leasing.dream.ca/building/56-temperance-street/",
+      "https://leasing.dream.ca/building/victory-building/",
+      "https://leasing.dream.ca/building/20-toronto-street-and-33-victoria-street/",
+      "https://leasing.dream.ca/building/250-dundas-street-w/",
+      "https://leasing.dream.ca/building/building-1073/?search=toronto&min=0&max=377250&type=O",
+      "https://leasing.dream.ca/building/425-bloor-street-east/?search=toronto&min=0&max=377250&type=O",
+      "https://leasing.dream.ca/building/dbrs-tower/?search=toronto&min=0&max=377250&type=O",
+      "https://leasing.dream.ca/building/dbrs-tower/",
+      "https://leasing.dream.ca/building/45-west-wilmot-street/?search=toronto&min=0&max=377250&type=O",
+      "https://leasing.dream.ca/building/building-41/",
+      "https://leasing.dream.ca/building/2200-eglinton-ave-e/?search=toronto&min=0&max=377250&type=O",
+      "https://leasing.dream.ca/building/137-yonge-street-and-74-victoria-street/?search=toronto&min=0&max=377250&type=O",
+      "https://leasing.dream.ca/building/building-41/?search=toronto&min=0&max=377250&type=O"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea6fe4847a857d3af01b9"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div[class^='SuiteListItem_suiteInfoContainer']",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "div[class^='SuiteListItem_suiteNameAndTag'] a",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea6fe4847a857d3af01bb"
+          }
+        ],
+        "_id": "687ea6fe4847a857d3af01ba"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864fa85282235fe5b7d460",
+      "68864fa95282235fe5b7d462",
+      "68864feb5282235fe5b7d52f",
+      "688650185282235fe5b7d718",
+      "688650185282235fe5b7d71c",
+      "688650345282235fe5b7d846",
+      "688650455282235fe5b7d946",
+      "688650575282235fe5b7d9e3",
+      "688650585282235fe5b7da1a",
+      "688650685282235fe5b7db0a",
+      "6886507b5282235fe5b7db7c",
+      "688650855282235fe5b7dbd6",
+      "6886508a5282235fe5b7dbf3",
+      "688650905282235fe5b7dc4f",
+      "6886509b5282235fe5b7dcfb",
+      "688650a15282235fe5b7dd47",
+      "688650a25282235fe5b7dd52",
+      "688650ab5282235fe5b7ddc9",
+      "688650af5282235fe5b7ddf5",
+      "688650b25282235fe5b7de18",
+      "688650b85282235fe5b7de61",
+      "688650bc5282235fe5b7de6c"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:08:01.575Z",
+    "__v": 3,
+    "endTime": "2025-07-27T16:15:56.144Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685bff9c78d6b1b057fc051f",
+    "title": "Properties- fidelitypm",
+    "urls": [
+      "https://www.fidelitypm.com/commercial/145-Front-Street-East",
+      "https://www.fidelitypm.com/commercial/815-Danforth-Avenue",
+      "https://www.fidelitypm.com/commercial/250-Merton-Street",
+      "https://www.fidelitypm.com/commercial/250-Consumers-Road",
+      "https://www.fidelitypm.com/commercial/1110-Finch-Avenue-West"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1.title",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea77e4847a857d3af029e"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.suite-row",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".suite-box .suite-type",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea77e4847a857d3af02a0"
+          }
+        ],
+        "_id": "687ea77e4847a857d3af029f"
+      }
+    ],
+    "userId": "1",
+    "status": "completed",
+    "results": [
+      "68864fa15282235fe5b7d444",
+      "68864fed5282235fe5b7d560",
+      "68864ff85282235fe5b7d5ca",
+      "688650185282235fe5b7d764",
+      "688650455282235fe5b7d93c"
+    ],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T21:08:03.460Z",
+    "__v": 3,
+    "endTime": "2025-07-27T16:13:58.817Z",
+    "advancedSelectors": [],
+    "disabled": false,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685c025247451360e684dac3",
+    "title": "Properties- fieldgateproperties",
+    "urls": [
+      "https://fieldgateproperties.com/property/airport-corporate-centre/",
+      "https://fieldgateproperties.com/property/property-zone/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h4.title",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "686142ca7d446ae83de6dfc4"
+      },
+      {
+        "target_element": "property_info",
+        "selector_value": ".property-intro .col-sm-4",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "title",
+            "selector_value": "h4.title",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142ca7d446ae83de6dfc6"
+          },
+          {
+            "target_element": "address",
+            "selector_value": "h5.address",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142ca7d446ae83de6dfc7"
+          },
+          {
+            "target_element": "property_type",
+            "selector_value": ".property-type",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142ca7d446ae83de6dfc8"
+          },
+          {
+            "target_element": "total_area",
+            "selector_value": ".total-area",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142ca7d446ae83de6dfc9"
+          },
+          {
+            "target_element": "leasing_available",
+            "selector_value": ".leasing",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142ca7d446ae83de6dfca"
+          },
+          {
+            "target_element": "contact_name",
+            "selector_value": ".leasing-available .name",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142ca7d446ae83de6dfcb"
+          },
+          {
+            "target_element": "contact_phone",
+            "selector_value": ".leasing-available .number",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142ca7d446ae83de6dfcc"
+          },
+          {
+            "target_element": "contact_email",
+            "selector_value": ".leasing-available .email a",
+            "type": "link",
+            "attribute": "href",
+            "_id": "686142ca7d446ae83de6dfcd"
+          }
+        ],
+        "_id": "686142ca7d446ae83de6dfc5"
+      }
+    ],
+    "userId": "1",
+    "status": "pending",
+    "results": [],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-22T09:56:13.785Z",
+    "__v": 2,
+    "endTime": null,
+    "advancedSelectors": [],
+    "disabled": true,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "685c02ed47451360e684dc0c",
+    "title": "Properties- fcr",
+    "urls": [
+      "https://fcr.ca/properties/ontario/toronto/1670-bayview-avenue/",
+      "https://fcr.ca/properties/ontario/toronto/liberty-village/102-atlantic/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "685c02ed47451360e684dc0d"
+      }
+    ],
+    "userId": "1",
+    "status": "pending",
+    "results": [],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-18T14:18:52.150Z",
+    "__v": 1,
+    "endTime": null,
+    "advancedSelectors": [],
+    "disabled": true,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0
+    }
+  },
+  {
+    "_id": "6861ad8b7bbc9bbbc8932289",
+    "title": "Properties- Gottardo",
+    "urls": [
+      "http://gottardoconstruction.gottardogroup.com/galaxyairportcentre.php",
+      "http://gottardoconstruction.gottardogroup.com/2295%20Bristol%20Circle.php",
+      "http://gottardoconstruction.gottardogroup.com/2315%20Bristol%20Circle.php"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "span.titles",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea88c4847a857d3af042b"
+      },
+      {
+        "target_element": "available_unit",
+        "selector_value": "p.body > b",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea88c4847a857d3af042c"
+      }
+    ],
+    "userId": "1",
+    "status": "pending",
+    "results": [],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T20:52:28.330Z",
+    "__v": 4,
+    "endTime": null,
+    "advancedSelectors": [],
+    "disabled": true,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "686270bb63b6aea5574fec1e",
+    "title": "Properties- Greenwin",
+    "urls": [
+      "https://www.greenwin.ca/commercial-properties/14-duncan-street",
+      "https://www.greenwin.ca/commercial-properties/30-duncan-street",
+      "https://www.greenwin.ca/commercial-properties/600-king-street-west"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "687ea8d04847a857d3af04a6"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": ".suite.commercial-suite-details",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".top-content:has(h3.suite-type:contains('UNIT')) .suite-type-text",
+            "type": "text",
+            "attribute": null,
+            "_id": "687ea8d04847a857d3af04a8"
+          }
+        ],
+        "_id": "687ea8d04847a857d3af04a7"
+      }
+    ],
+    "userId": "1",
+    "status": "pending",
+    "results": [],
+    "logs": [],
+    "error": "",
+    "startTime": null,
+    "updatedAt": "2025-07-21T20:53:36.214Z",
+    "__v": 7,
+    "endTime": null,
+    "advancedSelectors": [
+      "#inquiry-form_form"
+    ],
+    "disabled": true,
+    "proxyUsageStats": {
+      "averageProxySuccessRate": 0,
+      "proxyCostEstimate": 0,
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null
+    }
+  },
+  {
+    "_id": "688362efb8f08dd5389899e4",
+    "title": "Properties- Humboldproperties",
+    "urls": [
+      "http://www.humboldproperties.com/project/1118-1126-finch-avenue-west-toronto/",
+      "http://www.humboldproperties.com/project/214-king-street-west-toronto/",
+      "http://www.humboldproperties.com/project/72-steeles-avenue-west-vaughan/",
+      "http://www.humboldproperties.com/project/534-536-eglinton-avenue-west-toronto/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "68836a9c6eb59a65122d5324"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div[id^='tablepress'] table tbody tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "td.column-1",
+            "type": "text",
+            "attribute": null,
+            "_id": "68836a9c6eb59a65122d5326"
+          }
+        ],
+        "_id": "68836a9c6eb59a65122d5325"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "6886500e5282235fe5b7d6d2",
+      "6886500e5282235fe5b7d6c5",
+      "688650185282235fe5b7d725",
+      "6886506d5282235fe5b7db47"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 4,
+      "uniqueProxiesUsed": 1,
+      "lastProxyUsed": "2025-07-27T16:14:37.857Z",
+      "proxyCostEstimate": 0.004,
+      "averageProxySuccessRate": 100
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-25T11:29:32.729Z",
+    "__v": 2,
+    "endTime": "2025-07-27T16:14:37.884Z"
+  },
+  {
+    "_id": "68836b556eb59a65122d5381",
+    "title": "Properties- jilanigroup",
+    "urls": [
+      "https://www.jilanigroup.com/availability/295-the-west-mall/5100-orbitor-drive/",
+      "https://www.jilanigroup.com/availability/295-the-west-mall/5100-orbitor-drive/7420-airport-road/",
+      "https://www.jilanigroup.com/availability/295-the-west-mall/5100-orbitor-drive/7420-airport-road/2576-matheson-blvd/",
+      "https://www.jilanigroup.com/availability/295-the-west-mall/5100-orbitor-drive/7420-airport-road/2576-matheson-blvd/110-eglinton-avenue-west/",
+      "https://www.jilanigroup.com/availability/295-the-west-mall/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "div.bc-text-content span[style*='font-size:30']",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "688372cadbfb3316032ec268"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.bc-text-content:contains('Suite')",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "span",
+            "type": "text",
+            "attribute": null,
+            "_id": "688372cadbfb3316032ec26a"
+          }
+        ],
+        "_id": "688372cadbfb3316032ec269"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864f885282235fe5b7d3ac",
+      "68864f895282235fe5b7d3b3",
+      "68864fa75282235fe5b7d45a",
+      "68864ffa5282235fe5b7d5f9",
+      "6886500a5282235fe5b7d677"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-25T12:04:26.190Z",
+    "__v": 3,
+    "endTime": "2025-07-27T16:12:59.316Z"
+  },
+  {
+    "_id": "68837618dbfb3316032ec289",
+    "title": "Properties- cbre",
+    "urls": [
+      "https://www.cbre.ca/properties/office/details/CA-Plus-622/scotia-plaza-40-king-street-w-toronto-ontario-m5h-3y2",
+      "https://www.cbre.ca/properties/office/details/CA-Plus-321886/18-king-street-e-toronto-ontario-m5c-1c4",
+      "https://www.cbre.ca/properties/office/details/CA-Plus-385927/bay-adelaide-centre-east-22-adelaide-street-w-toronto-ontario-m5h-1l6",
+      "https://www.cbre.ca/properties/office/details/CA-Plus-312377/700-bay-street-toronto-ontario-m5g-1z6",
+      "https://www.cbre.ca/properties/office/details/CA-Plus-318590/8-king-street-e-toronto-ontario-m5c-1b5",
+      "https://www.cbre.ca/properties/office/details/CA-Plus-385832/474-bathurst-street-toronto-ontario-m5t-2s6",
+      "https://www.cbre.ca/properties/office/details/CA-Plus-1950/190-liberty-street-toronto-ontario-m6k-3l5"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "688378d69af4893717b0366c"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.leasesBlock div.cbre_table__row",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "div.cbre_table__cell:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "688378d69af4893717b0366e"
+          }
+        ],
+        "_id": "688378d69af4893717b0366d"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fdd5282235fe5b7d4ce",
+      "68864fe75282235fe5b7d51f",
+      "68864ff85282235fe5b7d5c4",
+      "6886503e5282235fe5b7d887",
+      "6886504b5282235fe5b7d980",
+      "6886505d5282235fe5b7da5f",
+      "688650655282235fe5b7da99"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-25T12:30:14.323Z",
+    "__v": 2,
+    "endTime": "2025-07-27T16:14:30.065Z"
+  },
+  {
+    "_id": "6885a6f29af4893717b03728",
+    "title": "Properties- commercialcafe",
+    "urls": [
+      "https://www.commercialcafe.com/commercial-property/ca/on/toronto/scotia-plaza-44-king-street-west-1/"
+    ],
+    "selectors": [
+      {
+        "target_element": "title",
+        "selector_value": "div.property-header h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885aaa872e97ea26c6b3bc6"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "#availabilitySection table.availability tr.space",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "li:contains('Space Number') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aaa872e97ea26c6b3bc8"
+          }
+        ],
+        "_id": "6885aaa872e97ea26c6b3bc7"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fdc5282235fe5b7d4c0"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T04:27:20.247Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:12:17.791Z"
+  },
+  {
+    "_id": "6885a8fa7ac378ec6f1fae7b",
+    "title": "Properties- lisgardev",
+    "urls": [
+      "https://lisgardev.ca/properties/royal-building/",
+      "https://lisgardev.ca/properties/cornwall-business-centre/",
+      "https://lisgardev.ca/properties/emerald-business-centre/",
+      "https://lisgardev.ca/properties/robert-speck-parkway/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885adb3973c56c25cb0a39a"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "table tbody tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "field",
+            "selector_value": "td:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885adb3973c56c25cb0a39c"
+          },
+          {
+            "target_element": "value",
+            "selector_value": "td:nth-child(2)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885adb3973c56c25cb0a39d"
+          }
+        ],
+        "_id": "6885adb3973c56c25cb0a39b"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "failed",
+    "disabled": false,
+    "results": [
+      "688650175282235fe5b7d6fe",
+      "688650195282235fe5b7d7fa",
+      "688650435282235fe5b7d8f1",
+      "688650a45282235fe5b7dd7c"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 2,
+      "uniqueProxiesUsed": 1,
+      "lastProxyUsed": "2025-07-27T16:15:32.517Z",
+      "proxyCostEstimate": 0.002,
+      "averageProxySuccessRate": 100
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T04:40:19.866Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:15:32.963Z"
+  },
+  {
+    "_id": "6885ae04973c56c25cb0a406",
+    "title": "Properties- madisongroup",
+    "urls": [
+      "https://madisongroup.ca/commercial/90-eglinton-ave-e/",
+      "https://madisongroup.ca/commercial/150-eglinton-ave-e/",
+      "https://madisongroup.ca/commercial/160-eglinton-ave-e/",
+      "https://madisongroup.ca/commercial/164-eglinton-ave-e/",
+      "https://madisongroup.ca/commercial/90-eglinton-ave-w/",
+      "https://madisongroup.ca/commercial/2490-2514-yonge-st/",
+      "https://madisongroup.ca/commercial/15-toronto-st/",
+      "https://madisongroup.ca/commercial/1940-eglinton-ave-e/",
+      "https://madisongroup.ca/commercial/367-369-rimrock-rd/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885aee589d14cc04cc9f815"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.elementor-widget-theme-post-content table tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "td:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aee589d14cc04cc9f817"
+          }
+        ],
+        "_id": "6885aee589d14cc04cc9f816"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fe75282235fe5b7d521",
+      "68864fef5282235fe5b7d58a",
+      "68864ffb5282235fe5b7d60b",
+      "688650495282235fe5b7d975",
+      "6886504b5282235fe5b7d98b",
+      "6886504c5282235fe5b7d996",
+      "6886506f5282235fe5b7db66",
+      "6886507a5282235fe5b7db71",
+      "6886508e5282235fe5b7dc31"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T04:45:25.242Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:15:10.629Z"
+  },
+  {
+    "_id": "6885ae88973c56c25cb0a47f",
+    "title": "Properties- melroseinvestments",
+    "urls": [
+      "https://melroseinvestments.com/leasing/oakville/132-allan-street/",
+      "https://melroseinvestments.com/leasing/oakville/136-allan-street/",
+      "https://melroseinvestments.com/leasing/oakville/1295-cornwall-road/",
+      "https://melroseinvestments.com/leasing/oakville/1300-1320-cornwall-road/",
+      "https://melroseinvestments.com/leasing/oakville/1405-1435-cornwall-road/",
+      "https://melroseinvestments.com/leasing/oakville/145-reynolds-street/",
+      "https://melroseinvestments.com/leasing/vaughan/8800-dufferin-street/",
+      "https://melroseinvestments.com/leasing/vaughan/8395-jane-street/",
+      "https://melroseinvestments.com/leasing/vaughan/110-jardin-drive/",
+      "https://melroseinvestments.com/leasing/vaughan/150-jardin-drive/",
+      "https://melroseinvestments.com/leasing/vaughan/9131-9135-keele-street/",
+      "https://melroseinvestments.com/leasing/vaughan/180-jardin-drive/"
+    ],
+    "selectors": [
+      {
+        "target_element": "title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885b5e29abd2be3a09274b3"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.w-100.p-3.bg-white.text-center",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "h5.text-secondary",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885b5e29abd2be3a09274b5"
+          }
+        ],
+        "_id": "6885b5e29abd2be3a09274b4"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "failed",
+    "disabled": false,
+    "results": [
+      "68864ffb5282235fe5b7d609",
+      "688650185282235fe5b7d745",
+      "688650195282235fe5b7d7c1",
+      "688650825282235fe5b7dbc0",
+      "688650905282235fe5b7dc8f",
+      "6886509b5282235fe5b7dd26",
+      "688650bd5282235fe5b7de88",
+      "688650db5282235fe5b7de9b",
+      "688650e15282235fe5b7debb",
+      "688651005282235fe5b7dee0",
+      "6886512d5282235fe5b7def3",
+      "688651325282235fe5b7df06"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 9,
+      "uniqueProxiesUsed": 1,
+      "lastProxyUsed": "2025-07-27T16:17:54.131Z",
+      "proxyCostEstimate": 0.009000000000000001,
+      "averageProxySuccessRate": 100
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T05:15:14.879Z",
+    "__v": 4,
+    "endTime": "2025-07-27T16:17:54.158Z"
+  },
+  {
+    "_id": "6885b120713be737405a9498",
+    "title": "Properties- menkes",
+    "urls": [
+      "https://www.menkes.com/commercial/projects/320-bay-street",
+      "https://www.menkes.com/commercial/projects/100-queens-quay-east",
+      "https://www.menkes.com/commercial/projects/waterfront-innovation-centre",
+      "https://www.menkes.com/commercial/projects/one-york-street",
+      "https://www.menkes.com/commercial/projects/25-york-street",
+      "https://www.menkes.com/commercial/projects/4711-yonge-street",
+      "https://www.menkes.com/commercial/projects/2375-skymark-ave",
+      "https://www.menkes.com/commercial/projects/4800-yonge-street-office",
+      "https://www.menkes.com/commercial/projects/789-don-mills-road"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885b95c97a816ba51e85799"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "failed",
+    "disabled": false,
+    "results": [
+      "68864fdc5282235fe5b7d4c6",
+      "68864fe75282235fe5b7d51d",
+      "6886501a5282235fe5b7d80c",
+      "6886501a5282235fe5b7d81e",
+      "688650585282235fe5b7da21",
+      "6886505b5282235fe5b7da58",
+      "688650665282235fe5b7dae9",
+      "688650815282235fe5b7dbb1",
+      "688650905282235fe5b7dc7b"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T05:30:04.954Z",
+    "__v": 4,
+    "endTime": "2025-07-27T16:15:12.829Z"
+  },
+  {
+    "_id": "6885bcd097a816ba51e8580e",
+    "title": "Properties- montezcorp",
+    "urls": [
+      "https://www.montezcorp.com/select-investment/120-bloor-street-east/",
+      "https://www.montezcorp.com/select-investment/1243-islington-avenue/",
+      "https://www.montezcorp.com/select-investment/herons-hill/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885bcd097a816ba51e8580f"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "failed",
+    "disabled": false,
+    "results": [
+      "688650125282235fe5b7d6f5",
+      "688650185282235fe5b7d741",
+      "6886503e5282235fe5b7d872"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T05:44:48.820Z",
+    "__v": 0,
+    "endTime": "2025-07-27T16:13:52.184Z"
+  },
+  {
+    "_id": "6885bd0c97a816ba51e85877",
+    "title": "Properties- morguardleasing",
+    "urls": [
+      "https://morguardleasing.com/building/8175779927176517284/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/building-2273/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/building-2583/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/6494671049124942355/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/8849191519512647986/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/9052739370809312404/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/673398602240036661/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/5651049464998995760/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/4436281808315234025/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/4575178569230496753/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/7215923531414912922/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/building-2492/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/8259425197180862605/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/8318931002772183451/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/8318931002772183451/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/6111828941606038449/?search=&min=0&max=183000&type=O",
+      "https://morguardleasing.com/building/2251-north-sheridan-way/?search=&min=0&max=183000&type=O"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885c8f08aab6f5865b744be"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div[class^=\"SuiteListItem_suiteInfoContainer\"]",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "div[class^=\"SuiteListItem_suiteNameAndTag\"] div",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8f08aab6f5865b744c0"
+          }
+        ],
+        "_id": "6885c8f08aab6f5865b744bf"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fae5282235fe5b7d488",
+      "68864faf5282235fe5b7d48f",
+      "68864ff35282235fe5b7d59d",
+      "688650185282235fe5b7d72f",
+      "688650185282235fe5b7d762",
+      "688650415282235fe5b7d8a8",
+      "688650575282235fe5b7d9ea",
+      "688650595282235fe5b7da2c",
+      "688650655282235fe5b7daad",
+      "6886507d5282235fe5b7db87",
+      "688650835282235fe5b7dbcb",
+      "688650885282235fe5b7dbe1",
+      "688650935282235fe5b7dccf",
+      "688650965282235fe5b7dce5",
+      "6886509b5282235fe5b7dd13",
+      "688650a55282235fe5b7dd9f",
+      "688650a65282235fe5b7ddaa"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T06:36:32.166Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:15:34.274Z"
+  },
+  {
+    "_id": "6885bd5697a816ba51e858fb",
+    "title": "Properties- northamleasingbrokerage",
+    "urls": [
+      "https://www.northamleasingbrokerage.com/office-and-retail-properties/483-bay-st",
+      "https://www.northamleasingbrokerage.com/office-and-retail-properties/2-carlton-st",
+      "https://www.northamleasingbrokerage.com/office-and-retail-properties/133-145-king-st-e",
+      "https://www.northamleasingbrokerage.com/office-and-retail-properties/250-university-ave",
+      "https://www.northamleasingbrokerage.com/office-and-retail-properties/235-yorkland-blvd",
+      "https://www.northamleasingbrokerage.com/office-and-retail-properties/245-yorkland-blvd",
+      "https://www.northamleasingbrokerage.com/office-and-retail-properties/207-queen-quay-w",
+      "https://www.northamleasingbrokerage.com/office-and-retail-properties/8-market-st-87-front-st"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885bd5697a816ba51e858fc"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "failed",
+    "disabled": false,
+    "results": [
+      "688650195282235fe5b7d7bf",
+      "688650195282235fe5b7d7df",
+      "688650435282235fe5b7d910",
+      "6886509b5282235fe5b7dd0c",
+      "688650ad5282235fe5b7ddda",
+      "688650b15282235fe5b7de06",
+      "688650dc5282235fe5b7deac",
+      "688650e85282235fe5b7decc"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 7,
+      "uniqueProxiesUsed": 1,
+      "lastProxyUsed": "2025-07-27T16:16:40.605Z",
+      "proxyCostEstimate": 0.007,
+      "averageProxySuccessRate": 100
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T05:47:02.126Z",
+    "__v": 0,
+    "endTime": "2025-07-27T16:16:40.623Z"
+  },
+  {
+    "_id": "6885bde797a816ba51e85959",
+    "title": "Properties- nwhproperties",
+    "urls": [
+      "https://nwhproperties.com/properties/greater-toronto-area/dundas-centre-medical/",
+      "https://nwhproperties.com/properties/greater-toronto-area/jerry-coughlan-health-wellness-centre/",
+      "https://nwhproperties.com/properties/greater-toronto-area/queensway-professional-centre-89/",
+      "https://nwhproperties.com/properties/greater-toronto-area/queensway-professional-centre-101/",
+      "https://nwhproperties.com/properties/greater-toronto-area/trafalgar-professional-centre/"
+    ],
+    "selectors": [
+      {
+        "target_element": "title ",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885c977ea80cca922abcced"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "#suites div[class*=\"rounded-small\"]",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "h3",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c977ea80cca922abccef"
+          }
+        ],
+        "_id": "6885c977ea80cca922abccee"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fdc5282235fe5b7d4c2",
+      "68864feb5282235fe5b7d52b",
+      "68864ff75282235fe5b7d5ab",
+      "6886501a5282235fe5b7d813",
+      "688650425282235fe5b7d8b5"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T06:38:47.813Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:13:55.130Z"
+  },
+  {
+    "_id": "6885cb8aea80cca922abcf24",
+    "title": "Properties- commercialme",
+    "urls": [
+      "https://commercialme.orlandocorp.com/commercial-property/ca/on/mississauga/5800-hurontario-street-2/",
+      "https://commercialme.orlandocorp.com/commercial-property/ca/on/mississauga/5900-hurontario-street-2/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885d83ecbba1f0ff96994a9"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "#availabilitySection tr.space",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "li:contains('Space Number') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d83ecbba1f0ff96994ab"
+          }
+        ],
+        "_id": "6885d83ecbba1f0ff96994aa"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fdc5282235fe5b7d4cc",
+      "68864ff85282235fe5b7d5be"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T07:41:50.826Z",
+    "__v": 4,
+    "endTime": "2025-07-27T16:12:42.483Z"
+  },
+  {
+    "_id": "6885d347d921b622a96973d0",
+    "title": "Properties- oxfordproperties",
+    "urls": [
+      "https://www.oxfordproperties.com/lease/office/20-bay-street",
+      "https://www.oxfordproperties.com/lease/office/10-bay-street",
+      "https://www.oxfordproperties.com/lease/office/88-queens-quay-west",
+      "https://www.oxfordproperties.com/lease/office/citigroup-place",
+      "https://www.oxfordproperties.com/lease/office/2200-yonge-street",
+      "https://www.oxfordproperties.com/lease/office/2190-yonge-street",
+      "https://www.oxfordproperties.com/lease/office/2180-yonge-street",
+      "https://www.oxfordproperties.com/lease/office/111-richmond-st-west",
+      "https://www.oxfordproperties.com/lease/office/120-adelaide-st-west",
+      "https://www.oxfordproperties.com/lease/office/130-adelaide-st-west",
+      "https://www.oxfordproperties.com/lease/office/100-adelaide-st-west"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885d4f165016e99c7036ba4"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.lg\\:grid.lg\\:grid-cols-6.border-t.border-light-blue.py-4",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "div.py-2:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d4f165016e99c7036ba6"
+          }
+        ],
+        "_id": "6885d4f165016e99c7036ba5"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fdc5282235fe5b7d4c4",
+      "68864feb5282235fe5b7d52d",
+      "68864fee5282235fe5b7d57f",
+      "688650185282235fe5b7d796",
+      "688650385282235fe5b7d851",
+      "6886503e5282235fe5b7d874",
+      "688650505282235fe5b7d9c2",
+      "6886505b5282235fe5b7da4d",
+      "688650805282235fe5b7db92",
+      "688650905282235fe5b7dc4d",
+      "688650905282235fe5b7dc51"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T07:27:45.381Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:15:12.627Z"
+  },
+  {
+    "_id": "6885d59d65016e99c7036c39",
+    "title": "Properties- pinedaleprop",
+    "urls": [
+      "https://pinedaleprop.com/commercial-properties/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885d8d4888b4a409604be73"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.col_half.col_last",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "li:contains('Suite Number') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d8d4888b4a409604be75"
+          }
+        ],
+        "_id": "6885d8d4888b4a409604be74"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "pending",
+    "disabled": true,
+    "results": [],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T07:48:03.407Z",
+    "__v": 1,
+    "endTime": null
+  },
+  {
+    "_id": "6885d869cbba1f0ff96994bb",
+    "title": "Properties- polarisrealty",
+    "urls": [
+      "http://www.polarisrealty.com/en/properties/toronto/5_2680-matheson-boulevard/_realestate_property",
+      "http://www.polarisrealty.com/en/properties/toronto/7_2700-matheson-boulevard-east/_realestate_property",
+      "http://www.polarisrealty.com/en/properties/toronto/8_5450-explorer-drive/_realestate_property",
+      "http://www.polarisrealty.com/en/properties/toronto/9_5255-orbitor-drive/_realestate_property",
+      "http://www.polarisrealty.com/en/properties/toronto/10_5700-explorer-drive/_realestate_property",
+      "http://www.polarisrealty.com/en/properties/toronto/11_5300-satellite-drive/_realestate_property",
+      "http://www.polarisrealty.com/en/properties/toronto/12_2585---2605-skymark-avenue/_realestate_property"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885dbac4c69d87bb513153f"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "#divContent h2.content",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "span.suite-number-not-present",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885dbac4c69d87bb5131541"
+          }
+        ],
+        "_id": "6885dbac4c69d87bb5131540"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "pending",
+    "disabled": true,
+    "results": [],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T07:58:41.343Z",
+    "__v": 1,
+    "endTime": null
+  },
+  {
+    "_id": "6885dc9b4c69d87bb513157e",
+    "title": "Properties- quadreal findspace",
+    "urls": [
+      "https://quadreal.findspace.com/building/145-king-street-west/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/commerce-court-east-commerce-court/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/commerce-court-north-commerce-court/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/6985-financial-drive/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/200-king-street-west/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/6775-financial-drive/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/commerce-court-west-commerce-court/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/18-york/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/building-1582/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/6990-creditview-road-2/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/120-bremner/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/priszm-building-2/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/ennisclare-corporate-centre/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/commerce-court-south-commerce-court/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/meadowvale-north-business-park/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/7125-mississauga-road/?search=&min=0&max=1120750&type=O",
+      "https://quadreal.findspace.com/building/6990-creditview-road/?search=&min=0&max=1120750&type=O"
+    ],
+    "selectors": [
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.SuiteListItem_suiteInfoContainer__NTfk0",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".SuiteListItem_suiteNameAndTag__FBNmQ",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885dc9b4c69d87bb5131580"
+          }
+        ],
+        "_id": "6885dc9b4c69d87bb513157f"
+      },
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885dc9b4c69d87bb5131581"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fd85282235fe5b7d4b5",
+      "68864ff65282235fe5b7d5a8",
+      "68864ff85282235fe5b7d5c2",
+      "688650325282235fe5b7d830",
+      "688650435282235fe5b7d903",
+      "688650455282235fe5b7d93e",
+      "688650655282235fe5b7da87",
+      "6886506d5282235fe5b7db20",
+      "6886506e5282235fe5b7db5b",
+      "6886508d5282235fe5b7dc23",
+      "688650905282235fe5b7dc92",
+      "688650915282235fe5b7dca5",
+      "688650a35282235fe5b7dd5d",
+      "688650a45282235fe5b7dd68",
+      "688650a95282235fe5b7ddbe",
+      "688650b35282235fe5b7de23",
+      "688650b35282235fe5b7de2e"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T08:00:27.647Z",
+    "__v": 0,
+    "endTime": "2025-07-27T16:15:47.956Z"
+  },
+  {
+    "_id": "6885e2414c69d87bb51316f9",
+    "title": "Properties- truenorthreit",
+    "urls": [
+      "https://truenorthreit.com/property/5775-yonge-street-toronto-ontario",
+      "https://truenorthreit.com/property/6925-century-avenue-mississauga-ontario",
+      "https://truenorthreit.com/property/1595-16th-avenue-richmond-hill-ontario",
+      "https://truenorthreit.com/property/777-brock-road-pickering-ontario",
+      "https://truenorthreit.com/property/675-cochrane-drive-markham-ontario",
+      "https://truenorthreit.com/property/101-mcnabb-street-markham-ontario",
+      "https://truenorthreit.com/property/5160-orbitor-drive-mississauga-ontario",
+      "https://truenorthreit.com/property/3115-harvester-road-burlington-ontario",
+      "https://truenorthreit.com/property/6-staples-avenue-richmond-hill-ontario",
+      "https://truenorthreit.com/property/3650-victoria-park-avenue-toronto-ontario",
+      "https://truenorthreit.com/property/80-whitehall-drive-markham-ontario"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885e2414c69d87bb51316fa"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "pending",
+    "disabled": true,
+    "results": [],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T08:32:57.802Z",
+    "__v": 0,
+    "endTime": null
+  },
+  {
+    "_id": "6885e28b4c69d87bb5131772",
+    "title": "Properties- sterlingkaramar",
+    "urls": [
+      "https://www.sterlingkaramar.com/commercial/10-unionville-gate",
+      "https://www.sterlingkaramar.com/commercial/465-davis-drive",
+      "https://www.sterlingkaramar.com/commercial/521-523-victoria-park-avenue",
+      "https://www.sterlingkaramar.com/commercial/890-yonge-street",
+      "https://www.sterlingkaramar.com/commercial/228-queens-quay-west",
+      "https://www.sterlingkaramar.com/commercial/600-and-620-the-east-mall",
+      "https://www.sterlingkaramar.com/commercial/658-danforth-avenue",
+      "https://www.sterlingkaramar.com/commercial/245-ouellette-avenue"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885e5401252a4a4bc6d608c"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "section#availability .suite, div.availability-row",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": ".suite-header, .suite-number",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885e5401252a4a4bc6d608e"
+          }
+        ],
+        "_id": "6885e5401252a4a4bc6d608d"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fdc5282235fe5b7d4ca",
+      "68864fe15282235fe5b7d50a",
+      "68864fec5282235fe5b7d540",
+      "688650325282235fe5b7d833",
+      "6886503c5282235fe5b7d867",
+      "688650435282235fe5b7d8cf",
+      "688650675282235fe5b7daff",
+      "6886506d5282235fe5b7db2b"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T08:37:20.436Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:14:37.732Z"
+  },
+  {
+    "_id": "6885e2f04c69d87bb5131803",
+    "title": "Properties- cadillacfairview",
+    "urls": [
+      "https://www.cadillacfairview.com/office/properties/td-bank-tower/",
+      "https://www.cadillacfairview.com/office/properties/td-north-tower/",
+      "https://www.cadillacfairview.com/office/properties/td-west-tower/",
+      "https://www.cadillacfairview.com/office/properties/td-south-tower/",
+      "https://www.cadillacfairview.com/office/properties/222-bay-st/",
+      "https://www.cadillacfairview.com/office/properties/95-wellington-street-west/",
+      "https://www.cadillacfairview.com/office/properties/160-front/",
+      "https://www.cadillacfairview.com/office/properties/16-york/",
+      "https://www.cadillacfairview.com/office/properties/rbc-centre/",
+      "https://www.cadillacfairview.com/office/properties/simcoe-place/",
+      "https://www.cadillacfairview.com/office/properties/2-queen-west/",
+      "https://www.cadillacfairview.com/office/properties/20-queen-west/",
+      "https://www.cadillacfairview.com/office/properties/250-yonge/",
+      "https://www.cadillacfairview.com/office/properties/1-dundas-west/",
+      "https://www.cadillacfairview.com/office/properties/4100-yonge/",
+      "https://www.cadillacfairview.com/office/properties/4120-yonge/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885ebe222e777f57fb51184"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "section#availability table tbody tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "td:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ebe222e777f57fb51186"
+          }
+        ],
+        "_id": "6885ebe222e777f57fb51185"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864ff85282235fe5b7d5c0",
+      "68864ffb5282235fe5b7d621",
+      "68864ffb5282235fe5b7d625",
+      "688650445282235fe5b7d92a",
+      "688650455282235fe5b7d935",
+      "688650475282235fe5b7d96a",
+      "688650665282235fe5b7dad9",
+      "688650665282235fe5b7daef",
+      "6886506b5282235fe5b7db15",
+      "6886508a5282235fe5b7dbf1",
+      "6886508d5282235fe5b7dc18",
+      "6886508e5282235fe5b7dc2e",
+      "688650a05282235fe5b7dd31",
+      "688650a15282235fe5b7dd3c",
+      "688650a55282235fe5b7dd94",
+      "688650af5282235fe5b7dde1"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:05:38.623Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:15:43.139Z"
+  },
+  {
+    "_id": "6885e4c74c69d87bb5131891",
+    "title": "Properties- downingstreet",
+    "urls": [
+      "https://www.downingstreet.com/commercial/187-parliament/",
+      "https://www.downingstreet.com/commercial/37-advance/",
+      "https://www.downingstreet.com/commercial/190-norseman-fs/",
+      "https://www.downingstreet.com/commercial/212-216-norseman/",
+      "https://www.downingstreet.com/commercial/1125-1129-leslie-street/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885e4c74c69d87bb5131892"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "failed",
+    "disabled": false,
+    "results": [
+      "68864fae5282235fe5b7d48a",
+      "68864fad5282235fe5b7d486",
+      "6886500b5282235fe5b7d68a",
+      "6886500c5282235fe5b7d6a6",
+      "6886500f5282235fe5b7d6e9"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T08:35:19.517Z",
+    "__v": 0,
+    "endTime": "2025-07-27T16:13:03.645Z"
+  },
+  {
+    "_id": "6885ed1822e777f57fb512f0",
+    "title": "Properties- triovest",
+    "urls": [
+      "https://www.triovest.com/case-studies/mississauga-gateway-centre-mississauga-on/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885ed1822e777f57fb512f1"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "688650655282235fe5b7da7b"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 1,
+      "uniqueProxiesUsed": 1,
+      "lastProxyUsed": "2025-07-27T16:14:29.018Z",
+      "proxyCostEstimate": 0.001,
+      "averageProxySuccessRate": 100
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:10:48.249Z",
+    "__v": 0,
+    "endTime": "2025-07-27T16:14:29.323Z"
+  },
+  {
+    "_id": "6885ede922e777f57fb51371",
+    "title": "Properties- leasing triovest",
+    "urls": [
+      "https://leasing.triovest.com/building/building-1518/?search=&min=0&max=480000&type=A",
+      "https://leasing.triovest.com/building/building-2381/?search=&min=0&max=480000&type=O",
+      "https://leasing.triovest.com/building/3329819921595067609/?search=&min=0&max=480000&type=O",
+      "https://leasing.triovest.com/building/building-1488/?search=&min=0&max=480000&type=O",
+      "https://leasing.triovest.com/building/building-1521/?search=&min=0&max=480000&type=O",
+      "https://leasing.triovest.com/building/building-611/?search=&min=0&max=480000&type=O",
+      "https://leasing.triovest.com/building/909078812586436500/?search=&min=0&max=480000&type=O",
+      "https://leasing.triovest.com/building/building-2258/?search=&min=0&max=480000&type=O"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885ef879598bedf603630a2"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div[class^=\"SuiteListItem_suiteInfoContainer\"]",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "div[class^=\"SuiteListItem_suiteNameAndTag\"] div",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ef879598bedf603630a4"
+          }
+        ],
+        "_id": "6885ef879598bedf603630a3"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "completed",
+    "disabled": false,
+    "results": [
+      "68864fa15282235fe5b7d446",
+      "68864fea5282235fe5b7d529",
+      "68864ffb5282235fe5b7d629",
+      "688650185282235fe5b7d72d",
+      "688650435282235fe5b7d8d1",
+      "688650435282235fe5b7d8d8",
+      "688650525282235fe5b7d9cd",
+      "688650665282235fe5b7dac5"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:21:11.722Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:14:30.154Z"
+  },
+  {
+    "_id": "6885ee2622e777f57fb513fb",
+    "title": "Properties- westburyint",
+    "urls": [
+      "https://www.westburyint.com/2201_bristolcircle.html"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885ee2622e777f57fb513fc"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "pending",
+    "disabled": true,
+    "results": [],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:21:32.037Z",
+    "__v": 0,
+    "endTime": null
+  },
+  {
+    "_id": "6885efee9598bedf6036314f",
+    "title": "Properties- westdaleproperties",
+    "urls": [
+      "https://www.westdaleproperties.com/rental/1450-Castlefield-Ave-Toronto",
+      "https://www.westdaleproperties.com/rental/2201-Eglinton-West-888-Birchmount-Toronto",
+      "https://www.westdaleproperties.com/rental/76-Miranda-Avenue-Toronto",
+      "https://www.westdaleproperties.com/rental/277-Wellington-Street-W-Toronto"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885f18c9381ce1daf4f19db"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div#txtDetail",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "property_description",
+            "selector_value": "p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f18c9381ce1daf4f19dd"
+          }
+        ],
+        "_id": "6885f18c9381ce1daf4f19dc"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "pending",
+    "disabled": true,
+    "results": [],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:31:38.384Z",
+    "__v": 1,
+    "endTime": null
+  },
+  {
+    "_id": "6885f1eb9381ce1daf4f1a83",
+    "title": "Properties- wtfgroup",
+    "urls": [
+      "http://wtfgroup.com/property/116-spadina/",
+      "http://wtfgroup.com/property/119-spadina/",
+      "http://wtfgroup.com/property/130-spadina/",
+      "http://wtfgroup.com/property/140-spadina/",
+      "http://wtfgroup.com/property/26-soho/",
+      "http://wtfgroup.com/property/king-west-centre/"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885f3241bb44c7f3fdb2ead"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.suite-box div.suite-row:not(:first-child)",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "div.suite-col:first-child a",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f3241bb44c7f3fdb2eaf"
+          }
+        ],
+        "_id": "6885f3241bb44c7f3fdb2eae"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "in-progress",
+    "disabled": false,
+    "results": [
+      "688650005282235fe5b7d66c",
+      "6886500c5282235fe5b7d6a1",
+      "6886500c5282235fe5b7d6a3"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:36:36.218Z",
+    "__v": 1,
+    "endTime": null
+  },
+  {
+    "_id": "6885f28f9381ce1daf4f1b20",
+    "title": "Properties- metrusproperties",
+    "urls": [
+      "https://www.metrusproperties.com/index.php?o=property&id=1503",
+      "https://www.metrusproperties.com/index.php?o=property&id=488",
+      "https://www.metrusproperties.com/index.php?o=property&id=2130",
+      "https://www.metrusproperties.com/index.php?o=property&id=63",
+      "https://www.metrusproperties.com/index.php?o=property&id=225",
+      "https://www.metrusproperties.com/index.php?o=property&id=3066",
+      "https://www.metrusproperties.com/index.php?o=property&id=1456",
+      "https://www.metrusproperties.com/index.php?o=property&id=362",
+      "https://www.metrusproperties.com/index.php?o=property&id=2947"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885f374b6e55bd2b16ca795"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.desc",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "property_description",
+            "selector_value": "self",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f374b6e55bd2b16ca797"
+          }
+        ],
+        "_id": "6885f374b6e55bd2b16ca796"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "pending",
+    "disabled": true,
+    "results": [],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:40:34.250Z",
+    "__v": 1,
+    "endTime": null
+  },
+  {
+    "_id": "6885f3f2b6e55bd2b16ca83f",
+    "title": "Properties- yorkheritage",
+    "urls": [
+      "https://www.yorkheritage.com/3-church-street",
+      "https://www.yorkheritage.com/11-church-street",
+      "https://www.yorkheritage.com/70-bond-street",
+      "https://www.yorkheritage.com/10-alcorn-avenue",
+      "https://www.yorkheritage.com/161-liberty-street",
+      "https://www.yorkheritage.com/15-fraser-avenue",
+      "https://www.yorkheritage.com/173-dufferin-street"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885f6401ecf6ba02f830ef9"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "div.main-content",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "property_description",
+            "selector_value": "div.sqs-block-html h2",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f6401ecf6ba02f830efb"
+          }
+        ],
+        "_id": "6885f6401ecf6ba02f830efa"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "pending",
+    "disabled": true,
+    "results": [],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:49:52.756Z",
+    "__v": 1,
+    "endTime": null
+  },
+  {
+    "_id": "6885f5b2b6e55bd2b16ca8f0",
+    "title": "Properties- riocan",
+    "urls": [
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/1293-Bloor-Street-West/default.aspx",
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/1650---1660-Carling-Avenue/default.aspx",
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/2323-Yonge-Street/default.aspx",
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/2453-Yonge-Street/default.aspx",
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/2955-Bloor-Street-West/default.aspx",
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/602-606-King-Street-West/default.aspx",
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/642-King-Street-West/default.aspx",
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/649-Queen-St-West/default.aspx",
+      "https://www.riocan.com/English/our-properties/leasing/details/2016/ePlace/default.aspx"
+    ],
+    "selectors": [
+      {
+        "target_element": "Title",
+        "selector_value": "h1",
+        "type": "text",
+        "attribute": null,
+        "childSelectors": [],
+        "_id": "6885f6d63992c146eafc94bf"
+      },
+      {
+        "target_element": "vacancy_data",
+        "selector_value": "ol.list-tenants li",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "target_element": "suite_number",
+            "selector_value": "span:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f6d63992c146eafc94c1"
+          }
+        ],
+        "_id": "6885f6d63992c146eafc94c0"
+      }
+    ],
+    "advancedSelectors": [],
+    "userId": "1",
+    "status": "failed",
+    "disabled": false,
+    "results": [
+      "688650575282235fe5b7da04",
+      "688650585282235fe5b7da0f",
+      "688650595282235fe5b7da37",
+      "688650925282235fe5b7dcc4",
+      "688650935282235fe5b7dcda",
+      "688650965282235fe5b7dcf0",
+      "688650b25282235fe5b7de0d",
+      "688650b45282235fe5b7de42",
+      "688650b55282235fe5b7de4d"
+    ],
+    "logs": [],
+    "error": "",
+    "proxyUsageStats": {
+      "totalProxyRequests": 0,
+      "uniqueProxiesUsed": 0,
+      "lastProxyUsed": null,
+      "proxyCostEstimate": 0,
+      "averageProxySuccessRate": 0
+    },
+    "startTime": null,
+    "updatedAt": "2025-07-27T09:52:22.643Z",
+    "__v": 1,
+    "endTime": "2025-07-27T16:15:49.582Z"
+  }
+]
