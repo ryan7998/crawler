@@ -35,7 +35,11 @@ export const getApiUrl = () => {
  * @returns {string} Socket URL
  */
 export const getSocketUrl = () => {
-    return import.meta.env.VITE_BASE_URL || 'http://localhost:3002'
+    // Use HTTPS / WSS since nginx is handling SSL termination
+    if (import.meta.env.VITE_BASE_URL) {
+        return import.meta.env.VITE_BASE_URL.replace('https://', 'wss://')
+    }
+    return 'ws://localhost:3002'
 }
 
 /**
@@ -68,11 +72,11 @@ export const sanitizeFilename = (filename) => {
  */
 export const getRelativeTime = (date) => {
     if (!date) return 'Never'
-    
+
     const now = new Date()
     const past = new Date(date)
     const diffInMs = now - past
-    
+
     const diffInSeconds = Math.floor(diffInMs / 1000)
     const diffInMinutes = Math.floor(diffInSeconds / 60)
     const diffInHours = Math.floor(diffInMinutes / 60)
@@ -80,7 +84,7 @@ export const getRelativeTime = (date) => {
     const diffInWeeks = Math.floor(diffInDays / 7)
     const diffInMonths = Math.floor(diffInDays / 30)
     const diffInYears = Math.floor(diffInDays / 365)
-    
+
     if (diffInSeconds < 60) {
         return 'Just now'
     } else if (diffInMinutes < 60) {
