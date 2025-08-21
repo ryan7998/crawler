@@ -8,8 +8,8 @@ const crawlQueue = new Queue('crawl', {
         duration: 3000 // per 3 seconds
     },
     redis: {
-        host: '127.0.0.1', // Redis is running locally
-        port: 6379,         // Default Redis port
+        host: process.env.REDIS_HOST || '127.0.0.1',
+        port: process.env.REDIS_PORT || 6379,     // Default Redis port
         maxRetriesPerRequest: null  // disables the retry limit
     },
     defaultJobOptions: {

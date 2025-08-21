@@ -27,7 +27,7 @@ export function useSocketConnection(options = {}) {
   const connect = () => {
     try {
       console.log('Connecting to socket at:', socketUrl)
-      
+
       socket.value = io(socketUrl, {
         path,
         transports,
@@ -37,7 +37,7 @@ export function useSocketConnection(options = {}) {
       })
 
       setupEventListeners()
-      
+
       if (autoConnect) {
         socket.value.connect()
       }
@@ -178,7 +178,7 @@ export function useSocketConnection(options = {}) {
     isConnected,
     connectionError,
     logs,
-    
+
     // Methods
     connect,
     disconnect,

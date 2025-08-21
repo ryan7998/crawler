@@ -7,6 +7,8 @@
   const CrawlData = require('./models/CrawlData');
   const Crawl = require('./models/Crawl');
   const { extractHtml, determineCrawlStatus } = require('../utils/helperFunctions');
+  // const { crawlQueue: getCrawlQueue } = require('./queues/crawlQueue')
+
   const getCrawlQueue = require('./queues/getCrawlQueue');
   const { initializeSocket, getSocket } = require('../utils/socket');
   const Seed = require('./classes/Seed');
@@ -50,13 +52,57 @@
 
   // Called once per crawlId to wire up its queue
   async function ensureProcessor(crawlId) {
+    console.log("activeProcessors: ", activeProcessors)
     if (activeProcessors.has(crawlId)) {
       console.log(`[${crawlId}] Processor already exists, skipping...`);
       return;
     }
     activeProcessors.add(crawlId);
 
-    const q = getCrawlQueue(crawlId);
+    // Environment-aware Redis connection handling
+    const bullVersion = require('bull/package.json').version;
+    const isBull4 = bullVersion.startsWith('4');
+    const isBull3 = bullVersion.startsWith('3');
+
+    let q = null;
+
+    if (isBull4) {
+      // Bull 4.x (local environment) - direct connection
+      try {
+        q = getCrawlQueue(crawlId);
+        console.log(`[${crawlId}] Bull 4.x - Queue created successfully`);
+      } catch (err) {
+        console.error(`[${crawlId}] Failed to create queue:`, err.message);
+        activeProcessors.delete(crawlId);
+        throw new Error(`Queue creation failed for crawl ${crawlId}: ${err.message}`);
+      }
+    } else {
+      // Bull 3.x (production environment) - retry mechanism for Redis connection issues
+      let retries = 3;
+
+      while (retries > 0 && !q) {
+        try {
+          q = getCrawlQueue(crawlId);
+          // Test the connection
+          await q.client.ping();
+          console.log(`[${crawlId}] Redis connection established successfully`);
+          break;
+        } catch (err) {
+          retries--;
+          console.error(`[${crawlId}] Redis connection attempt failed (${3 - retries}/3):`, err.message);
+
+          if (retries > 0) {
+            console.log(`[${crawlId}] Retrying in 2 seconds...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          } else {
+            console.error(`[${crawlId}] Failed to establish Redis connection after 3 attempts`);
+            activeProcessors.delete(crawlId);
+            throw new Error(`Redis connection failed for crawl ${crawlId}: ${err.message}`);
+          }
+        }
+      }
+    }
+
     const io = getSocket();
     const crawlIdStr = String(crawlId); // Ensure crawlId is a string for socket rooms
 
@@ -304,6 +350,92 @@
     } catch (err) {
       console.error('Error clearing queue:', err);
       return res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Redis connection test endpoint
+  app.get('/redis-test', async (req, res) => {
+    try {
+      const testQueue = getCrawlQueue('test');
+
+      // Environment-aware testing
+      const bullVersion = require('bull/package.json').version;
+      const isBull4 = bullVersion.startsWith('4');
+
+      if (isBull4) {
+        // Bull 4.x - basic queue test
+        await testQueue.add({ test: 'data' });
+        const jobs = await testQueue.getJobs(['waiting']);
+        await testQueue.empty();
+      } else {
+        // Bull 3.x - test with connection validation
+        await testQueue.add({ test: 'data' });
+        const jobs = await testQueue.getJobs(['waiting']);
+        await testQueue.empty();
+      }
+
+      return res.json({
+        status: 'success',
+        message: 'Redis connection and operations working correctly',
+        bullVersion: bullVersion,
+        redisHost: process.env.REDIS_HOST || '127.0.0.1',
+        redisPort: process.env.REDIS_PORT || 6379,
+        nodeEnv: process.env.NODE_ENV || 'development'
+      });
+    } catch (err) {
+      console.error('Redis test failed:', err);
+      return res.status(500).json({
+        status: 'error',
+        error: err.message,
+        bullVersion: require('bull/package.json').version,
+        redisHost: process.env.REDIS_HOST || '127.0.0.1',
+        redisPort: process.env.REDIS_PORT || 6379,
+        nodeEnv: process.env.NODE_ENV || 'development'
+      });
+    }
+  });
+
+  // Redis health check endpoint
+  app.get('/redis-health', async (req, res) => {
+    try {
+      const testQueue = getCrawlQueue('health-check');
+      const bullVersion = require('bull/package.json').version;
+      const isBull4 = bullVersion.startsWith('4');
+
+      if (isBull4) {
+        // Bull 4.x - basic health check
+        const waiting = await testQueue.getJobs(['waiting']);
+        await testQueue.empty();
+      } else {
+        // Bull 3.x - check if Redis is accessible
+        const client = testQueue.client;
+        await client.ping();
+
+        // Check queue status
+        const waiting = await testQueue.getJobs(['waiting']);
+        await testQueue.empty();
+      }
+
+      return res.json({
+        status: 'healthy',
+        redis: 'connected',
+        queue: 'operational',
+        bullVersion: bullVersion,
+        timestamp: new Date().toISOString(),
+        redisHost: process.env.REDIS_HOST || '127.0.0.1',
+        redisPort: process.env.REDIS_PORT || 6379
+      });
+    } catch (err) {
+      console.error('Redis health check failed:', err);
+      return res.status(500).json({
+        status: 'unhealthy',
+        redis: 'disconnected',
+        error: err.message,
+        bullVersion: require('bull/package.json').version,
+        timestamp: new Date().toISOString(),
+        redisHost: process.env.REDIS_HOST || '127.0.0.1',
+        redisPort: process.env.REDIS_PORT || 6379
+      });
     }
   });
 
