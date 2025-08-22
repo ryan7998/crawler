@@ -17,7 +17,7 @@ const crawlWebsite = async (req, res) => {
         if (!existingCrawl) {
             return res.status(404).json({ message: 'Crawl not found' })
         }
-        
+
         if (existingCrawl.status === 'in-progress') {
             return res.status(400).json({ message: 'Crawl is already in progress' })
         }
@@ -44,9 +44,38 @@ const crawlWebsite = async (req, res) => {
 
         // Generate a unique runId for this crawl run
         const runId = Date.now().toString();
+        console.log("runId: ", runId)
 
+        // Validate and sanitize job data before adding to queue
         for (const url of urls) {
-            await q.add({ url, crawlId, runId })
+            console.log("adding url: ", url)
+
+            // Validate URL format
+            if (!url || typeof url !== 'string' || url.trim().length === 0) {
+                console.error(`Invalid URL: ${url}`);
+                continue;
+            }
+
+            // Sanitize the job data to prevent serialization issues
+            const jobData = {
+                url: url.trim(),
+                crawlId: crawlId.toString(),
+                runId: runId.toString()
+            };
+
+            // Validate job data structure
+            if (!jobData.url || !jobData.crawlId || !jobData.runId) {
+                console.error(`Invalid job data:`, jobData);
+                continue;
+            }
+
+            try {
+                await q.add(jobData);
+                console.log(`Successfully added job for URL: ${url}`);
+            } catch (jobError) {
+                console.error(`Failed to add job for URL ${url}:`, jobError.message);
+                // Continue with other URLs instead of failing completely
+            }
         }
         res.json({ message: 'Crawl jobs added to queue', urls })
     } catch (error) {
@@ -123,19 +152,19 @@ const deleteCrawler = async (req, res) => {
         }
         // Remove associated CrawlData entries
         await CrawlData.deleteMany({ crawlId: id })
-        
+
         // Remove jobs related to this crawl from the queue
         console.log('deleting jobs for crawl:', id)
         const q = crawlQueue(id)
         const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
         console.log(`Found ${jobs.length} jobs to delete`)
-        
+
         for (const job of jobs) {
             console.log('Deleting job:', job.id)
             await job.remove()
         }
         console.log('Finished deleting jobs')
-        
+
         // Delete the crawl document
         await Crawl.findByIdAndDelete(id)
         // Emit a socket event to notify clients about the deletion
@@ -189,12 +218,12 @@ const getAllCrawlers = async (req, res) => {
     try {
         // Build the query
         let query = {}
-        
+
         // Add search functionality
         if (req.query.search) {
             query.title = { $regex: req.query.search, $options: 'i' } // Case-insensitive search
         }
-        
+
         // Implement pagination
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 100
@@ -275,7 +304,7 @@ const deleteCrawlData = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid crawlId' })
     }
-    
+
     try {
         // Find existing crawl
         const crawl = await Crawl.findById(id)
@@ -285,13 +314,13 @@ const deleteCrawlData = async (req, res) => {
 
         // Get count of CrawlData entries before deletion
         const dataCount = await CrawlData.countDocuments({ crawlId: id })
-        
+
         // Remove associated CrawlData entries
         const deleteResult = await CrawlData.deleteMany({ crawlId: id })
-        
+
         // Clear the results array in the Crawl document
-        await Crawl.findByIdAndUpdate(id, { 
-            $set: { 
+        await Crawl.findByIdAndUpdate(id, {
+            $set: {
                 results: [],
                 status: 'pending',
                 startTime: null,
@@ -303,21 +332,21 @@ const deleteCrawlData = async (req, res) => {
         const q = crawlQueue(id)
         const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
         let removedJobsCount = 0
-        
+
         for (const job of jobs) {
             await job.remove()
             removedJobsCount++
         }
 
         console.log(`Deleted ${deleteResult.deletedCount} crawl data entries and ${removedJobsCount} queue jobs for crawl ${id}`)
-        
-        res.status(200).json({ 
+
+        res.status(200).json({
             message: 'Crawl data deleted successfully',
             deletedDataCount: deleteResult.deletedCount,
             deletedJobsCount: removedJobsCount,
             crawlId: id
         })
-        
+
     } catch (error) {
         console.error('Error deleting crawl data:', error.message);
         res.status(500).json({ message: 'Error deleting crawl data', error: error.message });
@@ -337,7 +366,7 @@ const deleteCrawlDataForUrls = async (req, res) => {
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
         return res.status(400).json({ message: 'URLs array is required and must not be empty' })
     }
-    
+
     try {
         // Find existing crawl
         const crawl = await Crawl.findById(id)
@@ -346,7 +375,7 @@ const deleteCrawlDataForUrls = async (req, res) => {
         }
 
         // Remove CrawlData entries for specific URLs
-        const deleteResult = await CrawlData.deleteMany({ 
+        const deleteResult = await CrawlData.deleteMany({
             crawlId: id,
             url: { $in: urls }
         })
@@ -355,7 +384,7 @@ const deleteCrawlDataForUrls = async (req, res) => {
         const q = crawlQueue(id)
         const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
         let removedJobsCount = 0
-        
+
         for (const job of jobs) {
             if (urls.includes(job.data.url)) {
                 await job.remove()
@@ -366,8 +395,8 @@ const deleteCrawlDataForUrls = async (req, res) => {
         // Update crawl status if all data is deleted
         const remainingDataCount = await CrawlData.countDocuments({ crawlId: id })
         if (remainingDataCount === 0) {
-            await Crawl.findByIdAndUpdate(id, { 
-                $set: { 
+            await Crawl.findByIdAndUpdate(id, {
+                $set: {
                     results: [],
                     status: 'pending',
                     startTime: null,
@@ -377,8 +406,8 @@ const deleteCrawlDataForUrls = async (req, res) => {
         }
 
         console.log(`Deleted ${deleteResult.deletedCount} crawl data entries and ${removedJobsCount} queue jobs for specific URLs in crawl ${id}`)
-        
-        res.status(200).json({ 
+
+        res.status(200).json({
             message: 'Crawl data for specific URLs deleted successfully',
             deletedDataCount: deleteResult.deletedCount,
             deletedJobsCount: removedJobsCount,
@@ -386,7 +415,7 @@ const deleteCrawlDataForUrls = async (req, res) => {
             crawlId: id,
             deletedUrls: urls
         })
-        
+
     } catch (error) {
         console.error('Error deleting crawl data for specific URLs:', error.message);
         res.status(500).json({ message: 'Error deleting crawl data for specific URLs', error: error.message });
@@ -422,7 +451,7 @@ const runAllCrawls = async (req, res) => {
                     json: (result) => {
                         // Optionally collect result
                     },
-                    status: () => ({ json: () => {} }) // Dummy for error path
+                    status: () => ({ json: () => { } }) // Dummy for error path
                 });
                 started.push({ crawlId: crawl._id, title: crawl.title });
             } catch (err) {
@@ -461,7 +490,7 @@ const clearAllQueues = async (req, res) => {
 
         // Get all queue keys that match the pattern 'bull:crawl:*'
         const keys = await redis.keys('bull:crawl:*')
-        
+
         if (keys.length === 0) {
             await redis.disconnect()
             return res.status(200).json({ message: 'No queues found to clear' });
@@ -474,13 +503,13 @@ const clearAllQueues = async (req, res) => {
             // Extract crawlId from the key (format: 'bull:crawl:crawlId')
             const parts = key.split(':')
             const crawlId = parts[2]
-            
+
             if (!crawlId) continue
 
             try {
                 const queue = crawlQueue(crawlId)
                 const jobs = await queue.getJobs(['waiting', 'active', 'delayed', 'failed'])
-                
+
                 if (jobs.length > 0) {
                     await queue.empty()
                     clearedQueues++
@@ -496,7 +525,7 @@ const clearAllQueues = async (req, res) => {
 
         await redis.disconnect()
 
-        res.status(200).json({ 
+        res.status(200).json({
             message: `Cleared ${clearedQueues} queues with ${totalJobsCleared} total jobs`,
             clearedQueues,
             totalJobsCleared
@@ -519,10 +548,10 @@ const getAllQueuesStatus = async (req, res) => {
 
         // Get all queue keys that match the pattern 'bull:crawl:*'
         const keys = await redis.keys('bull:crawl:*')
-        
+
         if (keys.length === 0) {
             await redis.disconnect()
-            return res.json({ 
+            return res.json({
                 queues: [],
                 summary: {
                     totalActive: 0,
@@ -545,7 +574,7 @@ const getAllQueuesStatus = async (req, res) => {
             // Extract crawlId from the key (format: 'bull:crawl:crawlId')
             const parts = key.split(':')
             const crawlId = parts[2]
-            
+
             if (!crawlId) continue
 
             try {
@@ -557,7 +586,7 @@ const getAllQueuesStatus = async (req, res) => {
                 const completed = await queue.getJobs(['completed'])
 
                 const total = waiting.length + active.length + delayed.length + failed.length + completed.length
-                
+
                 if (total > 0) {
                     const queueInfo = {
                         crawlId,
@@ -692,9 +721,9 @@ const cleanupProxyUsage = async (req, res) => {
 
     try {
         const deletedCount = await proxyUsageService.cleanupOldRecords(parseInt(daysOld));
-        res.status(200).json({ 
+        res.status(200).json({
             message: `Cleaned up ${deletedCount} old proxy usage records`,
-            deletedCount 
+            deletedCount
         });
     } catch (error) {
         console.error('Error cleaning up proxy usage records:', error.message);
