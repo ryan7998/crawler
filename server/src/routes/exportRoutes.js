@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { optionalAuth } = require('../middleware/auth');
 
 // Test route to verify the server is working
 router.get('/test', (req, res) => {
@@ -23,7 +24,7 @@ router.get('/test', (req, res) => {
  * Get Google Sheet ID for global exports
  * GET /api/export/google-sheet-id
  */
-router.get('/google-sheet-id', (req, res) => {
+router.get('/google-sheet-id', optionalAuth, (req, res) => {
     try {
         const sheetId = process.env.GOOGLE_GLOBAL_EXPORT_SHEET_ID;
         if (!sheetId) {
@@ -308,13 +309,30 @@ router.post('/google-sheets/global', async (req, res) => {
  * Get available crawls for comparison
  * GET /api/export/crawls
  */
-router.get('/crawls', async (req, res) => {
+router.get('/crawls', optionalAuth, async (req, res) => {
     try {
         const { userId, limit = 50 } = req.query;
 
         const query = {};
-        if (userId) {
-            query.userId = userId;
+        
+        // If user is authenticated, use user-based filtering
+        if (req.user) {
+            if (req.user.isSuperAdmin()) {
+                // Superadmin can see all crawls
+                if (userId) {
+                    query.userId = userId;
+                }
+            } else {
+                // Regular admin can only see their own crawls
+                query.userId = req.user._id;
+            }
+        } else {
+            // If no user is authenticated, return empty result
+            return res.json({
+                crawls: [],
+                total: 0,
+                message: 'Authentication required to view crawls'
+            });
         }
 
         const crawls = await Crawl.find(query)

@@ -8,6 +8,17 @@ const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions
 const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
 const proxyUsageService = require('../services/proxyUsageService')
 
+// Helper function to build user-based query
+const buildUserQuery = (user) => {
+    if (user.isSuperAdmin()) {
+        // Superadmin can see all crawls
+        return {};
+    } else {
+        // Regular admin can only see their own crawls
+        return { userId: user._id };
+    }
+};
+
 const crawlWebsite = async (req, res) => {
     const { urls, crawlId, selectors } = req.body
 
@@ -56,16 +67,16 @@ const crawlWebsite = async (req, res) => {
 }
 
 const createCrawler = async (req, res) => {
-    const { title, urls, selectors, userId, advancedSelectors, comparisonSelectors } = req.body
+    const { title, urls, selectors, advancedSelectors, comparisonSelectors } = req.body
 
     try {
-        // Create new crawl entry
+        // Create new crawl entry with authenticated user's ID
         const newCrawl = new Crawl({
             title,
             urls: urls.map(url => url.trim()), // Convert to array of strings
             selectors: selectors || [], // Use provided selectors or empty array
             advancedSelectors: advancedSelectors || [],
-            userId,
+            userId: req.user._id, // Use authenticated user's ID
             status: 'pending',
             comparisonSelectors: comparisonSelectors || {},
         })
@@ -187,8 +198,8 @@ const getCrawler = async (req, res) => {
 const getAllCrawlers = async (req, res) => {
 
     try {
-        // Build the query
-        let query = {}
+        // Build the query with user-based filtering
+        let query = buildUserQuery(req.user)
         
         // Add search functionality
         if (req.query.search) {
@@ -200,9 +211,10 @@ const getAllCrawlers = async (req, res) => {
         const limit = parseInt(req.query.limit) || 100
         const skip = (page - 1) * limit
 
-        // Fetch crawls from the database
+        // Fetch crawls from the database with user filtering
         const crawls = await Crawl.find(query)
             .select('-__v') // Exclude the __v field
+            .populate('userId', 'firstName lastName email') // Populate user info
             .sort({ createdAt: -1 }) // Sort by newest first
             .skip(skip)
             .limit(limit)

@@ -191,9 +191,11 @@
 <script setup>
 import { ref, computed, watch, inject, onMounted } from 'vue'
 import { useApiService } from '../composables/useApiService'
+import { useAuth } from '../composables/useAuth'
 
 // Initialize composables
 const { get, post, loading: apiLoading, error: apiError } = useApiService()
+const { isAuthenticated } = useAuth()
 
 // Props
 const props = defineProps({
@@ -244,6 +246,13 @@ const storageWarning = computed(() => percentUsed.value > 90)
 
 // Methods
 const getPreviewInfo = async () => {
+    if (!isAuthenticated.value) {
+        previewInfo.value = {
+            crawlCount: 0
+        }
+        return
+    }
+    
     try {
         const params = new URLSearchParams()
         if (userId.value) params.append('userId', userId.value)
@@ -324,18 +333,28 @@ const formatBytes = (bytes) => {
 
 // Watchers
 watch([userId, limit], () => {
-    getPreviewInfo()
+    if (isAuthenticated.value) {
+        getPreviewInfo()
+    }
 })
 
 watch(showExport, (newValue) => {
-    if (newValue) {
+    if (newValue && isAuthenticated.value) {
+        getPreviewInfo()
+    }
+})
+
+watch(isAuthenticated, (newValue) => {
+    if (newValue && showExport.value) {
         getPreviewInfo()
     }
 })
 
 // Lifecycle
 onMounted(() => {
-    getPreviewInfo()
+    if (isAuthenticated.value) {
+        getPreviewInfo()
+    }
 })
 </script>
 
