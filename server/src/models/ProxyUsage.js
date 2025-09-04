@@ -140,21 +140,45 @@ proxyUsageSchema.statics.getCrawlSummary = async function(crawlId) {
     return result;
 };
 
-// Static method to get global proxy usage summary
-proxyUsageSchema.statics.getGlobalSummary = async function() {
-    const summary = await this.aggregate([
-        {
-            $group: {
-                _id: null,
-                totalProxyRequests: { $sum: '$totalRequests' },
-                uniqueProxiesUsed: { $addToSet: '$proxyId' },
-                totalCost: { $sum: '$totalCost' },
-                totalSuccessCount: { $sum: '$successCount' },
-                totalFailureCount: { $sum: '$failureCount' },
-                lastProxyUsed: { $max: '$lastUsed' }
-            }
+// Static method to get global proxy usage summary (user-specific)
+proxyUsageSchema.statics.getGlobalSummary = async function(user = null) {
+    let matchStage = {};
+    
+    // Add user filtering if user is provided
+    if (user) {
+        const Crawl = require('./Crawl');
+        let query = {};
+        if (user.isSuperAdmin()) {
+            // Superadmin can see all crawls
+            query = {};
+        } else {
+            // Regular admin can only see their own crawls
+            query = { userId: user._id };
         }
-    ]);
+        
+        const userCrawls = await Crawl.find(query).select('_id').lean();
+        const userCrawlIds = userCrawls.map(crawl => crawl._id);
+        matchStage.crawlId = { $in: userCrawlIds };
+    }
+    
+    const pipeline = [];
+    if (Object.keys(matchStage).length > 0) {
+        pipeline.push({ $match: matchStage });
+    }
+    
+    pipeline.push({
+        $group: {
+            _id: null,
+            totalProxyRequests: { $sum: '$totalRequests' },
+            uniqueProxiesUsed: { $addToSet: '$proxyId' },
+            totalCost: { $sum: '$totalCost' },
+            totalSuccessCount: { $sum: '$successCount' },
+            totalFailureCount: { $sum: '$failureCount' },
+            lastProxyUsed: { $max: '$lastUsed' }
+        }
+    });
+    
+    const summary = await this.aggregate(pipeline);
     
     if (summary.length === 0) {
         return {

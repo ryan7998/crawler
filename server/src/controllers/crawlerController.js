@@ -714,6 +714,16 @@ const getCrawlProxyStats = async (req, res) => {
     }
 
     try {
+        // Check if user owns this crawl or is superadmin
+        const crawl = await Crawl.findById(id);
+        if (!crawl) {
+            return res.status(404).json({ error: 'Crawl not found' });
+        }
+        
+        if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: 'Access denied. You can only view proxy stats for your own crawls.' });
+        }
+
         const stats = await proxyUsageService.getCrawlProxyStats(id);
         res.status(200).json(stats);
     } catch (error) {
@@ -723,12 +733,12 @@ const getCrawlProxyStats = async (req, res) => {
 };
 
 /**
- * Get global proxy usage statistics
+ * Get global proxy usage statistics (user-specific)
  * @route GET /api/proxy-stats/global
  */
 const getGlobalProxyStats = async (req, res) => {
     try {
-        const stats = await proxyUsageService.getGlobalProxyStats();
+        const stats = await proxyUsageService.getGlobalProxyStats(req.user);
         res.status(200).json(stats);
     } catch (error) {
         console.error('Error getting global proxy stats:', error.message);
@@ -737,7 +747,7 @@ const getGlobalProxyStats = async (req, res) => {
 };
 
 /**
- * Get proxy usage for a specific URL
+ * Get proxy usage for a specific URL (user-specific)
  * @route GET /api/proxy-stats/url
  */
 const getProxyUsageForUrl = async (req, res) => {
@@ -748,7 +758,7 @@ const getProxyUsageForUrl = async (req, res) => {
     }
 
     try {
-        const usage = await proxyUsageService.getProxyUsageForUrl(url);
+        const usage = await proxyUsageService.getProxyUsageForUrl(url, req.user);
         res.status(200).json(usage);
     } catch (error) {
         console.error('Error getting proxy usage for URL:', error.message);
@@ -757,7 +767,7 @@ const getProxyUsageForUrl = async (req, res) => {
 };
 
 /**
- * Get cost analysis for proxy usage
+ * Get cost analysis for proxy usage (user-specific)
  * @route GET /api/proxy-stats/cost-analysis
  */
 const getProxyCostAnalysis = async (req, res) => {
@@ -767,7 +777,8 @@ const getProxyCostAnalysis = async (req, res) => {
         const analysis = await proxyUsageService.getCostAnalysis(
             crawlId || null,
             startDate ? new Date(startDate) : null,
-            endDate ? new Date(endDate) : null
+            endDate ? new Date(endDate) : null,
+            req.user
         );
         res.status(200).json(analysis);
     } catch (error) {
@@ -777,14 +788,14 @@ const getProxyCostAnalysis = async (req, res) => {
 };
 
 /**
- * Clean up old proxy usage records
+ * Clean up old proxy usage records (user-specific)
  * @route DELETE /api/proxy-stats/cleanup
  */
 const cleanupProxyUsage = async (req, res) => {
     const { daysOld = 90 } = req.query;
 
     try {
-        const deletedCount = await proxyUsageService.cleanupOldRecords(parseInt(daysOld));
+        const deletedCount = await proxyUsageService.cleanupOldRecords(parseInt(daysOld), req.user);
         res.status(200).json({ 
             message: `Cleaned up ${deletedCount} old proxy usage records`,
             deletedCount 
