@@ -10,55 +10,91 @@
                     <a class="text-xl font-bold text-gray-800 ml-2" href="/">Notify!!</a>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <v-btn
-                        color="primary"
-                        @click="openCreateModal"
-                        size="small"
-                    >
-                        <v-icon start icon="mdi-plus" />
-                        New Crawl
-                    </v-btn>
-                    
-                    <!-- Actions Dropdown -->
-                    <v-menu>
-                        <template v-slot:activator="{ props }">
-                            <v-btn
-                                variant="outlined"
-                                color="secondary"
-                                v-bind="props"
-                                size="small"
-                            >
-                                <v-icon start icon="mdi-dots-horizontal" />
-                                Actions
-                            </v-btn>
-                        </template>
-                        <v-list>
-                            <v-list-item @click="showRunAllConfirm = true" :disabled="runAllLoading">
-                                <template v-slot:prepend>
-                                    <v-icon icon="mdi-play-circle" />
-                                </template>
-                                <v-list-item-title>Run All Crawls</v-list-item-title>
-                            </v-list-item>
-                            <v-list-item @click="showQueueStatusModal = true">
-                                <template v-slot:prepend>
-                                    <v-icon icon="mdi-queue" />
-                                </template>
-                                <v-list-item-title>Queue Status</v-list-item-title>
-                            </v-list-item>
-                            <v-list-item @click="showGlobalExportModal = true">
-                                <template v-slot:prepend>
-                                    <v-icon icon="mdi-download-multiple" />
-                                </template>
-                                <v-list-item-title>Export All</v-list-item-title>
-                            </v-list-item>
-                            <v-list-item @click="openGlobalSheet" :disabled="!globalSheetUrl">
-                                <template v-slot:prepend>
-                                    <v-icon icon="mdi-google-drive" />
-                                </template>
-                                <v-list-item-title>Open Sheet</v-list-item-title>
-                            </v-list-item>
-                        </v-list>
-                    </v-menu>
+                    <!-- Authentication Section -->
+                    <div v-if="!isAuthenticated" class="flex items-center space-x-2">
+                        <v-btn
+                            color="primary"
+                            variant="outlined"
+                            @click="openAuthModal('login')"
+                            size="small"
+                        >
+                            Login
+                        </v-btn>
+                        <v-btn
+                            color="primary"
+                            @click="openAuthModal('register')"
+                            size="small"
+                        >
+                            Sign Up
+                        </v-btn>
+                    </div>
+
+                    <!-- Authenticated User Section -->
+                    <div v-else class="flex items-center space-x-2">
+                        <v-btn
+                            color="primary"
+                            @click="openCreateModal"
+                            size="small"
+                        >
+                            <v-icon start icon="mdi-plus" />
+                            New Crawl
+                        </v-btn>
+                        
+                        <!-- User Menu -->
+                        <v-menu>
+                            <template v-slot:activator="{ props }">
+                                <v-btn
+                                    variant="outlined"
+                                    color="secondary"
+                                    v-bind="props"
+                                    size="small"
+                                >
+                                    <v-icon start icon="mdi-account" />
+                                    {{ userFullName }}
+                                    <v-icon end icon="mdi-chevron-down" />
+                                </v-btn>
+                            </template>
+                            <v-list>
+                                <v-list-item @click="showProfile = true">
+                                    <template v-slot:prepend>
+                                        <v-icon icon="mdi-account" />
+                                    </template>
+                                    <v-list-item-title>Profile</v-list-item-title>
+                                </v-list-item>
+                                <v-list-item @click="showRunAllConfirm = true" :disabled="runAllLoading">
+                                    <template v-slot:prepend>
+                                        <v-icon icon="mdi-play-circle" />
+                                    </template>
+                                    <v-list-item-title>Run All Crawls</v-list-item-title>
+                                </v-list-item>
+                                <v-list-item @click="showQueueStatusModal = true">
+                                    <template v-slot:prepend>
+                                        <v-icon icon="mdi-queue" />
+                                    </template>
+                                    <v-list-item-title>Queue Status</v-list-item-title>
+                                </v-list-item>
+                                <v-list-item @click="showGlobalExportModal = true">
+                                    <template v-slot:prepend>
+                                        <v-icon icon="mdi-download-multiple" />
+                                    </template>
+                                    <v-list-item-title>Export All</v-list-item-title>
+                                </v-list-item>
+                                <v-list-item @click="openGlobalSheet" :disabled="!globalSheetUrl">
+                                    <template v-slot:prepend>
+                                        <v-icon icon="mdi-google-drive" />
+                                    </template>
+                                    <v-list-item-title>Open Sheet</v-list-item-title>
+                                </v-list-item>
+                                <v-divider />
+                                <v-list-item @click="handleLogout">
+                                    <template v-slot:prepend>
+                                        <v-icon icon="mdi-logout" />
+                                    </template>
+                                    <v-list-item-title>Logout</v-list-item-title>
+                                </v-list-item>
+                            </v-list>
+                        </v-menu>
+                    </div>
                 </div>
             </div>
         </div>
@@ -93,6 +129,12 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+        
+        <!-- Auth Modal -->
+        <AuthModal
+          v-model="showAuthModal"
+          :initial-mode="authModalMode"
+        />
     </nav>
 </template>
 
@@ -100,9 +142,11 @@
 import { ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
+import { useAuth } from '../composables/useAuth'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
+import AuthModal from './AuthModal.vue'
 
 const router = useRouter()
 const showNotification = inject('showNotification')
@@ -117,12 +161,22 @@ const {
     globalSheetUrl
 } = useCrawlManagement()
 
+// Use the auth composable
+const {
+    isAuthenticated,
+    userFullName,
+    logout
+} = useAuth()
+
 // Modal state
 const showModal = ref(false)
 const selectedCrawl = ref(null)
 const showGlobalExportModal = ref(false)
 const showQueueStatusModal = ref(false)
 const showRunAllConfirm = ref(false)
+const showAuthModal = ref(false)
+const authModalMode = ref('login')
+const showProfile = ref(false)
 
 // Open create modal
 const openCreateModal = () => {
@@ -155,5 +209,16 @@ const openGlobalSheet = () => {
   if (globalSheetUrl.value) {
     window.open(globalSheetUrl.value, '_blank')
   }
+}
+
+// Authentication methods
+const openAuthModal = (mode) => {
+  authModalMode.value = mode
+  showAuthModal.value = true
+}
+
+const handleLogout = async () => {
+  await logout()
+  showNotification('Logged out successfully', 'success')
 }
 </script>

@@ -11,7 +11,8 @@
     "run-global-crawls": "node src/scripts/runGlobalCrawls.js",
     "clear-all-data": "node src/scripts/clearAllCrawlData.js",
     "export-db": "node src/scripts/exportDatabase.js",
-    "import-db": "node src/scripts/importDatabase.js"
+    "import-db": "node src/scripts/importDatabase.js",
+    "create-superadmin": "node src/scripts/createSuperAdmin.js"
   },
   "repository": {
     "type": "git",
@@ -27,13 +28,17 @@
   "dependencies": {
     "@huggingface/inference": "^3.6.1",
     "axios": "^1.7.7",
+    "bcryptjs": "^3.0.2",
     "bull": "^4.16.2",
     "cheerio": "^1.0.0",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.1.0",
     "googleapis": "^133.0.0",
+    "joi": "^18.0.1",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.6.1",
     "moondream": "^0.0.5",
     "p-throttle": "^6.2.0",

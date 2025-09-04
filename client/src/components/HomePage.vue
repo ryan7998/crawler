@@ -1,6 +1,33 @@
 <template>
     <!-- Main Content -->
     <div class="container mx-auto px-4 mt-8">
+        <!-- Welcome Section for Unauthenticated Users -->
+        <div v-if="!isAuthenticated" class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Welcome to Crawler</h1>
+            <p class="text-lg text-gray-600 mb-6">A powerful web scraping tool for extracting data from websites</p>
+            <div class="flex justify-center space-x-4">
+                <v-btn
+                    color="primary"
+                    size="large"
+                    @click="openAuthModal('login')"
+                >
+                    <v-icon start icon="mdi-login" />
+                    Login
+                </v-btn>
+                <v-btn
+                    color="primary"
+                    variant="outlined"
+                    size="large"
+                    @click="openAuthModal('register')"
+                >
+                    <v-icon start icon="mdi-account-plus" />
+                    Sign Up
+                </v-btn>
+            </div>
+        </div>
+
+        <!-- Authenticated User Content -->
+        <div v-else>
         <!-- Search Bar with Stats Button -->
         <v-card class="mb-4 pa-4">
             <div class="d-flex align-center justify-space-between mb-4">
@@ -339,6 +366,13 @@
         >
             {{ snackbarText }}
         </v-snackbar>
+        </div> <!-- Close authenticated user content -->
+        
+        <!-- Auth Modal -->
+        <AuthModal
+          v-model="showAuthModal"
+          :initial-mode="authModalMode"
+        />
     </div>
 </template>
 
@@ -349,6 +383,7 @@ import { useCrawlStore } from '../stores/crawlStore'
 import { getStatusColor } from '../utils/statusUtils'
 import { formatDate, formatDateTime, getRelativeTime } from '../utils/commonUtils'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
+import { useAuth } from '../composables/useAuth'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
@@ -357,12 +392,16 @@ import GlobalProxyStatsModal from './GlobalProxyStatsModal.vue'
 import ConfirmationModal from './ui/ConfirmationModal.vue'
 import { useProxyStats } from '../composables/useProxyStats'
 import { useApiService } from '../composables/useApiService'
+import AuthModal from './AuthModal.vue'
 
 // Initialize composables
 const { del, loading: apiLoading, error: apiError } = useApiService()
 
 // Initialize Pinia store
 const crawlStore = useCrawlStore()
+
+// Initialize auth
+const { isAuthenticated } = useAuth()
 const router = useRouter()
 
 // Inject the notification function
@@ -406,6 +445,8 @@ const showStatsModal = ref(false)
 const showGlobalProxyStatsModal = ref(false)
 const showCleanupDialog = ref(false)
 const cleanupDays = ref(90)
+const showAuthModal = ref(false)
+const authModalMode = ref('login')
 
 // Initialize proxy stats composable
 const {
@@ -569,6 +610,12 @@ const performCleanup = async () => {
     } catch (error) {
         showNotification('Error performing cleanup', 'error')
     }
+}
+
+// Authentication methods
+const openAuthModal = (mode) => {
+  authModalMode.value = mode
+  showAuthModal.value = true
 }
 
 onMounted(() => {

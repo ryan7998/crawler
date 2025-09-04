@@ -42,7 +42,8 @@ const crawlSchema = new Schema({
         default: {}
     },
     userId: {
-        type: String, // Placeholder for userId
+        type: Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
     status: {
