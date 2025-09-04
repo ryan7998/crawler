@@ -618,9 +618,24 @@ const openAuthModal = (mode) => {
   showAuthModal.value = true
 }
 
+// Watch for authentication changes
+watch(isAuthenticated, (newValue) => {
+    if (newValue) {
+        fetchCrawls()
+        fetchGlobalProxyStats()
+    } else {
+        // Clear data when user logs out
+        crawls.value = []
+        totalCrawls.value = 0
+    }
+})
+
 onMounted(() => {
-    fetchCrawls()
-    fetchGlobalProxyStats()
+    // Only fetch data if user is authenticated
+    if (isAuthenticated.value) {
+        fetchCrawls()
+        fetchGlobalProxyStats()
+    }
 })
 </script>
 

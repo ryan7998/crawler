@@ -1,9 +1,11 @@
 import { ref, inject } from 'vue'
 import { useApiService } from './useApiService'
+import { useAuth } from './useAuth'
 
 export function useCrawlManagement() {
     // Initialize composables
     const { get, post, put, loading: apiLoading, error: apiError } = useApiService()
+    const { isAuthenticated } = useAuth()
 
     // Reactive state
     const crawls = ref([])
@@ -34,12 +36,21 @@ export function useCrawlManagement() {
 
     // Initialize Google Sheet URL - make it non-blocking
     // Use setTimeout to avoid blocking the component initialization
+    // Only fetch if user is authenticated
     setTimeout(() => {
-        fetchGoogleSheetUrl()
+        if (isAuthenticated.value) {
+            fetchGoogleSheetUrl()
+        }
     }, 100)
 
     // Fetch crawls with pagination and search
     const fetchCrawls = async (options, searchQuery) => {
+        if (!isAuthenticated.value) {
+            crawls.value = []
+            totalCrawls.value = 0
+            return
+        }
+        
         try {
             isSearching.value = true
             const { page, itemsPerPage } = options
@@ -57,6 +68,13 @@ export function useCrawlManagement() {
 
     // Run all crawls
     const runAllCrawls = async () => {
+        if (!isAuthenticated.value) {
+            snackbarText.value = 'Please login to run crawls'
+            snackbarColor.value = 'error'
+            showSnackbar.value = true
+            return
+        }
+        
         runAllLoading.value = true
         try {
             const data = await post('/api/runallcrawls')
@@ -75,6 +93,13 @@ export function useCrawlManagement() {
 
     // Toggle disable/enable crawl
     const toggleDisableCrawl = async (item) => {
+        if (!isAuthenticated.value) {
+            snackbarText.value = 'Please login to manage crawls'
+            snackbarColor.value = 'error'
+            showSnackbar.value = true
+            return
+        }
+        
         disableLoadingId.value = item._id
         try {
             const data = await put(`/api/updatecrawl/${item._id}`,
