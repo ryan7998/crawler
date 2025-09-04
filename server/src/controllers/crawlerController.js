@@ -416,11 +416,21 @@ const deleteCrawlDataForUrls = async (req, res) => {
     }
 }
 
-// GLOBAL RUN: Start all non-disabled crawls
+// GLOBAL RUN: Start all non-disabled crawls (user-specific)
 const runAllCrawls = async (req, res) => {
     try {
-        // Find all non-disabled crawls
-        const crawls = await Crawl.find({ disabled: { $ne: true } });
+        // Build query based on user role
+        let query = { disabled: { $ne: true } };
+        if (req.user.isSuperAdmin()) {
+            // Superadmin can run all crawls
+            // query remains as is
+        } else {
+            // Regular admin can only run their own crawls
+            query.userId = req.user._id;
+        }
+
+        // Find all non-disabled crawls for the user
+        const crawls = await Crawl.find(query);
         if (!crawls.length) {
             return res.status(200).json({ message: 'No non-disabled crawls found to start', started: [], skipped: [] });
         }
