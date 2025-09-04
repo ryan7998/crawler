@@ -267,6 +267,17 @@ const checkDomainSelectors = async (req, res) => {
 const getQueueStatus = async (req, res) => {
     try {
         const { crawlId } = req.params
+        
+        // Check if user owns this crawl
+        const crawl = await Crawl.findById(crawlId);
+        if (!crawl) {
+            return res.status(404).json({ error: 'Crawl not found' });
+        }
+        
+        if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: 'Access denied. You can only view queues for your own crawls.' });
+        }
+        
         const q = crawlQueue(crawlId)
         const jobs = await q.getJobs(['active', 'waiting', 'delayed'])
         res.json({
@@ -451,6 +462,16 @@ const runAllCrawls = async (req, res) => {
 const clearCrawlQueue = async (req, res) => {
     const { crawlId } = req.params;
     try {
+        // Check if user owns this crawl
+        const crawl = await Crawl.findById(crawlId);
+        if (!crawl) {
+            return res.status(404).json({ error: 'Crawl not found' });
+        }
+        
+        if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: 'Access denied. You can only clear queues for your own crawls.' });
+        }
+        
         const q = crawlQueue(crawlId);
         await q.empty();
         // Set crawl status to pending
@@ -462,9 +483,30 @@ const clearCrawlQueue = async (req, res) => {
     }
 };
 
-// Clear all queues
+// Clear all queues (user-specific)
 const clearAllQueues = async (req, res) => {
     try {
+        // Get user's crawls first
+        let query = {};
+        if (req.user.isSuperAdmin()) {
+            // Superadmin can clear all queues
+            query = {};
+        } else {
+            // Regular admin can only clear their own crawls' queues
+            query = { userId: req.user._id };
+        }
+
+        const userCrawls = await Crawl.find(query).select('_id').lean();
+        const userCrawlIds = userCrawls.map(crawl => crawl._id.toString());
+
+        if (userCrawlIds.length === 0) {
+            return res.status(200).json({ 
+                message: 'No crawls found to clear queues for',
+                clearedQueues: 0,
+                totalJobsCleared: 0
+            });
+        }
+
         const Redis = require('ioredis')
         const redis = new Redis({
             host: process.env.REDIS_HOST || '127.0.0.1',
@@ -487,7 +529,7 @@ const clearAllQueues = async (req, res) => {
             const parts = key.split(':')
             const crawlId = parts[2]
             
-            if (!crawlId) continue
+            if (!crawlId || !userCrawlIds.includes(crawlId)) continue
 
             try {
                 const queue = crawlQueue(crawlId)
@@ -520,9 +562,35 @@ const clearAllQueues = async (req, res) => {
     }
 };
 
-// Get status of all per-crawl queues
+// Get status of all per-crawl queues (user-specific)
 const getAllQueuesStatus = async (req, res) => {
     try {
+        // Get user's crawls first
+        let query = {};
+        if (req.user.isSuperAdmin()) {
+            // Superadmin can see all crawls
+            query = {};
+        } else {
+            // Regular admin can only see their own crawls
+            query = { userId: req.user._id };
+        }
+
+        const userCrawls = await Crawl.find(query).select('_id title').lean();
+        const userCrawlIds = userCrawls.map(crawl => crawl._id.toString());
+
+        if (userCrawlIds.length === 0) {
+            return res.json({ 
+                queues: [],
+                summary: {
+                    totalActive: 0,
+                    totalWaiting: 0,
+                    totalDelayed: 0,
+                    totalFailed: 0,
+                    totalCompleted: 0
+                }
+            })
+        }
+
         const Redis = require('ioredis')
         const redis = new Redis({
             host: process.env.REDIS_HOST || '127.0.0.1',
@@ -558,7 +626,7 @@ const getAllQueuesStatus = async (req, res) => {
             const parts = key.split(':')
             const crawlId = parts[2]
             
-            if (!crawlId) continue
+            if (!crawlId || !userCrawlIds.includes(crawlId)) continue
 
             try {
                 const queue = crawlQueue(crawlId) // Use the existing crawlQueue function
@@ -571,8 +639,11 @@ const getAllQueuesStatus = async (req, res) => {
                 const total = waiting.length + active.length + delayed.length + failed.length + completed.length
                 
                 if (total > 0) {
+                    // Find the crawl title for this crawlId
+                    const crawl = userCrawls.find(c => c._id.toString() === crawlId);
                     const queueInfo = {
                         crawlId,
+                        crawlTitle: crawl ? crawl.title : 'Unknown Crawl',
                         total,
                         waiting: waiting.length,
                         active: active.length,

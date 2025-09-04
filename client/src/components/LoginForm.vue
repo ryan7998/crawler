@@ -94,7 +94,7 @@ import { ref, reactive } from 'vue'
 import { useAuth } from '../composables/useAuth'
 
 // Emits
-defineEmits(['switch-to-register'])
+const emit = defineEmits(['switch-to-register', 'auth-success'])
 
 // Composables
 const { login, loading, error, clearError } = useAuth()
@@ -126,7 +126,10 @@ const handleLogin = async () => {
 
   const result = await login(formData)
   
-  if (!result.success) {
+  if (result.success) {
+    // Emit success event to close modal
+    emit('auth-success')
+  } else {
     // Error is already set in the store
     console.error('Login failed:', result.message)
   }

@@ -15,12 +15,14 @@
         <LoginForm
           v-if="mode === 'login'"
           @switch-to-register="mode = 'register'"
+          @auth-success="closeModal"
         />
 
         <!-- Register Form -->
         <RegisterForm
           v-if="mode === 'register'"
           @switch-to-login="mode = 'login'"
+          @auth-success="closeModal"
         />
       </v-card-text>
     </v-card>
@@ -31,6 +33,7 @@
 import { ref, watch } from 'vue'
 import LoginForm from './LoginForm.vue'
 import RegisterForm from './RegisterForm.vue'
+import { useAuth } from '../composables/useAuth'
 
 // Props
 const props = defineProps({
@@ -48,6 +51,9 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['update:modelValue'])
 
+// Composables
+const { isAuthenticated } = useAuth()
+
 // State
 const isOpen = ref(props.modelValue)
 const mode = ref(props.initialMode)
@@ -59,6 +65,13 @@ watch(() => props.modelValue, (newValue) => {
 
 watch(() => props.initialMode, (newValue) => {
   mode.value = newValue
+})
+
+// Close modal when user becomes authenticated
+watch(isAuthenticated, (newValue) => {
+  if (newValue && isOpen.value) {
+    closeModal()
+  }
 })
 
 // Methods
