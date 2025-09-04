@@ -15,7 +15,18 @@ const buildUserQuery = (user) => {
         return {};
     } else {
         // Regular admin can only see their own crawls
-        return { userId: user._id };
+        // Ensure userId is properly converted to ObjectId
+        const userId = mongoose.Types.ObjectId.isValid(user._id) 
+            ? new mongoose.Types.ObjectId(user._id) 
+            : user._id;
+            
+        // Try both ObjectId and string formats to handle data inconsistencies
+        return { 
+            $or: [
+                { userId: userId },
+                { userId: userId.toString() }
+            ]
+        };
     }
 };
 
