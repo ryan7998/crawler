@@ -82,7 +82,7 @@
                                 </template>
                                 
                                 <v-list-item-title class="font-weight-medium">
-                                    Crawl: {{ queue.crawlId }}
+                                    {{ queue.crawlTitle || `Crawl: ${queue.crawlId}` }}
                                 </v-list-item-title>
                                 <v-list-item-subtitle>
                                     Active: {{ queue.active }} | Waiting: {{ queue.waiting }} | Failed: {{ queue.failed }}

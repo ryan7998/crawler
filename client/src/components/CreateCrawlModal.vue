@@ -223,10 +223,10 @@
 
 <script setup>
 import { ref, computed, watch, inject } from 'vue'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
 import CssSelector from './CssSelector.vue'
 import { getApiUrl, isValidUrl } from '../utils/commonUtils'
+import { useApiService } from '../composables/useApiService'
 
 const emit = defineEmits(['update:modelValue', 'crawl-created'])
 
@@ -251,6 +251,7 @@ const apiUrl = computed(() => getApiUrl())
 
 // Refs
 const router = useRouter()
+const { get, post, put } = useApiService()
 const form = ref(null)
 const currentStep = ref(1)
 const title = ref('')
@@ -344,11 +345,11 @@ const checkDomainConsistency = (urls) => {
 // Fetch domain selectors
 const fetchDomainSelectors = async (domain) => {
     try {
-        const response = await axios.get(`${apiUrl.value}/api/selectors/${domain}`)
-        console.log('Raw selectors from backend:', response.data.selectors)
+        const response = await get(`/api/selectors/${domain}`)
+        console.log('Raw selectors from backend:', response.selectors)
 
         // Transform the selectors to match the CssSelector component format
-        const transformedSelectors = response.data.selectors.map(selector => ({
+        const transformedSelectors = response.selectors.map(selector => ({
             id: Math.random().toString(36).substring(2, 9),
             name: selector.name, // Backend uses 'name', not 'target_element'
             css: selector.selector, // Backend uses 'selector', not 'selector_value'
@@ -555,11 +556,11 @@ const handleSubmit = async () => {
         console.log('Sending request data:', requestData)
 
         const response = isEditing.value
-            ? await axios.put(`${apiUrl.value}/api/updatecrawl/${props.crawlData._id}`, requestData)        
-            : await axios.post(`${apiUrl.value}/api/createcrawler`, requestData)
+            ? await put(`/api/updatecrawl/${props.crawlData._id}`, requestData)        
+            : await post(`/api/createcrawler`, requestData)
 
         showNotification(isEditing.value ? 'Crawl updated successfully' : 'Crawl created successfully', 'success')
-        emit('crawl-created', isEditing.value ? response.data.crawl : { _id: response.data.crawlId })       
+        emit('crawl-created', isEditing.value ? response.crawl : { _id: response.crawlId })       
         closeDialog()
     } catch (error) {
         console.error('Error creating/updating crawl:', error)

@@ -12,7 +12,8 @@
     "clear-all-data": "node src/scripts/clearAllCrawlData.js",
     "export-db": "node src/scripts/exportDatabase.js",
     "import-db": "node src/scripts/importDatabase.js",
-    "create-superadmin": "node src/scripts/createSuperAdmin.js"
+    "create-superadmin": "node src/scripts/createSuperAdmin.js",
+    "optimize-db": "node src/scripts/optimizeDatabase.js"
   },
   "repository": {
     "type": "git",
