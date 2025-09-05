@@ -4,7 +4,6 @@
         <!-- Header -->
         <CrawlerListHeader
             :selected-count="selectedCrawls.length"
-            @create-crawl="openCreateModal"
             @bulk-delete="handleBulkDelete"
             @bulk-export="handleBulkExport"
         />
@@ -23,7 +22,6 @@
                 @view-crawl="openCrawl"
                 @edit-crawl="editCrawl"
                 @delete-crawl="confirmDeleteCrawl"
-                @create-crawl="openCreateModal"
                 @retry="fetchCrawls({ page: 1, itemsPerPage: 50 })"
             />
         </div>
