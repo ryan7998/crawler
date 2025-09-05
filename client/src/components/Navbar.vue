@@ -4,15 +4,20 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center">
-                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12.25V1m0 11.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M4 19v-2.25m6-13.5V1m0 2.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M10 19V7.75m6 4.5V1m0 11.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM16 19v-2"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h1 class="text-xl font-bold text-gray-900">CrawlerPro</h1>
-                        <p class="text-xs text-gray-600">Advanced Web Scraping</p>
-                    </div>
+                    <button 
+                        @click="goToDashboard"
+                        class="flex items-center hover:opacity-80 transition-opacity"
+                    >
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12.25V1m0 11.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M4 19v-2.25m6-13.5V1m0 2.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M10 19V7.75m6 4.5V1m0 11.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM16 19v-2"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h1 class="text-xl font-bold text-gray-900">CrawlerPro</h1>
+                            <p class="text-xs text-gray-600">Advanced Web Scraping</p>
+                        </div>
+                    </button>
                 </div>
                 
                 <div class="flex items-center space-x-3">
@@ -242,6 +247,15 @@ const confirmRunAll = async () => {
 const openGlobalSheet = () => {
   if (globalSheetUrl.value) {
     window.open(globalSheetUrl.value, '_blank')
+  }
+}
+
+// Navigation methods
+const goToDashboard = () => {
+  if (isAuthenticated.value) {
+    router.push('/dashboard')
+  } else {
+    router.push('/')
   }
 }
 

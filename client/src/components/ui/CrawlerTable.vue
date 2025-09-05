@@ -1,0 +1,400 @@
+<template>
+  <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+    <!-- Table Header -->
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-medium text-gray-900">Crawls</h3>
+        <div class="flex items-center space-x-4">
+          <!-- Search -->
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search crawls..."
+              class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <span class="ml-3 text-gray-600">Loading crawls...</span>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="error" class="text-center py-12">
+      <div class="text-red-600 mb-4">
+        <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Error loading crawls</h3>
+      <p class="text-gray-500 mb-4">{{ error }}</p>
+      <button
+        @click="$emit('retry')"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200"
+      >
+        Try Again
+      </button>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="filteredCrawls.length === 0" class="text-center py-12">
+      <div class="text-gray-400 mb-4">
+        <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">
+        {{ searchQuery ? 'No crawls found' : 'No crawls yet' }}
+      </h3>
+      <p class="text-gray-500 mb-6">
+        {{ searchQuery ? 'Try adjusting your search terms' : 'Get started by creating your first web crawl' }}
+      </p>
+      <button
+        v-if="!searchQuery"
+        @click="$emit('create-crawl')"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Create Your First Crawl
+      </button>
+    </div>
+
+    <!-- Table View -->
+    <div v-else class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <input
+                v-model="selectAll"
+                @change="toggleSelectAll"
+                type="checkbox"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+            </th>
+            <th 
+              v-for="column in columns" 
+              :key="column.key"
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+              @click="sortBy(column.key)"
+            >
+              <div class="flex items-center space-x-1">
+                <span>{{ column.label }}</span>
+                <svg 
+                  v-if="sortField === column.key" 
+                  :class="[
+                    'w-4 h-4',
+                    sortDirection === 'asc' ? 'transform rotate-180' : ''
+                  ]"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                </svg>
+              </div>
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr 
+            v-for="crawl in paginatedCrawls" 
+            :key="crawl._id"
+            class="hover:bg-gray-50 cursor-pointer"
+            @click="$emit('crawl-click', crawl._id)"
+          >
+            <td class="px-6 py-4 whitespace-nowrap" @click.stop>
+              <input
+                v-model="selectedCrawls"
+                :value="crawl._id"
+                type="checkbox"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10">
+                  <div class="h-10 w-10 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
+                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12.25V1m0 11.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M4 19v-2.25m6-13.5V1m0 2.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M10 19V7.75m6 4.5V1m0 11.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM16 19v-2"/>
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{ crawl.title }}</div>
+                  <div class="text-sm text-gray-500">{{ crawl.urls?.length || 0 }} URLs</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <StatusPill :status="crawl.status" />
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ formatDate(crawl.startTime) }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ crawl.endTime ? formatDate(crawl.endTime) : 'Never' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" @click.stop>
+              <div class="flex items-center space-x-2">
+                <button
+                  @click="$emit('view-crawl', crawl._id)"
+                  class="text-blue-600 hover:text-blue-900"
+                >
+                  View
+                </button>
+                <button
+                  @click="$emit('edit-crawl', crawl)"
+                  class="text-indigo-600 hover:text-indigo-900"
+                >
+                  Edit
+                </button>
+                <button
+                  @click="$emit('delete-crawl', crawl._id)"
+                  class="text-red-600 hover:text-red-900"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+    <!-- Pagination -->
+    <div v-if="totalPages > 1" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div class="flex-1 flex justify-between sm:hidden">
+        <button
+          @click="currentPage = Math.max(1, currentPage - 1)"
+          :disabled="currentPage === 1"
+          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous
+        </button>
+        <button
+          @click="currentPage = Math.min(totalPages, currentPage + 1)"
+          :disabled="currentPage === totalPages"
+          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+        </button>
+      </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-700">
+            Showing
+            <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
+            to
+            <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredCrawls.length) }}</span>
+            of
+            <span class="font-medium">{{ filteredCrawls.length }}</span>
+            results
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <button
+              @click="currentPage = Math.max(1, currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+            
+            <button
+              v-for="page in visiblePages"
+              :key="page"
+              @click="currentPage = page"
+              :class="[
+                'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                page === currentPage
+                  ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+              ]"
+            >
+              {{ page }}
+            </button>
+            
+            <button
+              @click="currentPage = Math.min(totalPages, currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { formatDateTime } from '../../utils/commonUtils'
+import StatusPill from './StatusPill.vue'
+
+const props = defineProps({
+  crawls: {
+    type: Array,
+    default: () => []
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  error: {
+    type: String,
+    default: null
+  },
+  itemsPerPage: {
+    type: Number,
+    default: 10
+  }
+})
+
+const emit = defineEmits([
+  'crawl-click',
+  'view-crawl',
+  'edit-crawl',
+  'delete-crawl',
+  'create-crawl',
+  'retry'
+])
+
+// Local state
+const searchQuery = ref('')
+const currentPage = ref(1)
+const selectedCrawls = ref([])
+const selectAll = ref(false)
+const sortField = ref('startTime')
+const sortDirection = ref('desc')
+
+// Table columns configuration
+const columns = [
+  { key: 'title', label: 'Title' },
+  { key: 'status', label: 'Status' },
+  { key: 'startTime', label: 'Created' },
+  { key: 'endTime', label: 'Last Run' }
+]
+
+// Computed properties
+const filteredCrawls = computed(() => {
+  let filtered = props.crawls
+
+  // Apply search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(crawl => 
+      crawl.title?.toLowerCase().includes(query) ||
+      crawl.status?.toLowerCase().includes(query) ||
+      crawl._id?.toLowerCase().includes(query)
+    )
+  }
+
+  // Apply sorting
+  filtered = [...filtered].sort((a, b) => {
+    let aVal = a[sortField.value]
+    let bVal = b[sortField.value]
+
+    if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1
+    if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1
+    return 0
+  })
+
+  return filtered
+})
+
+const totalPages = computed(() => Math.ceil(filteredCrawls.value.length / props.itemsPerPage))
+
+const paginatedCrawls = computed(() => {
+  const start = (currentPage.value - 1) * props.itemsPerPage
+  const end = start + props.itemsPerPage
+  return filteredCrawls.value.slice(start, end)
+})
+
+const visiblePages = computed(() => {
+  const pages = []
+  const total = totalPages.value
+  const current = currentPage.value
+  
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) {
+      pages.push(i)
+    }
+  } else {
+    if (current <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i)
+      pages.push('...')
+      pages.push(total)
+    } else if (current >= total - 3) {
+      pages.push(1)
+      pages.push('...')
+      for (let i = total - 4; i <= total; i++) pages.push(i)
+    } else {
+      pages.push(1)
+      pages.push('...')
+      for (let i = current - 1; i <= current + 1; i++) pages.push(i)
+      pages.push('...')
+      pages.push(total)
+    }
+  }
+  
+  return pages
+})
+
+// Methods
+const sortBy = (field) => {
+  if (sortField.value === field) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDirection.value = 'asc'
+  }
+}
+
+const toggleSelectAll = () => {
+  if (selectAll.value) {
+    selectedCrawls.value = paginatedCrawls.value.map(crawl => crawl._id)
+  } else {
+    selectedCrawls.value = []
+  }
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Never'
+  return formatDateTime(dateString)
+}
+
+// Watch for changes in selected crawls
+watch(selectedCrawls, (newSelected) => {
+  selectAll.value = newSelected.length === paginatedCrawls.value.length && paginatedCrawls.value.length > 0
+}, { deep: true })
+
+// Watch for search changes to reset pagination
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+</script>

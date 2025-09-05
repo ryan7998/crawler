@@ -1,6 +1,57 @@
 <template>
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 mt-8">
+    <!-- General Dashboard (when no crawlId) -->
+    <div v-if="isGeneralDashboard" class="min-h-screen bg-gray-50">
+        <!-- Header -->
+        <CrawlerListHeader
+            :selected-count="selectedCrawls.length"
+            @create-crawl="openCreateModal"
+            @bulk-delete="handleBulkDelete"
+            @bulk-export="handleBulkExport"
+        />
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Statistics -->
+            <CrawlerStats :stats="crawlStats" />
+
+            <!-- Crawls Table -->
+            <CrawlerTable
+                :crawls="allCrawls"
+                :loading="crawlsLoading"
+                :error="crawlsError"
+                @crawl-click="openCrawl"
+                @view-crawl="openCrawl"
+                @edit-crawl="editCrawl"
+                @delete-crawl="confirmDeleteCrawl"
+                @create-crawl="openCreateModal"
+                @retry="fetchCrawls({ page: 1, itemsPerPage: 50 })"
+            />
+        </div>
+
+        <!-- Create Crawl Modal -->
+        <CreateCrawlModal
+            v-model="showCreateModal"
+            :crawl-data="selectedCrawl"
+            @crawl-created="handleCrawlCreated"
+            @error="handleModalError"
+        />
+
+        <!-- Bulk Delete Confirmation Modal -->
+        <ConfirmationModal
+            v-model="showBulkDeleteConfirm"
+            title="Delete Selected Crawls"
+            message="Are you sure you want to delete the selected crawls? This action cannot be undone."
+            :items="selectedCrawls"
+            confirm-text="Delete All"
+            cancel-text="Cancel"
+            color="error"
+            icon="mdi-delete"
+            @confirm="bulkDeleteCrawls"
+        />
+    </div>
+
+    <!-- Specific Crawl Dashboard (when crawlId exists) -->
+    <div v-else class="container mx-auto px-4 mt-8">
         <div class="flex space-x-4">
 
             <!-- Sidebar Actions -->
@@ -334,8 +385,8 @@
         <CreateCrawlModal
             v-model="showCreateModal"
             :crawl-data="crawl"
-            @crawl-created="handleCrawlCreated"
-            @error="handleModalError"
+            @crawl-created="handleCrawlCreatedSpecific"
+            @error="handleModalErrorSpecific"
         />
 
         <!-- Add ExportModal -->
@@ -377,9 +428,13 @@ import ExportModal from './ExportModal.vue'
 import ProxyStatsWidget from './ui/ProxyStatsWidget.vue'
 import ProxyStatsModal from './ProxyStatsModal.vue'
 import ConfirmationModal from './ui/ConfirmationModal.vue'
+import CrawlerListHeader from './ui/CrawlerListHeader.vue'
+import CrawlerTable from './ui/CrawlerTable.vue'
+import CrawlerStats from './ui/CrawlerStats.vue'
 import { useProxyStats } from '../composables/useProxyStats'
 import { useSocketConnection } from '../composables/useSocketConnection'
 import { useApiService } from '../composables/useApiService'
+import { useCrawlManagement } from '../composables/useCrawlManagement'
 import { prepareCrawlExportData, exportToExcel, generateFilename, saveExportMetadata, loadExportMetadata } from '../utils/exportUtils'
 
 // Initialize composables
@@ -389,6 +444,7 @@ const { get, post, del, loading: apiLoading, error: apiError } = useApiService()
 const route = useRoute()  // Access the crawl ID from the URL
 const router = useRouter()
 const crawlId = ref(route.params.crawlId)  // Get crawlId from URL
+const isGeneralDashboard = computed(() => !crawlId.value)  // Check if this is the general dashboard
 const crawl = ref(null)  // To store crawl data
 const errorMessage = ref('')  // To store any error messages
 const liveStatusDictionary = ref({})  // To store status by listening to the socket
@@ -409,8 +465,7 @@ const showDeleteDataConfirm = ref(false)
 const showDeleteUrlDataConfirm = ref(false)
 const urlToDelete = ref('')
 
-// Add bulk delete refs
-const showBulkDeleteConfirm = ref(false)
+// Add bulk delete refs for specific crawl dashboard
 const selectedUrls = ref([])
 const selectAll = ref(false)
 
@@ -427,6 +482,10 @@ const clearQueueLoading = ref(false)
 // Add proxy stats refs
 const showProxyStatsModal = ref(false)
 
+// General dashboard state
+const selectedCrawls = ref([])
+const showBulkDeleteConfirm = ref(false)
+
 // Initialize proxy stats composable
 const {
   proxyStats,
@@ -437,8 +496,27 @@ const {
   formattedGlobalStats
 } = useProxyStats()
 
+// Initialize crawl management composable for general dashboard
+const {
+  crawls: allCrawls,
+  loading: crawlsLoading,
+  error: crawlsError,
+  fetchCrawls
+} = useCrawlManagement()
+
 // Computed properties for proxy stats
 const detailedProxyStats = computed(() => proxyStats.value)
+
+// Computed properties for general dashboard
+const crawlStats = computed(() => {
+  const crawls = allCrawls.value || []
+  return {
+    totalCrawls: crawls.length,
+    activeCrawls: crawls.filter(c => c.status === 'in-progress' || c.status === 'pending').length,
+    completedCrawls: crawls.filter(c => c.status === 'completed').length,
+    totalUrls: crawls.reduce((sum, crawl) => sum + (crawl.urls?.length || 0), 0)
+  }
+})
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -549,52 +627,58 @@ onMounted(async () => {
     crawlId.value = route.params.crawlId
 
     try {
-        await fetchCrawlData()
-        await fetchProxyStats()
+        if (isGeneralDashboard.value) {
+            // Load all crawls for general dashboard
+            await fetchCrawls({ page: 1, itemsPerPage: 50 })
+        } else {
+            // Load specific crawl data
+            await fetchCrawlData()
+            await fetchProxyStats()
 
-        // Load saved export link from localStorage
-        const savedExport = loadExportMetadata(crawlId.value)
-        if (savedExport) {
-            latestExportLink.value = savedExport.sheetUrl
-            latestExportDate.value = new Date(savedExport.exportDate)
-        }
+            // Load saved export link from localStorage
+            const savedExport = loadExportMetadata(crawlId.value)
+            if (savedExport) {
+                latestExportLink.value = savedExport.sheetUrl
+                latestExportDate.value = new Date(savedExport.exportDate)
+            }
 
-        // Join the room for the specific crawl ID
-        joinRoom(crawlId.value)
-        
-        // Listen for crawl logs
-        on("crawlLog", async (data) => {
-            // console.log('Received crawl log:', data)  // Add logging
-            logs.value.push(data)
+            // Join the room for the specific crawl ID
+            joinRoom(crawlId.value)
             
-            // Update crawl status if it's a final status update
-            if (data.status === 'completed' || data.status === 'failed') {
-                crawl.value.status = data.status
-                // Clear all 'started' statuses when crawl completes
-                Object.keys(liveStatusDictionary.value).forEach(url => {
-                    if (liveStatusDictionary.value[url] === 'started') {
-                        // Check if this URL has a final status in aggregatedData
-                        const urlData = crawl.value.aggregatedData[url];
-                        if (urlData && urlData.length > 0) {
-                            const lastEntry = urlData[urlData.length - 1];
-                            liveStatusDictionary.value[url] = lastEntry.status;
-                        } else {
-                            // If no data, mark as failed
-                            liveStatusDictionary.value[url] = 'failed';
+            // Listen for crawl logs
+            on("crawlLog", async (data) => {
+                // console.log('Received crawl log:', data)  // Add logging
+                logs.value.push(data)
+                
+                // Update crawl status if it's a final status update
+                if (data.status === 'completed' || data.status === 'failed') {
+                    crawl.value.status = data.status
+                    // Clear all 'started' statuses when crawl completes
+                    Object.keys(liveStatusDictionary.value).forEach(url => {
+                        if (liveStatusDictionary.value[url] === 'started') {
+                            // Check if this URL has a final status in aggregatedData
+                            const urlData = crawl.value.aggregatedData[url];
+                            if (urlData && urlData.length > 0) {
+                                const lastEntry = urlData[urlData.length - 1];
+                                liveStatusDictionary.value[url] = lastEntry.status;
+                            } else {
+                                // If no data, mark as failed
+                                liveStatusDictionary.value[url] = 'failed';
+                            }
                         }
-                    }
-                });
-            } else if (data.url) {
-                // Update individual URL status using helper function
-                updateLiveStatus(data.url, data.status);
-            }
+                    });
+                } else if (data.url) {
+                    // Update individual URL status using helper function
+                    updateLiveStatus(data.url, data.status);
+                }
 
-            // Append new crawled data into FE rather than making a new api call
-            if (data.status === 'success') {
-                crawl.value.aggregatedData[data.url]
-                    .push({ data: data.result, date: new Date(), status: data.status })
-            }
-        })
+                // Append new crawled data into FE rather than making a new api call
+                if (data.status === 'success') {
+                    crawl.value.aggregatedData[data.url]
+                        .push({ data: data.result, date: new Date(), status: data.status })
+                }
+            })
+        }
 
     } catch (error) {
         console.error('Component initialization error:', error)
@@ -646,14 +730,14 @@ const deleteCrawl = async () => {
     }
 }
 
-// Handler for crawl creation/update
-const handleCrawlCreated = (updatedCrawl) => {
+// Handler for crawl creation/update (specific crawl dashboard)
+const handleCrawlCreatedSpecific = (updatedCrawl) => {
     showNotification('Crawl updated successfully', 'success')
     fetchCrawlData()
 }
 
-// Error handler for modal
-const handleModalError = (errorMessage) => {
+// Error handler for modal (specific crawl dashboard)
+const handleModalErrorSpecific = (errorMessage) => {
     showSnackbar.value = true
     snackbarText.value = errorMessage
     snackbarColor.value = 'error'
@@ -900,6 +984,72 @@ watch(selectedUrls, (newSelectedUrls) => {
         selectAll.value = newSelectedUrls.length === crawl.value.urls.length && crawl.value.urls.length > 0
     }
 }, { deep: true })
+
+// General dashboard methods
+const openCrawl = (crawlId) => {
+    router.push({ name: 'CrawlerDashboard', params: { crawlId } })
+}
+
+const editCrawl = (crawl) => {
+    selectedCrawl.value = crawl
+    showCreateModal.value = true
+}
+
+const openCreateModal = () => {
+    selectedCrawl.value = null
+    showCreateModal.value = true
+}
+
+const handleCrawlCreated = (crawl) => {
+    showNotification('Crawl saved successfully', 'success')
+    // Refresh the crawls list
+    fetchCrawls({ page: 1, itemsPerPage: 50 })
+}
+
+const handleModalError = (errorMessage) => {
+    showNotification(errorMessage, 'error')
+}
+
+const formatDate = (dateString) => {
+    if (!dateString) return 'Never'
+    return formatDateTime(dateString)
+}
+
+// Bulk operations for general dashboard
+const handleBulkDelete = () => {
+    if (selectedCrawls.value.length === 0) return
+    showBulkDeleteConfirm.value = true
+}
+
+const handleBulkExport = () => {
+    if (selectedCrawls.value.length === 0) return
+    // TODO: Implement bulk export functionality
+    showNotification('Bulk export functionality coming soon!', 'info')
+}
+
+const confirmDeleteCrawl = (crawlId) => {
+    selectedCrawls.value = [crawlId]
+    showBulkDeleteConfirm.value = true
+}
+
+const bulkDeleteCrawls = async () => {
+    try {
+        // Delete each selected crawl
+        for (const crawlId of selectedCrawls.value) {
+            await del(`/api/deletecrawl/${crawlId}`)
+        }
+        
+        showBulkDeleteConfirm.value = false
+        selectedCrawls.value = []
+        showNotification(`Successfully deleted ${selectedCrawls.value.length} crawls`, 'success')
+        
+        // Refresh the crawls list
+        await fetchCrawls({ page: 1, itemsPerPage: 50 })
+    } catch (error) {
+        showNotification(error.message, 'error')
+        showBulkDeleteConfirm.value = false
+    }
+}
 </script>
 
 <style scoped>

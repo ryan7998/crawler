@@ -31,14 +31,14 @@
           <LoginForm
             v-if="mode === 'login'"
             @switch-to-register="mode = 'register'"
-            @auth-success="closeModal"
+            @auth-success="handleAuthSuccess"
           />
 
           <!-- Register Form -->
           <RegisterForm
             v-if="mode === 'register'"
             @switch-to-login="mode = 'login'"
-            @auth-success="closeModal"
+            @auth-success="handleAuthSuccess"
           />
         </div>
       </div>
@@ -48,8 +48,11 @@
 
 <script setup>
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import LoginForm from './LoginForm.vue'
 import RegisterForm from './RegisterForm.vue'
+
+const router = useRouter()
 import { useAuth } from '../composables/useAuth'
 
 // Props
@@ -91,6 +94,13 @@ const handleKeydown = (event) => {
   if (event.key === 'Escape' && isOpen.value) {
     closeModal()
   }
+}
+
+// Handle successful authentication
+const handleAuthSuccess = () => {
+  closeModal()
+  // Redirect to dashboard after successful login/registration
+  router.push('/dashboard')
 }
 
 // Add event listener when component mounts
