@@ -1,36 +1,53 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="500" persistent>
-    <v-card>
-      <v-card-actions class="pa-4">
-        <v-spacer />
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          @click="closeModal"
-        />
-      </v-card-actions>
+  <!-- Modal Overlay -->
+  <div v-if="isOpen" class="fixed inset-0 z-[9999] overflow-y-auto">
+    <!-- Backdrop -->
+    <div 
+      class="fixed inset-0 bg-black bg-opacity-50 transition-opacity z-[9998]"
+      @click="closeModal"
+    ></div>
+    
+    <!-- Modal Content -->
+    <div class="relative flex min-h-screen items-center justify-center p-4 z-[9999]">
+      <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900">
+            {{ mode === 'login' ? 'Welcome Back' : 'Create Account' }}
+          </h2>
+          <button
+            @click="closeModal"
+            class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
 
-      <v-card-text class="pa-0">
-        <!-- Login Form -->
-        <LoginForm
-          v-if="mode === 'login'"
-          @switch-to-register="mode = 'register'"
-          @auth-success="closeModal"
-        />
+        <!-- Content -->
+        <div class="p-6">
+          <!-- Login Form -->
+          <LoginForm
+            v-if="mode === 'login'"
+            @switch-to-register="mode = 'register'"
+            @auth-success="closeModal"
+          />
 
-        <!-- Register Form -->
-        <RegisterForm
-          v-if="mode === 'register'"
-          @switch-to-login="mode = 'login'"
-          @auth-success="closeModal"
-        />
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+          <!-- Register Form -->
+          <RegisterForm
+            v-if="mode === 'register'"
+            @switch-to-login="mode = 'login'"
+            @auth-success="closeModal"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import LoginForm from './LoginForm.vue'
 import RegisterForm from './RegisterForm.vue'
 import { useAuth } from '../composables/useAuth'
@@ -51,38 +68,45 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['update:modelValue'])
 
-// Composables
-const { isAuthenticated } = useAuth()
-
 // State
-const isOpen = ref(props.modelValue)
+const isOpen = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
+})
+
 const mode = ref(props.initialMode)
 
-// Watchers
-watch(() => props.modelValue, (newValue) => {
-  isOpen.value = newValue
-})
-
-watch(() => props.initialMode, (newValue) => {
-  mode.value = newValue
-})
-
-// Close modal when user becomes authenticated
-watch(isAuthenticated, (newValue) => {
-  if (newValue && isOpen.value) {
-    closeModal()
-  }
+// Watch for prop changes
+watch(() => props.initialMode, (newMode) => {
+  mode.value = newMode
 })
 
 // Methods
 const closeModal = () => {
   isOpen.value = false
-  emit('update:modelValue', false)
 }
+
+// Close modal on escape key
+const handleKeydown = (event) => {
+  if (event.key === 'Escape' && isOpen.value) {
+    closeModal()
+  }
+}
+
+// Add event listener when component mounts
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+// Remove event listener when component unmounts
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style scoped>
-.v-dialog .v-card {
-  border-radius: 12px;
+/* Ensure modal is above everything */
+.fixed {
+  z-index: 9999;
 }
 </style>

@@ -1,582 +1,468 @@
 <template>
-    <v-dialog v-model="dialog" max-width="800px">
-        <v-card>
-            <v-card-title class="text-h5">
-                {{ isEditing ? 'Edit Crawl' : 'Create New Crawl' }}
-            </v-card-title>
+  <!-- Modal Overlay -->
+  <div v-if="dialog" class="fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex min-h-screen items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div 
+        class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        @click="closeModal"
+      ></div>
+      
+      <!-- Modal Content -->
+      <div class="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 class="text-2xl font-bold text-gray-900">
+            {{ isEditing ? 'Edit Crawl' : 'Create New Crawl' }}
+          </h2>
+          <button
+            @click="closeModal"
+            class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
 
-            <v-card-text>
-                <v-stepper v-model="currentStep">
-                    <v-stepper-header>
-                        <v-stepper-item
-                            :value="1"
-                            title="Basic Info"
-                        >
-                            <template v-slot:icon>
-                                <v-icon>mdi-text-box</v-icon>
-                            </template>
-                        </v-stepper-item>
-                        <v-divider></v-divider>
-                        <v-stepper-item
-                            :value="2"
-                            title="URLs"
-                        >
-                            <template v-slot:icon>
-                                <v-icon>mdi-link</v-icon>
-                            </template>
-                        </v-stepper-item>
-                        <v-divider></v-divider>
-                        <v-stepper-item
-                            :value="3"
-                            title="Domain Check"
-                        >
-                            <template v-slot:icon>
-                                <v-icon>mdi-domain</v-icon>
-                            </template>
-                        </v-stepper-item>
-                    </v-stepper-header>
+        <!-- Stepper -->
+        <div class="px-6 py-4 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <!-- Step 1 -->
+            <div class="flex items-center">
+              <div :class="[
+                'w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold',
+                currentStep >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+              ]">
+                <svg v-if="currentStep > 1" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span v-else>1</span>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900">Basic Info</p>
+                <p class="text-xs text-gray-500">Crawl details</p>
+              </div>
+            </div>
 
-                    <v-stepper-window>
-                        <v-stepper-window-item :value="1">
-                            <v-form ref="form" @submit.prevent>
-                                <v-text-field
-                                    v-model="title"
-                                    label="Crawl Title"
-                                    :rules="[v => !!v || 'Title is required']"
-                                    required
-                                ></v-text-field>
-                                <v-switch
-                                    v-if="isEditing"
-                                    v-model="disabled"
-                                    label="Disable this crawl (will not run in global run)"
-                                    class="mt-2"
-                                ></v-switch>
-                            </v-form>
-                        </v-stepper-window-item>
+            <!-- Connector -->
+            <div class="flex-1 h-0.5 bg-gray-200 mx-4"></div>
 
-                        <v-stepper-window-item :value="2">
-                            <v-form @submit.prevent>
-                                <v-textarea
-                                    v-model="urlsText"
-                                    label="URLs"
-                                    hint="Enter URLs separated by spaces or new lines"
-                                    persistent-hint
-                                    rows="5"
-                                    :rules="[
-                                        v => {
-                                            const urls = parseUrls(v);
-                                            if (urls.length === 0) return 'Please enter at least one URL';  
-                                            const invalidUrls = urls.filter(url => !isValidUrl(url));       
-                                            if (invalidUrls.length > 0) {
-                                                return `Invalid URL(s): ${invalidUrls.join(', ')}`;
-                                            }
-                                            return true;
-                                        }
-                                    ]"
-                                    required
-                                ></v-textarea>
-                            </v-form>
-                        </v-stepper-window-item>
+            <!-- Step 2 -->
+            <div class="flex items-center">
+              <div :class="[
+                'w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold',
+                currentStep >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+              ]">
+                <svg v-if="currentStep > 2" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span v-else>2</span>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900">URLs</p>
+                <p class="text-xs text-gray-500">Target websites</p>
+              </div>
+            </div>
 
-                        <v-stepper-window-item :value="3">
-                            <!-- Current Selectors Section -->
-                            <div class="flex flex-col gap-4">
-                                <div>
-                                    <h6 class="text-gray-700 font-semibold mb-4">Current Selectors</h6>     
-                                    <div class="space-y-4">
-                                        <CssSelector
-                                            v-for="selector in currentSelectors"
-                                            :key="selector.id"
-                                            :selector="selector"
-                                            @removeSelector="removeCurrentSelectorHandler"
-                                            @updateSelector="updateCurrentSelectorHandler"
-                                        />
-                                        <v-btn
-                                            variant="outlined"
-                                            color="primary"
-                                            size="small"
-                                            @click="currentSelectors.push({
-                                                id: Math.random().toString(36).substring(2, 9),
-                                                name: '',
-                                                css: ''
-                                            })"
-                                        >
-                                            Add New Selector
-                                        </v-btn>
-                                    </div>
-                                </div>
-                            <div v-if="domainLoading" class="d-flex justify-center align-center py-4">
-                                <v-progress-circular
-                                    indeterminate
-                                    color="primary"
-                                    size="64"
-                                ></v-progress-circular>
-                            </div>
-                            <div v-else class="mt-4">
-                                <v-alert
-                                    v-if="domainError"
-                                    type="error"
-                                    class="mb-4"
-                                >
-                                    {{ domainError }}
-                                </v-alert>
-                                <v-alert
-                                    v-if="domainInfo"
-                                    :type="domainInfo.hasSelectors ? 'success' : 'warning'"
-                                    class="mb-4"
-                                >
-                                    <div class="d-flex align-center">
-                                        <div>
-                                            <div class="font-weight-bold">Domain: {{ domainInfo.domain }}</div>
-                                            <div v-if="domainInfo.hasSelectors">
-                                                Default selectors found for this domain
-                                            </div>
-                                            <div v-else>
-                                                No default selectors found for this domain
-                                            </div>
-                                        </div>
-                                    </div>
-                                </v-alert>
-                                    <!-- Domain Selectors Section -->
-                                    <div v-if="domainInfo?.hasSelectors" class="mt-6">
-                                        <h6 class="text-gray-700 font-semibold mb-4">Default Selectors for {{ domainInfo.domain }}</h6>
-                                        <div class="space-y-4">
-                                            <div v-for="selector in localSelectors" :key="selector.id" class="flex items-center space-x-4">
-                                                <CssSelector 
-                                                    :selector="selector"
-                                                    :showRemoveButton="false"
-                                                    @updateSelector="updateDomainSelectorHandler"
-                                                />
-                                                <v-btn
-                                                    variant="text"
-                                                    color="primary"
-                                                    size="small"
-                                                    @click="addDomainSelectorToCurrent(selector)"
-                                                >
-                                                    Add to Current
-                                                </v-btn>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Advanced Section -->
-                            <v-expansion-panels class="mt-6">
-                                <v-expansion-panel>
-                                    <v-expansion-panel-title>Advanced</v-expansion-panel-title>
-                                    <v-expansion-panel-text>
-                                        <v-textarea
-                                            v-model="advancedSelectorsText"
-                                            label="Advanced CSS Selectors (one per line)"
-                                            hint="These selectors will be used to scope captcha checks. If a captcha is inside any of these, it will be ignored."
-                                            persistent-hint
-                                            rows="3"
-                                            auto-grow
-                                        ></v-textarea>
-                                    </v-expansion-panel-text>
-                                </v-expansion-panel>
-                            </v-expansion-panels>
-                        </v-stepper-window-item>
-                    </v-stepper-window>
-                </v-stepper>
-            </v-card-text>
+            <!-- Connector -->
+            <div class="flex-1 h-0.5 bg-gray-200 mx-4"></div>
 
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                    color="error"
-                    variant="text"
-                    @click="closeDialog"
+            <!-- Step 3 -->
+            <div class="flex items-center">
+              <div :class="[
+                'w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold',
+                currentStep >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+              ]">
+                <svg v-if="currentStep > 3" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span v-else>3</span>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900">Selectors</p>
+                <p class="text-xs text-gray-500">Data extraction</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 max-h-96 overflow-y-auto">
+          <!-- Step 1: Basic Info -->
+          <div v-if="currentStep === 1" class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Crawl Title *
+              </label>
+              <input
+                v-model="title"
+                type="text"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter a descriptive title for your crawl"
+                required
+              />
+              <p v-if="!title && showValidation" class="mt-1 text-sm text-red-600">
+                Title is required
+              </p>
+            </div>
+
+            <div v-if="isEditing" class="flex items-center">
+              <input
+                v-model="disabled"
+                type="checkbox"
+                id="disabled"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label for="disabled" class="ml-2 text-sm text-gray-700">
+                Disable this crawl (will not run in global run)
+              </label>
+            </div>
+          </div>
+
+          <!-- Step 2: URLs -->
+          <div v-if="currentStep === 2" class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                URLs *
+              </label>
+              <textarea
+                v-model="urlsText"
+                rows="6"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter URLs separated by spaces or new lines"
+              ></textarea>
+              <p class="mt-1 text-sm text-gray-500">
+                Enter URLs separated by spaces or new lines
+              </p>
+              <p v-if="urlValidationError" class="mt-1 text-sm text-red-600">
+                {{ urlValidationError }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 3: Selectors -->
+          <div v-if="currentStep === 3" class="space-y-6">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Selectors</h3>
+              <div class="space-y-4">
+                <div
+                  v-for="selector in currentSelectors"
+                  :key="selector.id"
+                  class="p-4 border border-gray-200 rounded-lg"
                 >
-                    Cancel
-                </v-btn>
-                <v-btn
-                    v-if="currentStep > 1"
-                    color="primary"
-                    variant="text"
-                    @click="handleBack"
+                  <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-medium text-gray-900">Selector {{ currentSelectors.indexOf(selector) + 1 }}</h4>
+                    <button
+                      @click="removeCurrentSelector(selector.id)"
+                      class="text-red-600 hover:text-red-800 p-1"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Element Name</label>
+                      <input
+                        v-model="selector.name"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., product-title"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">CSS Selector</label>
+                      <input
+                        v-model="selector.selector"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., .product-title"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                      <select
+                        v-model="selector.type"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="text">Text</option>
+                        <option value="link">Link</option>
+                        <option value="image">Image</option>
+                        <option value="table">Table</option>
+                        <option value="list">List</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Attribute (optional)</label>
+                      <input
+                        v-model="selector.attribute"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="e.g., href, src"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <button
+                  @click="addNewSelector"
+                  class="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
                 >
-                    Back
-                </v-btn>
-                <v-btn
-                    v-if="currentStep < 3"
-                    color="primary"
-                    variant="text"
-                    @click="handleNext"
-                >
-                    Next
-                </v-btn>
-                <v-btn
-                    v-else
-                    color="primary"
-                    variant="text"
-                    @click="handleSubmit"
-                    :loading="loading"
-                    :disabled="!!domainError"
-                >
-                    {{ isEditing ? 'Update' : 'Create' }}
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+                  <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  Add New Selector
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+          <button
+            v-if="currentStep > 1"
+            @click="previousStep"
+            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Previous
+          </button>
+          <div v-else></div>
+          
+          <div class="flex space-x-3">
+            <button
+              @click="closeModal"
+              class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              v-if="currentStep < 3"
+              @click="nextStep"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Next
+            </button>
+            <button
+              v-else
+              @click="saveCrawl"
+              :disabled="isLoading"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+            >
+              <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span>{{ isLoading ? 'Saving...' : (isEditing ? 'Update Crawl' : 'Create Crawl') }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, inject } from 'vue'
-import { useRouter } from 'vue-router'
-import CssSelector from './CssSelector.vue'
-import { getApiUrl, isValidUrl } from '../utils/commonUtils'
+import { ref, computed, watch } from 'vue'
 import { useApiService } from '../composables/useApiService'
+
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  },
+  crawlData: {
+    type: Object,
+    default: null
+  }
+})
 
 const emit = defineEmits(['update:modelValue', 'crawl-created'])
 
-const props = defineProps({
-    modelValue: {
-        type: Boolean,
-        default: false
-    },
-    crawlData: {
-        type: Object,
-        default: null
-    }
-})
+const { post, put, loading: apiLoading } = useApiService()
 
+// Modal state
 const dialog = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
 })
 
 const isEditing = computed(() => !!props.crawlData)
-const apiUrl = computed(() => getApiUrl())
+const isLoading = ref(false)
+const showValidation = ref(false)
 
-// Refs
-const router = useRouter()
-const { get, post, put } = useApiService()
-const form = ref(null)
+// Form data
 const currentStep = ref(1)
 const title = ref('')
-const urlsText = ref('')
-const loading = ref(false)
-const domainLoading = ref(false)
-const domainError = ref('')
-const domainInfo = ref(null)
 const disabled = ref(false)
-
-// Add new refs for selectors
-const localSelectors = ref([])
+const urlsText = ref('')
 const currentSelectors = ref([])
-const advancedSelectorsText = ref('')
+const urlValidationError = ref('')
 
-// Inject the notification function
-const showNotification = inject('showNotification')
-
-// Initialize form
-const initializeForm = () => {
-    if (props.crawlData) {
-        title.value = props.crawlData.title
-        urlsText.value = props.crawlData.urls.join('\n')
-        disabled.value = !!props.crawlData.disabled
-        // Initialize current selectors from crawlData with child selectors
-        currentSelectors.value = props.crawlData.selectors?.map(selector => ({
-            id: Math.random().toString(36).substring(2, 9),
-            name: selector.target_element || selector.name, // Handle both formats
-            css: selector.selector_value || selector.selector, // Handle both formats
-            type: selector.type || 'text',
-            attribute: selector.attribute || null,
-            childSelectors: (selector.childSelectors || []).map(child => ({
-                id: Math.random().toString(36).substring(2, 9),
-                name: child.target_element || child.name, // Handle both formats
-                selector: child.selector_value || child.selector, // Handle both formats
-                type: child.type || 'text',
-                attribute: child.attribute || null
-            }))
-        })) || [],
-        advancedSelectorsText.value = (props.crawlData.advancedSelectors || []).join('\n')
-    } else {
-        title.value = ''
-        urlsText.value = ''
-        disabled.value = false
-        currentSelectors.value = []
-        advancedSelectorsText.value = ''
-    }
-}
-
-// Watch for changes in crawlData
-watch(() => props.crawlData, (newVal) => {
+// Initialize form when modal opens
+watch(() => props.modelValue, (isOpen) => {
+  if (isOpen) {
     initializeForm()
-}, { immediate: true })
-
-// Watch for dialog changes
-watch(() => dialog.value, (newVal) => {
-    if (newVal) {
-        initializeForm()
-    }
+  }
 })
 
-// Parse URLs from text
-const parseUrls = (text) => {
-    return text
-        .split(/[\s\n]+/)
-        .map(url => url.trim())
-        .filter(url => url.length > 0)
-}
-
-// Extract domain from URL
-const extractDomain = (url) => {
-    try {
-        const urlObj = new URL(url)
-        return urlObj.hostname // This will preserve www if present
-    } catch {
-        return null
-    }
-}
-
-// Check if all URLs have the same domain
-const checkDomainConsistency = (urls) => {
-    const domains = urls.map(url => extractDomain(url)).filter(Boolean)
-    if (domains.length === 0) return null
-
-    const firstDomain = domains[0]
-    const allSameDomain = domains.every(domain => domain === firstDomain)
-
-    return allSameDomain ? firstDomain : null
-}
-
-// Fetch domain selectors
-const fetchDomainSelectors = async (domain) => {
-    try {
-        const response = await get(`/api/selectors/${domain}`)
-        console.log('Raw selectors from backend:', response.selectors)
-
-        // Transform the selectors to match the CssSelector component format
-        const transformedSelectors = response.selectors.map(selector => ({
-            id: Math.random().toString(36).substring(2, 9),
-            name: selector.name, // Backend uses 'name', not 'target_element'
-            css: selector.selector, // Backend uses 'selector', not 'selector_value'
-            type: selector.type || 'text',
-            attribute: selector.attribute || null,
-            childSelectors: (selector.childSelectors || []).map(child => ({
-                id: Math.random().toString(36).substring(2, 9),
-                name: child.name, // Backend uses 'name'
-                selector: child.selector, // Backend uses 'selector'
-                type: child.type || 'text',
-                attribute: child.attribute || null
-            }))
-        }))
-        console.log('Transformed selectors for frontend:', transformedSelectors)
-
-        localSelectors.value = transformedSelectors
-        return {
-            domain,
-            hasSelectors: true,
-            selectors: transformedSelectors
-        }
-    } catch (error) {
-        if (error.response?.status === 404) {
-            localSelectors.value = []
-            return {
-                domain,
-                hasSelectors: false,
-                selectors: null
-            }
-        }
-        throw error
-    }
-}
-
-// Add selector update handlers
-const updateCurrentSelectorHandler = ({ selector }) => {
-    const index = currentSelectors.value.findIndex(s => s.id === selector.id)
-    if (index !== -1) {
-        currentSelectors.value[index] = { ...currentSelectors.value[index], ...selector }
-    }
-}
-
-const updateDomainSelectorHandler = ({ selector }) => {
-    const index = localSelectors.value.findIndex(s => s.id === selector.id)
-    if (index !== -1) {
-        localSelectors.value[index] = { ...localSelectors.value[index], ...selector }
-    }
-}
-
-// Add selector remove handlers
-const removeCurrentSelectorHandler = (selectorId) => {
-    currentSelectors.value = currentSelectors.value.filter(s => s.id !== selectorId)
-}
-
-const removeDomainSelectorHandler = (selectorId) => {
-    localSelectors.value = localSelectors.value.filter(s => s.id !== selectorId)
-}
-
-// Add function to add domain selector to current selectors
-const addDomainSelectorToCurrent = (selector) => {
-    // Check if selector already exists in current selectors
-    const exists = currentSelectors.value.some(s =>
-        s.name === selector.name && s.css === selector.css
-    )
-    if (!exists) {
-        currentSelectors.value.push({
-            id: Math.random().toString(36).substring(2, 9),
-            name: selector.name,
-            css: selector.css,
-            type: selector.type || 'text',
-            attribute: selector.attribute || null,
-            childSelectors: (selector.childSelectors || []).map(child => ({
-                id: Math.random().toString(36).substring(2, 9),
-                name: child.name,
-                selector: child.selector,
-                type: child.type || 'text',
-                attribute: child.attribute || null
-            }))
-        })
-    }
-}
-
-// Add validation function for selectors
-const validateSelectors = () => {
-    if (currentSelectors.value.length === 0) {
-        showNotification('Please add at least one selector', 'error')
-        return false
-    }
-
-    const emptySelectors = currentSelectors.value.filter(selector =>
-        !selector.name.trim() || !selector.css.trim()
-    )
-
-    if (emptySelectors.length > 0) {
-        showNotification('Please fill in all selector fields', 'error')
-        return false
-    }
-
-    return true
-}
-
-// Handle next step
-const handleNext = async () => {
-    if (currentStep.value === 1) {
-        const { valid } = await form.value.validate()
-        if (!valid) {
-            showNotification('Please enter a title', 'error')
-            return
-        }
-        currentStep.value++
-    } else if (currentStep.value === 2) {
-        const urls = parseUrls(urlsText.value)
-        if (urls.length === 0) {
-            showNotification('Please enter at least one URL', 'error')
-            return
-        }
-
-        const invalidUrls = urls.filter(url => !isValidUrl(url))
-        if (invalidUrls.length > 0) {
-            showNotification('Please enter valid URLs', 'error')
-            return
-        }
-
-        domainLoading.value = true
-        domainError.value = ''
-        domainInfo.value = null
-
-        try {
-            const domain = checkDomainConsistency(urls)
-            if (!domain) {
-                domainError.value = 'All URLs must be from the same domain'
-                return
-            }
-
-            currentStep.value++
-            domainInfo.value = await fetchDomainSelectors(domain)
-        } catch (error) {
-            console.error('Error checking domain:', error)
-            domainError.value = 'Error checking domain selectors'
-        } finally {
-            domainLoading.value = false
-        }
-    }
-}
-
-// Handle back step
-const handleBack = () => {
-    currentStep.value--
-    if (currentStep.value === 2) {
-        domainError.value = ''
-        domainInfo.value = null
-    }
-}
-
-// Handle form submission
-const handleSubmit = async () => {
-    const urls = parseUrls(urlsText.value)
-
-    if (urls.length === 0) {
-        showNotification('Please enter at least one URL', 'error')
-        return
-    }
-
-    const invalidUrls = urls.filter(url => !isValidUrl(url))
-    if (invalidUrls.length > 0) {
-        showNotification('Please enter valid URLs', 'error')
-        return
-    }
-
-    if (domainError.value) {
-        return
-    }
-
-    if (!validateSelectors()) {
-        return
-    }
-
-    loading.value = true
-
-    try {
-        const requestData = {
-            title: title.value.trim(),
-            urls: urls.map(url => url.trim()),
-            selectors: currentSelectors.value.map(selector => ({
-                target_element: selector.name,
-                selector_value: selector.css,
-                type: selector.type || 'text',
-                attribute: selector.attribute,
-                childSelectors: selector.childSelectors?.map(child => ({
-                    target_element: child.name,
-                    selector_value: child.selector,
-                    type: child.type || 'text',
-                    attribute: child.attribute
-                })) || []
-            })),
-            advancedSelectors: advancedSelectorsText.value
-                .split('\n')
-                .map(s => s.trim())
-                .filter(s => s.length > 0),
-            userId: '1',
-            ...(isEditing.value ? { disabled: disabled.value } : {})
-        }
-
-        console.log('Sending request data:', requestData)
-
-        const response = isEditing.value
-            ? await put(`/api/updatecrawl/${props.crawlData._id}`, requestData)        
-            : await post(`/api/createcrawler`, requestData)
-
-        showNotification(isEditing.value ? 'Crawl updated successfully' : 'Crawl created successfully', 'success')
-        emit('crawl-created', isEditing.value ? response.crawl : { _id: response.crawlId })       
-        closeDialog()
-    } catch (error) {
-        console.error('Error creating/updating crawl:', error)
-        showNotification(error.response?.data?.message || 'An error occurred', 'error')
-    } finally {
-        loading.value = false
-    }
-}
-
-// Close dialog
-const closeDialog = () => {
-    dialog.value = false
+const initializeForm = () => {
+  currentStep.value = 1
+  showValidation.value = false
+  urlValidationError.value = ''
+  
+  if (props.crawlData) {
+    title.value = props.crawlData.title || ''
+    disabled.value = props.crawlData.disabled || false
+    urlsText.value = (props.crawlData.urls || []).join('\n')
+    currentSelectors.value = (props.crawlData.selectors || []).map((selector, index) => ({
+      id: `selector-${index}`,
+      name: selector.target_element || '',
+      selector: selector.selector_value || '',
+      type: selector.type || 'text',
+      attribute: selector.attribute || ''
+    }))
+  } else {
     title.value = ''
+    disabled.value = false
     urlsText.value = ''
-    currentStep.value = 1
-    domainError.value = ''
-    domainInfo.value = null
+    currentSelectors.value = []
+  }
 }
-</script> 
+
+const parseUrls = (text) => {
+  return text.split(/[\s\n]+/).filter(url => url.trim().length > 0)
+}
+
+const isValidUrl = (url) => {
+  try {
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
+
+const validateUrls = () => {
+  const urls = parseUrls(urlsText.value)
+  if (urls.length === 0) {
+    urlValidationError.value = 'Please enter at least one URL'
+    return false
+  }
+  
+  const invalidUrls = urls.filter(url => !isValidUrl(url))
+  if (invalidUrls.length > 0) {
+    urlValidationError.value = `Invalid URL(s): ${invalidUrls.join(', ')}`
+    return false
+  }
+  
+  urlValidationError.value = ''
+  return true
+}
+
+const nextStep = () => {
+  if (currentStep.value === 1) {
+    if (!title.value.trim()) {
+      showValidation.value = true
+      return
+    }
+  } else if (currentStep.value === 2) {
+    if (!validateUrls()) {
+      return
+    }
+  }
+  
+  currentStep.value++
+}
+
+const previousStep = () => {
+  currentStep.value--
+}
+
+const addNewSelector = () => {
+  currentSelectors.value.push({
+    id: `selector-${Date.now()}`,
+    name: '',
+    selector: '',
+    type: 'text',
+    attribute: ''
+  })
+}
+
+const removeCurrentSelector = (id) => {
+  const index = currentSelectors.value.findIndex(s => s.id === id)
+  if (index > -1) {
+    currentSelectors.value.splice(index, 1)
+  }
+}
+
+const closeModal = () => {
+  dialog.value = false
+}
+
+const saveCrawl = async () => {
+  if (!title.value.trim()) {
+    showValidation.value = true
+    return
+  }
+  
+  if (!validateUrls()) {
+    currentStep.value = 2
+    return
+  }
+  
+  isLoading.value = true
+  
+  try {
+    const urls = parseUrls(urlsText.value)
+    const selectors = currentSelectors.value
+      .filter(s => s.name.trim() && s.selector.trim())
+      .map(s => ({
+        target_element: s.name,
+        selector_value: s.selector,
+        type: s.type,
+        attribute: s.attribute || null
+      }))
+    
+    const crawlData = {
+      title: title.value.trim(),
+      urls,
+      selectors,
+      disabled
+    }
+    
+    let response
+    if (isEditing.value) {
+      response = await put(`/api/updatecrawler/${props.crawlData._id}`, crawlData)
+    } else {
+      response = await post('/api/createcrawler', crawlData)
+    }
+    
+    emit('crawl-created', response.data)
+    closeModal()
+  } catch (error) {
+    console.error('Error saving crawl:', error)
+    // Handle error - you might want to show a notification here
+  } finally {
+    isLoading.value = false
+  }
+}
+</script>
+
+<style scoped>
+/* Custom animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+</style>

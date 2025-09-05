@@ -1,686 +1,242 @@
 <template>
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 mt-8">
-        <!-- Welcome Section for Unauthenticated Users -->
-        <div v-if="!isAuthenticated" class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">Welcome to Crawler</h1>
-            <p class="text-lg text-gray-600 mb-6">A powerful web scraping tool for extracting data from websites</p>
-            <div class="flex justify-center space-x-4">
-                <v-btn
-                    color="primary"
-                    size="large"
-                    @click="openAuthModal('login')"
-                >
-                    <v-icon start icon="mdi-login" />
-                    Login
-                </v-btn>
-                <v-btn
-                    color="primary"
-                    variant="outlined"
-                    size="large"
-                    @click="openAuthModal('register')"
-                >
-                    <v-icon start icon="mdi-account-plus" />
-                    Sign Up
-                </v-btn>
-            </div>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <!-- Hero Section -->
+    <div class="relative max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+          Extract Data from
+          <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Any Website
+          </span>
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          Powerful web scraping tool with real-time monitoring, custom selectors, and automated data export. 
+          Scale your data extraction with enterprise-grade reliability.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <button
+            @click="openAuthModal('register')"
+            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+          >
+            Start Free Trial
+          </button>
+          <button
+            @click="scrollToFeatures"
+            class="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+          >
+            View Features
+          </button>
         </div>
 
-        <!-- Authenticated User Content -->
-        <div v-else>
-        <!-- Search Bar with Stats Button -->
-        <v-card class="mb-4 pa-4">
-            <div class="d-flex align-center justify-space-between mb-4">
-                <div class="d-flex align-center flex-grow-1 mr-4">
-                    <v-text-field
-                        v-model="searchQuery"
-                        label="Search crawls by name"
-                        prepend-inner-icon="mdi-magnify"
-                        variant="outlined"
-                        clearable
-                        hide-details
-                        class="flex-grow-1"
-                        :loading="isSearching"
-                        @update:model-value="handleSearch"
-                        @click:clear="handleSearch"
-                    />
-                    <v-chip
-                        v-if="searchQuery || selectedStatus !== 'all'"
-                        color="primary"
-                        variant="outlined"
-                        class="ml-2"
-                    >
-                        {{ filteredCrawls.length }} result{{ filteredCrawls.length !== 1 ? 's' : '' }}
-                    </v-chip>
-                </div>
-                <v-btn
-                    variant="outlined"
-                    color="info"
-                    @click="showStatsModal = true"
-                    prepend-icon="mdi-chart-box"
-                >
-                    View Stats
-                </v-btn>
-            </div>
-            
-            <!-- Status Filter -->
-            <div class="d-flex align-center">
-                <span class="text-subtitle-2 font-weight-medium mr-3">Status:</span>
-                <div class="d-flex gap-1">
-                    <v-chip
-                        v-for="status in statusOptions"
-                        :key="status.value"
-                        :color="selectedStatus === status.value ? 'primary' : 'default'"
-                        :variant="selectedStatus === status.value ? 'elevated' : 'outlined'"
-                        @click="toggleStatusFilter(status.value)"
-                        class="cursor-pointer"
-                        size="small"
-                    >
-                        <v-icon :icon="status.icon" start size="x-small" />
-                        {{ status.label }}
-                        <span class="ml-1">({{ getStatusCount(status.value) }})</span>
-                    </v-chip>
-                </div>
-                <v-spacer />
-                <v-btn
-                    v-if="selectedStatus !== 'all'"
-                    variant="text"
-                    color="primary"
-                    size="small"
-                    @click="clearStatusFilter"
-                >
-                    Clear Filter
-                </v-btn>
-            </div>
-        </v-card>
-
-        <!-- Global Proxy Stats Widget -->
-        <div class="mb-4">
-            <ProxyStatsWidget
-                :stats="globalProxyStats"
-                :loading="globalProxyStatsLoading"
-                :error="globalProxyStatsError"
-                :show-actions="true"
-                :show-cleanup="true"
-                @refresh="fetchGlobalProxyStats"
-                @view-details="showGlobalProxyStatsModal = true"
-                @cleanup="showCleanupDialog = true"
-            />
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-600 mb-2">10K+</div>
+            <div class="text-gray-600">Websites Scraped</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-indigo-600 mb-2">99.9%</div>
+            <div class="text-gray-600">Uptime</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-purple-600 mb-2">24/7</div>
+            <div class="text-gray-600">Monitoring</div>
+          </div>
         </div>
-        
-        <v-data-table
-            :headers="headers"
-            :items="filteredCrawls"
-            :items-per-page="-1"
-            hover
-            class="elevation-2 rounded-lg custom-table"
-            density="comfortable"
-        >
-            <!-- No results message -->
-            <template v-slot:no-data>
-                <div class="text-center pa-8">
-                    <v-icon size="80" color="grey-lighten-2" class="mb-4">mdi-magnify</v-icon>
-                    <h3 class="text-h5 text-grey-darken-1 mb-2">
-                        {{ searchQuery ? `No crawls found matching "${searchQuery}"` : 'No crawls found' }}
-                    </h3>
-                    <p class="text-body-1 text-grey mb-4">
-                        {{ searchQuery ? 'Try adjusting your search terms or create a new crawl' : 'Get started by creating your first crawl' }}
-                    </p>
-                    <v-btn
-                        v-if="!searchQuery"
-                        color="primary"
-                        @click="openCreateModal"
-                        prepend-icon="mdi-plus"
-                    >
-                        Create Your First Crawl
-                    </v-btn>
-                </div>
-            </template>
-            
-            <!-- Custom cell for Title column -->
-            <template v-slot:item.title="{ item }">
-                <div class="d-flex align-center">
-                    <v-btn
-                        variant="text"
-                        color="primary"
-                        size="small"
-                        :to="{ name: 'CrawlerDashboard', params: { crawlId: item._id } }"
-                        class="text-none font-weight-medium text-left text-body-2"
-                    >
-                        {{ item.title }}
-                    </v-btn>
-                    <v-chip
-                        v-if="item.disabled"
-                        size="x-small"
-                        color="grey"
-                        class="ml-2"
-                    >
-                        Disabled
-                    </v-chip>
-                </div>
-            </template>
-
-            <!-- Custom cell for URLs column -->
-            <template v-slot:item.urls="{ item }">
-                <div class="text-center text-body-2">
-                    {{ item.urls ? item.urls.length : 0 }}
-                </div>
-            </template>
-
-            <!-- Custom cell for Actions column -->
-            <template v-slot:item.actions="{ item }">
-                <v-menu>
-                    <template v-slot:activator="{ props }">
-                        <v-btn
-                            variant="text"
-                            color="primary"
-                            v-bind="props"
-                            size="small"
-                        >
-                            <v-icon>mdi-dots-vertical</v-icon>
-                        </v-btn>
-                    </template>
-                    <v-list>
-                        <v-list-item @click="openEditModal(item)">
-                            <template v-slot:prepend>
-                                <v-icon icon="mdi-pencil" />
-                            </template>
-                            <v-list-item-title>Edit</v-list-item-title>
-                        </v-list-item>
-                        <v-list-item @click="toggleDisableCrawl(item)" :disabled="disableLoadingId === item._id">
-                            <template v-slot:prepend>
-                                <v-icon :icon="item.disabled ? 'mdi-toggle-switch-off-outline' : 'mdi-toggle-switch'" />
-                            </template>
-                            <v-list-item-title>{{ item.disabled ? 'Enable' : 'Disable' }} Crawl</v-list-item-title>
-                        </v-list-item>
-                        <v-divider></v-divider>
-                        <v-list-item @click="confirmDeleteCrawl(item)" :disabled="deleteLoadingId === item._id">
-                            <template v-slot:prepend>
-                                <v-icon icon="mdi-delete" color="error" />
-                            </template>
-                            <v-list-item-title class="text-error">Delete Crawl</v-list-item-title>
-                        </v-list-item>
-                    </v-list>
-                </v-menu>
-            </template>
-
-            <!-- Custom cell for Status column -->
-            <template v-slot:item.status="{ item }">
-                <div class="text-center">
-                    <v-chip
-                        :color="item.status === 'in-progress' ? 'blue' : getStatusColor(item.status)"
-                        size="small"
-                        class="text-capitalize mb-1 text-body-2"
-                    >
-                        <v-icon v-if="item.status === 'in-progress'" start icon="mdi-progress-clock" />
-                        <v-icon v-else-if="item.status === 'completed'" start icon="mdi-check-circle" />
-                        <v-icon v-else-if="item.status === 'failed'" start icon="mdi-alert-circle" />
-                        <v-icon v-else start icon="mdi-clock-outline" />
-                        {{ item.status }}
-                    </v-chip>
-                    <div v-if="item.aggregatedData" class="text-caption text-grey">
-                        {{ Object.keys(item.aggregatedData).length }} URLs
-                    </div>
-                </div>
-            </template>
-
-            <!-- Custom cell for Last Run column -->
-            <template v-slot:item.lastRun="{ item }">
-                <v-tooltip location="top">
-                    <template #activator="{ props }">
-                        <div v-bind="props" class="text-center cursor-pointer">
-                            <div class="text-body-2">
-                                {{ getRelativeTime(item.endTime || item.updatedAt) }}
-                            </div>
-                        </div>
-                    </template>
-                    <span>{{ formatDateTime(item.endTime || item.updatedAt) }}</span>
-                </v-tooltip>
-            </template>
-        </v-data-table>
-
-        <!-- Create/Edit Crawl Modal -->
-        <CreateCrawlModal
-            v-model="showModal"
-            :crawl-data="selectedCrawl"
-            @crawl-created="handleCrawlCreated"
-        />
-
-        <!-- Global Export Modal -->
-        <GlobalExportModal
-            v-model="showGlobalExportModal"
-            @export-success="handleGlobalExportSuccess"
-        />
-
-        <!-- Queue Status Modal -->
-        <QueueStatusModal
-            v-model="showQueueStatusModal"
-        />
-
-        <!-- Statistics Modal -->
-        <v-dialog v-model="showStatsModal" max-width="600">
-            <v-card>
-                <v-card-title class="text-h5 d-flex align-center">
-                    <v-icon icon="mdi-chart-box" class="mr-2" />
-                    Crawl Statistics
-                </v-card-title>
-                <v-card-text>
-                    <v-row>
-                        <v-col cols="12" sm="6">
-                            <v-card class="text-center pa-4" variant="outlined">
-                                <v-icon size="40" color="primary" class="mb-3">mdi-web</v-icon>
-                                <div class="text-h4 font-weight-bold text-primary">{{ totalCrawls }}</div>
-                                <div class="text-subtitle-1">Total Crawls</div>
-                            </v-card>
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <v-card class="text-center pa-4" variant="outlined">
-                                <v-icon size="40" color="success" class="mb-3">mdi-check-circle</v-icon>
-                                <div class="text-h4 font-weight-bold text-success">{{ completedCrawls }}</div>
-                                <div class="text-subtitle-1">Completed</div>
-                            </v-card>
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <v-card class="text-center pa-4" variant="outlined">
-                                <v-icon size="40" color="error" class="mb-3">mdi-alert-circle</v-icon>
-                                <div class="text-h4 font-weight-bold text-error">{{ failedCrawls }}</div>
-                                <div class="text-subtitle-1">Failed</div>
-                            </v-card>
-                        </v-col>
-                        <v-col cols="12" sm="6">
-                            <v-card class="text-center pa-4" variant="outlined">
-                                <v-icon size="40" color="info" class="mb-3">mdi-progress-clock</v-icon>
-                                <div class="text-h4 font-weight-bold text-info">{{ inProgressCrawls }}</div>
-                                <div class="text-subtitle-1">In Progress</div>
-                            </v-card>
-                        </v-col>
-                    </v-row>
-                    
-                    <!-- Additional Stats -->
-                    <v-divider class="my-4"></v-divider>
-                    <div class="text-center">
-                        <div class="text-h6 mb-2">Success Rate</div>
-                        <div class="text-h3 font-weight-bold text-success">
-                            {{ totalCrawls > 0 ? Math.round((completedCrawls / totalCrawls) * 100) : 0 }}%
-                        </div>
-                    </div>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer />
-                    <v-btn @click="showStatsModal = false">Close</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
-        <!-- Delete Confirmation Dialog -->
-        <ConfirmationModal
-            v-model="showDeleteConfirm"
-            title="Confirm Delete"
-            :message="deleteConfirmMessage"
-            confirm-text="Delete"
-            cancel-text="Cancel"
-            color="error"
-            icon="mdi-delete"
-            :loading="deleteLoadingId === crawlToDelete?._id"
-            @confirm="deleteCrawl"
-        />
-
-        <!-- Global Proxy Stats Modal -->
-        <GlobalProxyStatsModal
-            v-model="showGlobalProxyStatsModal"
-        />
-
-        <!-- Cleanup Confirmation Dialog -->
-        <v-dialog v-model="showCleanupDialog" max-width="400px">
-            <v-card>
-                <v-card-title>Cleanup Old Proxy Data</v-card-title>
-                <v-card-text>
-                    <p>This will permanently delete proxy usage records older than the specified number of days.</p>
-                    <v-text-field
-                        v-model="cleanupDays"
-                        label="Days to keep"
-                        type="number"
-                        variant="outlined"
-                        density="compact"
-                        :rules="[v => v > 0 || 'Must be greater than 0']"
-                    />
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer />
-                    <v-btn variant="outlined" @click="showCleanupDialog = false">Cancel</v-btn>
-                    <v-btn
-                        color="warning"
-                        @click="performCleanup"
-                        :loading="globalProxyStatsLoading"
-                    >
-                        Cleanup
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
-        <v-snackbar
-            v-model="showSnackbar"
-            :color="snackbarColor"
-            timeout="3000"
-        >
-            {{ snackbarText }}
-        </v-snackbar>
-        </div> <!-- Close authenticated user content -->
-        
-        <!-- Auth Modal -->
-        <AuthModal
-          v-model="showAuthModal"
-          :initial-mode="authModalMode"
-        />
+      </div>
     </div>
+
+    <!-- Features Section -->
+    <div ref="featuresSection" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Everything You Need to Scale Data Extraction
+          </h2>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            From simple web scraping to complex data pipelines, our platform handles it all with enterprise-grade features.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Feature 1 -->
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100 hover:shadow-xl transition-all duration-300">
+            <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Lightning Fast</h3>
+            <p class="text-gray-600">Extract data from thousands of pages in minutes with our optimized crawling engine and parallel processing.</p>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-100 hover:shadow-xl transition-all duration-300">
+            <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Real-time Monitoring</h3>
+            <p class="text-gray-600">Track crawl progress, monitor success rates, and get instant notifications when data changes.</p>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-2xl border border-purple-100 hover:shadow-xl transition-all duration-300">
+            <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Custom Selectors</h3>
+            <p class="text-gray-600">Create complex CSS selectors with nested data extraction and domain-specific templates.</p>
+          </div>
+
+          <!-- Feature 4 -->
+          <div class="bg-gradient-to-br from-orange-50 to-red-50 p-8 rounded-2xl border border-orange-100 hover:shadow-xl transition-all duration-300">
+            <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Multiple Export Formats</h3>
+            <p class="text-gray-600">Export to CSV, Excel, or Google Sheets with automated scheduling and change detection.</p>
+          </div>
+
+          <!-- Feature 5 -->
+          <div class="bg-gradient-to-br from-teal-50 to-cyan-50 p-8 rounded-2xl border border-teal-100 hover:shadow-xl transition-all duration-300">
+            <div class="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Secure & Reliable</h3>
+            <p class="text-gray-600">Enterprise-grade security with proxy rotation, rate limiting, and 99.9% uptime guarantee.</p>
+          </div>
+
+          <!-- Feature 6 -->
+          <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-8 rounded-2xl border border-indigo-100 hover:shadow-xl transition-all duration-300">
+            <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mb-6">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Analytics & Insights</h3>
+            <p class="text-gray-600">Comprehensive analytics dashboard with success rates, performance metrics, and data trends.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
+          Ready to Scale Your Data Extraction?
+        </h2>
+        <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+          Join thousands of businesses already using CrawlerPro to extract valuable data from the web.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button
+            @click="openAuthModal('register')"
+            class="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+          >
+            Start Your Free Trial
+          </button>
+          <button
+            @click="scrollToFeatures"
+            class="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-200"
+          >
+            Learn More
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <div class="flex items-center justify-center mb-4">
+            <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12.25V1m0 11.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M4 19v-2.25m6-13.5V1m0 2.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M10 19V7.75m6 4.5V1m0 11.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM16 19v-2"/>
+              </svg>
+            </div>
+            <span class="ml-3 text-2xl font-bold text-white">CrawlerPro</span>
+          </div>
+          <p class="text-gray-400 mb-4">
+            Advanced web scraping platform for modern businesses
+          </p>
+          <p class="text-gray-500 text-sm">
+            © 2024 CrawlerPro. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, inject, watch, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCrawlStore } from '../stores/crawlStore'
-import { getStatusColor } from '../utils/statusUtils'
-import { formatDate, formatDateTime, getRelativeTime } from '../utils/commonUtils'
-import { useCrawlManagement } from '../composables/useCrawlManagement'
-import { useAuth } from '../composables/useAuth'
-import CreateCrawlModal from './CreateCrawlModal.vue'
-import GlobalExportModal from './GlobalExportModal.vue'
-import QueueStatusModal from './QueueStatusModal.vue'
-import ProxyStatsWidget from './ui/ProxyStatsWidget.vue'
-import GlobalProxyStatsModal from './GlobalProxyStatsModal.vue'
-import ConfirmationModal from './ui/ConfirmationModal.vue'
-import { useProxyStats } from '../composables/useProxyStats'
-import { useApiService } from '../composables/useApiService'
-import AuthModal from './AuthModal.vue'
+import { ref } from 'vue'
 
-// Initialize composables
-const { del, loading: apiLoading, error: apiError } = useApiService()
+const featuresSection = ref(null)
 
-// Initialize Pinia store
-const crawlStore = useCrawlStore()
+// Define emits
+const emit = defineEmits(['open-auth-modal'])
 
-// Initialize auth
-const { isAuthenticated } = useAuth()
-const router = useRouter()
-
-// Inject the notification function
-const showNotification = inject('showNotification')
-
-// Use the crawl management composable
-const {
-    crawls,
-    totalCrawls,
-    isSearching,
-    runAllLoading,
-    disableLoadingId,
-    showSnackbar,
-    snackbarText,
-    snackbarColor,
-    fetchCrawls: fetchCrawlsFromComposable,
-    runAllCrawls: runAllCrawlsFromComposable,
-    toggleDisableCrawl: toggleDisableCrawlFromComposable
-} = useCrawlManagement()
-
-// Table configuration
-const headers = [
-    { title: 'Title', key: 'title', align: 'start' },
-    { title: 'URLs', key: 'urls', align: 'center', width: '100px' },
-    { title: 'Status', key: 'status', align: 'center' },
-    { title: 'Last Run', key: 'lastRun', align: 'center' },
-    { title: 'Actions', key: 'actions', sortable: false, align: 'center' }
-]
-
-// No pagination needed - showing all crawls
-
-// Modal state
-const showModal = ref(false)
-const selectedCrawl = ref(null)
-const showGlobalExportModal = ref(false)
-const showQueueStatusModal = ref(false)
-const showDeleteConfirm = ref(false)
-const crawlToDelete = ref(null)
-const deleteLoadingId = ref(null)
-const showStatsModal = ref(false)
-const showGlobalProxyStatsModal = ref(false)
-const showCleanupDialog = ref(false)
-const cleanupDays = ref(90)
-const showAuthModal = ref(false)
-const authModalMode = ref('login')
-
-// Initialize proxy stats composable
-const {
-  globalStats,
-  loading: globalProxyStatsLoading,
-  error: globalProxyStatsError,
-  fetchGlobalProxyStats,
-  formattedGlobalStats,
-  cleanupProxyUsage
-} = useProxyStats()
-
-// Computed properties for global proxy stats
-const globalProxyStats = computed(() => formattedGlobalStats.value)
-
-// Computed property for delete confirmation message
-const deleteConfirmMessage = computed(() => {
-    return `Are you sure you want to delete "${crawlToDelete.value?.title}"? This action cannot be undone.`
-})
-
-// Search query
-const searchQuery = ref('')
-
-// Status filter state
-const selectedStatus = ref('all')
-
-// Status filter options
-const statusOptions = [
-    { value: 'all', label: 'All', icon: 'mdi-view-list' },
-    { value: 'completed', label: 'Completed', icon: 'mdi-check-circle' },
-    { value: 'failed', label: 'Failed', icon: 'mdi-alert-circle' },
-    { value: 'in-progress', label: 'In Progress', icon: 'mdi-progress-clock' },
-    { value: 'pending', label: 'Pending', icon: 'mdi-clock-outline' }
-]
-
-// Computed properties for statistics
-const completedCrawls = computed(() => {
-    return crawls.value.filter(crawl => crawl.status === 'completed').length
-})
-
-const failedCrawls = computed(() => {
-    return crawls.value.filter(crawl => crawl.status === 'failed').length
-})
-
-const inProgressCrawls = computed(() => {
-    return crawls.value.filter(crawl => crawl.status === 'in-progress').length
-})
-
-// Computed property for filtered crawls
-const filteredCrawls = computed(() => {
-    if (selectedStatus.value === 'all') {
-        return crawls.value
-    }
-    return crawls.value.filter(crawl => crawl.status === selectedStatus.value)
-})
-
-// Function to get count for each status
-const getStatusCount = (status) => {
-    if (status === 'all') {
-        return crawls.value.length
-    }
-    return crawls.value.filter(crawl => crawl.status === status).length
-}
-
-// Debounced search function
-let searchTimeout = null
-
-// Status filter functions
-const toggleStatusFilter = (status) => {
-    selectedStatus.value = status
-}
-
-const clearStatusFilter = () => {
-    selectedStatus.value = 'all'
-}
-
-// Wrapper function to call the composable's fetchCrawls with search only
-const fetchCrawls = async () => {
-    await fetchCrawlsFromComposable({ page: 1, itemsPerPage: 1000 }, searchQuery.value)
-}
-
-// Handle search with debouncing
-const handleSearch = () => {
-    // Clear existing timeout
-    if (searchTimeout) {
-        clearTimeout(searchTimeout)
-    }
-    
-    // Set new timeout for debounced search
-    searchTimeout = setTimeout(() => {
-        fetchCrawls()
-    }, 300) // 300ms delay
-}
-
-// No need to watch options since we're not using pagination
-
-// Open create modal
-const openCreateModal = () => {
-    selectedCrawl.value = null
-    showModal.value = true
-}
-
-// Open edit modal
-const openEditModal = (crawl) => {
-    selectedCrawl.value = crawl
-    showModal.value = true
-}
-
-// Handle crawl creation/update
-const handleCrawlCreated = (crawl) => {
-    fetchCrawls()
-    if (crawl._id) {
-        showNotification('Crawl created successfully', 'success')
-        router.push({ name: 'CrawlerDashboard', params: { crawlId: crawl._id } })
-    }
-}
-
-// Handle global export success
-const handleGlobalExportSuccess = (exportResult) => {
-    showNotification('Global export completed successfully!', 'success')
-}
-
-// Wrapper functions to call the composable's functions
-const runAllCrawls = async () => {
-    await runAllCrawlsFromComposable()
-}
-
-const toggleDisableCrawl = async (item) => {
-    await toggleDisableCrawlFromComposable(item)
-}
-
-// Delete crawl functions
-const confirmDeleteCrawl = (crawl) => {
-    crawlToDelete.value = crawl
-    showDeleteConfirm.value = true
-}
-
-const deleteCrawl = async () => {
-    if (!crawlToDelete.value) return
-    
-    deleteLoadingId.value = crawlToDelete.value._id
-    try {
-        await del(`/api/deletecrawl/${crawlToDelete.value._id}`)
-        showDeleteConfirm.value = false
-        crawlToDelete.value = null
-        showNotification('Crawl deleted successfully', 'success')
-        fetchCrawls() // Refresh the list
-    } catch (error) {
-        showNotification(error.message, 'error')
-    } finally {
-        deleteLoadingId.value = null
-    }
-}
-
-// Proxy cleanup function
-const performCleanup = async () => {
-    try {
-        await cleanupProxyUsage(cleanupDays.value)
-        showCleanupDialog.value = false
-        await fetchGlobalProxyStats() // Refresh data after cleanup
-        showNotification('Proxy data cleanup completed successfully', 'success')
-    } catch (error) {
-        showNotification('Error performing cleanup', 'error')
-    }
-}
-
-// Authentication methods
 const openAuthModal = (mode) => {
-  authModalMode.value = mode
-  showAuthModal.value = true
+  emit('open-auth-modal', mode)
 }
 
-// Watch for authentication changes
-watch(isAuthenticated, (newValue) => {
-    if (newValue) {
-        fetchCrawls()
-        fetchGlobalProxyStats()
-    } else {
-        // Clear data when user logs out
-        crawls.value = []
-        totalCrawls.value = 0
-    }
-})
-
-onMounted(() => {
-    // Only fetch data if user is authenticated
-    if (isAuthenticated.value) {
-        fetchCrawls()
-        fetchGlobalProxyStats()
-    }
-})
+const scrollToFeatures = () => {
+  featuresSection.value?.scrollIntoView({ behavior: 'smooth' })
+}
 </script>
 
 <style scoped>
-.v-data-table {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.v-data-table :deep(.v-data-table-header) {
-    background-color: #f8f9fa;
-    font-weight: 600;
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
 }
 
-.v-data-table :deep(.v-data-table__tr:hover) {
-    background-color: #f5f5f5;
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
-.v-card {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    transition: box-shadow 0.2s ease;
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-.v-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.2s ease-in-out;
 }
 
-.custom-table :deep(.v-data-table-header) {
-    min-height: 60px;
+/* Gradient text animation */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
-.custom-table :deep(.v-data-table__tr) {
-    min-height: 60px;
+.bg-gradient-to-r {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
 }
-
-.custom-table :deep(.v-data-table__td) {
-    padding: 16px 8px;
-    vertical-align: middle;
-}
-
-.custom-table :deep(.v-data-table__th) {
-    padding: 16px 8px;
-    vertical-align: middle;
-}
-</style> 
+</style>
