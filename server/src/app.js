@@ -110,7 +110,14 @@ mongoose
 if (!isProd) mongoose.set('debug', true); // query logging in dev
 
 /* ———————————————————
-   6) Start server
+   6) Error handling middleware
+   ——————————————————— */
+const { errorHandler, notFound } = require('./middleware/errorHandler');
+app.use(notFound);
+app.use(errorHandler);
+
+/* ———————————————————
+   7) Start server
    ——————————————————— */
 const PORT = process.env.PORT || (isProd ? 3000 : 3001);
 app.listen(PORT, () => {

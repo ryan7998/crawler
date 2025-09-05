@@ -1,5 +1,4 @@
 const axios = require('axios')
-// const crawlQueue = require('../queues/crawlQueue')
 const crawlQueue = require('../queues/getCrawlQueue')
 const Crawl = require('../models/Crawl')
 const CrawlData = require('../models/CrawlData')
@@ -7,6 +6,9 @@ const Selectors = require('../models/Selectors')
 const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions')
 const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
 const proxyUsageService = require('../services/proxyUsageService')
+const { sendSuccess, sendError, sendNotFound, sendValidationError } = require('../utils/responseUtils')
+const { asyncHandler } = require('../middleware/errorHandler')
+const { validateObjectId } = require('../utils/validationUtils')
 
 // Helper function to build user-based query
 const buildUserQuery = (user) => {
@@ -30,105 +32,93 @@ const buildUserQuery = (user) => {
     }
 };
 
-const crawlWebsite = async (req, res) => {
+const crawlWebsite = asyncHandler(async (req, res) => {
     const { urls, crawlId, selectors } = req.body
 
-    try {
-        // Check if crawl is already in progress
-        const existingCrawl = await Crawl.findById(crawlId)
-        if (!existingCrawl) {
-            return res.status(404).json({ message: 'Crawl not found' })
-        }
-        
-        if (existingCrawl.status === 'in-progress') {
-            return res.status(400).json({ message: 'Crawl is already in progress' })
-        }
-
-        // Update crawl status to in-progress
-        await Crawl.findByIdAndUpdate(crawlId, { status: 'in-progress' })
-
-        console.log("Adding job: ", urls, crawlId)
-        // 1) Tell the worker "set up a processor for this crawlId"
-        try {
-            await axios.post(`http://localhost:3002/processor/${crawlId}`);
-        } catch (err) {
-            console.error('Failed to notify worker to start processor:', err.message);
-            // you can choose to continue or return an error here
-        }
-        const q = crawlQueue(crawlId)
-
-        // Check if jobs already exist for this crawl
-        const existingJobs = await q.getJobs(['waiting', 'active', 'delayed'])
-        if (existingJobs.length > 0) {
-            console.log(`Found ${existingJobs.length} existing jobs for crawl ${crawlId}, skipping job addition`);
-            return res.json({ message: 'Crawl jobs already exist in queue', urls })
-        }
-
-        // Generate a unique runId for this crawl run
-        const runId = Date.now().toString();
-
-        for (const url of urls) {
-            await q.add({ url, crawlId, runId })
-        }
-        res.json({ message: 'Crawl jobs added to queue', urls })
-    } catch (error) {
-        console.log('Error adding jobs to the queue: ', error.message)
-        res.status(500).json({ error: `Failed to add crawl jobs. ${error.message}` })
+    // Check if crawl is already in progress
+    const existingCrawl = await Crawl.findById(crawlId)
+    if (!existingCrawl) {
+        return sendNotFound(res, 'Crawl')
     }
-}
+    
+    if (existingCrawl.status === 'in-progress') {
+        return sendError(res, 'Crawl is already in progress', 400, 'CRAWL_IN_PROGRESS')
+    }
 
-const createCrawler = async (req, res) => {
+    // Update crawl status to in-progress
+    await Crawl.findByIdAndUpdate(crawlId, { status: 'in-progress' })
+
+    try {
+        // Notify worker to set up processor for this crawlId
+        await axios.post(`http://localhost:3002/processor/${crawlId}`);
+    } catch (err) {
+        console.error('Failed to notify worker to start processor:', err.message);
+        // Continue with job addition even if worker notification fails
+    }
+
+    const q = crawlQueue(crawlId)
+
+    // Check if jobs already exist for this crawl
+    const existingJobs = await q.getJobs(['waiting', 'active', 'delayed'])
+    if (existingJobs.length > 0) {
+        return sendSuccess(res, { urls }, 'Crawl jobs already exist in queue')
+    }
+
+    // Generate a unique runId for this crawl run
+    const runId = Date.now().toString();
+
+    for (const url of urls) {
+        await q.add({ url, crawlId, runId })
+    }
+    
+    sendSuccess(res, { urls }, 'Crawl jobs added to queue')
+})
+
+const createCrawler = asyncHandler(async (req, res) => {
     const { title, urls, selectors, advancedSelectors, comparisonSelectors } = req.body
 
-    try {
-        // Create new crawl entry with authenticated user's ID
-        const newCrawl = new Crawl({
-            title,
-            urls: urls.map(url => url.trim()), // Convert to array of strings
-            selectors: selectors || [], // Use provided selectors or empty array
-            advancedSelectors: advancedSelectors || [],
-            userId: req.user._id, // Use authenticated user's ID
-            status: 'pending',
-            comparisonSelectors: comparisonSelectors || {},
-        })
-        console.log('newCrawl: ', newCrawl)
-        // Save to database
-        await newCrawl.save()
-        res.status(201).json({ message: 'Crawl created', crawlId: newCrawl._id })
-    } catch (error) {
-        res.status(500).json({ message: 'Error creating crawl', error: error.message })
-    }
-}
+    // Create new crawl entry with authenticated user's ID
+    const newCrawl = new Crawl({
+        title,
+        urls: urls.map(url => url.trim()), // Convert to array of strings
+        selectors: selectors || [], // Use provided selectors or empty array
+        advancedSelectors: advancedSelectors || [],
+        userId: req.user._id, // Use authenticated user's ID
+        status: 'pending',
+        comparisonSelectors: comparisonSelectors || {},
+    })
 
-const updateCrawler = async (req, res) => {
+    // Save to database
+    await newCrawl.save()
+    sendSuccess(res, { crawlId: newCrawl._id }, 'Crawl created successfully', 201)
+})
+
+const updateCrawler = asyncHandler(async (req, res) => {
     const { id } = req.params
     const { title, urls, selectors, advancedSelectors, comparisonSelectors } = req.body
 
-    // Validate crawlId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid crawlId' })
+    // Find the existing crawl
+    const crawl = await Crawl.findById(id)
+    if (!crawl) {
+        return sendNotFound(res, 'Crawl')
     }
-    try {
-        // Find the existing crawl
-        const crawl = await Crawl.findById(id)
-        if (!crawl) {
-            return res.status(404).json({ message: 'Crawl not found' })
-        }
-        // Update the crawl fields if provided
-        if (title) crawl.title = title
-        if (urls) crawl.urls = urls.map(url => url.trim())
-        if (selectors) crawl.selectors = selectors
-        if (advancedSelectors) crawl.advancedSelectors = advancedSelectors
-        if (typeof req.body.disabled === 'boolean') crawl.disabled = req.body.disabled
-        if (comparisonSelectors) crawl.comparisonSelectors = comparisonSelectors
 
-        const updatedCrawl = await crawl.save()
-        res.status(200).json({ message: 'Crawl updated successfully', crawl: updatedCrawl })
-    } catch (error) {
-        console.log('Error updating crawl: ', error.message)
-        res.status(500).json({ message: 'Error updating crawl', error: error.message })
+    // Check ownership
+    if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+        return sendError(res, 'Access denied. You can only update your own crawls.', 403, 'FORBIDDEN')
     }
-}
+
+    // Update the crawl fields if provided
+    if (title) crawl.title = title
+    if (urls) crawl.urls = urls.map(url => url.trim())
+    if (selectors) crawl.selectors = selectors
+    if (advancedSelectors) crawl.advancedSelectors = advancedSelectors
+    if (typeof req.body.disabled === 'boolean') crawl.disabled = req.body.disabled
+    if (comparisonSelectors) crawl.comparisonSelectors = comparisonSelectors
+
+    const updatedCrawl = await crawl.save()
+    sendSuccess(res, { crawl: updatedCrawl }, 'Crawl updated successfully')
+})
 
 const deleteCrawler = async (req, res) => {
     const { id } = req.params
