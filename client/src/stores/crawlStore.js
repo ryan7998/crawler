@@ -8,7 +8,10 @@ export const useCrawlStore = defineStore('crawl', {
         crawlsLoading: false,
         // Modal states
         showCreateModal: false,
-        selectedCrawl: null
+        selectedCrawl: null,
+        showGlobalExportModal: false,
+        showQueueStatusModal: false,
+        showRunAllConfirm: false
     }),
     getters: {
         // Computed stats from allCrawls
@@ -40,6 +43,25 @@ export const useCrawlStore = defineStore('crawl', {
         },
         setSelectedCrawl(crawl) {
             this.selectedCrawl = crawl
+        },
+        // Global modals
+        openGlobalExportModal() {
+            this.showGlobalExportModal = true
+        },
+        closeGlobalExportModal() {
+            this.showGlobalExportModal = false
+        },
+        openQueueStatusModal() {
+            this.showQueueStatusModal = true
+        },
+        closeQueueStatusModal() {
+            this.showQueueStatusModal = false
+        },
+        openRunAllConfirm() {
+            this.showRunAllConfirm = true
+        },
+        closeRunAllConfirm() {
+            this.showRunAllConfirm = false
         },
         // Crawls data actions
         setAllCrawls(crawls) {

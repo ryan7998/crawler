@@ -30,6 +30,29 @@
             @error="handleModalError"
         />
 
+        <!-- Global Export Modal -->
+        <GlobalExportModal
+            v-model="crawlStore.showGlobalExportModal"
+            @export-success="handleGlobalExportSuccess"
+        />
+
+        <!-- Queue Status Modal -->
+        <QueueStatusModal
+            v-model="crawlStore.showQueueStatusModal"
+        />
+
+        <!-- Run All Confirmation Modal -->
+        <ConfirmationModal
+            v-model="crawlStore.showRunAllConfirm"
+            title="Confirm Run All"
+            message="Are you sure you want to run all crawls? This will start all enabled crawls that are not already in progress."
+            confirm-text="Run All"
+            cancel-text="Cancel"
+            color="info"
+            :loading="runAllLoading"
+            @confirm="confirmRunAll"
+        />
+
         <!-- Bulk Delete Confirmation Modal -->
         <ConfirmationModal
             v-model="showBulkDeleteConfirm"
@@ -55,6 +78,8 @@ import CrawlerListHeader from './ui/CrawlerListHeader.vue'
 import CrawlerTable from './ui/CrawlerTable.vue'
 import CrawlDetailsView from './CrawlDetailsView.vue'
 import CreateCrawlModal from './CreateCrawlModal.vue'
+import GlobalExportModal from './GlobalExportModal.vue'
+import QueueStatusModal from './QueueStatusModal.vue'
 import ConfirmationModal from './ui/ConfirmationModal.vue'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
 import { useCrawlStore } from '../stores/crawlStore'
@@ -80,7 +105,9 @@ const { del } = useApiService()
 const {
   crawls: allCrawls,
   isSearching: crawlsLoading,
-  fetchCrawls
+  fetchCrawls,
+  runAllLoading,
+  runAllCrawls: runAllCrawlsFromComposable
 } = useCrawlManagement()
 
 // Fetch crawls when component mounts (only for general dashboard)
@@ -143,6 +170,16 @@ const handleCrawlCreated = (crawl) => {
 
 const handleModalError = (errorMessage) => {
     showNotification(errorMessage, 'error')
+}
+
+// Modal handlers
+const handleGlobalExportSuccess = (exportResult) => {
+    showNotification('Global export completed successfully!', 'success')
+}
+
+const confirmRunAll = async () => {
+    crawlStore.closeRunAllConfirm()
+    await runAllCrawlsFromComposable()
 }
 
 const formatDate = (dateString) => {

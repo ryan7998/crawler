@@ -76,7 +76,7 @@
                                     <span>Profile</span>
                                 </button>
                                 <button
-                                    @click="showRunAllConfirm = true; showUserMenu = false"
+                                    @click="openRunAllConfirm(); showUserMenu = false"
                                     :disabled="runAllLoading"
                                     class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
@@ -86,7 +86,7 @@
                                     <span>Run All Crawls</span>
                                 </button>
                                 <button
-                                    @click="showQueueStatusModal = true; showUserMenu = false"
+                                    @click="openQueueStatusModal(); showUserMenu = false"
                                     class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                 >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +95,7 @@
                                     <span>Queue Status</span>
                                 </button>
                                 <button
-                                    @click="showGlobalExportModal = true; showUserMenu = false"
+                                    @click="openGlobalExportModal(); showUserMenu = false"
                                     class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                 >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,44 +129,6 @@
                 </div>
             </div>
         </div>
-        <!-- Modals -->
-        <GlobalExportModal
-            v-model="showGlobalExportModal"
-            @export-success="handleGlobalExportSuccess"
-        />
-        <QueueStatusModal
-            v-model="showQueueStatusModal"
-        />
-        <!-- Run All Confirmation Modal -->
-        <div v-if="showRunAllConfirm" class="fixed inset-0 z-50 overflow-y-auto">
-          <div class="flex min-h-screen items-center justify-center p-4">
-            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="showRunAllConfirm = false"></div>
-            <div class="relative bg-white rounded-xl shadow-2xl max-w-md w-full">
-              <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Confirm Run All</h3>
-                <p class="text-gray-600 mb-6">Are you sure you want to run all crawls? This will start all enabled crawls that are not already in progress.</p>
-                <div class="flex space-x-3 justify-end">
-                  <button
-                    @click="showRunAllConfirm = false"
-                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    @click="confirmRunAll"
-                    :disabled="runAllLoading"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                  >
-                    <svg v-if="runAllLoading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    <span>{{ runAllLoading ? 'Running...' : 'Run All' }}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         
     </nav>
 </template>
@@ -177,8 +139,6 @@ import { useRouter } from 'vue-router'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
 import { useAuth } from '../composables/useAuth'
 import { useCrawlStore } from '../stores/crawlStore'
-import GlobalExportModal from './GlobalExportModal.vue'
-import QueueStatusModal from './QueueStatusModal.vue'
 
 const router = useRouter()
 const showNotification = inject('showNotification')
@@ -206,10 +166,7 @@ const {
 // Use the crawl store
 const crawlStore = useCrawlStore()
 
-// Modal state
-const showGlobalExportModal = ref(false)
-const showQueueStatusModal = ref(false)
-const showRunAllConfirm = ref(false)
+// Local state
 const showProfile = ref(false)
 const showUserMenu = ref(false)
 
@@ -218,20 +175,17 @@ const openCreateModal = () => {
     crawlStore.openCreateModal()
 }
 
-
-// Handle global export success
-const handleGlobalExportSuccess = (exportResult) => {
-    showNotification('Global export completed successfully!', 'success')
+// Modal functions
+const openGlobalExportModal = () => {
+    crawlStore.openGlobalExportModal()
 }
 
-// Wrapper for run all crawls
-const runAllCrawls = async () => {
-    await runAllCrawlsFromComposable()
+const openQueueStatusModal = () => {
+    crawlStore.openQueueStatusModal()
 }
 
-const confirmRunAll = async () => {
-  showRunAllConfirm.value = false
-  await runAllCrawls()
+const openRunAllConfirm = () => {
+    crawlStore.openRunAllConfirm()
 }
 
 const openGlobalSheet = () => {
