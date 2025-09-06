@@ -11,7 +11,7 @@
                         <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12.25V1m0 11.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M4 19v-2.25m6-13.5V1m0 2.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M10 19V7.75m6 4.5V1m0 11.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM16 19v-2"/>
-                            </svg>
+                    </svg>
                         </div>
                         <div class="ml-3">
                             <h1 class="text-xl font-bold text-gray-900">CrawlerPro</h1>
@@ -130,11 +130,6 @@
             </div>
         </div>
         <!-- Modals -->
-        <CreateCrawlModal
-            v-model="showModal"
-            :crawl-data="selectedCrawl"
-            @crawl-created="handleCrawlCreated"
-        />
         <GlobalExportModal
             v-model="showGlobalExportModal"
             @export-success="handleGlobalExportSuccess"
@@ -181,7 +176,7 @@ import { ref, inject, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
 import { useAuth } from '../composables/useAuth'
-import CreateCrawlModal from './CreateCrawlModal.vue'
+import { useCrawlStore } from '../stores/crawlStore'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
 
@@ -208,9 +203,10 @@ const {
     logout
 } = useAuth()
 
+// Use the crawl store
+const crawlStore = useCrawlStore()
+
 // Modal state
-const showModal = ref(false)
-const selectedCrawl = ref(null)
 const showGlobalExportModal = ref(false)
 const showQueueStatusModal = ref(false)
 const showRunAllConfirm = ref(false)
@@ -219,15 +215,9 @@ const showUserMenu = ref(false)
 
 // Open create modal
 const openCreateModal = () => {
-    selectedCrawl.value = null
-    showModal.value = true
+    crawlStore.openCreateModal()
 }
 
-// Handle crawl creation/update
-const handleCrawlCreated = (crawl) => {
-    showNotification('Crawl created successfully', 'success')
-    router.push({ name: 'CrawlerDashboard', params: { crawlId: crawl._id } })
-}
 
 // Handle global export success
 const handleGlobalExportSuccess = (exportResult) => {

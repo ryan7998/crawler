@@ -11,13 +11,12 @@
     <!-- Main Content -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Statistics -->
-            <CrawlerStats :stats="crawlStats" />
+            <CrawlerStats :stats="crawlStats" :loading="crawlsLoading" />
 
             <!-- Crawls Table -->
             <CrawlerTable
                 :crawls="allCrawls"
                 :loading="crawlsLoading"
-                :error="crawlsError"
                 @crawl-click="openCrawl"
                 @view-crawl="openCrawl"
                 @edit-crawl="editCrawl"
@@ -28,8 +27,8 @@
 
         <!-- Create Crawl Modal -->
         <CreateCrawlModal
-            v-model="showCreateModal"
-            :crawl-data="selectedCrawl"
+            v-model="crawlStore.showCreateModal"
+            :crawl-data="crawlStore.selectedCrawl"
             @crawl-created="handleCrawlCreated"
             @error="handleModalError"
         />
@@ -62,6 +61,7 @@ import CrawlDetailsView from './CrawlDetailsView.vue'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import ConfirmationModal from './ui/ConfirmationModal.vue'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
+import { useCrawlStore } from '../stores/crawlStore'
 import { formatDateTime } from '../utils/commonUtils'
 
 const route = useRoute()
@@ -72,14 +72,14 @@ const isGeneralDashboard = computed(() => !crawlId.value)
 // General dashboard state
 const selectedCrawls = ref([])
 const showBulkDeleteConfirm = ref(false)
-const showCreateModal = ref(false)
-const selectedCrawl = ref(null)
+
+// Use the crawl store for modal state
+const crawlStore = useCrawlStore()
 
 // Initialize crawl management composable for general dashboard
 const {
   crawls: allCrawls,
-  loading: crawlsLoading,
-  error: crawlsError,
+  isSearching: crawlsLoading,
   fetchCrawls
 } = useCrawlManagement()
 
@@ -120,16 +120,15 @@ const openCrawl = (crawlId) => {
 }
 
 const editCrawl = (crawl) => {
-    selectedCrawl.value = crawl
-    showCreateModal.value = true
+    crawlStore.openCreateModal(crawl)
 }
 
 const openCreateModal = () => {
-    selectedCrawl.value = null
-    showCreateModal.value = true
+    crawlStore.openCreateModal()
 }
 
 const handleCrawlCreated = (crawl) => {
+    crawlStore.closeCreateModal()
     showNotification('Crawl saved successfully', 'success')
     // Refresh the crawls list
     fetchCrawls({ page: 1, itemsPerPage: 50 })

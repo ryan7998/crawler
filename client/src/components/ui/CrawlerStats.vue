@@ -14,7 +14,10 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 truncate">Total Crawls</dt>
-              <dd class="text-lg font-medium text-gray-900">{{ stats.totalCrawls }}</dd>
+              <dd class="text-lg font-medium text-gray-900">
+                <span v-if="loading" class="animate-pulse bg-gray-200 rounded h-6 w-12 inline-block"></span>
+                <span v-else>{{ stats.totalCrawls }}</span>
+              </dd>
             </dl>
           </div>
         </div>
@@ -35,7 +38,10 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 truncate">Active Crawls</dt>
-              <dd class="text-lg font-medium text-gray-900">{{ stats.activeCrawls }}</dd>
+              <dd class="text-lg font-medium text-gray-900">
+                <span v-if="loading" class="animate-pulse bg-gray-200 rounded h-6 w-12 inline-block"></span>
+                <span v-else>{{ stats.activeCrawls }}</span>
+              </dd>
             </dl>
           </div>
         </div>
@@ -56,7 +62,10 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 truncate">Completed</dt>
-              <dd class="text-lg font-medium text-gray-900">{{ stats.completedCrawls }}</dd>
+              <dd class="text-lg font-medium text-gray-900">
+                <span v-if="loading" class="animate-pulse bg-gray-200 rounded h-6 w-12 inline-block"></span>
+                <span v-else>{{ stats.completedCrawls }}</span>
+              </dd>
             </dl>
           </div>
         </div>
@@ -77,7 +86,10 @@
           <div class="ml-5 w-0 flex-1">
             <dl>
               <dt class="text-sm font-medium text-gray-500 truncate">Total URLs</dt>
-              <dd class="text-lg font-medium text-gray-900">{{ stats.totalUrls }}</dd>
+              <dd class="text-lg font-medium text-gray-900">
+                <span v-if="loading" class="animate-pulse bg-gray-200 rounded h-6 w-12 inline-block"></span>
+                <span v-else>{{ stats.totalUrls }}</span>
+              </dd>
             </dl>
           </div>
         </div>
@@ -97,6 +109,10 @@ defineProps({
       completedCrawls: 0,
       totalUrls: 0
     })
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
