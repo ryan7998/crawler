@@ -325,14 +325,14 @@
 
     <ExportModal
       v-model="showExportModal"
-      :crawl-id="crawlId"
+      :crawl-id="crawlId.value"
       :crawl-title="crawl?.title"
       @export-success="handleExportSuccess"
     />
 
     <ProxyStatsModal
       v-model="showProxyStatsModal"
-      :crawl-id="crawlId"
+      :crawl-id="crawlId.value"
     />
   </div>
 </template>
@@ -355,20 +355,14 @@ import { useSocketConnection } from '../composables/useSocketConnection'
 import { useApiService } from '../composables/useApiService'
 import { saveExportMetadata, loadExportMetadata } from '../utils/exportUtils'
 
-// Props
-const props = defineProps({
-  crawlId: {
-    type: String,
-    required: true
-  }
-})
+// Get crawlId from route params
+const route = useRoute()
+const router = useRouter()
+const crawlId = computed(() => route.params.crawlId)
 
 // Initialize composables
 const { socket, isConnected, logs, joinRoom, on, disconnect } = useSocketConnection()
 const { get, post, del, loading: apiLoading, error: apiError } = useApiService()
-
-const route = useRoute()
-const router = useRouter()
 const crawl = ref(null)
 const errorMessage = ref('')
 const liveStatusDictionary = ref({})
@@ -487,7 +481,7 @@ const getCurrentSlideOverTitle = () => {
 // Function to fetch crawl data from the server
 const fetchCrawlData = async () => {
     try {
-        const data = await get(`/api/getcrawler/${props.crawlId}`)
+        const data = await get(`/api/getcrawler/${crawlId.value}`)
         crawl.value = data
 
         // Initialize aggregatedData if it doesn't exist
@@ -517,7 +511,7 @@ const fetchCrawlData = async () => {
 // Function to fetch proxy stats
 const fetchProxyStats = async () => {
     try {
-        await fetchCrawlProxyStats(props.crawlId)
+        await fetchCrawlProxyStats(crawlId.value)
     } catch (error) {
         console.error('Error fetching proxy stats:', error)
     }
@@ -530,14 +524,14 @@ onMounted(async () => {
         await fetchProxyStats()
 
         // Load saved export link from localStorage
-        const savedExport = loadExportMetadata(props.crawlId)
+        const savedExport = loadExportMetadata(crawlId.value)
         if (savedExport) {
             latestExportLink.value = savedExport.sheetUrl
             latestExportDate.value = new Date(savedExport.exportDate)
         }
 
         // Join the room for the specific crawl ID
-        joinRoom(props.crawlId)
+        joinRoom(crawlId.value)
         
         // Listen for crawl logs
         on("crawlLog", async (data) => {
@@ -579,7 +573,7 @@ onMounted(async () => {
 })
 
 // Watch for crawlId changes to re-fetch data when navigating between crawls
-watch(() => props.crawlId, async (newCrawlId, oldCrawlId) => {
+watch(crawlId, async (newCrawlId, oldCrawlId) => {
     if (newCrawlId && newCrawlId !== oldCrawlId) {
         console.log('CrawlDetailsView: crawlId changed from', oldCrawlId, 'to', newCrawlId)
         try {
@@ -622,7 +616,7 @@ const startCrawl = async () => {
     try {
         const requestBody = {
             urls: crawl.value.urls,
-            crawlId: props.crawlId,
+            crawlId: crawlId.value,
             selectors: crawl.value.selectors || []
         }
         // Make a POST request to start the crawl
@@ -641,7 +635,7 @@ const confirmDelete = () => {
 
 const deleteCrawl = async () => {
     try {
-        await del(`/api/deletecrawl/${props.crawlId}`)
+        await del(`/api/deletecrawl/${crawlId.value}`)
         showConfirm.value = false
         showNotification('Crawl deleted successfully', 'success')
         router.push('/')  // Redirect to dashboard
@@ -670,7 +664,7 @@ const handleExportSuccess = (exportResult) => {
     latestExportDate.value = exportResult.exportDate
     
     // Save to localStorage for persistence
-    saveExportMetadata(props.crawlId, {
+    saveExportMetadata(crawlId.value, {
         sheetUrl: exportResult.sheetUrl,
         exportDate: exportResult.exportDate
     })
@@ -685,7 +679,7 @@ const confirmDeleteCrawlData = () => {
 
 const deleteCrawlData = async () => {
     try {
-        const response = await del(`/api/deletecrawldata/${props.crawlId}`)
+        const response = await del(`/api/deletecrawldata/${crawlId.value}`)
         showDeleteDataConfirm.value = false
         showNotification(`Crawl data cleared successfully. Deleted ${response.deletedDataCount} entries.`, 'success')
         await fetchCrawlData() // Refresh the data
@@ -702,7 +696,7 @@ const confirmDeleteUrlData = (url) => {
 
 const deleteUrlData = async () => {
     try {
-        const response = await del(`/api/deletecrawldata/${props.crawlId}/urls`, {
+        const response = await del(`/api/deletecrawldata/${crawlId.value}/urls`, {
             data: {
                 urls: [urlToDelete.value]
             }
@@ -724,7 +718,7 @@ const confirmBulkDelete = () => {
 
 const bulkDeleteUrlData = async () => {
     try {
-        const response = await del(`/api/deletecrawldata/${props.crawlId}/urls`, {
+        const response = await del(`/api/deletecrawldata/${crawlId.value}/urls`, {
             data: {
                 urls: selectedUrls.value
             }
@@ -749,7 +743,7 @@ const restartSelectedUrls = async () => {
     try {
         const requestBody = {
             urls: selectedUrls.value,
-            crawlId: props.crawlId,
+            crawlId: crawlId.value,
             selectors: crawl.value.selectors || []
         }
         // Make a POST request to start the crawl with selected URLs
@@ -769,7 +763,7 @@ const restartSelectedUrls = async () => {
 const clearCrawlQueue = async () => {
     clearQueueLoading.value = true
     try {
-        await del(`/api/clearqueue/${props.crawlId}`)
+        await del(`/api/clearqueue/${crawlId.value}`)
         snackbarText.value = 'Queue cleared!'
         snackbarColor.value = 'success'
         showSnackbar.value = true

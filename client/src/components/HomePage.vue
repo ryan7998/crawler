@@ -4,17 +4,14 @@
     v-if="!isAuthenticated" 
     @open-auth-modal="openAuthModal" 
   />
-  <CrawlerDashboard 
-    v-else 
-    :key="`dashboard-${$route.params.crawlId || 'general'}`"
-  />
+  <GeneralDashboard v-else />
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useAuth } from '../composables/useAuth'
 import LandingPage from './LandingPage.vue'
-import CrawlerDashboard from './CrawlerDashboard.vue'
+import GeneralDashboard from './GeneralDashboard.vue'
 
 // Get authentication status
 const { isAuthenticated } = useAuth()

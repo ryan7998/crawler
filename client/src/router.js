@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router"
-import CrawlerDashboard from "./components/CrawlerDashboard.vue"
 import HomePage from "./components/HomePage.vue"
+import CrawlDetailsView from "./components/CrawlDetailsView.vue"
 import { useAuth } from "./composables/useAuth"
 
 const routes = [
@@ -12,7 +12,7 @@ const routes = [
     {
         path: '/crawl/:crawlId',
         name: 'CrawlDetails',
-        component: HomePage,
+        component: CrawlDetailsView,
         meta: { requiresAuth: true }
     },
 ]
