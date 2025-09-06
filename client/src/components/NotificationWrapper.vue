@@ -51,37 +51,38 @@
 </template>
 
 <script setup>
-import { ref, provide, watch } from 'vue'
+import { ref, provide, onUnmounted } from 'vue'
 
 // Snackbar state
 const showSnackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
 
+// Local timeout reference for cleanup
+let notificationTimeout = null
+
 // Provide a function to show notifications
 const showNotification = (message, type = 'success') => {
+    // Clear any existing timeout
+    if (notificationTimeout) {
+        clearTimeout(notificationTimeout)
+    }
+    
     showSnackbar.value = true
     snackbarText.value = message
     snackbarColor.value = type
     
     // Auto-dismiss after 3 seconds
-    setTimeout(() => {
+    notificationTimeout = setTimeout(() => {
         showSnackbar.value = false
+        notificationTimeout = null
     }, 3000)
 }
 
-// Watch for changes to showSnackbar to handle auto-dismiss
-watch(showSnackbar, (newValue) => {
-    if (newValue) {
-        // Clear any existing timeout
-        if (window.notificationTimeout) {
-            clearTimeout(window.notificationTimeout)
-        }
-        
-        // Set new timeout
-        window.notificationTimeout = setTimeout(() => {
-            showSnackbar.value = false
-        }, 3000)
+// Cleanup timeout on component unmount
+onUnmounted(() => {
+    if (notificationTimeout) {
+        clearTimeout(notificationTimeout)
     }
 })
 
