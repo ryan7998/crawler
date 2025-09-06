@@ -45,21 +45,28 @@ export function useCrawlManagement() {
 
     // Fetch crawls with pagination and search
     const fetchCrawls = async (options, searchQuery) => {
+        console.log('useCrawlManagement: fetchCrawls called, isAuthenticated:', isAuthenticated.value)
         if (!isAuthenticated.value) {
+            console.log('useCrawlManagement: User not authenticated, clearing crawls')
             crawls.value = []
             totalCrawls.value = 0
             return
         }
         
         try {
+            console.log('useCrawlManagement: Starting to fetch crawls...')
             isSearching.value = true
             const { page, itemsPerPage } = options
             const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''
-            const data = await get(`/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`)
+            const url = `/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`
+            console.log('useCrawlManagement: Fetching from URL:', url)
+            const data = await get(url)
+            console.log('useCrawlManagement: Received data:', data)
             crawls.value = data.crawls
             totalCrawls.value = data.totalCrawls
+            console.log('useCrawlManagement: Set crawls to:', crawls.value.length, 'items')
         } catch (error) {
-            console.error('Error fetching crawls:', error)
+            console.error('useCrawlManagement: Error fetching crawls:', error)
             showNotification('Error fetching crawls', 'error')
         } finally {
             isSearching.value = false
