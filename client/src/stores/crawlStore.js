@@ -6,6 +6,8 @@ export const useCrawlStore = defineStore('crawl', {
         // Crawls data
         allCrawls: [],
         crawlsLoading: false,
+        // Selected crawls for bulk operations
+        selectedCrawls: [],
         // Modal states
         showCreateModal: false,
         selectedCrawl: null,
@@ -81,6 +83,29 @@ export const useCrawlStore = defineStore('crawl', {
         },
         removeCrawl(crawlId) {
             this.allCrawls = this.allCrawls.filter(c => c._id !== crawlId)
+        },
+        // Selected crawls actions
+        setSelectedCrawls(crawls) {
+            this.selectedCrawls = crawls
+        },
+        addSelectedCrawl(crawlId) {
+            if (!this.selectedCrawls.includes(crawlId)) {
+                this.selectedCrawls.push(crawlId)
+            }
+        },
+        removeSelectedCrawl(crawlId) {
+            this.selectedCrawls = this.selectedCrawls.filter(id => id !== crawlId)
+        },
+        clearSelectedCrawls() {
+            this.selectedCrawls = []
+        },
+        toggleSelectedCrawl(crawlId) {
+            const index = this.selectedCrawls.indexOf(crawlId)
+            if (index > -1) {
+                this.selectedCrawls.splice(index, 1)
+            } else {
+                this.selectedCrawls.push(crawlId)
+            }
         }
     }
 })

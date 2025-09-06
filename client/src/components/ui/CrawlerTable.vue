@@ -3,8 +3,34 @@
     <!-- Table Header -->
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-medium text-gray-900">Crawls</h3>
+        <div>
+          <h3 class="text-lg font-medium text-gray-900">Crawls</h3>
+          <p class="mt-1 text-sm text-gray-500">Manage your web crawls</p>
+        </div>
         <div class="flex items-center space-x-4">
+          <!-- Bulk Actions -->
+          <div v-if="selectedCrawls.length > 0" class="flex items-center space-x-2">
+            <span class="text-sm text-gray-700">{{ selectedCrawls.length }} selected</span>
+            <button
+              @click="$emit('bulk-delete')"
+              class="inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+              Delete Selected
+            </button>
+            <button
+              @click="$emit('bulk-export')"
+              class="inline-flex items-center px-3 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Export Selected
+            </button>
+          </div>
+          
           <!-- Search -->
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -19,7 +45,6 @@
               class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
-          
         </div>
       </div>
     </div>
@@ -79,7 +104,7 @@
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               <input
-                v-model="selectAll"
+                :checked="selectAll"
                 @change="toggleSelectAll"
                 type="checkbox"
                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -121,8 +146,8 @@
           >
             <td class="px-6 py-4 whitespace-nowrap" @click.stop>
               <input
-                v-model="selectedCrawls"
-                :value="crawl._id"
+                :checked="selectedCrawls.includes(crawl._id)"
+                @change="toggleCrawlSelection(crawl._id)"
                 type="checkbox"
                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
@@ -255,6 +280,7 @@
 import { ref, computed, watch } from 'vue'
 import { formatDateTime } from '../../utils/commonUtils'
 import StatusPill from './StatusPill.vue'
+import { useCrawlStore } from '../../stores/crawlStore'
 
 const props = defineProps({
   crawls: {
@@ -281,16 +307,23 @@ const emit = defineEmits([
   'edit-crawl',
   'delete-crawl',
   'create-crawl',
-  'retry'
+  'retry',
+  'bulk-delete',
+  'bulk-export'
 ])
+
+// Use the crawl store for selected crawls
+const crawlStore = useCrawlStore()
 
 // Local state
 const searchQuery = ref('')
 const currentPage = ref(1)
-const selectedCrawls = ref([])
 const selectAll = ref(false)
 const sortField = ref('startTime')
 const sortDirection = ref('desc')
+
+// Computed for selected crawls from store
+const selectedCrawls = computed(() => crawlStore.selectedCrawls)
 
 // Table columns configuration
 const columns = [
@@ -375,11 +408,16 @@ const sortBy = (field) => {
   }
 }
 
+const toggleCrawlSelection = (crawlId) => {
+  crawlStore.toggleSelectedCrawl(crawlId)
+}
+
 const toggleSelectAll = () => {
   if (selectAll.value) {
-    selectedCrawls.value = paginatedCrawls.value.map(crawl => crawl._id)
+    const allCrawlIds = paginatedCrawls.value.map(crawl => crawl._id)
+    crawlStore.setSelectedCrawls(allCrawlIds)
   } else {
-    selectedCrawls.value = []
+    crawlStore.clearSelectedCrawls()
   }
 }
 
@@ -388,7 +426,7 @@ const formatDate = (dateString) => {
   return formatDateTime(dateString)
 }
 
-// Watch for changes in selected crawls
+// Watch for changes in selected crawls from store
 watch(selectedCrawls, (newSelected) => {
   selectAll.value = newSelected.length === paginatedCrawls.value.length && paginatedCrawls.value.length > 0
 }, { deep: true })

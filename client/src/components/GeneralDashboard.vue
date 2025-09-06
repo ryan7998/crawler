@@ -1,12 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <CrawlerListHeader
-      :selected-count="selectedCrawls.length"
-      @bulk-delete="handleBulkDelete"
-      @bulk-export="handleBulkExport"
-    />
-
+  <div class="min-h-screen bg-gray-50 pb-20">
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Crawls Table -->
@@ -18,8 +11,16 @@
         @edit-crawl="editCrawl"
         @delete-crawl="confirmDeleteCrawl"
         @retry="fetchCrawls({ page: 1, itemsPerPage: 50 })"
+        @bulk-delete="handleBulkDelete"
+        @bulk-export="handleBulkExport"
       />
     </div>
+
+    <!-- Fixed Bottom Stats Bar -->
+    <StatsBottomBar
+      @refresh="handleRefresh"
+      @export-all="handleGlobalExport"
+    />
 
     <!-- Create Crawl Modal -->
     <CreateCrawlModal
@@ -52,26 +53,26 @@
       @confirm="confirmRunAll"
     />
 
-    <!-- Bulk Delete Confirmation Modal -->
-    <ConfirmationModal
-      v-model="showBulkDeleteConfirm"
-      title="Delete Selected Crawls"
-      message="Are you sure you want to delete the selected crawls? This action cannot be undone."
-      :items="selectedCrawls"
-      confirm-text="Delete All"
-      cancel-text="Cancel"
-      color="error"
-      icon="mdi-delete"
-      @confirm="bulkDeleteCrawls"
-    />
+        <!-- Bulk Delete Confirmation Modal -->
+        <ConfirmationModal
+          v-model="showBulkDeleteConfirm"
+          title="Delete Selected Crawls"
+          message="Are you sure you want to delete the selected crawls? This action cannot be undone."
+          :items="crawlStore.selectedCrawls"
+          confirm-text="Delete All"
+          cancel-text="Cancel"
+          color="error"
+          icon="mdi-delete"
+          @confirm="bulkDeleteCrawls"
+        />
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, inject } from 'vue'
 import { useRouter } from 'vue-router'
-import CrawlerListHeader from './ui/CrawlerListHeader.vue'
 import CrawlerTable from './ui/CrawlerTable.vue'
+import StatsBottomBar from './ui/StatsBottomBar.vue'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
@@ -83,7 +84,6 @@ import { useApiService } from '../composables/useApiService'
 const router = useRouter()
 
 // General dashboard state
-const selectedCrawls = ref([])
 const showBulkDeleteConfirm = ref(false)
 
 // Use the crawl store for modal state
@@ -143,33 +143,42 @@ const confirmRunAll = async () => {
 
 // Bulk operations for general dashboard
 const handleBulkDelete = () => {
-  if (selectedCrawls.value.length === 0) return
+  if (crawlStore.selectedCrawls.length === 0) return
   showBulkDeleteConfirm.value = true
 }
 
 const handleBulkExport = () => {
-  if (selectedCrawls.value.length === 0) return
+  if (crawlStore.selectedCrawls.length === 0) return
   // TODO: Implement bulk export functionality
   showNotification('Bulk export functionality coming soon!', 'info')
 }
 
+// Bottom bar actions
+const handleRefresh = () => {
+  fetchCrawls({ page: 1, itemsPerPage: 50 })
+}
+
+const handleGlobalExport = () => {
+  crawlStore.openGlobalExportModal()
+}
+
 const confirmDeleteCrawl = (crawlId) => {
-  selectedCrawls.value = [crawlId]
+  crawlStore.setSelectedCrawls([crawlId])
   showBulkDeleteConfirm.value = true
 }
 
 const bulkDeleteCrawls = async () => {
   try {
-    const deletedCount = selectedCrawls.value.length
+    const deletedCount = crawlStore.selectedCrawls.length
     
     // Delete each selected crawl
-    for (const crawlId of selectedCrawls.value) {
+    for (const crawlId of crawlStore.selectedCrawls) {
       await del(`/api/deletecrawl/${crawlId}`)
       crawlStore.removeCrawl(crawlId) // Remove from store
     }
     
     showBulkDeleteConfirm.value = false
-    selectedCrawls.value = []
+    crawlStore.clearSelectedCrawls()
     showNotification(`Successfully deleted ${deletedCount} crawls`, 'success')
     
     // Refresh the crawls list
