@@ -42,9 +42,9 @@ export function useApiService() {
       if (error.response?.status === 401) {
         // Token expired or invalid, clear auth data
         localStorage.removeItem('auth_token')
-        // Redirect to login if not already there
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login'
+        // Redirect to home page if not already there
+        if (window.location.pathname !== '/') {
+          window.location.href = '/'
         }
       }
       return Promise.reject(error)

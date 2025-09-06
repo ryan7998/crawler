@@ -45,7 +45,7 @@ export function useAuth() {
 
   const requireAuth = () => {
     if (!isAuthenticated.value) {
-      router.push('/login')
+      router.push('/')
       return false
     }
     return true
@@ -53,7 +53,7 @@ export function useAuth() {
 
   const requireSuperAdmin = () => {
     if (!isAuthenticated.value) {
-      router.push('/login')
+      router.push('/')
       return false
     }
     if (!isSuperAdmin.value) {
@@ -65,7 +65,7 @@ export function useAuth() {
 
   const requireAdmin = () => {
     if (!isAuthenticated.value) {
-      router.push('/login')
+      router.push('/')
       return false
     }
     if (!isAdmin.value) {
