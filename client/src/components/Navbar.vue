@@ -6,7 +6,7 @@
                 <div class="flex items-center">
                     <button 
                         @click="goToDashboard"
-                        class="flex items-center hover:opacity-80 transition-opacity"
+                        class="flex items-center hover:opacity-80 transition-opacity focus:outline-none border-none bg-transparent py-2 px-3 rounded-lg hover:bg-gray-50"
                     >
                         <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

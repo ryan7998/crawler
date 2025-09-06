@@ -180,19 +180,19 @@
               <div class="flex items-center space-x-2">
                 <button
                   @click="$emit('view-crawl', crawl._id)"
-                  class="text-blue-600 hover:text-blue-900"
+                  class="text-blue-600 hover:text-blue-900 focus:outline-none border-none bg-transparent px-2 py-1 rounded hover:bg-blue-50 transition-colors"
                 >
                   View
                 </button>
                 <button
                   @click="$emit('edit-crawl', crawl)"
-                  class="text-indigo-600 hover:text-indigo-900"
+                  class="text-indigo-600 hover:text-indigo-900 focus:outline-none border-none bg-transparent px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
                 >
                   Edit
                 </button>
                 <button
                   @click="$emit('delete-crawl', crawl._id)"
-                  class="text-red-600 hover:text-red-900"
+                  class="text-red-600 hover:text-red-900 focus:outline-none border-none bg-transparent px-2 py-1 rounded hover:bg-red-50 transition-colors"
                 >
                   Delete
                 </button>
