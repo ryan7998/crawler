@@ -149,7 +149,7 @@ const showNotification = inject('showNotification')
 
 // General dashboard methods
 const openCrawl = (crawlId) => {
-    router.push({ name: 'CrawlerDashboard', params: { crawlId } })
+    router.push({ name: 'CrawlDetails', params: { crawlId } })
 }
 
 const editCrawl = (crawl) => {
@@ -229,6 +229,6 @@ const bulkDeleteCrawls = async () => {
 
 <style scoped>
 .v-card {
-    margin-bottom: 1rem;
+    /* margin-bottom: 1rem; */
 }
 </style>

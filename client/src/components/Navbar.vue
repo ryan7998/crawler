@@ -197,7 +197,7 @@ const openGlobalSheet = () => {
 // Navigation methods
 const goToDashboard = () => {
   if (isAuthenticated.value) {
-    router.push('/dashboard')
+    router.push('/')
   } else {
     router.push('/')
   }

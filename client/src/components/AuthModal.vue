@@ -100,7 +100,7 @@ const handleKeydown = (event) => {
 const handleAuthSuccess = () => {
   closeModal()
   // Redirect to dashboard after successful login/registration
-  router.push('/dashboard')
+  router.push('/')
 }
 
 // Add event listener when component mounts

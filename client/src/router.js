@@ -10,15 +10,9 @@ const routes = [
         component: HomePage,
     },
     {
-        path: '/dashboard',
-        name: 'Dashboard',
-        component: CrawlerDashboard,
-        meta: { requiresAuth: true }
-    },
-    {
-        path: '/dashboard/:crawlId',
-        name: 'CrawlerDashboard',
-        component: CrawlerDashboard,
+        path: '/crawl/:crawlId',
+        name: 'CrawlDetails',
+        component: HomePage,
         meta: { requiresAuth: true }
     },
 ]

@@ -644,7 +644,7 @@ const deleteCrawl = async () => {
         await del(`/api/deletecrawl/${props.crawlId}`)
         showConfirm.value = false
         showNotification('Crawl deleted successfully', 'success')
-        router.push('/dashboard')  // Redirect to dashboard
+        router.push('/')  // Redirect to dashboard
     } catch (error) {
         showNotification(error.message, 'error')
         showConfirm.value = false
