@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import NotificationWrapper from './components/NotificationWrapper.vue'
 import Navbar from './components/Navbar.vue'
 import AuthModal from './components/AuthModal.vue'
+import ModalWrapper from './components/ModalWrapper.vue'
 
 // Auth modal state
 const showAuthModal = ref(false)
@@ -26,6 +27,9 @@ const handleOpenAuthModal = (mode) => {
             v-model="showAuthModal"
             :initial-mode="authModalMode"
           />
+          
+          <!-- Global Modals Wrapper -->
+          <ModalWrapper />
         </div>
     </NotificationWrapper>
 </template>
