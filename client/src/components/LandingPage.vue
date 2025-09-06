@@ -172,7 +172,7 @@
             Advanced web scraping platform for modern businesses
           </p>
           <p class="text-gray-500 text-sm">
-            © 2024 CrawlerPro. All rights reserved.
+            © {{ currentYear }} CrawlerPro. All rights reserved.
           </p>
         </div>
       </div>
@@ -181,15 +181,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const featuresSection = ref(null)
 
-// Define emits
-const emit = defineEmits(['open-auth-modal'])
+// Get current year
+const currentYear = computed(() => new Date().getFullYear())
 
+// Use store for auth modal
 const openAuthModal = (mode) => {
-  emit('open-auth-modal', mode)
+  window.openAuthModal(mode)
 }
 
 const scrollToFeatures = () => {

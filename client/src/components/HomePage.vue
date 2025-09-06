@@ -1,9 +1,6 @@
 <template>
   <!-- Conditional rendering based on authentication status -->
-  <LandingPage 
-    v-if="!isAuthenticated" 
-    @open-auth-modal="openAuthModal" 
-  />
+  <LandingPage v-if="!isAuthenticated" />
   <GeneralDashboard v-else />
 </template>
 
@@ -15,11 +12,4 @@ import GeneralDashboard from './GeneralDashboard.vue'
 
 // Get authentication status
 const { isAuthenticated } = useAuth()
-
-// Define emits
-const emit = defineEmits(['open-auth-modal'])
-
-const openAuthModal = (mode) => {
-  emit('open-auth-modal', mode)
-}
 </script>

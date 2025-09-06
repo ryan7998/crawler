@@ -15,14 +15,6 @@
         @bulk-export="handleBulkExport"
       />
     </div>
-
-    <!-- Fixed Bottom Stats Bar -->
-    <StatsBottomBar
-      @refresh="handleRefresh"
-      @export-all="handleGlobalExport"
-    />
-
-
   </div>
 </template>
 
@@ -30,7 +22,6 @@
 import { onMounted, onUnmounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import CrawlerTable from './ui/CrawlerTable.vue'
-import StatsBottomBar from './ui/StatsBottomBar.vue'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
 import { useCrawlStore } from '../stores/crawlStore'
 import { useApiService } from '../composables/useApiService'
@@ -95,15 +86,6 @@ const handleBulkExport = () => {
   if (crawlStore.selectedCrawls.length === 0) return
   // TODO: Implement bulk export functionality
   showNotification('Bulk export functionality coming soon!', 'info')
-}
-
-// Bottom bar actions
-const handleRefresh = () => {
-  fetchCrawls({ page: 1, itemsPerPage: 50 })
-}
-
-const handleGlobalExport = () => {
-  crawlStore.openGlobalExportModal()
 }
 
 const confirmDeleteCrawl = (crawlId) => {
