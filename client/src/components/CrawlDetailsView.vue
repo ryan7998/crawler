@@ -578,6 +578,35 @@ onMounted(async () => {
     }
 })
 
+// Watch for crawlId changes to re-fetch data when navigating between crawls
+watch(() => props.crawlId, async (newCrawlId, oldCrawlId) => {
+    if (newCrawlId && newCrawlId !== oldCrawlId) {
+        console.log('CrawlDetailsView: crawlId changed from', oldCrawlId, 'to', newCrawlId)
+        try {
+            // Clear previous data
+            crawl.value = null
+            errorMessage.value = ''
+            
+            // Fetch new crawl data
+            await fetchCrawlData()
+            await fetchProxyStats()
+            
+            // Load saved export link for new crawl
+            const savedExport = loadExportMetadata(newCrawlId)
+            if (savedExport) {
+                latestExportLink.value = savedExport.sheetUrl
+                latestExportDate.value = new Date(savedExport.exportDate)
+            }
+            
+            // Join the room for the new crawl ID
+            joinRoom(newCrawlId)
+        } catch (error) {
+            console.error('Error loading new crawl data:', error)
+            errorMessage.value = 'Failed to load crawl data'
+        }
+    }
+})
+
 // Cleanup function when component unmounts
 onUnmounted(() => {
     disconnect()

@@ -1,6 +1,6 @@
 <template>
     <!-- General Dashboard (when no crawlId) -->
-    <div v-if="isGeneralDashboard" class="min-h-screen bg-gray-50">
+    <div v-if="isGeneralDashboard" :key="`general-${crawlId}`" class="min-h-screen bg-gray-50">
         <!-- Header -->
         <CrawlerListHeader
             :selected-count="selectedCrawls.length"
@@ -48,7 +48,7 @@
     </div>
 
     <!-- Specific Crawl Dashboard (when crawlId exists) -->
-    <CrawlDetailsView v-else :crawl-id="crawlId" />
+    <CrawlDetailsView v-else :key="`crawl-${crawlId}`" :crawl-id="crawlId" />
 </template>
 
 <script setup>
@@ -91,11 +91,27 @@ onMounted(() => {
   }
 })
 
-// Watch for route changes to refetch crawls when returning to general dashboard
+// Watch for route changes to handle component re-rendering
 watch(() => route.params.crawlId, (newCrawlId, oldCrawlId) => {
+  console.log('CrawlerDashboard: Route changed from', oldCrawlId, 'to', newCrawlId)
+  
+  // Update the local crawlId ref to trigger re-rendering
+  crawlId.value = newCrawlId
+  
   // If we're moving from a specific crawl to general dashboard, refetch crawls
   if (oldCrawlId && !newCrawlId) {
     console.log('CrawlerDashboard: Returning to general dashboard, refetching crawls...')
+    fetchCrawls({ page: 1, itemsPerPage: 50 })
+  }
+}, { immediate: true })
+
+// Also watch the computed isGeneralDashboard to ensure proper re-rendering
+watch(isGeneralDashboard, (newValue, oldValue) => {
+  console.log('CrawlerDashboard: isGeneralDashboard changed from', oldValue, 'to', newValue)
+  
+  // If we're now on the general dashboard, fetch crawls
+  if (newValue && !oldValue) {
+    console.log('CrawlerDashboard: Now on general dashboard, fetching crawls...')
     fetchCrawls({ page: 1, itemsPerPage: 50 })
   }
 })
