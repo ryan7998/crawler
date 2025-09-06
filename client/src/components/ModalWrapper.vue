@@ -1,4 +1,11 @@
 <template>
+  <!-- Auth Modal -->
+  <AuthModal
+    v-model="crawlStore.showAuthModal"
+    :initial-mode="crawlStore.authModalMode"
+    @auth-success="handleAuthSuccess"
+  />
+
   <!-- Global Modals -->
   <CreateCrawlModal
     v-model="crawlStore.showCreateModal"
@@ -42,6 +49,7 @@
 
 <script setup>
 import { inject } from 'vue'
+import AuthModal from './AuthModal.vue'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import GlobalExportModal from './GlobalExportModal.vue'
 import QueueStatusModal from './QueueStatusModal.vue'
@@ -58,6 +66,12 @@ const { runAllCrawls, runAllLoading } = useCrawlManagement()
 
 // Inject notification function
 const showNotification = inject('showNotification')
+
+// Auth modal handler
+const handleAuthSuccess = () => {
+  crawlStore.closeAuthModal()
+  showNotification('Authentication successful!', 'success')
+}
 
 // Modal handlers
 const handleCrawlCreated = (crawl) => {
@@ -100,5 +114,10 @@ const confirmBulkDelete = async () => {
     showNotification(error.message, 'error')
     crawlStore.closeBulkDeleteConfirm()
   }
+}
+
+// Expose auth modal handler for global access
+window.openAuthModal = (mode) => {
+  crawlStore.openAuthModal(mode)
 }
 </script>

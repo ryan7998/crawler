@@ -14,7 +14,9 @@ export const useCrawlStore = defineStore('crawl', {
         showGlobalExportModal: false,
         showQueueStatusModal: false,
         showRunAllConfirm: false,
-        showBulkDeleteConfirm: false
+        showBulkDeleteConfirm: false,
+        showAuthModal: false,
+        authModalMode: 'login'
     }),
     getters: {
         // Computed stats from allCrawls
@@ -71,6 +73,13 @@ export const useCrawlStore = defineStore('crawl', {
         },
         closeBulkDeleteConfirm() {
             this.showBulkDeleteConfirm = false
+        },
+        openAuthModal(mode = 'login') {
+            this.authModalMode = mode
+            this.showAuthModal = true
+        },
+        closeAuthModal() {
+            this.showAuthModal = false
         },
         // Crawls data actions
         setAllCrawls(crawls) {

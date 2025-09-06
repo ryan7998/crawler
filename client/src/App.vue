@@ -1,18 +1,11 @@
 <script setup>
-import { ref } from 'vue'
 import NotificationWrapper from './components/NotificationWrapper.vue'
 import Navbar from './components/Navbar.vue'
-import AuthModal from './components/AuthModal.vue'
 import ModalWrapper from './components/ModalWrapper.vue'
-
-// Auth modal state
-const showAuthModal = ref(false)
-const authModalMode = ref('login')
 
 // Handle auth modal opening
 const handleOpenAuthModal = (mode) => {
-  authModalMode.value = mode
-  showAuthModal.value = true
+  window.openAuthModal(mode)
 }
 </script>
 
@@ -21,12 +14,6 @@ const handleOpenAuthModal = (mode) => {
         <div class="min-h-screen bg-white w-full">
           <Navbar @open-auth-modal="handleOpenAuthModal" />
           <router-view @open-auth-modal="handleOpenAuthModal" />
-          
-          <!-- Auth Modal at app level -->
-          <AuthModal
-            v-model="showAuthModal"
-            :initial-mode="authModalMode"
-          />
           
           <!-- Global Modals Wrapper -->
           <ModalWrapper />
