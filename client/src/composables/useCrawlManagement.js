@@ -1,11 +1,13 @@
 import { ref, inject } from 'vue'
 import { useApiService } from './useApiService'
 import { useAuth } from './useAuth'
+import { useCrawlStore } from '../stores/crawlStore'
 
 export function useCrawlManagement() {
     // Initialize composables
     const { get, post, put, loading: apiLoading, error: apiError } = useApiService()
     const { isAuthenticated } = useAuth()
+    const crawlStore = useCrawlStore()
 
     // Reactive state
     const crawls = ref([])
@@ -50,12 +52,15 @@ export function useCrawlManagement() {
             console.log('useCrawlManagement: User not authenticated, clearing crawls')
             crawls.value = []
             totalCrawls.value = 0
+            // Clear store as well
+            crawlStore.setAllCrawls([])
             return
         }
         
         try {
             console.log('useCrawlManagement: Starting to fetch crawls...')
             isSearching.value = true
+            crawlStore.setCrawlsLoading(true) // Sync loading state with store
             const { page, itemsPerPage } = options
             const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''
             const url = `/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`
@@ -64,12 +69,17 @@ export function useCrawlManagement() {
             console.log('useCrawlManagement: Received data:', data)
             crawls.value = data.crawls
             totalCrawls.value = data.totalCrawls
+            
+            // Sync with store
+            crawlStore.setAllCrawls(data.crawls)
+            
             console.log('useCrawlManagement: Set crawls to:', crawls.value.length, 'items')
         } catch (error) {
             console.error('useCrawlManagement: Error fetching crawls:', error)
             showNotification('Error fetching crawls', 'error')
         } finally {
             isSearching.value = false
+            crawlStore.setCrawlsLoading(false) // Sync loading state with store
         }
     }
 
@@ -115,6 +125,9 @@ export function useCrawlManagement() {
             const updated = data.crawl
             const idx = crawls.value.findIndex(c => c._id === item._id)
             if (idx !== -1) crawls.value[idx] = { ...crawls.value[idx], ...updated }
+            
+            // Sync with store
+            crawlStore.updateCrawl(updated)
             snackbarText.value = updated.disabled ? 'Crawl disabled' : 'Crawl enabled'
             snackbarColor.value = 'success'
             showSnackbar.value = true

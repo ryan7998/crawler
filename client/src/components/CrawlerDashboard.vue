@@ -10,9 +10,6 @@
 
     <!-- Main Content -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Statistics -->
-            <CrawlerStats :stats="crawlStats" :loading="crawlsLoading" />
-
             <!-- Crawls Table -->
             <CrawlerTable
                 :crawls="allCrawls"
@@ -56,12 +53,12 @@ import { onMounted, ref, inject, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CrawlerListHeader from './ui/CrawlerListHeader.vue'
 import CrawlerTable from './ui/CrawlerTable.vue'
-import CrawlerStats from './ui/CrawlerStats.vue'
 import CrawlDetailsView from './CrawlDetailsView.vue'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import ConfirmationModal from './ui/ConfirmationModal.vue'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
 import { useCrawlStore } from '../stores/crawlStore'
+import { useApiService } from '../composables/useApiService'
 import { formatDateTime } from '../utils/commonUtils'
 
 const route = useRoute()
@@ -75,6 +72,9 @@ const showBulkDeleteConfirm = ref(false)
 
 // Use the crawl store for modal state
 const crawlStore = useCrawlStore()
+
+// Initialize API service
+const { del } = useApiService()
 
 // Initialize crawl management composable for general dashboard
 const {
@@ -116,16 +116,6 @@ watch(isGeneralDashboard, (newValue, oldValue) => {
   }
 })
 
-// Computed properties for general dashboard
-const crawlStats = computed(() => {
-  const crawls = allCrawls.value || []
-  return {
-    totalCrawls: crawls.length,
-    activeCrawls: crawls.filter(c => c.status === 'in-progress' || c.status === 'pending').length,
-    completedCrawls: crawls.filter(c => c.status === 'completed').length,
-    totalUrls: crawls.reduce((sum, crawl) => sum + (crawl.urls?.length || 0), 0)
-  }
-})
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -145,6 +135,7 @@ const openCreateModal = () => {
 
 const handleCrawlCreated = (crawl) => {
     crawlStore.closeCreateModal()
+    crawlStore.addCrawl(crawl) // Add to store
     showNotification('Crawl saved successfully', 'success')
     // Refresh the crawls list
     fetchCrawls({ page: 1, itemsPerPage: 50 })
@@ -178,14 +169,17 @@ const confirmDeleteCrawl = (crawlId) => {
 
 const bulkDeleteCrawls = async () => {
     try {
+        const deletedCount = selectedCrawls.value.length
+        
         // Delete each selected crawl
         for (const crawlId of selectedCrawls.value) {
             await del(`/api/deletecrawl/${crawlId}`)
+            crawlStore.removeCrawl(crawlId) // Remove from store
         }
         
         showBulkDeleteConfirm.value = false
         selectedCrawls.value = []
-        showNotification(`Successfully deleted ${selectedCrawls.value.length} crawls`, 'success')
+        showNotification(`Successfully deleted ${deletedCount} crawls`, 'success')
         
         // Refresh the crawls list
         await fetchCrawls({ page: 1, itemsPerPage: 50 })

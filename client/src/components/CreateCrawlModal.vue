@@ -13,7 +13,7 @@
         <!-- Header -->
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 class="text-2xl font-bold text-gray-900">
-            {{ isEditing ? 'Edit Crawl' : 'Create New Crawl' }}
+                {{ isEditing ? 'Edit Crawl' : 'Create New Crawl' }}
           </h2>
           <button
             @click="closeModal"
@@ -96,11 +96,11 @@
                 Crawl Title *
               </label>
               <input
-                v-model="title"
+                                    v-model="title"
                 type="text"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter a descriptive title for your crawl"
-                required
+                                    required
               />
               <p v-if="!title && showValidation" class="mt-1 text-sm text-red-600">
                 Title is required
@@ -109,7 +109,7 @@
 
             <div v-if="isEditing" class="flex items-center">
               <input
-                v-model="disabled"
+                                    v-model="disabled"
                 type="checkbox"
                 id="disabled"
                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -127,7 +127,7 @@
                 URLs *
               </label>
               <textarea
-                v-model="urlsText"
+                                    v-model="urlsText"
                 rows="6"
                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter URLs separated by spaces or new lines"
@@ -143,12 +143,12 @@
 
           <!-- Step 3: Selectors -->
           <div v-if="currentStep === 3" class="space-y-6">
-            <div>
+                                <div>
               <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Selectors</h3>
-              <div class="space-y-4">
+                                    <div class="space-y-4">
                 <div
-                  v-for="selector in currentSelectors"
-                  :key="selector.id"
+                                            v-for="selector in currentSelectors"
+                                            :key="selector.id"
                   class="p-4 border border-gray-200 rounded-lg"
                 >
                   <div class="flex items-center justify-between mb-3">
@@ -161,7 +161,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                       </svg>
                     </button>
-                  </div>
+                                    </div>
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -172,7 +172,7 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="e.g., product-title"
                       />
-                    </div>
+                                </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">CSS Selector</label>
                       <input
@@ -181,7 +181,7 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="e.g., .product-title"
                       />
-                    </div>
+                            </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
                       <select
@@ -195,7 +195,7 @@
                         <option value="list">List</option>
                       </select>
                     </div>
-                    <div>
+                                        <div>
                       <label class="block text-sm font-medium text-gray-700 mb-1">Attribute (optional)</label>
                       <input
                         v-model="selector.attribute"
@@ -203,9 +203,9 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="e.g., href, src"
                       />
-                    </div>
-                  </div>
-                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                 
                 <button
                   @click="addNewSelector"
@@ -216,10 +216,10 @@
                   </svg>
                   Add New Selector
                 </button>
-              </div>
-            </div>
-          </div>
-        </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
         <!-- Footer -->
         <div class="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
@@ -236,18 +236,18 @@
             <button
               @click="closeModal"
               class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
+                >
+                    Cancel
             </button>
             <button
-              v-if="currentStep < 3"
+                    v-if="currentStep < 3"
               @click="nextStep"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Next
+                >
+                    Next
             </button>
             <button
-              v-else
+                    v-else
               @click="saveCrawl"
               :disabled="isLoading"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
@@ -269,14 +269,14 @@ import { ref, computed, watch } from 'vue'
 import { useApiService } from '../composables/useApiService'
 
 const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  },
-  crawlData: {
-    type: Object,
-    default: null
-  }
+    modelValue: {
+        type: Boolean,
+        default: false
+    },
+    crawlData: {
+        type: Object,
+        default: null
+    }
 })
 
 const emit = defineEmits(['update:modelValue', 'crawl-created'])
@@ -285,8 +285,8 @@ const { post, put, loading: apiLoading } = useApiService()
 
 // Modal state
 const dialog = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+    get: () => props.modelValue,
+    set: (value) => emit('update:modelValue', value)
 })
 
 const isEditing = computed(() => !!props.crawlData)
@@ -313,7 +313,7 @@ const initializeForm = () => {
   showValidation.value = false
   urlValidationError.value = ''
   
-  if (props.crawlData) {
+    if (props.crawlData) {
     title.value = props.crawlData.title || ''
     disabled.value = props.crawlData.disabled || false
     urlsText.value = (props.crawlData.urls || []).join('\n')
@@ -321,14 +321,14 @@ const initializeForm = () => {
       id: `selector-${index}`,
       name: selector.target_element || '',
       selector: selector.selector_value || '',
-      type: selector.type || 'text',
+            type: selector.type || 'text',
       attribute: selector.attribute || ''
     }))
-  } else {
-    title.value = ''
+    } else {
+        title.value = ''
     disabled.value = false
-    urlsText.value = ''
-    currentSelectors.value = []
+        urlsText.value = ''
+        currentSelectors.value = []
   }
 }
 
@@ -337,10 +337,10 @@ const parseUrls = (text) => {
 }
 
 const isValidUrl = (url) => {
-  try {
+    try {
     new URL(url)
     return true
-  } catch {
+    } catch {
     return false
   }
 }
@@ -382,7 +382,7 @@ const previousStep = () => {
 }
 
 const addNewSelector = () => {
-  currentSelectors.value.push({
+        currentSelectors.value.push({
     id: `selector-${Date.now()}`,
     name: '',
     selector: '',
@@ -405,14 +405,14 @@ const closeModal = () => {
 const saveCrawl = async () => {
   if (!title.value.trim()) {
     showValidation.value = true
-    return
-  }
-  
+            return
+        }
+
   if (!validateUrls()) {
     currentStep.value = 2
-    return
-  }
-  
+            return
+        }
+
   isLoading.value = true
   
   try {

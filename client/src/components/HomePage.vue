@@ -44,8 +44,8 @@
             <div class="text-gray-600">Monitoring</div>
           </div>
         </div>
-      </div>
-    </div>
+            </div>
+        </div>
 
     <!-- Features Section -->
     <div ref="featuresSection" class="py-20 bg-white">
@@ -57,7 +57,7 @@
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
             From simple web scraping to complex data pipelines, our platform handles it all with enterprise-grade features.
           </p>
-        </div>
+                </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <!-- Feature 1 -->
@@ -69,8 +69,8 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-3">Lightning Fast</h3>
             <p class="text-gray-600">Extract data from thousands of pages in minutes with our optimized crawling engine and parallel processing.</p>
-          </div>
-
+            </div>
+            
           <!-- Feature 2 -->
           <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-100 hover:shadow-xl transition-all duration-300">
             <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-6">
@@ -80,7 +80,7 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-3">Real-time Monitoring</h3>
             <p class="text-gray-600">Track crawl progress, monitor success rates, and get instant notifications when data changes.</p>
-          </div>
+                </div>
 
           <!-- Feature 3 -->
           <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-2xl border border-purple-100 hover:shadow-xl transition-all duration-300">
@@ -92,8 +92,8 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-3">Custom Selectors</h3>
             <p class="text-gray-600">Create complex CSS selectors with nested data extraction and domain-specific templates.</p>
-          </div>
-
+        </div>
+        
           <!-- Feature 4 -->
           <div class="bg-gradient-to-br from-orange-50 to-red-50 p-8 rounded-2xl border border-orange-100 hover:shadow-xl transition-all duration-300">
             <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center mb-6">
@@ -103,7 +103,7 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-3">Multiple Export Formats</h3>
             <p class="text-gray-600">Export to CSV, Excel, or Google Sheets with automated scheduling and change detection.</p>
-          </div>
+                </div>
 
           <!-- Feature 5 -->
           <div class="bg-gradient-to-br from-teal-50 to-cyan-50 p-8 rounded-2xl border border-teal-100 hover:shadow-xl transition-all duration-300">
@@ -114,7 +114,7 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-3">Secure & Reliable</h3>
             <p class="text-gray-600">Enterprise-grade security with proxy rotation, rate limiting, and 99.9% uptime guarantee.</p>
-          </div>
+                </div>
 
           <!-- Feature 6 -->
           <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-8 rounded-2xl border border-indigo-100 hover:shadow-xl transition-all duration-300">
@@ -122,13 +122,13 @@
               <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
               </svg>
-            </div>
+                </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-3">Analytics & Insights</h3>
             <p class="text-gray-600">Comprehensive analytics dashboard with success rates, performance metrics, and data trends.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+                    </div>
+                </div>
+                            </div>
+                        </div>
 
     <!-- CTA Section -->
     <div class="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
@@ -152,8 +152,8 @@
           >
             Learn More
           </button>
-        </div>
-      </div>
+                        </div>
+                    </div>
     </div>
 
     <!-- Footer -->
@@ -178,7 +178,7 @@
       </div>
     </footer>
 
-  </div>
+    </div>
 </template>
 
 <script setup>
@@ -239,4 +239,4 @@ const scrollToFeatures = () => {
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;
 }
-</style>
+</style> 

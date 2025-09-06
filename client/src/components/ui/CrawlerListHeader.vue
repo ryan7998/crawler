@@ -1,6 +1,7 @@
 <template>
   <div class="bg-white shadow-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header Section -->
       <div class="flex justify-between items-center py-6">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
@@ -29,14 +30,18 @@
               Export Selected
             </button>
           </div>
-
         </div>
       </div>
+      
+      <!-- Stats Bar -->
+      <CrawlerStats />
     </div>
   </div>
 </template>
 
 <script setup>
+import CrawlerStats from './CrawlerStats.vue'
+
 defineProps({
   title: {
     type: String,
