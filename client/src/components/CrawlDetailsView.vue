@@ -374,10 +374,6 @@ const showCreateModal = ref(false)
 const showExportMenu = ref(false)
 const queueStatus = ref({ active: 0, waiting: 0, delayed: 0, total: 0 })
 
-// Add snackbar refs
-const showSnackbar = ref(false)
-const snackbarText = ref('')
-const snackbarColor = ref('success')
 
 // Add delete crawl data refs
 const showDeleteDataConfirm = ref(false)
@@ -654,9 +650,7 @@ const handleCrawlCreated = (updatedCrawl) => {
 
 // Error handler for modal (specific crawl dashboard)
 const handleModalError = (errorMessage) => {
-    showSnackbar.value = true
-    snackbarText.value = errorMessage
-    snackbarColor.value = 'error'
+    showNotification(errorMessage, 'error')
 }
 
 // Handle successful export
@@ -765,13 +759,9 @@ const clearCrawlQueue = async () => {
     clearQueueLoading.value = true
     try {
         await del(`/api/clearqueue/${crawlId.value}`)
-        snackbarText.value = 'Queue cleared!'
-        snackbarColor.value = 'success'
-        showSnackbar.value = true
+        showNotification('Queue cleared!', 'success')
     } catch (error) {
-        snackbarText.value = error.message
-        snackbarColor.value = 'error'
-        showSnackbar.value = true
+        showNotification(error.message, 'error')
     } finally {
         clearQueueLoading.value = false
     }

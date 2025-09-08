@@ -149,11 +149,7 @@ const emit = defineEmits(['open-auth-modal'])
 // Use the crawl management composable
 const {
     runAllLoading,
-    showSnackbar,
-    snackbarText,
-    snackbarColor,
-    runAllCrawls: runAllCrawlsFromComposable,
-    globalSheetUrl
+    runAllCrawls: runAllCrawlsFromComposable
 } = useCrawlManagement()
 
 // Use the auth composable
