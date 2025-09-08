@@ -1,6 +1,13 @@
 import { ref, computed } from 'vue'
 import { useApiService } from './useApiService'
-import { useFormatting } from './useFormatting'
+import { 
+  formatNumber, 
+  formatCost, 
+  formatPercentage, 
+  formatDate, 
+  getRelativeTime, 
+  getSuccessRateColor 
+} from '@/utils/formattingUtils'
 import { useAuth } from './useAuth'
 
 export function useProxyStats() {
@@ -14,14 +21,6 @@ export function useProxyStats() {
   const error = ref(null)
 
   // Use centralized formatting utilities
-  const {
-    formatNumber,
-    formatCost,
-    formatPercentage,
-    formatDate,
-    getRelativeTime,
-    getSuccessRateColor
-  } = useFormatting()
 
   // Get proxy stats for a specific crawl
   const fetchCrawlProxyStats = async (crawlId) => {

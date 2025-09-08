@@ -19,7 +19,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useFormatting } from '@/composables/useFormatting'
+import { formatNumber, formatCost, formatPercentage } from '@/utils/formattingUtils'
 
 const props = defineProps({
   value: {
@@ -55,7 +55,6 @@ const props = defineProps({
   }
 })
 
-const { formatNumber, formatCost, formatPercentage } = useFormatting()
 
 const formattedValue = computed(() => {
   switch (props.type) {

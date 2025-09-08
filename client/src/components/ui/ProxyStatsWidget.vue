@@ -118,7 +118,13 @@
 </template>
 
 <script setup>
-import { useFormatting } from '@/composables/useFormatting'
+import { 
+  formatNumber, 
+  formatCost, 
+  formatPercentage, 
+  formatDate, 
+  getRelativeTime 
+} from '@/utils/formattingUtils'
 
 const props = defineProps({
   stats: {
@@ -154,13 +160,6 @@ const props = defineProps({
 const emit = defineEmits(['refresh', 'view-details', 'cleanup'])
 
 // Use centralized formatting utilities
-const {
-  formatNumber,
-  formatCost,
-  formatPercentage,
-  formatDate,
-  getRelativeTime
-} = useFormatting()
 </script>
 
 <style scoped>
