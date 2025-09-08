@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router"
 import HomePage from "./components/HomePage.vue"
 import CrawlDetailsView from "./components/CrawlDetailsView.vue"
-import { useAuth } from "./composables/useAuth"
+import { useAuthStore } from "./stores/authStore"
 
 const routes = [
     {
@@ -24,12 +24,12 @@ const router = createRouter({
 
 // Navigation guard
 router.beforeEach(async (to, from, next) => {
-    const { isAuthenticated, initializeAuth } = useAuth()
+    const authStore = useAuthStore()
     
     // Initialize auth if not already done
-    await initializeAuth()
+    await authStore.initializeAuth()
     
-    if (to.meta.requiresAuth && !isAuthenticated.value) {
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
         // Redirect to home page with login intent
         next({ path: '/', query: { redirect: to.fullPath } })
     } else {
