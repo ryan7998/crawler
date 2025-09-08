@@ -171,10 +171,10 @@
               <StatusPill :status="crawl.status" />
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ formatDate(crawl.startTime) }}
+              {{ getRelativeTime(crawl.createdAt) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ crawl.endTime ? formatDate(crawl.endTime) : 'Never' }}
+              {{ crawl.endTime ? getRelativeTime(crawl.endTime) : 'Never' }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" @click.stop>
               <div class="flex items-center space-x-2">
@@ -278,7 +278,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { formatDate } from '../../../utils/formattingUtils'
+import { getRelativeTime } from '../../../utils/formattingUtils'
 import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../../stores/crawlStore'
 import { useCrawlManagement } from '../../../composables/useCrawlManagement'
@@ -324,7 +324,7 @@ const error = computed(() => crawlStore.error)
 const columns = [
   { key: 'title', label: 'Title' },
   { key: 'status', label: 'Status' },
-  { key: 'startTime', label: 'Created' },
+  { key: 'createdAt', label: 'Created' },
   { key: 'endTime', label: 'Last Run' }
 ]
 
