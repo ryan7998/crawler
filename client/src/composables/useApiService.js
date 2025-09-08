@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import { getApiUrl } from '../utils/commonUtils'
+import { useAuthStore } from '../stores/authStore'
 
 /**
  * Reusable API service composable
@@ -9,6 +10,7 @@ import { getApiUrl } from '../utils/commonUtils'
 export function useApiService() {
   const loading = ref(false)
   const error = ref(null)
+  const authStore = useAuthStore()
 
   // Create axios instance with default config
   const api = axios.create({
@@ -40,12 +42,8 @@ export function useApiService() {
     },
     (error) => {
       if (error.response?.status === 401) {
-        // Token expired or invalid, clear auth data
-        localStorage.removeItem('auth_token')
-        // Redirect to home page if not already there
-        if (window.location.pathname !== '/') {
-          window.location.href = '/'
-        }
+        // Token expired or invalid, handle through auth store
+        authStore.handleAuthExpired()
       }
       return Promise.reject(error)
     }

@@ -34,6 +34,13 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('auth_token')
   }
 
+  // Handle auth expiration (called by API service)
+  const handleAuthExpired = () => {
+    clearAuthData()
+    // The router guard will automatically handle navigation
+    // when isAuthenticated becomes false
+  }
+
   const login = async (credentials) => {
     try {
       loading.value = true
@@ -196,6 +203,7 @@ export const useAuthStore = defineStore('auth', () => {
     updateProfile,
     changePassword,
     initializeAuth,
-    clearAuthData
+    clearAuthData,
+    handleAuthExpired
   }
 })

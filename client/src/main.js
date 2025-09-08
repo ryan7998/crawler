@@ -5,9 +5,6 @@ import App from './App.vue'
 import router from './router'
 import './index.css' //Import Tailwind css
 
-// Auth
-import { useAuth } from './composables/useAuth'
-
 const pinia = createPinia()
 
 const app = createApp(App)

@@ -1,18 +1,28 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import NotificationWrapper from './components/NotificationWrapper.vue'
 import Navbar from './components/Navbar.vue'
 import ModalWrapper from './components/ModalWrapper.vue'
 import StatsWrapper from './components/StatsWrapper.vue'
 import { useAuth } from './composables/useAuth'
 
-// Get authentication status
+// Get authentication status and router
 const { isAuthenticated } = useAuth()
+const router = useRouter()
 
 // Handle auth modal opening
 const handleOpenAuthModal = (mode) => {
   window.openAuthModal(mode)
 }
+
+// Watch for auth state changes and redirect if user becomes unauthenticated
+watch(isAuthenticated, (isAuth, wasAuth) => {
+  // If user was authenticated but is no longer, redirect to home
+  if (wasAuth && !isAuth && router.currentRoute.value.meta.requiresAuth) {
+    router.push('/')
+  }
+})
 </script>
 
 <template>
