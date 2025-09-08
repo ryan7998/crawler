@@ -19,29 +19,17 @@
 <script setup>
 import { 
   inject, 
-  computed, 
-  watchEffect,
-  watch
+  computed
 } from 'vue'
 import { useRouter } from 'vue-router'
 import CrawlerTable from '../ui/data/CrawlerTable.vue'
-import { useCrawlManagement } from '../../composables/useCrawlManagement'
 import { useCrawlStore } from '../../stores/crawlStore'
-import { useApiService } from '../../composables/useApiService'
 
 const router = useRouter()
 
 // Use the crawl store for modal state
 const crawlStore = useCrawlStore()
 
-// Initialize API service
-const { del } = useApiService()
-
-// Initialize crawl management composable for general dashboard
-const {
-  runAllLoading,
-  runAllCrawls: runAllCrawlsFromComposable
-} = useCrawlManagement()
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -55,43 +43,25 @@ const editCrawl = (crawl) => {
   crawlStore.openCreateModal(crawl)
 }
 
-// Memoized bulk operations
+// Bulk operations - using store actions
 const handleBulkDelete = () => {
-  if (crawlStore.selectedCrawls.length === 0) return
-  crawlStore.openBulkDeleteConfirm()
+  crawlStore.handleBulkDelete()
 }
 
 const handleBulkExport = () => {
-  if (crawlStore.selectedCrawls.length === 0) return
+  if (!crawlStore.canPerformBulkExport()) return
   // TODO: Implement bulk export functionality
   showNotification('Bulk export functionality coming soon!', 'info')
 }
 
 const confirmDeleteCrawl = (crawlId) => {
-  crawlStore.setSelectedCrawls([crawlId])
-  crawlStore.openBulkDeleteConfirm()
+  crawlStore.confirmDeleteCrawl(crawlId)
 }
 
 
 // Watch for changes in selected crawls to optimize bulk operations
 const hasSelectedCrawls = computed(() => crawlStore.selectedCrawls.length > 0)
 
-// Watch for changes in crawl data to optimize re-renders
-watch(
-  () => crawlStore.allCrawls,
-  (newCrawls) => {
-    console.log('GeneralDashboard: Crawls updated, count:', newCrawls.length)
-  },
-  { deep: false } // Shallow watch for better performance
-)
-
-// Use watchEffect for side effects that depend on reactive state
-watchEffect(() => {
-  // This will run whenever any of its dependencies change
-  if (crawlStore.allCrawls.length > 0) {
-    console.log('GeneralDashboard: Crawls loaded successfully')
-  }
-})
 
 
 </script>

@@ -122,6 +122,18 @@ export const useCrawlStore = defineStore('crawl', {
         clearSelectedCrawls() {
             this.selectedCrawls = []
         },
+        // Bulk operations
+        handleBulkDelete() {
+            if (this.selectedCrawls.length === 0) return
+            this.openBulkDeleteConfirm()
+        },
+        canPerformBulkExport() {
+            return this.selectedCrawls.length > 0
+        },
+        confirmDeleteCrawl(crawlId) {
+            this.setSelectedCrawls([crawlId])
+            this.openBulkDeleteConfirm()
+        },
         toggleSelectedCrawl(crawlId) {
             const index = this.selectedCrawls.indexOf(crawlId)
             if (index > -1) {
