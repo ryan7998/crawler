@@ -10,7 +10,6 @@ export function useSocketConnection(options = {}) {
   const socket = ref(null)
   const isConnected = ref(false)
   const connectionError = ref(null)
-  const logs = ref([])
 
   const {
     socketUrl = getSocketUrl(),
@@ -156,7 +155,6 @@ export function useSocketConnection(options = {}) {
    */
   const cleanup = () => {
     disconnect()
-    logs.value = []
     connectionError.value = null
   }
 
@@ -174,10 +172,9 @@ export function useSocketConnection(options = {}) {
 
   return {
     // State
-    socket: socket.value,
+    socket,
     isConnected,
     connectionError,
-    logs,
     
     // Methods
     connect,
