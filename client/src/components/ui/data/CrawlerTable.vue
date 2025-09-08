@@ -226,13 +226,6 @@
                     </span>
                   </label>
                 </div>
-                
-                <button
-                  @click="$emit('view-crawl', crawl._id)"
-                  class="text-blue-600 hover:text-blue-900 focus:outline-none border-none bg-transparent px-2 py-1 rounded hover:bg-blue-50 transition-colors"
-                >
-                  View
-                </button>
                 <button
                   @click="$emit('edit-crawl', crawl)"
                   class="text-indigo-600 hover:text-indigo-900 focus:outline-none border-none bg-transparent px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
