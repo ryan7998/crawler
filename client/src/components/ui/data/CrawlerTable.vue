@@ -308,7 +308,7 @@ const { fetchCrawls } = useCrawlManagement()
 const searchQuery = ref('')
 const currentPage = ref(1)
 const selectAll = ref(false)
-const sortField = ref('startTime')
+const sortField = ref('createdAt')
 const sortDirection = ref('desc')
 
 // Pagination options
@@ -408,18 +408,24 @@ const toggleCrawlSelection = (crawlId) => {
 }
 
 const toggleSelectAll = () => {
-  if (selectAll.value) {
+  const currentlySelected = selectedCrawls.value.length
+  const totalVisible = paginatedCrawls.value.length
+  
+  if (currentlySelected === totalVisible && totalVisible > 0) {
+    // All are selected, so deselect all
+    crawlStore.clearSelectedCrawls()
+  } else {
+    // Not all are selected, so select all visible
     const allCrawlIds = paginatedCrawls.value.map(crawl => crawl._id)
     crawlStore.setSelectedCrawls(allCrawlIds)
-  } else {
-    crawlStore.clearSelectedCrawls()
   }
 }
 
 
 // Watch for changes in selected crawls from store
-watch(selectedCrawls, (newSelected) => {
-  selectAll.value = newSelected.length === paginatedCrawls.value.length && paginatedCrawls.value.length > 0
+watch([selectedCrawls, paginatedCrawls], ([newSelected, newPaginated]) => {
+  const isAllSelected = newSelected.length === newPaginated.length && newPaginated.length > 0
+  selectAll.value = isAllSelected
 }, { deep: true })
 
 // Retry handler
