@@ -19,7 +19,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="row in tableData" :key="row.date">
-                        <td>{{ formatDateTime(row.date) }}</td>
+                        <td>{{ formatDate(row.date) }}</td>
                         <td>
                             <v-chip 
                                 :color="row.status === 'success' ? 'success' : 'error'" 
@@ -65,7 +65,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { formatDateTime } from '../utils/commonUtils'
+import { formatDate } from '../utils/formattingUtils'
 
 const props = defineProps(['data'])
 

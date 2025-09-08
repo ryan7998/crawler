@@ -278,7 +278,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { formatDateTime } from '../../utils/commonUtils'
+import { formatDate } from '../../utils/formattingUtils'
 import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../stores/crawlStore'
 
@@ -421,10 +421,6 @@ const toggleSelectAll = () => {
   }
 }
 
-const formatDate = (dateString) => {
-  if (!dateString) return 'Never'
-  return formatDateTime(dateString)
-}
 
 // Watch for changes in selected crawls from store
 watch(selectedCrawls, (newSelected) => {

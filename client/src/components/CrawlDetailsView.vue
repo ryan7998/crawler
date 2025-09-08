@@ -16,13 +16,13 @@
               <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <span class="text-sm text-gray-600">Created: {{ formatDateTime(crawl.startTime) }}</span>
+              <span class="text-sm text-gray-600">Created: {{ formatDate(crawl.startTime) }}</span>
             </div>
             <div v-if="crawl.endTime" class="flex items-center space-x-2">
               <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <span class="text-sm text-gray-600">Last Run: {{ formatDateTime(crawl.endTime) }}</span>
+              <span class="text-sm text-gray-600">Last Run: {{ formatDate(crawl.endTime) }}</span>
             </div>
           </div>
           
@@ -40,7 +40,7 @@
               Open Google Sheet
             </a>
             <div class="text-xs text-gray-500 mt-1">
-              Exported: {{ formatDateTime(latestExportDate) }}
+              Exported: {{ formatDate(latestExportDate) }}
             </div>
           </div>
         </div>
@@ -343,7 +343,7 @@ import { useRoute, useRouter } from 'vue-router'
 import ViewResult from './ViewResult.vue'
 import { useExcerpts } from '../composables/useExcerpts'
 import SlideOver from './SlideOver.vue'
-import { formatDateTime } from '../utils/commonUtils'
+import { formatDate } from '../utils/formattingUtils'
 import CreateCrawlModal from './CreateCrawlModal.vue'
 import ExportModal from './ExportModal.vue'
 import ProxyStatsWidget from './ui/ProxyStatsWidget.vue'
