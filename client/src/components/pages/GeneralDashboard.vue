@@ -8,8 +8,6 @@
         @crawl-click="openCrawl"
         @view-crawl="openCrawl"
         @edit-crawl="editCrawl"
-        @delete-crawl="confirmDeleteCrawl"
-        @bulk-delete="handleBulkDelete"
         @bulk-export="handleBulkExport"
       />
     </div>
@@ -43,19 +41,11 @@ const editCrawl = (crawl) => {
   crawlStore.openCreateModal(crawl)
 }
 
-// Bulk operations - using store actions
-const handleBulkDelete = () => {
-  crawlStore.handleBulkDelete()
-}
-
+// Bulk export handler (needs notification access)
 const handleBulkExport = () => {
   if (!crawlStore.canPerformBulkExport()) return
   // TODO: Implement bulk export functionality
   showNotification('Bulk export functionality coming soon!', 'info')
-}
-
-const confirmDeleteCrawl = (crawlId) => {
-  crawlStore.confirmDeleteCrawl(crawlId)
 }
 
 

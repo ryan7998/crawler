@@ -12,7 +12,7 @@
           <div v-if="selectedCrawls.length > 0" class="flex items-center space-x-2">
             <span class="text-sm text-gray-700">{{ selectedCrawls.length }} selected</span>
             <button
-              @click="$emit('bulk-delete')"
+              @click="crawlStore.handleBulkDelete()"
               class="inline-flex items-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100"
             >
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +21,7 @@
               Delete Selected
             </button>
             <button
-              @click="$emit('bulk-export')"
+              @click="handleBulkExport"
               class="inline-flex items-center px-3 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100"
             >
               <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,7 +191,7 @@
                   Edit
                 </button>
                 <button
-                  @click="$emit('delete-crawl', crawl._id)"
+                  @click="crawlStore.confirmDeleteCrawl(crawl._id)"
                   class="text-red-600 hover:text-red-900 focus:outline-none border-none bg-transparent px-2 py-1 rounded hover:bg-red-50 transition-colors"
                 >
                   Delete
@@ -294,9 +294,7 @@ const emit = defineEmits([
   'crawl-click',
   'view-crawl',
   'edit-crawl',
-  'delete-crawl',
   'create-crawl',
-  'bulk-delete',
   'bulk-export'
 ])
 
@@ -427,6 +425,14 @@ watch(selectedCrawls, (newSelected) => {
 // Retry handler
 const handleRetry = () => {
   fetchCrawls(paginationOptions)
+}
+
+// Bulk export handler (needs notification access)
+const handleBulkExport = () => {
+  if (!crawlStore.canPerformBulkExport()) return
+  // TODO: Implement bulk export functionality
+  // For now, we'll emit the event to parent for notification handling
+  emit('bulk-export')
 }
 
 // Watch for search changes to reset pagination
