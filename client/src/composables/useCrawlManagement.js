@@ -37,6 +37,7 @@ export function useCrawlManagement() {
         try {
             isSearching.value = true
             crawlStore.setCrawlsLoading(true)
+            crawlStore.clearError()
             
             const { page, itemsPerPage } = options
             const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''
@@ -47,6 +48,7 @@ export function useCrawlManagement() {
             
         } catch (error) {
             console.error('Error fetching crawls:', error)
+            crawlStore.setError(error.message || 'Error fetching crawls')
             showNotification('Error fetching crawls', 'error')
         } finally {
             isSearching.value = false

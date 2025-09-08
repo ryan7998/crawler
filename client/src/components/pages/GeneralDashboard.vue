@@ -4,14 +4,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Crawls Table -->
       <CrawlerTable
-        :crawls="allCrawls"
-        :loading="crawlsLoading"
         :has-selected="hasSelectedCrawls"
         @crawl-click="openCrawl"
         @view-crawl="openCrawl"
         @edit-crawl="editCrawl"
         @delete-crawl="confirmDeleteCrawl"
-        @retry="handleRetry"
         @bulk-delete="handleBulkDelete"
         @bulk-export="handleBulkExport"
       />
@@ -21,12 +18,8 @@
 
 <script setup>
 import { 
-  onMounted, 
-  onUnmounted, 
   inject, 
   computed, 
-  ref, 
-  shallowRef,
   watchEffect,
   watch
 } from 'vue'
@@ -46,22 +39,9 @@ const { del } = useApiService()
 
 // Initialize crawl management composable for general dashboard
 const {
-  isSearching: crawlsLoading,
-  fetchCrawls,
   runAllLoading,
   runAllCrawls: runAllCrawlsFromComposable
 } = useCrawlManagement()
-
-// Use store for crawl data - memoized computed
-const allCrawls = computed(() => crawlStore.allCrawls)
-
-// Memoized pagination options to prevent recreation
-const paginationOptions = shallowRef({ page: 1, itemsPerPage: 50 })
-
-// Memoized event handler to prevent recreation
-const handleRefreshCrawls = () => {
-  fetchCrawls(paginationOptions.value)
-}
 
 // Inject the notification function
 const showNotification = inject('showNotification')
@@ -92,10 +72,6 @@ const confirmDeleteCrawl = (crawlId) => {
   crawlStore.openBulkDeleteConfirm()
 }
 
-// Memoized retry handler
-const handleRetry = () => {
-  fetchCrawls(paginationOptions.value)
-}
 
 // Watch for changes in selected crawls to optimize bulk operations
 const hasSelectedCrawls = computed(() => crawlStore.selectedCrawls.length > 0)
@@ -117,18 +93,5 @@ watchEffect(() => {
   }
 })
 
-// Fetch crawls when component mounts
-onMounted(() => {
-  console.log('GeneralDashboard: Mounted, fetching crawls...')
-  fetchCrawls(paginationOptions.value)
-  
-  // Listen for refresh events from global modals
-  window.addEventListener('refresh-crawls', handleRefreshCrawls)
-})
-
-// Cleanup event listener on unmount
-onUnmounted(() => {
-  window.removeEventListener('refresh-crawls', handleRefreshCrawls)
-})
 
 </script>

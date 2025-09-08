@@ -71,6 +71,10 @@ const crawlSchema = new Schema({
     endTime: {
         type: Date, // End time of the crawl, will be set when crawl completes
     },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
     updatedAt: {
         type: Date,
         default: Date.now,

@@ -50,7 +50,7 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center items-center py-12">
+    <div v-if="crawlsLoading" class="flex justify-center items-center py-12">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       <span class="ml-3 text-gray-600">Loading crawls...</span>
     </div>
@@ -65,7 +65,7 @@
       <h3 class="text-lg font-medium text-gray-900 mb-2">Error loading crawls</h3>
       <p class="text-gray-500 mb-4">{{ error }}</p>
       <button
-        @click="$emit('retry')"
+        @click="handleRetry"
         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200"
       >
         Try Again
@@ -277,24 +277,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { formatDate } from '../../../utils/formattingUtils'
 import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../../stores/crawlStore'
+import { useCrawlManagement } from '../../../composables/useCrawlManagement'
 
 const props = defineProps({
-  crawls: {
-    type: Array,
-    default: () => []
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  },
-  error: {
-    type: String,
-    default: null
-  },
   itemsPerPage: {
     type: Number,
     default: 10
@@ -307,13 +296,15 @@ const emit = defineEmits([
   'edit-crawl',
   'delete-crawl',
   'create-crawl',
-  'retry',
   'bulk-delete',
   'bulk-export'
 ])
 
 // Use the crawl store for selected crawls
 const crawlStore = useCrawlStore()
+
+// Initialize crawl management for data fetching
+const { fetchCrawls } = useCrawlManagement()
 
 // Local state
 const searchQuery = ref('')
@@ -322,8 +313,14 @@ const selectAll = ref(false)
 const sortField = ref('startTime')
 const sortDirection = ref('desc')
 
-// Computed for selected crawls from store
+// Pagination options
+const paginationOptions = { page: 1, itemsPerPage: 50 }
+
+// Computed properties from store
 const selectedCrawls = computed(() => crawlStore.selectedCrawls)
+const allCrawls = computed(() => crawlStore.allCrawls)
+const crawlsLoading = computed(() => crawlStore.crawlsLoading)
+const error = computed(() => crawlStore.error)
 
 // Table columns configuration
 const columns = [
@@ -335,7 +332,7 @@ const columns = [
 
 // Computed properties
 const filteredCrawls = computed(() => {
-  let filtered = props.crawls
+  let filtered = allCrawls.value
 
   // Apply search filter
   if (searchQuery.value) {
@@ -427,8 +424,27 @@ watch(selectedCrawls, (newSelected) => {
   selectAll.value = newSelected.length === paginatedCrawls.value.length && paginatedCrawls.value.length > 0
 }, { deep: true })
 
+// Retry handler
+const handleRetry = () => {
+  fetchCrawls(paginationOptions)
+}
+
 // Watch for search changes to reset pagination
 watch(searchQuery, () => {
   currentPage.value = 1
+})
+
+// Fetch crawls when component mounts
+onMounted(() => {
+  console.log('CrawlerTable: Mounted, fetching crawls...')
+  fetchCrawls(paginationOptions)
+  
+  // Listen for refresh events from global modals
+  window.addEventListener('refresh-crawls', handleRetry)
+})
+
+// Cleanup event listener on unmount
+onUnmounted(() => {
+  window.removeEventListener('refresh-crawls', handleRetry)
 })
 </script>

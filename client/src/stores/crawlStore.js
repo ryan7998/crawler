@@ -6,6 +6,7 @@ export const useCrawlStore = defineStore('crawl', {
         // Crawls data
         allCrawls: [],
         crawlsLoading: false,
+        error: null,
         // Selected crawls for bulk operations
         selectedCrawls: [],
         // Modal states
@@ -87,6 +88,12 @@ export const useCrawlStore = defineStore('crawl', {
         },
         setCrawlsLoading(loading) {
             this.crawlsLoading = loading
+        },
+        setError(error) {
+            this.error = error
+        },
+        clearError() {
+            this.error = null
         },
         addCrawl(crawl) {
             this.allCrawls.unshift(crawl)
