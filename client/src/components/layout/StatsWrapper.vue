@@ -12,9 +12,9 @@
 </template>
 
 <script setup>
-import StatsBottomBar from './ui/StatsBottomBar.vue'
-import { useCrawlManagement } from '../composables/useCrawlManagement'
-import { useCrawlStore } from '../stores/crawlStore'
+import StatsBottomBar from '../ui/stats/StatsBottomBar.vue'
+import { useCrawlManagement } from '../../composables/useCrawlManagement'
+import { useCrawlStore } from '../../stores/crawlStore'
 
 // Use crawl management for stats bar
 const { fetchCrawls } = useCrawlManagement()

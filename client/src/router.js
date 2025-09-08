@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router"
-import HomePage from "./components/HomePage.vue"
-import CrawlDetailsView from "./components/CrawlDetailsView.vue"
+import HomePage from "./components/pages/HomePage.vue"
+import CrawlDetailsView from "./components/pages/CrawlDetailsView.vue"
 import { useAuthStore } from "./stores/authStore"
 
 const routes = [

@@ -63,7 +63,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { useCrawlStore } from '../../stores/crawlStore'
+import { useCrawlStore } from '../../../stores/crawlStore'
 
 // Use the crawl store for stats
 const crawlStore = useCrawlStore()

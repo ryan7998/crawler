@@ -164,7 +164,7 @@
 
 <script setup>
 import { ref, computed, watch, inject, onMounted } from 'vue'
-import { useApiService } from '../composables/useApiService'
+import { useApiService } from '../../composables/useApiService'
 
 // Initialize composables
 const { get, post, loading: apiLoading, error: apiError } = useApiService()

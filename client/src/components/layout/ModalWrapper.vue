@@ -49,14 +49,14 @@
 
 <script setup>
 import { inject } from 'vue'
-import AuthModal from './AuthModal.vue'
-import CreateCrawlModal from './CreateCrawlModal.vue'
-import GlobalExportModal from './GlobalExportModal.vue'
-import QueueStatusModal from './QueueStatusModal.vue'
-import ConfirmationModal from './ui/ConfirmationModal.vue'
-import { useCrawlStore } from '../stores/crawlStore'
-import { useCrawlManagement } from '../composables/useCrawlManagement'
-import { useApiService } from '../composables/useApiService'
+import AuthModal from '../modals/AuthModal.vue'
+import CreateCrawlModal from '../modals/CreateCrawlModal.vue'
+import GlobalExportModal from '../modals/GlobalExportModal.vue'
+import QueueStatusModal from '../modals/QueueStatusModal.vue'
+import ConfirmationModal from '../modals/ui/ConfirmationModal.vue'
+import { useCrawlStore } from '../../stores/crawlStore'
+import { useCrawlManagement } from '../../composables/useCrawlManagement'
+import { useApiService } from '../../composables/useApiService'
 
 // Use crawl store for modal state
 const crawlStore = useCrawlStore()

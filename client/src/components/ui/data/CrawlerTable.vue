@@ -278,9 +278,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { formatDate } from '../../utils/formattingUtils'
+import { formatDate } from '../../../utils/formattingUtils'
 import StatusPill from './StatusPill.vue'
-import { useCrawlStore } from '../../stores/crawlStore'
+import { useCrawlStore } from '../../../stores/crawlStore'
 
 const props = defineProps({
   crawls: {

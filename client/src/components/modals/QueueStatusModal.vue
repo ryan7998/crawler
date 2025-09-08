@@ -152,7 +152,7 @@
 
 <script setup>
 import { ref, computed, watch, inject } from 'vue'
-import { useApiService } from '../composables/useApiService'
+import { useApiService } from '../../composables/useApiService'
 
 const props = defineProps({
   modelValue: {

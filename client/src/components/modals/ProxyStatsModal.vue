@@ -1,10 +1,10 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="900px" persistent @click:outside="closeModal">
+  <v-dialog v-model="isOpen" max-width="900px" persistent>
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
         <div class="d-flex align-center">
           <v-icon icon="mdi-server-network" class="mr-2" />
-          Global Proxy Usage Statistics
+          Proxy Usage Statistics
         </div>
         <v-btn icon="mdi-close" variant="text" @click="closeModal" />
       </v-card-title>
@@ -12,7 +12,7 @@
       <v-card-text>
         <div v-if="loading" class="text-center py-8">
           <v-progress-circular indeterminate size="48" />
-          <div class="mt-4">Loading global proxy statistics...</div>
+          <div class="mt-4">Loading proxy statistics...</div>
         </div>
 
         <div v-else-if="error" class="text-center py-8">
@@ -21,22 +21,21 @@
           <v-btn class="mt-4" @click="refreshData">Retry</v-btn>
         </div>
 
-        <div v-else-if="!globalStats || !globalStats.summary" class="text-center py-8">
+        <div v-else-if="!proxyStats || !proxyStats.summary" class="text-center py-8">
           <v-icon icon="mdi-server-off" size="48" color="grey" />
-          <div class="mt-4 text-grey">No global proxy usage data available</div>
-          <v-btn class="mt-4" @click="refreshData">Refresh</v-btn>
+          <div class="mt-4 text-grey">No proxy usage data available</div>
         </div>
 
-        <div v-else-if="globalStats && globalStats.summary">
+        <div v-else-if="proxyStats && proxyStats.summary">
           <!-- Summary Section -->
           <v-card class="mb-6" variant="outlined">
-            <v-card-title class="text-h6">Global Summary</v-card-title>
+            <v-card-title class="text-h6">Summary</v-card-title>
             <v-card-text>
               <v-row>
                 <v-col cols="6" md="3">
                   <div class="text-center">
                     <div class="text-h4 font-weight-bold text-primary">
-                      {{ formatNumber(globalStats.summary.totalProxyRequests || 0) }}
+                      {{ formatNumber(proxyStats.summary.totalProxyRequests) }}
                     </div>
                     <div class="text-caption text-medium-emphasis">Total Requests</div>
                   </div>
@@ -44,7 +43,7 @@
                 <v-col cols="6" md="3">
                   <div class="text-center">
                     <div class="text-h4 font-weight-bold text-success">
-                      {{ formatNumber(globalStats.summary.uniqueProxiesUsed || 0) }}
+                      {{ formatNumber(proxyStats.summary.uniqueProxiesUsed) }}
                     </div>
                     <div class="text-caption text-medium-emphasis">Unique Proxies</div>
                   </div>
@@ -52,7 +51,7 @@
                 <v-col cols="6" md="3">
                   <div class="text-center">
                     <div class="text-h4 font-weight-bold text-info">
-                      {{ formatPercentage(parseFloat(globalStats.summary.averageSuccessRate) || 0) }}
+                      {{ formatPercentage(proxyStats.summary.averageProxySuccessRate) }}
                     </div>
                     <div class="text-caption text-medium-emphasis">Success Rate</div>
                   </div>
@@ -63,17 +62,16 @@
 
           <!-- Tabs for different views -->
           <v-tabs v-model="activeTab" class="mb-4">
-            <v-tab value="performance">Top Proxies</v-tab>
-            <v-tab value="usage">Recent Usage</v-tab>
-            <v-tab value="costs">Cost Analysis</v-tab>
+            <v-tab value="performance">Proxy Performance</v-tab>
+            <v-tab value="usage">Detailed Usage</v-tab>
           </v-tabs>
 
           <v-window v-model="activeTab">
-            <!-- Top Proxies Tab -->
+            <!-- Proxy Performance Tab -->
             <v-window-item value="performance">
               <v-card variant="outlined">
                 <v-card-title class="d-flex justify-space-between align-center">
-                  Top Performing Proxies
+                  Proxy Performance
                   <v-btn
                     icon="mdi-refresh"
                     size="small"
@@ -85,27 +83,30 @@
                 <v-card-text>
                   <v-data-table
                     :headers="performanceHeaders"
-                    :items="globalStats.topProxies || []"
+                    :items="proxyStats.proxyPerformance || []"
                     :loading="loading"
                     class="elevation-0"
                   >
                     <template v-slot:item.proxyId="{ item }">
                       <div>
-                        <div class="font-weight-medium">{{ item.proxyId || 'Unknown' }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.location || 'Unknown Location' }}</div>
+                        <div class="font-weight-medium">{{ item.proxyId }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ item.location }}</div>
                       </div>
                     </template>
                     <template v-slot:item.totalRequests="{ item }">
-                      {{ formatNumber(item.totalRequests || 0) }}
+                      {{ formatNumber(item.totalRequests) }}
                     </template>
                     <template v-slot:item.successRate="{ item }">
                       <v-chip
-                        :color="getSuccessRateColor(item.successRate || 0)"
+                        :color="getSuccessRateColor(item.successRate)"
                         size="small"
                         variant="tonal"
                       >
-                        {{ formatPercentage(item.successRate || 0) }}
+                        {{ formatPercentage(item.successRate) }}
                       </v-chip>
+                    </template>
+                    <template v-slot:item.averageResponseTime="{ item }">
+                      {{ formatResponseTime(item.averageResponseTime) }}
                     </template>
                     <template v-slot:item.lastUsed="{ item }">
                       {{ getRelativeTime(item.lastUsed) }}
@@ -115,11 +116,11 @@
               </v-card>
             </v-window-item>
 
-            <!-- Recent Usage Tab -->
+            <!-- Detailed Usage Tab -->
             <v-window-item value="usage">
               <v-card variant="outlined">
                 <v-card-title class="d-flex justify-space-between align-center">
-                  Recent Proxy Usage
+                  Detailed Usage
                   <v-btn
                     icon="mdi-refresh"
                     size="small"
@@ -131,7 +132,7 @@
                 <v-card-text>
                   <v-data-table
                     :headers="usageHeaders"
-                    :items="globalStats.recentUsage || []"
+                    :items="proxyStats.detailedUsage || []"
                     :loading="loading"
                     class="elevation-0"
                   >
@@ -142,112 +143,21 @@
                     </template>
                     <template v-slot:item.proxyId="{ item }">
                       <div>
-                        <div class="font-weight-medium">{{ item.proxyId || 'Unknown' }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.proxyLocation || 'Unknown Location' }}</div>
+                        <div class="font-weight-medium">{{ item.proxyId }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ item.proxyLocation }}</div>
                       </div>
                     </template>
                     <template v-slot:item.totalRequests="{ item }">
-                      {{ formatNumber(item.totalRequests || 0) }}
+                      {{ formatNumber(item.totalRequests) }}
                     </template>
                     <template v-slot:item.successCount="{ item }">
-                      <span class="text-success">{{ formatNumber(item.successCount || 0) }}</span>
+                      <span class="text-success">{{ formatNumber(item.successCount) }}</span>
                     </template>
                     <template v-slot:item.failureCount="{ item }">
-                      <span class="text-error">{{ formatNumber(item.failureCount || 0) }}</span>
+                      <span class="text-error">{{ formatNumber(item.failureCount) }}</span>
                     </template>
                     <template v-slot:item.lastUsed="{ item }">
                       {{ getRelativeTime(item.lastUsed) }}
-                    </template>
-                  </v-data-table>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
-
-            <!-- Cost Analysis Tab -->
-            <v-window-item value="costs">
-              <v-card variant="outlined">
-                <v-card-title class="d-flex justify-space-between align-center">
-                  Cost Analysis
-                  <div class="d-flex gap-2">
-                    <v-btn
-                      icon="mdi-refresh"
-                      size="small"
-                      variant="text"
-                      :loading="loading"
-                      @click="refreshData"
-                    />
-                    <v-btn
-                      size="small"
-                      variant="outlined"
-                      color="warning"
-                      @click="showCleanupDialog = true"
-                    >
-                      Cleanup Old Data
-                    </v-btn>
-                  </div>
-                </v-card-title>
-                <v-card-text>
-                  <!-- Cost Summary -->
-                  <div class="cost-summary">
-                    <v-row>
-                      <v-col cols="4">
-                        <div class="text-center">
-                          <div class="text-h5 font-weight-bold text-primary">
-                            {{ formatNumber(costAnalysis.totalRequests || 0) }}
-                          </div>
-                          <div class="text-caption text-medium-emphasis">Total Requests</div>
-                        </div>
-                      </v-col>
-                      <v-col cols="4">
-                        <div class="text-center">
-                          <div class="text-h5 font-weight-bold text-info">
-                            {{ formatCost((costAnalysis.totalCost || 0) / Math.max(costAnalysis.totalRequests || 1, 1)) }}
-                          </div>
-                          <div class="text-caption text-medium-emphasis">Avg Cost/Request</div>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </div>
-
-                  <!-- Date Range Filter -->
-                  <v-row class="mb-4">
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="costAnalysisParams.startDate"
-                        label="Start Date"
-                        type="date"
-                        variant="outlined"
-                        density="compact"
-                        @update:model-value="updateCostAnalysis"
-                      />
-                    </v-col>
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="costAnalysisParams.endDate"
-                        label="End Date"
-                        type="date"
-                        variant="outlined"
-                        density="compact"
-                        @update:model-value="updateCostAnalysis"
-                      />
-                    </v-col>
-                  </v-row>
-
-                  <!-- Daily Costs Table -->
-                  <v-data-table
-                    :headers="costHeaders"
-                    :items="costAnalysis.dailyCosts || []"
-                    :loading="loading"
-                    class="elevation-0"
-                  >
-                    <template v-slot:item.date="{ item }">
-                      {{ formatDate(item.date) }}
-                    </template>
-                    <template v-slot:item.totalRequests="{ item }">
-                      {{ formatNumber(item.totalRequests || 0) }}
-                    </template>
-                    <template v-slot:item.uniqueProxies="{ item }">
-                      {{ formatNumber(item.uniqueProxies || 0) }}
                     </template>
                   </v-data-table>
                 </v-card-text>
@@ -295,24 +205,28 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
-import { useProxyStats } from '../composables/useProxyStats'
+import { ref, computed, watch } from 'vue'
+import { useProxyStats } from '../../composables/useProxyStats'
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false
+  },
+  crawlId: {
+    type: String,
+    default: null
   }
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 const {
-  globalStats,
+  proxyStats,
   costAnalysis,
   loading,
   error,
-  fetchGlobalProxyStats,
+  fetchCrawlProxyStats,
   fetchCostAnalysis,
   cleanupProxyUsage,
   formatNumber,
@@ -340,6 +254,7 @@ const performanceHeaders = [
   { title: 'Proxy ID', key: 'proxyId', sortable: true },
   { title: 'Total Requests', key: 'totalRequests', sortable: true },
   { title: 'Success Rate', key: 'successRate', sortable: true },
+  { title: 'Avg Response Time', key: 'averageResponseTime', sortable: true },
   { title: 'Last Used', key: 'lastUsed', sortable: true }
 ]
 
@@ -354,20 +269,28 @@ const usageHeaders = [
 
 const costHeaders = [
   { title: 'Date', key: 'date', sortable: true },
+  { title: 'Total Cost', key: 'totalCost', sortable: true },
   { title: 'Total Requests', key: 'totalRequests', sortable: true },
   { title: 'Unique Proxies', key: 'uniqueProxies', sortable: true }
 ]
 
 // Watch for modal open to load data
+watch(isOpen, async (newValue) => {
+  if (newValue && props.crawlId) {
+    await loadData()
+  }
+})
+
 const loadData = async () => {
   try {
-    await fetchGlobalProxyStats()
+    await fetchCrawlProxyStats(props.crawlId)
     await fetchCostAnalysis({
+      crawlId: props.crawlId,
       startDate: costAnalysisParams.value.startDate,
       endDate: costAnalysisParams.value.endDate
     })
   } catch (err) {
-    console.error('Error loading global proxy stats:', err)
+    console.error('Error loading proxy stats:', err)
   }
 }
 
@@ -378,6 +301,7 @@ const refreshData = async () => {
 const updateCostAnalysis = async () => {
   try {
     await fetchCostAnalysis({
+      crawlId: props.crawlId,
       startDate: costAnalysisParams.value.startDate,
       endDate: costAnalysisParams.value.endDate
     })
@@ -400,33 +324,16 @@ const closeModal = () => {
   isOpen.value = false
 }
 
-// Add escape key handler
-const handleEscape = (event) => {
-  if (event.key === 'Escape' && isOpen.value) {
-    closeModal()
-  }
-}
-
-// Add event listener when modal opens
-watch(isOpen, (newValue) => {
-  if (newValue) {
-    document.addEventListener('keydown', handleEscape)
-    loadData()
-  } else {
-    document.removeEventListener('keydown', handleEscape)
-  }
-})
-
-// Cleanup on unmount
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleEscape)
-})
-
 // Helper functions
 const getSuccessRateColor = (rate) => {
   if (rate >= 90) return 'success'
   if (rate >= 70) return 'warning'
   return 'error'
+}
+
+const formatResponseTime = (time) => {
+  if (!time) return 'N/A'
+  return `${time.toFixed(0)}ms`
 }
 </script>
 

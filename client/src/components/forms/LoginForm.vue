@@ -107,7 +107,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { useAuth } from '../composables/useAuth'
+import { useAuth } from '../../composables/useAuth'
 
 const emit = defineEmits(['switch-to-register', 'auth-success'])
 

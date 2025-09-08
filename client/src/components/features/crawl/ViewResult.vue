@@ -65,7 +65,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { formatDate } from '../utils/formattingUtils'
+import { formatDate } from '../../../utils/formattingUtils'
 
 const props = defineProps(['data'])
 

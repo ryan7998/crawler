@@ -1,10 +1,10 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import NotificationWrapper from './components/NotificationWrapper.vue'
-import Navbar from './components/Navbar.vue'
-import ModalWrapper from './components/ModalWrapper.vue'
-import StatsWrapper from './components/StatsWrapper.vue'
+import NotificationWrapper from './components/layout/NotificationWrapper.vue'
+import Navbar from './components/layout/Navbar.vue'
+import ModalWrapper from './components/layout/ModalWrapper.vue'
+import StatsWrapper from './components/layout/StatsWrapper.vue'
 import { useAuth } from './composables/useAuth'
 
 // Get authentication status and router

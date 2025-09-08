@@ -6,7 +6,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useAuth } from '../composables/useAuth'
+import { useAuth } from '../../composables/useAuth'
 import LandingPage from './LandingPage.vue'
 import GeneralDashboard from './GeneralDashboard.vue'
 

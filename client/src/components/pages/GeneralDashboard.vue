@@ -31,10 +31,10 @@ import {
   watch
 } from 'vue'
 import { useRouter } from 'vue-router'
-import CrawlerTable from './ui/CrawlerTable.vue'
-import { useCrawlManagement } from '../composables/useCrawlManagement'
-import { useCrawlStore } from '../stores/crawlStore'
-import { useApiService } from '../composables/useApiService'
+import CrawlerTable from '../ui/data/CrawlerTable.vue'
+import { useCrawlManagement } from '../../composables/useCrawlManagement'
+import { useCrawlStore } from '../../stores/crawlStore'
+import { useApiService } from '../../composables/useApiService'
 
 const router = useRouter()
 

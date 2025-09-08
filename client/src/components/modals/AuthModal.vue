@@ -49,11 +49,11 @@
 <script setup>
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import LoginForm from './LoginForm.vue'
-import RegisterForm from './RegisterForm.vue'
+import LoginForm from '../forms/LoginForm.vue'
+import RegisterForm from '../forms/RegisterForm.vue'
 
 const router = useRouter()
-import { useAuth } from '../composables/useAuth'
+import { useAuth } from '../../composables/useAuth'
 
 // Props
 const props = defineProps({

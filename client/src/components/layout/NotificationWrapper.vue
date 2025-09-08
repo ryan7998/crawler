@@ -37,7 +37,7 @@
                 </div>
                 <div class="ml-4 flex-shrink-0">
                     <button
-                        @click="showSnackbar = false"
+                        @click="hideNotification"
                         class="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition-colors"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,41 +51,29 @@
 </template>
 
 <script setup>
-import { ref, provide, onUnmounted } from 'vue'
+import { provide } from 'vue'
+import { useNotification } from '../../composables/useNotification'
 
-// Snackbar state
-const showSnackbar = ref(false)
-const snackbarText = ref('')
-const snackbarColor = ref('success')
+// Use the notification composable
+const {
+    showSnackbar,
+    snackbarText,
+    snackbarColor,
+    showNotification,
+    hideNotification,
+    showSuccess,
+    showError,
+    showWarning,
+    showInfo
+} = useNotification({ global: true })
 
-// Local timeout reference for cleanup
-let notificationTimeout = null
-
-// Provide a function to show notifications
-const showNotification = (message, type = 'success') => {
-    // Clear any existing timeout
-    if (notificationTimeout) {
-        clearTimeout(notificationTimeout)
-    }
-    
-    showSnackbar.value = true
-    snackbarText.value = message
-    snackbarColor.value = type
-    
-    // Auto-dismiss after 3 seconds
-    notificationTimeout = setTimeout(() => {
-        showSnackbar.value = false
-        notificationTimeout = null
-    }, 3000)
-}
-
-// Cleanup timeout on component unmount
-onUnmounted(() => {
-    if (notificationTimeout) {
-        clearTimeout(notificationTimeout)
-    }
-})
-
-// Provide the notification function to child components
+// Provide the notification function to child components for backward compatibility
 provide('showNotification', showNotification)
+
+// Also provide individual methods for more specific usage
+provide('showSuccess', showSuccess)
+provide('showError', showError)
+provide('showWarning', showWarning)
+provide('showInfo', showInfo)
+provide('hideNotification', hideNotification)
 </script> 

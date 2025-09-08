@@ -136,9 +136,9 @@
 <script setup>
 import { ref, inject, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCrawlManagement } from '../composables/useCrawlManagement'
-import { useAuth } from '../composables/useAuth'
-import { useCrawlStore } from '../stores/crawlStore'
+import { useCrawlManagement } from '../../composables/useCrawlManagement'
+import { useAuth } from '../../composables/useAuth'
+import { useCrawlStore } from '../../stores/crawlStore'
 
 const router = useRouter()
 const showNotification = inject('showNotification')
