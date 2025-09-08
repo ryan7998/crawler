@@ -4,39 +4,37 @@ This directory contains Vue 3 composables that provide reusable functionality ac
 
 ## useCrawlManagement
 
-A composable that provides crawl management functionality including fetching crawls, running all crawls, and toggling crawl disable/enable status.
+A composable that provides crawl management functionality including fetching crawls, running all crawls, and toggling crawl disable/enable status. This composable focuses on business logic and delegates UI state to components.
 
 ### Usage
 
 ```javascript
 import { useCrawlManagement } from "../composables/useCrawlManagement";
+import { useCrawlStore } from "../stores/crawlStore";
 
 // Use the composable
 const {
-  crawls,
-  totalCrawls,
   isSearching,
   runAllLoading,
   disableLoadingId,
-  showSnackbar,
-  snackbarText,
-  snackbarColor,
   fetchCrawls,
   runAllCrawls,
   toggleDisableCrawl,
 } = useCrawlManagement();
+
+// Get crawl data from store
+const crawlStore = useCrawlStore();
+const crawls = computed(() => crawlStore.allCrawls);
+const totalCrawls = computed(() => crawlStore.allCrawls.length);
 ```
 
 ### Available State
 
-- `crawls` - Array of crawl objects
-- `totalCrawls` - Total number of crawls (for pagination)
 - `isSearching` - Boolean indicating if a search is in progress
 - `runAllLoading` - Boolean indicating if "run all crawls" is in progress
 - `disableLoadingId` - ID of the crawl currently being toggled (if any)
-- `showSnackbar` - Boolean to control snackbar visibility
-- `snackbarText` - Text to display in the snackbar
-- `snackbarColor` - Color of the snackbar ('success', 'error', etc.)
+
+**Note**: `crawls` and `totalCrawls` are now available through the `crawlStore` to avoid duplication.
 
 ### Available Functions
 
@@ -63,10 +61,15 @@ await fetchCrawls({ page: 1, itemsPerPage: 10 }, "amazon");
 
 Starts all non-disabled crawls that are not currently in progress.
 
+**Returns:** `Promise<Object>` - Result object with success status and message
+
 **Example:**
 
 ```javascript
-await runAllCrawls();
+const result = await runAllCrawls();
+if (result.success) {
+  console.log("Crawls started:", result.message);
+}
 ```
 
 #### `toggleDisableCrawl(crawl)`
@@ -77,10 +80,15 @@ Toggles the disabled status of a crawl.
 
 - `crawl` - Crawl object to toggle
 
+**Returns:** `Promise<Object>` - Result object with success status and message
+
 **Example:**
 
 ```javascript
-await toggleDisableCrawl(crawlItem);
+const result = await toggleDisableCrawl(crawlItem);
+if (result.success) {
+  console.log("Crawl toggled:", result.message);
+}
 ```
 
 ### Example Component

@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, inject } from 'vue'
+import { onMounted, onUnmounted, inject, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import CrawlerTable from './ui/CrawlerTable.vue'
 import { useCrawlManagement } from '../composables/useCrawlManagement'
@@ -38,12 +38,14 @@ const { del } = useApiService()
 
 // Initialize crawl management composable for general dashboard
 const {
-  crawls: allCrawls,
   isSearching: crawlsLoading,
   fetchCrawls,
   runAllLoading,
   runAllCrawls: runAllCrawlsFromComposable
 } = useCrawlManagement()
+
+// Use store for crawl data
+const allCrawls = computed(() => crawlStore.allCrawls)
 
 // Fetch crawls when component mounts
 onMounted(() => {
