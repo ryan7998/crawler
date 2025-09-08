@@ -59,7 +59,7 @@
     import UrlComponent from './UrlComponent.vue'
     import { useCrawlStore } from '../stores/crawlStore'
     import { useRouter } from 'vue-router'
-    import { getApiUrl } from '../utils/commonUtils'
+    import { getApiUrl } from '../utils/environmentUtils'
 
     const crawlStore = useCrawlStore()
     const router = useRouter()

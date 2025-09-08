@@ -1,6 +1,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { io } from 'socket.io-client'
-import { getSocketUrl } from '../utils/commonUtils'
+import { getSocketUrl } from '../utils/environmentUtils'
 
 /**
  * Reusable socket connection composable

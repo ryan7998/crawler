@@ -353,7 +353,7 @@ import StatusPill from './ui/StatusPill.vue'
 import { useProxyStats } from '../composables/useProxyStats'
 import { useSocketConnection } from '../composables/useSocketConnection'
 import { useApiService } from '../composables/useApiService'
-import { saveExportMetadata, loadExportMetadata } from '../utils/exportUtils'
+import { saveExportMetadata, loadExportMetadata } from '../utils/fileUtils'
 
 // Get crawlId from route params
 const route = useRoute()

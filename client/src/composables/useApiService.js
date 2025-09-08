@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import axios from 'axios'
-import { getApiUrl } from '../utils/commonUtils'
+import { getApiUrl } from '../utils/environmentUtils'
 import { useAuthStore } from '../stores/authStore'
 
 /**
