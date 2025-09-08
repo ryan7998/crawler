@@ -94,8 +94,12 @@ export function useCrawlManagement() {
         
         disableLoadingId.value = item._id
         try {
-            const data = await put(`/api/updatecrawl/${item._id}`, { disabled: !item.disabled })
-            const updated = data.crawl
+            const response = await put(`/api/updatecrawl/${item._id}`, { disabled: !item.disabled })
+            const updated = response.data?.crawl
+            
+            if (!updated) {
+                throw new Error('No updated crawl data received from server')
+            }
             
             // Update store
             crawlStore.updateCrawl(updated)

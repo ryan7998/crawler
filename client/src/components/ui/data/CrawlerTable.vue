@@ -141,7 +141,10 @@
           <tr 
             v-for="crawl in paginatedCrawls" 
             :key="crawl._id"
-            class="hover:bg-gray-50 cursor-pointer"
+            :class="[
+              'hover:bg-gray-50 cursor-pointer',
+              crawl.disabled ? 'opacity-60 bg-gray-50' : ''
+            ]"
             @click="$emit('crawl-click', crawl._id)"
           >
             <td class="px-6 py-4 whitespace-nowrap" @click.stop>
@@ -168,7 +171,12 @@
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <StatusPill :status="crawl.status" />
+              <div class="flex items-center space-x-2">
+                <StatusPill :status="crawl.status" />
+                <span v-if="crawl.disabled" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  Disabled
+                </span>
+              </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ getRelativeTime(crawl.createdAt) }}
@@ -178,6 +186,47 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" @click.stop>
               <div class="flex items-center space-x-2">
+                <!-- Toggle Switch -->
+                <div class="flex items-center space-x-2">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :checked="!crawl.disabled"
+                      @change="toggleCrawlStatus(crawl._id)"
+                      :disabled="disableLoadingId === crawl._id"
+                      class="sr-only peer"
+                    />
+                    <div :class="[
+                      'relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out',
+                      crawl.disabled ? 'bg-gray-300' : 'bg-green-500',
+                      disableLoadingId === crawl._id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    ]">
+                      <!-- Switch handle -->
+                      <div :class="[
+                        'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ease-in-out flex items-center justify-center',
+                        crawl.disabled ? 'translate-x-0' : 'translate-x-5'
+                      ]">
+                        <!-- Loading spinner inside the handle -->
+                        <div v-if="disableLoadingId === crawl._id" class="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                        <!-- Check/X icon -->
+                        <svg v-else-if="!crawl.disabled" class="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg v-else class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <!-- Status label -->
+                    <span :class="[
+                      'ml-2 text-xs font-medium',
+                      crawl.disabled ? 'text-gray-500' : 'text-green-600'
+                    ]">
+                      {{ crawl.disabled ? 'Disabled' : 'Enabled' }}
+                    </span>
+                  </label>
+                </div>
+                
                 <button
                   @click="$emit('view-crawl', crawl._id)"
                   class="text-blue-600 hover:text-blue-900 focus:outline-none border-none bg-transparent px-2 py-1 rounded hover:bg-blue-50 transition-colors"
@@ -277,7 +326,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
 import { getRelativeTime } from '../../../utils/formattingUtils'
 import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../../stores/crawlStore'
@@ -302,7 +351,10 @@ const emit = defineEmits([
 const crawlStore = useCrawlStore()
 
 // Initialize crawl management for data fetching
-const { fetchCrawls } = useCrawlManagement()
+const { fetchCrawls, toggleDisableCrawl, disableLoadingId } = useCrawlManagement()
+
+// Inject the notification function
+const showNotification = inject('showNotification')
 
 // Local state
 const searchQuery = ref('')
@@ -439,6 +491,21 @@ const handleBulkExport = () => {
   // TODO: Implement bulk export functionality
   // For now, we'll emit the event to parent for notification handling
   emit('bulk-export')
+}
+
+// Toggle crawl status handler
+const toggleCrawlStatus = async (crawlId) => {
+  const crawl = allCrawls.value.find(c => c._id === crawlId)
+  if (!crawl) {
+    showNotification('Crawl not found', 'error')
+    return
+  }
+  
+  try {
+    await toggleDisableCrawl(crawl)
+  } catch (error) {
+    console.error('Error toggling crawl status:', error)
+  }
 }
 
 // Watch for search changes to reset pagination

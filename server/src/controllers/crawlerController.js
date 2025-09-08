@@ -97,26 +97,37 @@ const updateCrawler = asyncHandler(async (req, res) => {
     const { id } = req.params
     const { title, urls, selectors, advancedSelectors, comparisonSelectors } = req.body
 
-    // Find the existing crawl
-    const crawl = await Crawl.findById(id)
-    if (!crawl) {
+    // Find the existing crawl first to check ownership
+    const existingCrawl = await Crawl.findById(id)
+    if (!existingCrawl) {
         return sendNotFound(res, 'Crawl')
     }
 
     // Check ownership
-    if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+    if (!req.user.isSuperAdmin() && existingCrawl.userId.toString() !== req.user._id.toString()) {
         return sendError(res, 'Access denied. You can only update your own crawls.', 403, 'FORBIDDEN')
     }
 
-    // Update the crawl fields if provided
-    if (title) crawl.title = title
-    if (urls) crawl.urls = urls.map(url => url.trim())
-    if (selectors) crawl.selectors = selectors
-    if (advancedSelectors) crawl.advancedSelectors = advancedSelectors
-    if (typeof req.body.disabled === 'boolean') crawl.disabled = req.body.disabled
-    if (comparisonSelectors) crawl.comparisonSelectors = comparisonSelectors
+    // Prepare update object
+    const updateData = {}
+    if (title) updateData.title = title
+    if (urls) updateData.urls = urls.map(url => url.trim())
+    if (selectors) updateData.selectors = selectors
+    if (advancedSelectors) updateData.advancedSelectors = advancedSelectors
+    if (typeof req.body.disabled === 'boolean') updateData.disabled = req.body.disabled
+    if (comparisonSelectors) updateData.comparisonSelectors = comparisonSelectors
 
-    const updatedCrawl = await crawl.save()
+    // Use findByIdAndUpdate to avoid validation issues
+    const updatedCrawl = await Crawl.findByIdAndUpdate(
+        id, 
+        updateData, 
+        { new: true, runValidators: true }
+    )
+
+    if (!updatedCrawl) {
+        return sendNotFound(res, 'Crawl')
+    }
+
     sendSuccess(res, { crawl: updatedCrawl }, 'Crawl updated successfully')
 })
 
