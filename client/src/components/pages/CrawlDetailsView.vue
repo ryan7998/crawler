@@ -353,6 +353,7 @@ import StatusPill from '../ui/data/StatusPill.vue'
 import { useProxyStats } from '../../composables/useProxyStats'
 import { useSocketConnection } from '../../composables/useSocketConnection'
 import { useApiService } from '../../composables/useApiService'
+import { useStatsBarContext } from '../../composables/useStatsBarContext'
 import { saveExportMetadata, loadExportMetadata } from '../../utils/fileUtils'
 
 // Get crawlId from route params
@@ -407,6 +408,9 @@ const {
   formattedCrawlStats,
   formattedGlobalStats
 } = useProxyStats()
+
+// Initialize stats bar context
+const { setContext } = useStatsBarContext()
 
 // Computed properties for proxy stats
 const detailedProxyStats = computed(() => proxyStats.value)
@@ -494,6 +498,21 @@ const fetchCrawlData = async () => {
             }
             // Initialize excerpt
             excerpts.value[url] = useExcerpts(ref(url), 30)
+        })
+
+        // Set stats bar context for this specific crawl
+        setContext('crawl-details', {
+          title: crawl.value.title,
+          status: crawl.value.status,
+          totalUrls: crawl.value.urls?.length || 0,
+          completedUrls: Object.values(crawl.value.aggregatedData || {})
+            .filter(urlData => urlData && urlData.length > 0)
+            .length,
+          failedUrls: Object.values(crawl.value.aggregatedData || {})
+            .filter(urlData => urlData && urlData.length > 0 && 
+              urlData[urlData.length - 1]?.status === 'failed')
+            .length,
+          hasData: hasCrawlData.value
         })
 
         // Clear any stale 'started' statuses if crawl is completed
