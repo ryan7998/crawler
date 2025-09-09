@@ -73,7 +73,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="filteredCrawls.length === 0" class="text-center py-12">
+    <div v-else-if="tableData.isEmpty" class="text-center py-12">
       <div class="text-gray-400 mb-4">
         <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -268,11 +268,11 @@
         <div>
           <p class="text-sm text-gray-700">
             Showing
-            <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
+            <span class="font-medium">{{ paginationInfo.start }}</span>
             to
-            <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredCrawls.length) }}</span>
+            <span class="font-medium">{{ paginationInfo.end }}</span>
             of
-            <span class="font-medium">{{ filteredCrawls.length }}</span>
+            <span class="font-medium">{{ paginationInfo.total }}</span>
             results
           </p>
         </div>
@@ -322,11 +322,10 @@
 import { ref, computed, watch, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRelativeTime } from '../../../utils/formattingUtils'
+import { processTableData, toggleSort } from '../../../utils/tableUtils'
 import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../../stores/crawlStore'
 import { useCrawlManagement } from '../../../composables/useCrawlManagement'
-
-// No props needed - using hardcoded pagination
 
 // Router for navigation
 const router = useRouter()
@@ -375,79 +374,29 @@ const columns = [
   { key: 'endTime', label: 'Last Run' }
 ]
 
-// Computed properties
-const filteredCrawls = computed(() => {
-  let filtered = allCrawls.value
-
-  // Apply search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(crawl => 
-      crawl.title?.toLowerCase().includes(query) ||
-      crawl.status?.toLowerCase().includes(query) ||
-      crawl._id?.toLowerCase().includes(query)
-    )
-  }
-
-  // Apply sorting
-  filtered = [...filtered].sort((a, b) => {
-    let aVal = a[sortField.value]
-    let bVal = b[sortField.value]
-
-    if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1
-    if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1
-    return 0
+// Table data processing using utility functions
+const tableData = computed(() => {
+  return processTableData(allCrawls.value, {
+    searchQuery: searchQuery.value,
+    searchFields: ['title', 'status', '_id'],
+    sortField: sortField.value,
+    sortDirection: sortDirection.value,
+    currentPage: currentPage.value,
+    itemsPerPage: itemsPerPage
   })
-
-  return filtered
 })
 
-const totalPages = computed(() => Math.ceil(filteredCrawls.value.length / itemsPerPage))
-
-const paginatedCrawls = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredCrawls.value.slice(start, end)
-})
-
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-  
-  if (total <= 7) {
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
-  } else {
-    if (current <= 4) {
-      for (let i = 1; i <= 5; i++) pages.push(i)
-      pages.push('...')
-      pages.push(total)
-    } else if (current >= total - 3) {
-      pages.push(1)
-      pages.push('...')
-      for (let i = total - 4; i <= total; i++) pages.push(i)
-    } else {
-      pages.push(1)
-      pages.push('...')
-      for (let i = current - 1; i <= current + 1; i++) pages.push(i)
-      pages.push('...')
-      pages.push(total)
-    }
-  }
-  
-  return pages
-})
+// Extract computed values from processed data
+const paginatedCrawls = computed(() => tableData.value.items)
+const totalPages = computed(() => tableData.value.totalPages)
+const visiblePages = computed(() => tableData.value.visiblePages)
+const paginationInfo = computed(() => tableData.value.paginationInfo)
 
 // Methods
 const sortBy = (field) => {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
-  }
+  const newSort = toggleSort(sortField.value, field, sortDirection.value)
+  sortField.value = newSort.field
+  sortDirection.value = newSort.direction
 }
 
 const toggleCrawlSelection = (crawlId) => {
