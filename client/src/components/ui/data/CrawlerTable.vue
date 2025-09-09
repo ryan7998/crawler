@@ -141,10 +141,7 @@
           <tr 
             v-for="crawl in paginatedCrawls" 
             :key="crawl._id"
-            :class="[
-              'hover:bg-gray-50 cursor-pointer',
-              crawl.disabled ? 'opacity-60 bg-gray-50' : ''
-            ]"
+            :class="getRowClasses(crawl)"
             @click="openCrawl(crawl._id)"
           >
             <td class="px-6 py-4 whitespace-nowrap" @click.stop>
@@ -196,16 +193,9 @@
                       :disabled="disableLoadingId === crawl._id"
                       class="sr-only peer"
                     />
-                    <div :class="[
-                      'relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out',
-                      crawl.disabled ? 'bg-gray-300' : 'bg-green-500',
-                      disableLoadingId === crawl._id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                    ]">
+                    <div :class="getToggleSwitchClasses(crawl)">
                       <!-- Switch handle -->
-                      <div :class="[
-                        'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ease-in-out flex items-center justify-center',
-                        crawl.disabled ? 'translate-x-0' : 'translate-x-5'
-                      ]">
+                      <div :class="getToggleHandleClasses(crawl)">
                         <!-- Loading spinner inside the handle -->
                         <div v-if="disableLoadingId === crawl._id" class="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
                         <!-- Check/X icon -->
@@ -218,10 +208,7 @@
                       </div>
                     </div>
                     <!-- Status label -->
-                    <span :class="[
-                      'ml-2 text-xs font-medium',
-                      crawl.disabled ? 'text-gray-500' : 'text-green-600'
-                    ]">
+                    <span :class="getToggleLabelClasses(crawl)">
                       {{ crawl.disabled ? 'Disabled' : 'Enabled' }}
                     </span>
                   </label>
@@ -250,15 +237,15 @@
     <div v-if="totalPages > 1" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
       <div class="flex-1 flex justify-between sm:hidden">
         <button
-          @click="currentPage = Math.max(1, currentPage - 1)"
-          :disabled="currentPage === 1"
+          @click="currentPage = previousPage"
+          :disabled="!canGoToPreviousPage"
           class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Previous
         </button>
         <button
-          @click="currentPage = Math.min(totalPages, currentPage + 1)"
-          :disabled="currentPage === totalPages"
+          @click="currentPage = nextPage"
+          :disabled="!canGoToNextPage"
           class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Next
@@ -279,8 +266,8 @@
         <div>
           <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
             <button
-              @click="currentPage = Math.max(1, currentPage - 1)"
-              :disabled="currentPage === 1"
+              @click="currentPage = previousPage"
+              :disabled="!canGoToPreviousPage"
               class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -292,19 +279,14 @@
               v-for="page in visiblePages"
               :key="page"
               @click="currentPage = page"
-              :class="[
-                'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
-                page === currentPage
-                  ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                  : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-              ]"
+              :class="getPaginationButtonClasses(page)"
             >
               {{ page }}
             </button>
             
             <button
-              @click="currentPage = Math.min(totalPages, currentPage + 1)"
-              :disabled="currentPage === totalPages"
+              @click="currentPage = nextPage"
+              :disabled="!canGoToNextPage"
               class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -348,16 +330,19 @@ const editCrawl = (crawl) => {
   crawlStore.openCreateModal(crawl)
 }
 
+// Constants
+const ITEMS_PER_PAGE = 10
+const PAGINATION_OPTIONS = { page: 1, itemsPerPage: 50 }
+const SEARCH_FIELDS = ['title', 'status', '_id']
+const DEFAULT_SORT_FIELD = 'createdAt'
+const DEFAULT_SORT_DIRECTION = 'desc'
+
 // Local state
 const searchQuery = ref('')
 const currentPage = ref(1)
 const selectAll = ref(false)
-const sortField = ref('createdAt')
-const sortDirection = ref('desc')
-const itemsPerPage = 10
-
-// Pagination options
-const paginationOptions = { page: 1, itemsPerPage: 50 }
+const sortField = ref(DEFAULT_SORT_FIELD)
+const sortDirection = ref(DEFAULT_SORT_DIRECTION)
 
 // Computed properties from store
 const selectedCrawls = computed(() => crawlStore.selectedCrawls)
@@ -378,11 +363,11 @@ const columns = [
 const tableData = computed(() => {
   return processTableData(allCrawls.value, {
     searchQuery: searchQuery.value,
-    searchFields: ['title', 'status', '_id'],
+    searchFields: SEARCH_FIELDS,
     sortField: sortField.value,
     sortDirection: sortDirection.value,
     currentPage: currentPage.value,
-    itemsPerPage: itemsPerPage
+    itemsPerPage: ITEMS_PER_PAGE
   })
 })
 
@@ -391,6 +376,41 @@ const paginatedCrawls = computed(() => tableData.value.items)
 const totalPages = computed(() => tableData.value.totalPages)
 const visiblePages = computed(() => tableData.value.visiblePages)
 const paginationInfo = computed(() => tableData.value.paginationInfo)
+
+// Computed class bindings for better readability
+const getRowClasses = (crawl) => [
+  'hover:bg-gray-50 cursor-pointer',
+  crawl.disabled ? 'opacity-60 bg-gray-50' : ''
+]
+
+const getToggleSwitchClasses = (crawl) => [
+  'relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out',
+  crawl.disabled ? 'bg-gray-300' : 'bg-green-500',
+  disableLoadingId === crawl._id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+]
+
+const getToggleHandleClasses = (crawl) => [
+  'absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ease-in-out flex items-center justify-center',
+  crawl.disabled ? 'translate-x-0' : 'translate-x-5'
+]
+
+const getToggleLabelClasses = (crawl) => [
+  'ml-2 text-xs font-medium',
+  crawl.disabled ? 'text-gray-500' : 'text-green-600'
+]
+
+const getPaginationButtonClasses = (page) => [
+  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+  page === currentPage.value
+    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+]
+
+// Pagination button logic
+const canGoToPreviousPage = computed(() => currentPage.value > 1)
+const canGoToNextPage = computed(() => currentPage.value < totalPages.value)
+const previousPage = computed(() => Math.max(1, currentPage.value - 1))
+const nextPage = computed(() => Math.min(totalPages.value, currentPage.value + 1))
 
 // Methods
 const sortBy = (field) => {
@@ -426,13 +446,12 @@ watch([selectedCrawls, allCrawls], ([newSelected, newAllCrawls]) => {
 
 // Watch for refresh trigger from store
 watch(refreshTrigger, () => {
-  console.log('CrawlerTable: Refresh triggered, fetching crawls...')
-  fetchCrawls(paginationOptions)
+  fetchCrawls(PAGINATION_OPTIONS)
 })
 
 // Retry handler
 const handleRetry = () => {
-  fetchCrawls(paginationOptions)
+  fetchCrawls(PAGINATION_OPTIONS)
 }
 
 // Bulk export handler
@@ -464,7 +483,6 @@ watch(searchQuery, () => {
 
 // Fetch crawls when component mounts
 onMounted(() => {
-  console.log('CrawlerTable: Mounted, fetching crawls...')
-  fetchCrawls(paginationOptions)
+  fetchCrawls(PAGINATION_OPTIONS)
 })
 </script>
