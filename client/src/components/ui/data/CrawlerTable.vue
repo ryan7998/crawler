@@ -325,12 +325,7 @@ import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../../stores/crawlStore'
 import { useCrawlManagement } from '../../../composables/useCrawlManagement'
 
-const props = defineProps({
-  itemsPerPage: {
-    type: Number,
-    default: 10
-  }
-})
+// No props needed - using hardcoded pagination
 
 const emit = defineEmits([
   'crawl-click',
@@ -355,6 +350,7 @@ const currentPage = ref(1)
 const selectAll = ref(false)
 const sortField = ref('createdAt')
 const sortDirection = ref('desc')
+const itemsPerPage = 10
 
 // Pagination options
 const paginationOptions = { page: 1, itemsPerPage: 50 }
@@ -400,11 +396,11 @@ const filteredCrawls = computed(() => {
   return filtered
 })
 
-const totalPages = computed(() => Math.ceil(filteredCrawls.value.length / props.itemsPerPage))
+const totalPages = computed(() => Math.ceil(filteredCrawls.value.length / itemsPerPage))
 
 const paginatedCrawls = computed(() => {
-  const start = (currentPage.value - 1) * props.itemsPerPage
-  const end = start + props.itemsPerPage
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
   return filteredCrawls.value.slice(start, end)
 })
 
