@@ -319,7 +319,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
+import { ref, computed, watch, onMounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRelativeTime } from '../../../utils/formattingUtils'
 import StatusPill from './StatusPill.vue'
@@ -365,6 +365,7 @@ const selectedCrawls = computed(() => crawlStore.selectedCrawls)
 const allCrawls = computed(() => crawlStore.allCrawls)
 const crawlsLoading = computed(() => crawlStore.crawlsLoading)
 const error = computed(() => crawlStore.error)
+const refreshTrigger = computed(() => crawlStore.refreshTrigger)
 
 // Table columns configuration
 const columns = [
@@ -474,6 +475,12 @@ watch([selectedCrawls, allCrawls], ([newSelected, newAllCrawls]) => {
   selectAll.value = isAllSelected
 }, { deep: true })
 
+// Watch for refresh trigger from store
+watch(refreshTrigger, () => {
+  console.log('CrawlerTable: Refresh triggered, fetching crawls...')
+  fetchCrawls(paginationOptions)
+})
+
 // Retry handler
 const handleRetry = () => {
   fetchCrawls(paginationOptions)
@@ -510,13 +517,5 @@ watch(searchQuery, () => {
 onMounted(() => {
   console.log('CrawlerTable: Mounted, fetching crawls...')
   fetchCrawls(paginationOptions)
-  
-  // Listen for refresh events from global modals
-  window.addEventListener('refresh-crawls', handleRetry)
-})
-
-// Cleanup event listener on unmount
-onUnmounted(() => {
-  window.removeEventListener('refresh-crawls', handleRetry)
 })
 </script>

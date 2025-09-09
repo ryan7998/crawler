@@ -17,7 +17,9 @@ export const useCrawlStore = defineStore('crawl', {
         showRunAllConfirm: false,
         showBulkDeleteConfirm: false,
         showAuthModal: false,
-        authModalMode: 'login'
+        authModalMode: 'login',
+        // Refresh trigger for components
+        refreshTrigger: 0
     }),
     getters: {
         // Computed stats from allCrawls
@@ -155,6 +157,10 @@ export const useCrawlStore = defineStore('crawl', {
             } else {
                 this.selectedCrawls.push(crawlId)
             }
+        },
+        // Trigger refresh for components
+        triggerRefresh() {
+            this.refreshTrigger++
         }
     }
 })

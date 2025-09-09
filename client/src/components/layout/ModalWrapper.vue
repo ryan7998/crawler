@@ -108,8 +108,8 @@ const confirmBulkDelete = async () => {
     crawlStore.clearSelectedCrawls()
     showNotification(`Successfully deleted ${deletedCount} crawls`, 'success')
     
-    // Emit event to refresh the crawls list
-    window.dispatchEvent(new CustomEvent('refresh-crawls'))
+    // Trigger refresh using store
+    crawlStore.triggerRefresh()
   } catch (error) {
     showNotification(error.message, 'error')
     crawlStore.closeBulkDeleteConfirm()
