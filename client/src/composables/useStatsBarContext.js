@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStatsBarStore } from '../stores/statsBarStore'
 
@@ -12,9 +12,16 @@ export function useStatsBarContext() {
     const routeParams = route.params
 
     switch (routeName) {
-      case 'crawl-details':
-        // This would be set by the CrawlDetailsView component
-        // with specific crawl data
+      case 'CrawlDetails':
+        // Set loading context immediately for crawl-details
+        statsBarStore.setContext('crawl-details', {
+          title: 'Loading...',
+          status: 'Loading...',
+          totalUrls: 0,
+          completedUrls: 0,
+          failedUrls: 0,
+          hasData: false
+        })
         break
       case 'proxy-stats':
         statsBarStore.setContext('proxy-stats', {
@@ -27,8 +34,11 @@ export function useStatsBarContext() {
     }
   }
 
+  // Set context immediately and watch for route changes
+  setContextFromRoute()
+  
   // Watch for route changes
-  onMounted(() => {
+  watch(() => route.name, () => {
     setContextFromRoute()
   })
 
