@@ -19,6 +19,13 @@
     @export-success="handleGlobalExportSuccess"
   />
 
+  <ExportModal
+    v-model="crawlStore.showExportModal"
+    :crawl-id="crawlStore.selectedCrawl?._id"
+    :crawl-title="crawlStore.selectedCrawl?.title"
+    @export-success="handleExportSuccess"
+  />
+
   <QueueStatusModal
     v-model="crawlStore.showQueueStatusModal"
   />
@@ -102,6 +109,7 @@ import { useRouter } from 'vue-router'
 import AuthModal from '../modals/AuthModal.vue'
 import CreateCrawlModal from '../modals/CreateCrawlModal.vue'
 import GlobalExportModal from '../modals/GlobalExportModal.vue'
+import ExportModal from '../modals/ExportModal.vue'
 import QueueStatusModal from '../modals/QueueStatusModal.vue'
 import ConfirmationModal from '../modals/ui/ConfirmationModal.vue'
 import { useCrawlStore } from '../../stores/crawlStore'
@@ -148,6 +156,11 @@ const handleModalError = (errorMessage) => {
 
 const handleGlobalExportSuccess = (exportResult) => {
   showNotification('Global export completed successfully!', 'success')
+}
+
+const handleExportSuccess = (exportResult) => {
+  crawlStore.closeExportModal()
+  showNotification('Export completed successfully!', 'success')
 }
 
 const confirmRunAll = async () => {

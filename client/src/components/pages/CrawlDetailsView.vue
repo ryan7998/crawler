@@ -260,21 +260,7 @@
 
     <!-- Note: Confirmation modals are now handled by ModalWrapper.vue -->
 
-    <!-- Modals -->
-    <CreateCrawlModal
-      v-model="showCreateModal"
-      :crawl-data="crawl"
-      @crawl-created="handleCrawlCreated"
-      @error="handleModalError"
-    />
-
-    <ExportModal
-      v-model="showExportModal"
-      :crawl-id="crawlId.value"
-      :crawl-title="crawl?.title"
-      @export-success="handleExportSuccess"
-    />
-
+    <!-- Component-specific modals only -->
     <ProxyStatsModal
       v-model="showProxyStatsModal"
       :crawl-id="crawlId.value"
@@ -288,8 +274,6 @@ import { useRoute, useRouter } from 'vue-router'
 import ViewResult from '../features/crawl/ViewResult.vue'
 import SlideOver from '../features/proxy/SlideOver.vue'
 import { formatDate } from '../../utils/formattingUtils'
-import CreateCrawlModal from '../modals/CreateCrawlModal.vue'
-import ExportModal from '../modals/ExportModal.vue'
 import ProxyStatsWidget from '../ui/stats/ProxyStatsWidget.vue'
 import ProxyStatsModal from '../modals/ProxyStatsModal.vue'
 import StatusPill from '../ui/data/StatusPill.vue'
@@ -315,8 +299,6 @@ const crawlStore = useCrawlStore()
 
 const viewResults = ref({})
 const logs = ref([])
-const showCreateModal = ref(false)
-const showExportMenu = ref(false)
 const queueStatus = ref({ active: 0, waiting: 0, delayed: 0, total: 0 })
 
 // Add bulk delete refs for specific crawl dashboard
@@ -332,7 +314,6 @@ const clearQueueLoading = ref(false)
 
 // Add proxy stats refs
 const showProxyStatsModal = ref(false)
-const showExportModal = ref(false)
 
 // Initialize proxy stats composable
 const {
@@ -500,7 +481,8 @@ onUnmounted(() => {
 })
 
 const configureCrawl = () => {
-    showCreateModal.value = true
+    crawlStore.setSelectedCrawl(crawl.value)
+    crawlStore.openCreateModal()
 }
 
 // Use shared action functions
@@ -508,6 +490,7 @@ const handleStartCrawl = async () => {
     await startCrawl(crawlId.value, crawl.value.urls, crawl.value.selectors || [])
     crawl.value.status = 'in-progress'
 }
+
 
 // Handler for crawl creation/update (specific crawl dashboard)
 const handleCrawlCreated = (updatedCrawl) => {

@@ -13,6 +13,7 @@ export const useCrawlStore = defineStore('crawl', {
         showCreateModal: false,
         selectedCrawl: null,
         showGlobalExportModal: false,
+        showExportModal: false,
         showQueueStatusModal: false,
         showRunAllConfirm: false,
         showBulkDeleteConfirm: false,
@@ -75,6 +76,12 @@ export const useCrawlStore = defineStore('crawl', {
         },
         closeGlobalExportModal() {
             this.showGlobalExportModal = false
+        },
+        openExportModal() {
+            this.showExportModal = true
+        },
+        closeExportModal() {
+            this.showExportModal = false
         },
         openQueueStatusModal() {
             this.showQueueStatusModal = true
