@@ -29,6 +29,17 @@ export const useCrawlStore = defineStore('crawl', {
                 completedCrawls: crawls.filter(c => c.status === 'completed').length,
                 totalUrls: crawls.reduce((sum, crawl) => sum + (crawl.urls?.length || 0), 0)
             }
+        },
+        // Check if we're doing a single delete or bulk delete
+        isSingleDelete: (state) => {
+            return state.selectedCrawl && state.selectedCrawls.length === 0
+        },
+        // Get the crawls to delete (either selected crawls or single crawl)
+        crawlsToDelete: (state) => {
+            if (state.selectedCrawl && state.selectedCrawls.length === 0) {
+                return [state.selectedCrawl]
+            }
+            return state.selectedCrawls
         }
     },
     actions: {
@@ -74,6 +85,8 @@ export const useCrawlStore = defineStore('crawl', {
         },
         closeBulkDeleteConfirm() {
             this.showBulkDeleteConfirm = false
+            // Clear single delete selection when closing
+            this.selectedCrawl = null
         },
         openAuthModal(mode = 'login') {
             this.authModalMode = mode
@@ -131,7 +144,8 @@ export const useCrawlStore = defineStore('crawl', {
             return this.selectedCrawls.length > 0
         },
         confirmDeleteCrawl(crawlId) {
-            this.setSelectedCrawls([crawlId])
+            // Store the crawl ID for single delete without selecting it
+            this.selectedCrawl = crawlId
             this.openBulkDeleteConfirm()
         },
         toggleSelectedCrawl(crawlId) {
