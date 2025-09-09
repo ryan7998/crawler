@@ -58,7 +58,7 @@ export function useProxyStats() {
           totalProxyRequests: 0,
           uniqueProxiesUsed: 0,
           totalCost: 0,
-          averageProxySuccessRate: 0,
+          averageSuccessRate: 0,
           lastProxyUsed: null
         },
         detailedUsage: [],
@@ -248,7 +248,7 @@ export function useProxyStats() {
       totalRequests: summary.totalProxyRequests || 0,
       uniqueProxies: summary.uniqueProxiesUsed || 0,
       totalCost: summary.totalCost || 0,
-      successRate: summary.averageProxySuccessRate || 0,
+      successRate: summary.averageSuccessRate || 0,
       lastUsed: summary.lastProxyUsed ? new Date(summary.lastProxyUsed) : null
     }
   })

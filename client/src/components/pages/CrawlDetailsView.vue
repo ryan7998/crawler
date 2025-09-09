@@ -263,7 +263,7 @@
     <!-- Component-specific modals only -->
     <ProxyStatsModal
       v-model="showProxyStatsModal"
-      :crawl-id="crawlId.value"
+      :crawl-id="crawlId"
     />
   </div>
 </template>

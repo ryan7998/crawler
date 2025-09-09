@@ -332,7 +332,16 @@ function createDateRangeMatch(startDate, endDate, dateField = 'lastUsed') {
  * @returns {Object} Match stage
  */
 function createCrawlMatch(crawlId) {
-    return crawlId ? { crawlId: crawlId } : {};
+    if (!crawlId) return {};
+    
+    // Import mongoose at the top of the file if not already imported
+    const mongoose = require('mongoose');
+    
+    return { 
+        crawlId: mongoose.Types.ObjectId.isValid(crawlId) 
+            ? new mongoose.Types.ObjectId(crawlId) 
+            : crawlId 
+    };
 }
 
 module.exports = {

@@ -67,8 +67,9 @@
             <p class="mt-2 text-sm text-gray-600">No proxy usage data available for this crawl</p>
           </div>
 
+
           <!-- Data Content -->
-          <div v-else-if="proxyStats && proxyStats.summary">
+          <div v-if="proxyStats && proxyStats.summary">
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
@@ -114,7 +115,7 @@
                   </div>
                   <div class="ml-4">
                     <p class="text-sm font-medium text-purple-600">Success Rate</p>
-                    <p class="text-2xl font-bold text-purple-900">{{ formatPercentage(proxyStats.summary.averageProxySuccessRate) }}</p>
+                    <p class="text-2xl font-bold text-purple-900">{{ formatPercentage(proxyStats.summary.averageSuccessRate) }}</p>
                   </div>
                 </div>
               </div>
@@ -337,7 +338,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useProxyStats } from '../../composables/useProxyStats'
 
 const props = defineProps({
@@ -372,6 +373,20 @@ const isOpen = computed({
 const activeTab = ref('performance')
 const showCleanupDialog = ref(false)
 const cleanupDays = ref(90)
+
+// Watch for crawlId changes
+watch(() => props.crawlId, async (newCrawlId, oldCrawlId) => {
+  if (newCrawlId && newCrawlId !== oldCrawlId) {
+    await loadData()
+  }
+}, { immediate: true })
+
+// Load data on mount if crawlId is available
+onMounted(async () => {
+  if (props.crawlId) {
+    await loadData()
+  }
+})
 
 // Watch for modal open to load data
 watch(isOpen, async (newValue) => {
