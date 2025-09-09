@@ -454,22 +454,22 @@ const toggleCrawlSelection = (crawlId) => {
 
 const toggleSelectAll = () => {
   const currentlySelected = selectedCrawls.value.length
-  const totalVisible = paginatedCrawls.value.length
+  const totalCrawls = allCrawls.value.length
   
-  if (currentlySelected === totalVisible && totalVisible > 0) {
-    // All are selected, so deselect all
+  if (currentlySelected === totalCrawls && totalCrawls > 0) {
+    // All crawls are selected, so deselect all
     crawlStore.clearSelectedCrawls()
   } else {
-    // Not all are selected, so select all visible
-    const allCrawlIds = paginatedCrawls.value.map(crawl => crawl._id)
+    // Not all crawls are selected, so select all crawls across all pages
+    const allCrawlIds = allCrawls.value.map(crawl => crawl._id)
     crawlStore.setSelectedCrawls(allCrawlIds)
   }
 }
 
 
 // Watch for changes in selected crawls from store
-watch([selectedCrawls, paginatedCrawls], ([newSelected, newPaginated]) => {
-  const isAllSelected = newSelected.length === newPaginated.length && newPaginated.length > 0
+watch([selectedCrawls, allCrawls], ([newSelected, newAllCrawls]) => {
+  const isAllSelected = newSelected.length === newAllCrawls.length && newAllCrawls.length > 0
   selectAll.value = isAllSelected
 }, { deep: true })
 
