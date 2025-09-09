@@ -502,6 +502,7 @@ const fetchCrawlData = async () => {
 
         // Set stats bar context for this specific crawl
         setContext('crawl-details', {
+          crawlId: crawlId.value,
           title: crawl.value.title,
           status: crawl.value.status,
           totalUrls: crawl.value.urls?.length || 0,

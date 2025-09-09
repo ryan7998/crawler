@@ -17,6 +17,12 @@ export const useCrawlStore = defineStore('crawl', {
         showRunAllConfirm: false,
         showBulkDeleteConfirm: false,
         showAuthModal: false,
+        // Confirmation modals for crawl actions
+        showDeleteCrawlConfirm: false,
+        showClearDataConfirm: false,
+        showClearQueueConfirm: false,
+        showRestartUrlsConfirm: false,
+        selectedUrls: [],
         authModalMode: 'login',
         // Refresh trigger for components
         refreshTrigger: 0
@@ -96,6 +102,35 @@ export const useCrawlStore = defineStore('crawl', {
         },
         closeAuthModal() {
             this.showAuthModal = false
+        },
+        
+        // New confirmation modal actions
+        openDeleteCrawlConfirm() {
+            this.showDeleteCrawlConfirm = true
+        },
+        closeDeleteCrawlConfirm() {
+            this.showDeleteCrawlConfirm = false
+        },
+        openClearDataConfirm() {
+            this.showClearDataConfirm = true
+        },
+        closeClearDataConfirm() {
+            this.showClearDataConfirm = false
+        },
+        openClearQueueConfirm() {
+            this.showClearQueueConfirm = true
+        },
+        closeClearQueueConfirm() {
+            this.showClearQueueConfirm = false
+        },
+        openRestartUrlsConfirm() {
+            this.showRestartUrlsConfirm = true
+        },
+        closeRestartUrlsConfirm() {
+            this.showRestartUrlsConfirm = false
+        },
+        setSelectedUrls(urls) {
+            this.selectedUrls = urls
         },
         // Crawls data actions
         setAllCrawls(crawls) {

@@ -15,6 +15,7 @@ export function useStatsBarContext() {
       case 'CrawlDetails':
         // Set loading context immediately for crawl-details
         statsBarStore.setContext('crawl-details', {
+          crawlId: route.params.crawlId,
           title: 'Loading...',
           status: 'Loading...',
           totalUrls: 0,
