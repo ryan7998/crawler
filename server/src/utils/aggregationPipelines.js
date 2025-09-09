@@ -50,6 +50,7 @@ const proxyUsageStages = {
     projectProxySummary: {
         $project: {
             proxyId: '$_id',
+            proxyUrl: '$url',
             totalRequests: 1,
             successRate: {
                 $cond: [

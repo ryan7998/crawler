@@ -374,6 +374,15 @@ const activeTab = ref('performance')
 const showCleanupDialog = ref(false)
 const cleanupDays = ref(90)
 
+// Define loadData function first
+const loadData = async () => {
+  try {
+    await fetchCrawlProxyStats(props.crawlId)
+  } catch (err) {
+    console.error('Error loading proxy stats:', err)
+  }
+}
+
 // Watch for crawlId changes
 watch(() => props.crawlId, async (newCrawlId, oldCrawlId) => {
   if (newCrawlId && newCrawlId !== oldCrawlId) {
@@ -394,14 +403,6 @@ watch(isOpen, async (newValue) => {
     await loadData()
   }
 })
-
-const loadData = async () => {
-  try {
-    await fetchCrawlProxyStats(props.crawlId)
-  } catch (err) {
-    console.error('Error loading proxy stats:', err)
-  }
-}
 
 const refreshData = async () => {
   await loadData()

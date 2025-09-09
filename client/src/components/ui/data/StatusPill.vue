@@ -75,6 +75,10 @@ const statusConfig = {
   'stopped': {
     classes: 'bg-gray-100 text-gray-800',
     dotClasses: 'bg-gray-400'
+  },
+  'loading': {
+    classes: 'bg-gray-100 text-gray-800',
+    dotClasses: 'bg-gray-400'
   }
 }
 
