@@ -87,7 +87,7 @@
       </p>
       <button
         v-if="!searchQuery"
-        @click="$emit('create-crawl')"
+        @click="crawlStore.openCreateModal()"
         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@
               'hover:bg-gray-50 cursor-pointer',
               crawl.disabled ? 'opacity-60 bg-gray-50' : ''
             ]"
-            @click="$emit('crawl-click', crawl._id)"
+            @click="openCrawl(crawl._id)"
           >
             <td class="px-6 py-4 whitespace-nowrap" @click.stop>
               <input
@@ -227,7 +227,7 @@
                   </label>
                 </div>
                 <button
-                  @click="$emit('edit-crawl', crawl)"
+                  @click="editCrawl(crawl)"
                   class="text-indigo-600 hover:text-indigo-900 focus:outline-none border-none bg-transparent px-2 py-1 rounded hover:bg-indigo-50 transition-colors"
                 >
                   Edit
@@ -320,6 +320,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, inject } from 'vue'
+import { useRouter } from 'vue-router'
 import { getRelativeTime } from '../../../utils/formattingUtils'
 import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../../stores/crawlStore'
@@ -327,13 +328,8 @@ import { useCrawlManagement } from '../../../composables/useCrawlManagement'
 
 // No props needed - using hardcoded pagination
 
-const emit = defineEmits([
-  'crawl-click',
-  'view-crawl',
-  'edit-crawl',
-  'create-crawl',
-  'bulk-export'
-])
+// Router for navigation
+const router = useRouter()
 
 // Use the crawl store for selected crawls
 const crawlStore = useCrawlStore()
@@ -343,6 +339,15 @@ const { fetchCrawls, toggleDisableCrawl, disableLoadingId } = useCrawlManagement
 
 // Inject the notification function
 const showNotification = inject('showNotification')
+
+// Navigation and action functions
+const openCrawl = (crawlId) => {
+  router.push({ name: 'CrawlDetails', params: { crawlId } })
+}
+
+const editCrawl = (crawl) => {
+  crawlStore.openCreateModal(crawl)
+}
 
 // Local state
 const searchQuery = ref('')
@@ -474,12 +479,11 @@ const handleRetry = () => {
   fetchCrawls(paginationOptions)
 }
 
-// Bulk export handler (needs notification access)
+// Bulk export handler
 const handleBulkExport = () => {
   if (!crawlStore.canPerformBulkExport()) return
   // TODO: Implement bulk export functionality
-  // For now, we'll emit the event to parent for notification handling
-  emit('bulk-export')
+  showNotification('Bulk export functionality coming soon!', 'info')
 }
 
 // Toggle crawl status handler
