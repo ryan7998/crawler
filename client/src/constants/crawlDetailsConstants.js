@@ -195,10 +195,3 @@ export const ANIMATION_DURATIONS = {
   SLOW: 'duration-300'
 }
 
-// Z-Index Layers
-export const Z_INDEX = {
-  DROPDOWN: 50,
-  MODAL: 100,
-  TOOLTIP: 200,
-  NOTIFICATION: 300
-}

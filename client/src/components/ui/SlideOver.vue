@@ -1,6 +1,6 @@
 <template>
     <Teleport to="body">
-        <div class="relative z-10" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+        <div class="relative z-50" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
             <div class="fixed inset-0 overflow-hidden">
                 <div class="absolute inset-0 overflow-hidden">

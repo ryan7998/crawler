@@ -42,7 +42,7 @@
       <template v-slot:title>
         <div class="flex items-center space-x-3">
           <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-          <span class="font-semibold text-gray-900">{{ 'Test' }}</span>
+          <span class="font-semibold text-gray-900">{{ getCurrentSlideOverTitle() }}</span>
         </div>
       </template>
       <template #default>
