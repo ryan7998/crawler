@@ -41,7 +41,7 @@
     import { ref, reactive, watch, toRef } from 'vue'
     import { useApiService } from '../../../composables/useApiService'
     import CssSelector from '../../forms/CssSelector.vue'
-    import SlideOver from '../proxy/SlideOver.vue'
+    import SlideOver from '../../ui/SlideOver.vue'
 
     // Initialize composables
     const { post, loading: apiLoading, error: apiError } = useApiService()

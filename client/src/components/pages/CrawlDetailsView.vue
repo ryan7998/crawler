@@ -42,7 +42,7 @@
       <template v-slot:title>
         <div class="flex items-center space-x-3">
           <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-          <span class="font-semibold text-gray-900">{{ getCurrentSlideOverTitle() }}</span>
+          <span class="font-semibold text-gray-900">{{ 'Test' }}</span>
         </div>
       </template>
       <template #default>
@@ -71,7 +71,7 @@
 import { onMounted, ref, watch, inject, computed, onUnmounted, shallowRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ViewResult from '../features/crawl/ViewResult.vue'
-import SlideOver from '../features/proxy/SlideOver.vue'
+import SlideOver from '../ui/SlideOver.vue'
 import { formatDate } from '../../utils/formattingUtils'
 import ProxyStatsModal from '../modals/ProxyStatsModal.vue'
 import StatusPill from '../ui/data/StatusPill.vue'
