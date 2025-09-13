@@ -33,11 +33,6 @@
         <CrawlDetailsSidebar
           :latest-export-link="latestExportLink"
           :latest-export-date="latestExportDate"
-          :formatted-crawl-stats="formattedCrawlStats"
-          :detailed-proxy-stats="detailedProxyStats"
-          :proxy-stats-loading="proxyStatsLoading"
-          :proxy-stats-error="proxyStatsError"
-          @refresh-proxy-stats="fetchProxyStats"
           @view-proxy-details="showProxyStatsModal = true"
         />
       </div>
@@ -78,7 +73,6 @@ import { useRoute, useRouter } from 'vue-router'
 import ViewResult from '../features/crawl/ViewResult.vue'
 import SlideOver from '../features/proxy/SlideOver.vue'
 import { formatDate } from '../../utils/formattingUtils'
-import ProxyStatsWidget from '../ui/stats/ProxyStatsWidget.vue'
 import ProxyStatsModal from '../modals/ProxyStatsModal.vue'
 import StatusPill from '../ui/data/StatusPill.vue'
 import CrawlDetailsHeader from './components/CrawlDetailsHeader.vue'
@@ -90,6 +84,7 @@ import { useApiService } from '../../composables/useApiService'
 import { useCrawlActions } from '../../composables/useCrawlActions'
 import { useCrawlData } from '../../composables/useCrawlData'
 import { useCrawlStore } from '../../stores/crawlStore'
+import { useStatsBarStore } from '../../stores/statsBarStore'
 import { useCrawlDetailsView } from '../../composables/useCrawlDetailsView'
 import { useCrawlExport } from '../../composables/useCrawlExport'
 import { useCrawlSocket } from '../../composables/useCrawlSocket'
@@ -107,6 +102,7 @@ const { get, post, del, loading: apiLoading, error: apiError } = useApiService()
 const { confirmDeleteUrlData, confirmRestartSelectedUrls, startCrawl } = useCrawlActions()
 const { crawl, errorMessage, excerpts, liveStatusDictionary, hasCrawlData, fetchCrawlData, refreshCrawlData, clearLiveStatusDictionary, updateLiveStatus } = useCrawlData()
 const crawlStore = useCrawlStore()
+const statsBarStore = useStatsBarStore()
 
 // Initialize new composables
 const { selectedUrls, selectAll, toggleSelectAll, clearSelection, toggleUrlSelection } = useCrawlDetailsView(crawl)
@@ -187,6 +183,8 @@ const getCurrentSlideOverTitle = () => {
 const fetchProxyStats = async () => {
     try {
         await fetchCrawlProxyStats(crawlId.value)
+        // Update proxy stats in the stats bar store
+        statsBarStore.setProxyStats(proxyStats.value)
     } catch (error) {
         console.error('Error fetching proxy stats:', error)
     }

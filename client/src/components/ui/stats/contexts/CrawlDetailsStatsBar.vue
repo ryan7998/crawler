@@ -38,6 +38,17 @@
         </span>
       </div>
     </div>
+    <!-- Proxy Stats Integration -->
+    <div class="flex items-center space-x-2">
+      <div class="w-3 h-3 bg-cyan-500 rounded-full"></div>
+      <span class="text-sm text-gray-600">Proxy:
+        <span v-if="!proxyStats || !proxyStats.summary" class="animate-pulse bg-gray-200 rounded h-4 w-8 inline-block"></span>
+         <span v-else>
+           <span class="font-semibold text-gray-900">{{ formatNumber(proxyStats.summary.totalProxyRequests || 0) }}</span>
+           <span class="text-xs text-gray-500 ml-1">({{ formatPercentage((proxyStats.summary.totalSuccessCount/proxyStats.summary.totalProxyRequests * 100) || 0) }})</span>
+         </span>
+      </span>
+    </div>
 
     <!-- Actions Section -->
     <div class="flex items-center space-x-3">
@@ -164,6 +175,9 @@ import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
 import { useStatsBarStore } from '../../../../stores/statsBarStore'
 import { useCrawlStore } from '../../../../stores/crawlStore'
 import { useCrawlActions } from '../../../../composables/useCrawlActions'
+import { formatNumber, formatPercentage } from '../../../../utils/formattingUtils'
+
+// No props needed - proxy stats come from store
 
 const statsBarStore = useStatsBarStore()
 const crawlStore = useCrawlStore()
@@ -182,6 +196,7 @@ const {
 const showNotification = inject('showNotification')
 
 const contextData = computed(() => statsBarStore.contextData)
+const proxyStats = computed(() => statsBarStore.proxyStats)
 
 // Dropdown state
 const showDropdown = ref(false)
