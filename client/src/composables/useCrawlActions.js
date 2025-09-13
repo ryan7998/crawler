@@ -1,7 +1,9 @@
-import { ref, inject } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApiService } from './useApiService'
 import { useCrawlStore } from '../stores/crawlStore'
+import { useNotification } from './useNotification'
+import { useLoadingState, LOADING_KEYS } from './useLoadingState'
 
 /**
  * Composable for managing crawl actions
@@ -11,12 +13,8 @@ export function useCrawlActions() {
   const router = useRouter()
   const { post, del } = useApiService()
   const crawlStore = useCrawlStore()
-  const showNotification = inject('showNotification')
-
-  // Loading states
-  const clearQueueLoading = ref(false)
-  const deleteLoading = ref(false)
-  const exportLoading = ref(false)
+  const { showNotification, handleError } = useNotification()
+  const { setLoading, isLoading } = useLoadingState()
 
   /**
    * Show delete crawl confirmation
@@ -39,8 +37,8 @@ export function useCrawlActions() {
    */
   const deleteCrawl = async (crawlId, redirect = true) => {
     try {
-      deleteLoading.value = true
-      await del(`/api/deletecrawl/${crawlId}`)
+      setLoading(LOADING_KEYS.DELETE_CRAWL, true)
+      await del(`/api/deletecrawl/${crawlId}`, {}, { silent: true })
       showNotification('Crawl deleted successfully', 'success')
       
       if (redirect) {
@@ -49,7 +47,7 @@ export function useCrawlActions() {
     } catch (error) {
       showNotification(error.message, 'error')
     } finally {
-      deleteLoading.value = false
+      setLoading(LOADING_KEYS.DELETE_CRAWL, false)
     }
   }
 
@@ -143,8 +141,8 @@ export function useCrawlActions() {
    */
   const clearCrawlQueue = async (crawlId, onSuccess = null) => {
     try {
-      clearQueueLoading.value = true
-      await del(`/api/clearqueue/${crawlId}`)
+      setLoading(LOADING_KEYS.CLEAR_QUEUE, true)
+      await del(`/api/clearqueue/${crawlId}`, {}, { silent: true })
       showNotification('Queue cleared successfully', 'success')
       
       if (onSuccess) {
@@ -153,7 +151,7 @@ export function useCrawlActions() {
     } catch (error) {
       showNotification(error.message, 'error')
     } finally {
-      clearQueueLoading.value = false
+      setLoading(LOADING_KEYS.CLEAR_QUEUE, false)
     }
   }
 
@@ -231,7 +229,7 @@ export function useCrawlActions() {
    */
   const exportCrawl = async (crawlId, onSuccess = null) => {
     try {
-      exportLoading.value = true
+      setLoading(LOADING_KEYS.EXPORT_CRAWL, true)
       // This would typically open an export modal or trigger export
       showNotification('Opening export modal for this crawl...', 'info')
       
@@ -241,7 +239,7 @@ export function useCrawlActions() {
     } catch (error) {
       showNotification(error.message, 'error')
     } finally {
-      exportLoading.value = false
+      setLoading(LOADING_KEYS.EXPORT_CRAWL, false)
     }
   }
 
@@ -269,10 +267,10 @@ export function useCrawlActions() {
   }
 
   return {
-    // Loading states
-    clearQueueLoading,
-    deleteLoading,
-    exportLoading,
+    // Loading states (centralized)
+    clearQueueLoading: computed(() => isLoading(LOADING_KEYS.CLEAR_QUEUE)),
+    deleteLoading: computed(() => isLoading(LOADING_KEYS.DELETE_CRAWL)),
+    exportLoading: computed(() => isLoading(LOADING_KEYS.EXPORT_CRAWL)),
     
     // Confirmation actions (use these in components)
     confirmDeleteCrawl,

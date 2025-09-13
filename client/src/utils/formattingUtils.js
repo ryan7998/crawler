@@ -126,26 +126,7 @@ export const truncateText = (text, maxLength = 50, suffix = '...') => {
   return text.substring(0, maxLength) + suffix
 }
 
-/**
- * Format URL for display (truncate long URLs)
- * @param {string} url - URL to format
- * @param {number} maxLength - Maximum length
- * @returns {string} Formatted URL
- */
-export const formatUrl = (url, maxLength = 50) => {
-  if (!url) return 'N/A'
-  if (url.length <= maxLength) return url
-  
-  const protocol = url.match(/^https?:\/\//)?.[0] || ''
-  const domain = url.replace(/^https?:\/\//, '').split('/')[0]
-  const path = url.replace(/^https?:\/\/[^\/]+/, '')
-  
-  if (protocol + domain.length <= maxLength) {
-    return protocol + domain + (path ? '...' : '')
-  }
-  
-  return truncateText(url, maxLength)
-}
+// formatUrl moved to urlUtils.js to avoid duplication
 
 /**
  * Get color for success rate display

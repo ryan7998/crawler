@@ -3,19 +3,7 @@
  * Handles URL validation, filename sanitization, and other validation functions
  */
 
-/**
- * Validate URL format
- * @param {string} url - URL to validate
- * @returns {boolean} Whether URL is valid
- */
-export const isValidUrl = (url) => {
-    try {
-        new URL(url)
-        return true
-    } catch {
-        return false
-    }
-}
+// isValidUrl moved to urlUtils.js to avoid duplication
 
 /**
  * Validate email format

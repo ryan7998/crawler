@@ -141,7 +141,7 @@
         formState.urls.splice(index, 1)
     }
 
-    // Validate URL format
+    // Validate URL format (TODO: Use isValidUrl from urlUtils.js)
     const isValidUrl = (url) => {
         const pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
             '((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,})'+ // domain name

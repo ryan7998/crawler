@@ -114,6 +114,7 @@ import QueueStatusModal from '../modals/QueueStatusModal.vue'
 import ConfirmationModal from '../modals/ui/ConfirmationModal.vue'
 import { useCrawlStore } from '../../stores/crawlStore'
 import { useCrawlManagement } from '../../composables/useCrawlManagement'
+import { useCrawlActions } from '../../composables/useCrawlActions'
 import { useApiService } from '../../composables/useApiService'
 
 // Use crawl store for modal state
@@ -121,6 +122,14 @@ const crawlStore = useCrawlStore()
 
 // Use crawl management for run all functionality
 const { runAllCrawls, runAllLoading } = useCrawlManagement()
+
+// Use crawl actions for other operations
+const { 
+  deleteLoading, 
+  clearQueueLoading, 
+  confirmDeleteCrawl: deleteCrawlAction,
+  confirmClearCrawlQueue: clearQueueAction
+} = useCrawlActions()
 
 // Router for navigation
 const router = useRouter()
@@ -132,9 +141,7 @@ const { post, del } = useApiService()
 const showNotification = inject('showNotification')
 
 // Loading states for new modals
-const deleteLoading = ref(false)
 const clearDataLoading = ref(false)
-const clearQueueLoading = ref(false)
 const restartLoading = ref(false)
 
 // Auth modal handler
@@ -192,25 +199,14 @@ const confirmBulkDelete = async () => {
 
 // New confirmation handlers
 const confirmDeleteCrawl = async () => {
-  try {
-    deleteLoading.value = true
-    const crawlId = crawlStore.selectedCrawl?._id
-    if (!crawlId) {
-      showNotification('No crawl selected', 'error')
-      return
-    }
-    
-    await del(`/api/deletecrawl/${crawlId}`)
-    crawlStore.closeDeleteCrawlConfirm()
-    showNotification('Crawl deleted successfully', 'success')
-    
-    // Redirect to dashboard
-    router.push('/')
-  } catch (error) {
-    showNotification(error.message, 'error')
-  } finally {
-    deleteLoading.value = false
+  const crawlId = crawlStore.selectedCrawl?._id
+  if (!crawlId) {
+    showNotification('No crawl selected', 'error')
+    return
   }
+  
+  await deleteCrawlAction(crawlId, true)
+  crawlStore.closeDeleteCrawlConfirm()
 }
 
 const confirmClearData = async () => {
@@ -236,25 +232,16 @@ const confirmClearData = async () => {
 }
 
 const confirmClearQueue = async () => {
-  try {
-    clearQueueLoading.value = true
-    const crawlId = crawlStore.selectedCrawl?._id
-    if (!crawlId) {
-      showNotification('No crawl selected', 'error')
-      return
-    }
-    
-    await del(`/api/clearqueue/${crawlId}`)
-    crawlStore.closeClearQueueConfirm()
-    showNotification('Queue cleared successfully', 'success')
-    
-    // Trigger refresh
-    crawlStore.triggerRefresh()
-  } catch (error) {
-    showNotification(error.message, 'error')
-  } finally {
-    clearQueueLoading.value = false
+  const crawlId = crawlStore.selectedCrawl?._id
+  if (!crawlId) {
+    showNotification('No crawl selected', 'error')
+    return
   }
+
+  await clearQueueAction(crawlId, () => {
+    crawlStore.triggerRefresh()
+  })
+  crawlStore.closeClearQueueConfirm()
 }
 
 const confirmRestartUrls = async () => {

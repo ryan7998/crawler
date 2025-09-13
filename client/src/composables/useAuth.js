@@ -23,6 +23,15 @@ export function useAuth() {
   const isAdmin = computed(() => authStore.isAdmin)
   const userFullName = computed(() => authStore.userFullName)
 
+  // Helper function to check authentication before operations
+  const withAuth = (callback, fallback = () => {}) => {
+    if (!isAuthenticated.value) {
+      fallback()
+      return false
+    }
+    return callback()
+  }
+
   // Navigation-integrated auth methods
   const login = async (credentials) => {
     const result = await authStore.login(credentials)
@@ -111,6 +120,9 @@ export function useAuth() {
     requireAuth,
     requireSuperAdmin,
     requireAdmin,
+    
+    // Helper for composables
+    withAuth,
     
     // UI helpers
     initializeAuth,

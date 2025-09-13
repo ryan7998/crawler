@@ -100,6 +100,81 @@ export function useNotification(options = {}) {
     showNotification(message, 'info')
   }
 
+  // Enhanced error handling methods
+  /**
+   * Handle error with context and logging
+   * @param {Error|string} error - Error object or message
+   * @param {string} context - Context where error occurred
+   */
+  const handleError = (error, context = '') => {
+    console.error(`${context}:`, error)
+    
+    const errorMessage = typeof error === 'string' 
+      ? error 
+      : error.message || error.toString() || 'An unexpected error occurred'
+    
+    showNotification(errorMessage, 'error')
+  }
+
+  /**
+   * Handle API errors specifically
+   * @param {Error} error - API error
+   * @param {string} operation - Operation being performed
+   */
+  const handleApiError = (error, operation = 'operation') => {
+    const context = `API Error during ${operation}`
+    handleError(error, context)
+  }
+
+  /**
+   * Handle socket errors specifically
+   * @param {Error} error - Socket error
+   * @param {string} event - Socket event
+   */
+  const handleSocketError = (error, event = 'socket event') => {
+    const context = `Socket Error during ${event}`
+    handleError(error, context)
+  }
+
+  /**
+   * Handle validation errors
+   * @param {string} message - Validation message
+   */
+  const handleValidationError = (message) => {
+    showWarning(`Validation Error: ${message}`)
+  }
+
+  /**
+   * Handle network errors
+   * @param {Error} error - Network error
+   */
+  const handleNetworkError = (error) => {
+    handleError(error, 'Network Error')
+  }
+
+  /**
+   * Handle timeout errors
+   * @param {string} operation - Operation that timed out
+   */
+  const handleTimeoutError = (operation = 'operation') => {
+    handleError('Request timed out. Please try again.', `Timeout during ${operation}`)
+  }
+
+  /**
+   * Handle unauthorized errors
+   */
+  const handleUnauthorizedError = () => {
+    handleError('You are not authorized to perform this action.', 'Authorization Error')
+  }
+
+  /**
+   * Handle not found errors
+   * @param {string} resource - Resource that wasn't found
+   */
+  const handleNotFoundError = (resource = 'resource') => {
+    handleError('The requested resource was not found.', `${resource} not found`)
+  }
+
   // Cleanup on unmount (only for local state)
   if (!global) {
     onUnmounted(() => {
@@ -115,13 +190,23 @@ export function useNotification(options = {}) {
     snackbarText: state.snackbarText,
     snackbarColor: state.snackbarColor,
     
-    // Methods
+    // Basic notification methods
     showNotification,
     hideNotification,
     showSuccess,
     showError,
     showWarning,
-    showInfo
+    showInfo,
+    
+    // Enhanced error handling methods
+    handleError,
+    handleApiError,
+    handleSocketError,
+    handleValidationError,
+    handleNetworkError,
+    handleTimeoutError,
+    handleUnauthorizedError,
+    handleNotFoundError
   }
 }
 

@@ -1,7 +1,9 @@
-import { ref, inject } from 'vue'
+import { ref, computed } from 'vue'
 import { useApiService } from './useApiService'
 import { useAuth } from './useAuth'
 import { useCrawlStore } from '../stores/crawlStore'
+import { useNotification } from './useNotification'
+import { useLoadingState, LOADING_KEYS } from './useLoadingState'
 
 /**
  * Composable for crawl management operations
@@ -10,16 +12,13 @@ import { useCrawlStore } from '../stores/crawlStore'
 export function useCrawlManagement() {
     // Initialize composables
     const { get, post, put, loading: apiLoading, error: apiError } = useApiService()
-    const { isAuthenticated } = useAuth()
+    const { isAuthenticated, withAuth } = useAuth()
     const crawlStore = useCrawlStore()
+    const { showNotification, handleError } = useNotification()
+    const { setLoading, isLoading } = useLoadingState()
 
-    // Business logic state only
-    const isSearching = ref(false)
-    const runAllLoading = ref(false)
+    // Business logic state only (using centralized loading)
     const disableLoadingId = ref(null)
-
-    // Inject the notification function
-    const showNotification = inject('showNotification')
 
 
     /**
@@ -28,14 +27,10 @@ export function useCrawlManagement() {
      * @param {string} searchQuery - Search query string
      */
     const fetchCrawls = async (options, searchQuery) => {
-        if (!isAuthenticated.value) {
-            crawlStore.setAllCrawls([])
-            crawlStore.setCrawlsLoading(false)
-            return
-        }
+        return withAuth(async () => {
         
         try {
-            isSearching.value = true
+            setLoading(LOADING_KEYS.SEARCH_CRAWLS, true)
             crawlStore.setCrawlsLoading(true)
             crawlStore.clearError()
             
@@ -43,7 +38,7 @@ export function useCrawlManagement() {
             const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''
             const url = `/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`
             
-            const data = await get(url)
+            const data = await get(url, {}, { silent: true })
             crawlStore.setAllCrawls(data.crawls)
             
         } catch (error) {
@@ -51,9 +46,13 @@ export function useCrawlManagement() {
             crawlStore.setError(error.message || 'Error fetching crawls')
             showNotification('Error fetching crawls', 'error')
         } finally {
-            isSearching.value = false
+            setLoading(LOADING_KEYS.SEARCH_CRAWLS, false)
             crawlStore.setCrawlsLoading(false)
         }
+        }, () => {
+            crawlStore.setAllCrawls([])
+            crawlStore.setCrawlsLoading(false)
+        })
     }
 
     /**
@@ -116,9 +115,9 @@ export function useCrawlManagement() {
     }
 
     return {
-        // Business logic state
-        isSearching,
-        runAllLoading,
+        // Business logic state (centralized loading)
+        isSearching: computed(() => isLoading(LOADING_KEYS.SEARCH_CRAWLS)),
+        runAllLoading: computed(() => isLoading(LOADING_KEYS.START_CRAWL)),
         disableLoadingId,
         
         // Functions

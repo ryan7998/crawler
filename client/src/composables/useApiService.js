@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { getApiUrl } from '../utils/environmentUtils'
 import { useAuthStore } from '../stores/authStore'
+import { useNotification } from './useNotification'
 
 /**
  * Reusable API service composable
@@ -11,6 +12,7 @@ export function useApiService() {
   const loading = ref(false)
   const error = ref(null)
   const authStore = useAuthStore()
+  const { handleApiError, handleNetworkError } = useNotification()
 
   // Create axios instance with default config
   const api = axios.create({
@@ -53,10 +55,11 @@ export function useApiService() {
    * Make a GET request
    * @param {string} url - API endpoint
    * @param {Object} config - Axios config
+   * @param {Object} options - Request options
    * @returns {Promise} Response data
    */
-  const get = async (url, config = {}) => {
-    return await makeRequest(() => api.get(url, config))
+  const get = async (url, config = {}, options = {}) => {
+    return await makeRequest(() => api.get(url, config), { context: `GET ${url}`, ...options })
   }
 
   /**
@@ -64,10 +67,11 @@ export function useApiService() {
    * @param {string} url - API endpoint
    * @param {any} data - Request data
    * @param {Object} config - Axios config
+   * @param {Object} options - Request options
    * @returns {Promise} Response data
    */
-  const post = async (url, data = {}, config = {}) => {
-    return await makeRequest(() => api.post(url, data, config))
+  const post = async (url, data = {}, config = {}, options = {}) => {
+    return await makeRequest(() => api.post(url, data, config), { context: `POST ${url}`, ...options })
   }
 
   /**
@@ -75,20 +79,22 @@ export function useApiService() {
    * @param {string} url - API endpoint
    * @param {any} data - Request data
    * @param {Object} config - Axios config
+   * @param {Object} options - Request options
    * @returns {Promise} Response data
    */
-  const put = async (url, data = {}, config = {}) => {
-    return await makeRequest(() => api.put(url, data, config))
+  const put = async (url, data = {}, config = {}, options = {}) => {
+    return await makeRequest(() => api.put(url, data, config), { context: `PUT ${url}`, ...options })
   }
 
   /**
    * Make a DELETE request
    * @param {string} url - API endpoint
    * @param {Object} config - Axios config
+   * @param {Object} options - Request options
    * @returns {Promise} Response data
    */
-  const del = async (url, config = {}) => {
-    return await makeRequest(() => api.delete(url, config))
+  const del = async (url, config = {}, options = {}) => {
+    return await makeRequest(() => api.delete(url, config), { context: `DELETE ${url}`, ...options })
   }
 
   /**
@@ -96,18 +102,24 @@ export function useApiService() {
    * @param {string} url - API endpoint
    * @param {any} data - Request data
    * @param {Object} config - Axios config
+   * @param {Object} options - Request options
    * @returns {Promise} Response data
    */
-  const patch = async (url, data = {}, config = {}) => {
-    return await makeRequest(() => api.patch(url, data, config))
+  const patch = async (url, data = {}, config = {}, options = {}) => {
+    return await makeRequest(() => api.patch(url, data, config), { context: `PATCH ${url}`, ...options })
   }
 
   /**
    * Generic request wrapper with error handling and loading state
    * @param {Function} requestFn - Request function to execute
+   * @param {Object} options - Request options
+   * @param {boolean} options.silent - Whether to suppress error notifications
+   * @param {string} options.context - Context for error messages
    * @returns {Promise} Response data
    */
-  const makeRequest = async (requestFn) => {
+  const makeRequest = async (requestFn, options = {}) => {
+    const { silent = false, context = 'API request' } = options
+    
     loading.value = true
     error.value = null
 
@@ -117,6 +129,18 @@ export function useApiService() {
     } catch (err) {
       const errorMessage = getErrorMessage(err)
       error.value = errorMessage
+      
+      // Use centralized error handling (unless silent)
+      if (!silent) {
+        if (err.response) {
+          handleApiError(err, context)
+        } else if (err.request) {
+          handleNetworkError(err)
+        } else {
+          handleApiError(err, context)
+        }
+      }
+      
       throw new Error(errorMessage)
     } finally {
       loading.value = false

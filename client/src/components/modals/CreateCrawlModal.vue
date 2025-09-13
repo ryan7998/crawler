@@ -267,6 +267,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useApiService } from '../../composables/useApiService'
+import { isValidUrl } from '../../utils/urlUtils'
 
 const props = defineProps({
     modelValue: {
@@ -336,14 +337,7 @@ const parseUrls = (text) => {
   return text.split(/[\s\n]+/).filter(url => url.trim().length > 0)
 }
 
-const isValidUrl = (url) => {
-    try {
-    new URL(url)
-    return true
-    } catch {
-    return false
-  }
-}
+// Using isValidUrl from urlUtils
 
 const validateUrls = () => {
   const urls = parseUrls(urlsText.value)
