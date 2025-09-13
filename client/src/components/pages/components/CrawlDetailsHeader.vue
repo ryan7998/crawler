@@ -16,23 +16,46 @@
             </button>
             <div class="h-6 w-px bg-gray-300"></div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900">{{ crawl?.title || 'Loading...' }}</h1>
-              <div class="flex items-center space-x-4 mt-1">
-                <div class="flex items-center space-x-2">
-                  <span class="text-sm text-gray-500">Status:</span>
-                  <StatusPill :status="crawl?.status || 'loading'" />
+              <!-- Loading State -->
+              <div v-if="loading || !crawl" class="flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <div class="space-y-1">
+                  <div class="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+                  <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-sm text-gray-500">Status:</span>
+                      <div class="h-5 bg-gray-200 rounded-full w-16 animate-pulse"></div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <div class="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                    </div>
+                  </div>
                 </div>
-                <div class="flex items-center space-x-2 text-sm text-gray-500">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Created {{ formatDate(crawl?.startTime) }}</span>
-                </div>
-                <div v-if="crawl?.endTime" class="flex items-center space-x-2 text-sm text-gray-500">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Last Run {{ formatDate(crawl.endTime) }}</span>
+              </div>
+              
+              <!-- Loaded State -->
+              <div v-else>
+                <h1 class="text-2xl font-bold text-gray-900">{{ crawl?.title || 'Untitled Crawl' }}</h1>
+                <div class="flex items-center space-x-4 mt-1">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-500">Status:</span>
+                    <StatusPill :status="crawl?.status || 'pending'" />
+                  </div>
+                  <div class="flex items-center space-x-2 text-sm text-gray-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Created {{ formatDate(crawl?.startTime) }}</span>
+                  </div>
+                  <div v-if="crawl?.endTime" class="flex items-center space-x-2 text-sm text-gray-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Last Run {{ formatDate(crawl.endTime) }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -56,10 +79,13 @@
               :disabled="loading"
               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg v-if="loading" class="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
               </svg>
-              {{ crawl?.status === 'pending' ? 'Start Crawl' : 'Restart Crawl' }}
+              <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-5-8V4a1 1 0 011-1h2a1 1 0 011 1v2m-4 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/>
+              </svg>
+              {{ loading ? 'Starting...' : (crawl?.status === 'pending' ? 'Start Crawl' : 'Restart Crawl') }}
             </button>
           </div>
         </div>
