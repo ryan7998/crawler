@@ -7,6 +7,7 @@ export const useStatsBarStore = defineStore('statsBar', () => {
   const contextData = ref({})
   const customActions = ref([])
   const proxyStats = ref(null)
+  const proxyStatsLoading = ref(false)
   
   // Getters
   const isGlobalContext = computed(() => currentContext.value === 'global')
@@ -23,6 +24,11 @@ export const useStatsBarStore = defineStore('statsBar', () => {
     proxyStats.value = stats
   }
   
+  const setProxyStatsLoading = (loading) => {
+    proxyStatsLoading.value = loading
+  }
+  
+  
   const clearContext = () => {
     currentContext.value = 'global'
     contextData.value = {}
@@ -36,6 +42,7 @@ export const useStatsBarStore = defineStore('statsBar', () => {
     contextData,
     customActions,
     proxyStats,
+    proxyStatsLoading,
     
     // Getters
     isGlobalContext,
@@ -44,6 +51,7 @@ export const useStatsBarStore = defineStore('statsBar', () => {
     // Actions
     setContext,
     setProxyStats,
+    setProxyStatsLoading,
     clearContext
   }
 })

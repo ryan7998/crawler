@@ -41,13 +41,14 @@
     <!-- Proxy Stats Integration -->
     <div class="flex items-center space-x-2">
       <div class="w-3 h-3 bg-cyan-500 rounded-full"></div>
-      <span class="text-sm text-gray-600">Proxy:
-        <span v-if="!proxyStats || !proxyStats.summary" class="animate-pulse bg-gray-200 rounded h-4 w-8 inline-block"></span>
-         <span v-else>
-           <span class="font-semibold text-gray-900">{{ formatNumber(proxyStats.summary.totalProxyRequests || 0) }}</span>
-           <span class="text-xs text-gray-500 ml-1">({{ formatPercentage((proxyStats.summary.totalSuccessCount/proxyStats.summary.totalProxyRequests * 100) || 0) }})</span>
-         </span>
-      </span>
+        <span class="text-sm text-gray-600">Proxy:
+         <span v-if="proxyStatsLoading" class="animate-pulse bg-gray-200 rounded h-4 w-8 inline-block"></span>
+         <span v-else-if="proxyStatsDisplay.hasData">
+            <span class="font-semibold text-gray-900">{{ formatNumber(proxyStatsDisplay.requests) }}</span>
+            <span class="text-xs text-gray-500 ml-1">({{ formatPercentage(proxyStatsDisplay.successRate) }})</span>
+          </span>
+         <span v-else class="font-semibold text-gray-900">0</span>
+        </span>
     </div>
 
     <!-- Actions Section -->
@@ -197,6 +198,27 @@ const showNotification = inject('showNotification')
 
 const contextData = computed(() => statsBarStore.contextData)
 const proxyStats = computed(() => statsBarStore.proxyStats)
+const proxyStatsLoading = computed(() => statsBarStore.proxyStatsLoading)
+
+// Computed property for proxy stats display
+const proxyStatsDisplay = computed(() => {
+  if (!proxyStats.value || !proxyStats.value.summary) {
+    return {
+      requests: 0,
+      successRate: 0,
+      hasData: false
+    }
+  }
+  
+  const { totalProxyRequests = 0, totalSuccessCount = 0 } = proxyStats.value.summary
+  const successRate = totalProxyRequests > 0 ? (totalSuccessCount / totalProxyRequests) * 100 : 0
+  
+  return {
+    requests: totalProxyRequests,
+    successRate,
+    hasData: true
+  }
+})
 
 // Dropdown state
 const showDropdown = ref(false)

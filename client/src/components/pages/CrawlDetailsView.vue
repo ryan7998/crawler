@@ -190,6 +190,11 @@ const fetchProxyStats = async () => {
     }
 }
 
+// Sync proxy stats loading state to store
+watch(proxyStatsLoading, (newLoading) => {
+    statsBarStore.setProxyStatsLoading(newLoading)
+})
+
 // Initialize component on mount
 onMounted(async () => {
     try {
