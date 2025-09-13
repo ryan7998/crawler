@@ -33,7 +33,6 @@
         <CrawlDetailsSidebar
           :latest-export-link="latestExportLink"
           :latest-export-date="latestExportDate"
-          @view-proxy-details="showProxyStatsModal = true"
         />
       </div>
     </div>
@@ -63,6 +62,7 @@
     <ProxyStatsModal
       v-model="showProxyStatsModal"
       :crawl-id="crawlId"
+      @update:modelValue="statsBarStore.closeProxyModal"
     />
   </div>
 </template>
@@ -112,7 +112,6 @@ const { handleError, handleSuccess, handleApiError } = useNotification()
 
 const viewResults = shallowRef({})
 const clearQueueLoading = ref(false)
-const showProxyStatsModal = ref(false)
 
 // Initialize proxy stats composable
 const {
@@ -195,6 +194,9 @@ watch(proxyStatsLoading, (newLoading) => {
     statsBarStore.setProxyStatsLoading(newLoading)
 })
 
+// Watch for proxy modal state changes from store
+const showProxyStatsModal = computed(() => statsBarStore.showProxyModal)
+
 // Initialize component on mount
 onMounted(async () => {
     try {
@@ -206,6 +208,7 @@ onMounted(async () => {
         
         // Connect to socket
         await connectToCrawl()
+
 
     } catch (error) {
         handleApiError(error, 'component initialization')
