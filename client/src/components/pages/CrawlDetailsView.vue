@@ -48,7 +48,6 @@
       <template #default>
         <ViewResult 
           v-for="(isOpen, url) in viewResults" 
-          v-if="isOpen"
           :key="url"
           :data="crawl.aggregatedData[url]" 
           :url="url" 

@@ -51,7 +51,7 @@
         </span>
       <button
         @click="statsBarStore.openProxyModal()"
-        class="ml-2 inline-flex items-center px-2 py-1 text-xs font-medium text-cyan-600 bg-cyan-50 border border-cyan-200 rounded-md hover:bg-cyan-100 hover:border-cyan-300 transition-colors duration-200"
+        :class="['ml-2 inline-flex items-center px-2 py-1 text-xs font-medium text-cyan-600 bg-cyan-50 border border-cyan-200 rounded-md hover:bg-cyan-100 hover:border-cyan-300 transition-colors', ANIMATION_DURATIONS.NORMAL]"
         title="View detailed proxy analytics"
       >
         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@
         <button
           @click="toggleDropdown"
           :disabled="loading || actionsLoading"
-          class="inline-flex items-center px-4 py-2 text-sm font-bold text-gray-800 bg-gray-100 border-2 border-gray-300 rounded-lg hover:bg-gray-200 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md"
+          :class="['inline-flex items-center px-4 py-2 text-sm font-bold text-gray-800 bg-gray-100 border-2 border-gray-300 rounded-lg hover:bg-gray-200 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md', ANIMATION_DURATIONS.NORMAL]"
         >
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
@@ -187,6 +187,7 @@ import { useStatsBarStore } from '../../../../stores/statsBarStore'
 import { useCrawlStore } from '../../../../stores/crawlStore'
 import { useCrawlActions } from '../../../../composables/useCrawlActions'
 import { formatNumber, formatPercentage } from '../../../../utils/formattingUtils'
+import { ANIMATION_DURATIONS } from '../../../../constants/crawlDetailsConstants'
 
 // No props needed - proxy stats come from store
 
