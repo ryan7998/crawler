@@ -16,3 +16,5 @@ server/.env copy
 server/oauth2-credentials-web.json
 server/.env copy 2
 vhostsettings
+.htaccess_bk
+client/.env copy
