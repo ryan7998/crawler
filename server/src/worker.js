@@ -23,8 +23,23 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/crawler_db'
   useNewUrlParser:    true,
   useUnifiedTopology: true,
 })
-  .then(() => console.log('MongoDB connected'))
+  .then(async () => {
+    console.log('MongoDB connected');
+    await recoverStuckCrawls();
+  })
   .catch(err => console.error('MongoDB connection error:', err));
+
+// Reset any crawls left as in-progress from a previous crashed/restarted worker run
+async function recoverStuckCrawls() {
+  const stuck = await Crawl.find({ status: 'in-progress' });
+  if (stuck.length === 0) {
+    console.log('✅ No stuck crawls found on startup');
+    return;
+  }
+  const ids = stuck.map(c => c._id);
+  await Crawl.updateMany({ _id: { $in: ids } }, { status: 'pending' });
+  console.log(`🔄 Reset ${stuck.length} stuck in-progress crawl(s) to pending: ${ids.join(', ')}`);
+}
 
 // —————————————— PER-CRAWL PROCESSORS ——————————————
 const activeProcessors = new Set();
@@ -68,8 +83,27 @@ async function ensureProcessor(crawlId) {
     console.error(`[${crawlId}] Crawl not found`);
     return;
   }
-  activeJobs.set(crawlId, { total: crawl.urls.length, completed: 0 });
-  console.log(`[${crawlId}] Tracking ${crawl.urls.length} URLs`);
+
+  // Count URLs already processed in a previous (interrupted) run so the
+  // counter resumes correctly and doesn't wait forever for jobs that already finished.
+  const processedUrls = await CrawlData.distinct('url', { crawlId });
+  const alreadyProcessed = processedUrls.length;
+  const total = crawl.urls.length;
+
+  // If all URLs already have data (worker restarted after the real work was done),
+  // finalise the crawl immediately without waiting for queue events.
+  if (alreadyProcessed >= total) {
+    console.log(`[${crawlId}] All ${total} URLs already have data — finalising now`);
+    const allData = await CrawlData.find({ crawlId });
+    const statusInfo = determineCrawlStatus(allData);
+    await Crawl.findByIdAndUpdate(crawlId, { status: statusInfo.status, endTime: new Date() });
+    console.log(`[${crawlId}] Status set to ${statusInfo.status} on recovery`);
+    cleanupCrawl(crawlId);
+    return;
+  }
+
+  activeJobs.set(crawlId, { total, completed: alreadyProcessed });
+  console.log(`[${crawlId}] Tracking ${total} URLs (${alreadyProcessed} already done, ${total - alreadyProcessed} remaining)`);
 
   // Listen for completions & failures to update crawl status
   q.on('completed', async job => {
@@ -117,6 +151,26 @@ async function ensureProcessor(crawlId) {
       io.to(crawlIdStr).emit('crawlLog', {
         status: statusInfo.status,
         message: statusInfo.status === 'failed' ? 'Some URLs failed' : 'All URLs done'
+      });
+      cleanupCrawl(crawlId);
+    }
+  });
+
+  // Handle jobs that stall (lock expired — Bull will re-queue them once).
+  // Count them as done so the completion check isn't permanently blocked.
+  q.on('stalled', async (jobId) => {
+    console.warn(`[${crawlId}] Job ${jobId} stalled — counting as done`);
+    const state = activeJobs.get(crawlId);
+    if (!state) return;
+    state.completed++;
+    if (state.completed === state.total) {
+      const allData = await CrawlData.find({ crawlId });
+      const statusInfo = determineCrawlStatus(allData);
+      await Crawl.findByIdAndUpdate(crawlId, { status: statusInfo.status, endTime: new Date() });
+      const io = getSocket();
+      io.to(String(crawlId)).emit('crawlLog', {
+        status: statusInfo.status,
+        message: 'Crawl finalised after stalled job'
       });
       cleanupCrawl(crawlId);
     }
