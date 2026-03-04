@@ -424,12 +424,12 @@ const saveCrawl = async () => {
       title: title.value.trim(),
       urls,
       selectors,
-      disabled
+      disabled: disabled.value
     }
     
     let response
     if (isEditing.value) {
-      response = await put(`/api/updatecrawler/${props.crawlData._id}`, crawlData)
+      response = await put(`/api/updatecrawl/${props.crawlData._id}`, crawlData)
     } else {
       response = await post('/api/createcrawler', crawlData)
     }

@@ -253,7 +253,7 @@ onUnmounted(() => {
 
 const configureCrawl = () => {
     crawlStore.setSelectedCrawl(crawl.value)
-    crawlStore.openCreateModal()
+    crawlStore.openCreateModal(crawl)
 }
 
 // Use shared action functions
