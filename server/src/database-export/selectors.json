@@ -1,0 +1,2506 @@
+[
+  {
+    "_id": "683b3cb35be64c9e3d6b1585",
+    "domain": "www.amazon.ca",
+    "selectors": [
+      {
+        "target_element": "title",
+        "selector_value": "#productTitle",
+        "_id": "683b3cb35be64c9e3d6b1586"
+      },
+      {
+        "target_element": "price",
+        "selector_value": "#corePrice_feature_div .a-price.a-text-price:not(.a-text-strike) > span.a-offscreen",
+        "_id": "683b3cb35be64c9e3d6b1587"
+      },
+      {
+        "target_element": "rating",
+        "selector_value": "#averageCustomerReviews span[data-hook=\"rating-out-of-text\"]",
+        "_id": "683b3cb35be64c9e3d6b1588"
+      },
+      {
+        "target_element": "reviews_count",
+        "selector_value": "#acrCustomerReviewText",
+        "_id": "683b3cb35be64c9e3d6b1589"
+      },
+      {
+        "target_element": "availability",
+        "selector_value": "#availability span",
+        "_id": "683b3cb35be64c9e3d6b158a"
+      },
+      {
+        "target_element": "main_image",
+        "selector_value": "#imgTagWrapperId img#landingImage",
+        "_id": "683b3cb35be64c9e3d6b158b"
+      },
+      {
+        "target_element": "bullet_points",
+        "selector_value": "#feature-bullets ul li span",
+        "_id": "683b3cb35be64c9e3d6b158c"
+      },
+      {
+        "target_element": "description",
+        "selector_value": "#productDescription p, div#productDescription",
+        "_id": "683b3cb35be64c9e3d6b158d"
+      },
+      {
+        "target_element": "brand",
+        "selector_value": "#bylineInfo",
+        "_id": "683b3cb35be64c9e3d6b158e"
+      },
+      {
+        "target_element": "asin",
+        "selector_value": "input#ASIN",
+        "_id": "683b3cb35be64c9e3d6b158f"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-05-31T17:30:27.447Z",
+    "__v": 0,
+    "createdAt": "2025-05-31T17:30:27.500Z",
+    "updatedAt": "2025-05-31T17:30:27.500Z"
+  },
+  {
+    "_id": "68558da9f60a55358d7cdfc7",
+    "domain": "adgarcanada.com",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "#vacancy_table table tbody tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "floor",
+            "selector": "td[data-label='Floor']",
+            "type": "text",
+            "attribute": null,
+            "_id": "68558da9f60a55358d7cdfc9"
+          },
+          {
+            "name": "suite_number",
+            "selector": "td[data-label='Suite #']",
+            "type": "text",
+            "attribute": null,
+            "_id": "68558da9f60a55358d7cdfca"
+          },
+          {
+            "name": "plans_link",
+            "selector": "td[data-label='Plans'] a",
+            "type": "link",
+            "attribute": "href",
+            "_id": "68558da9f60a55358d7cdfcb"
+          },
+          {
+            "name": "area_sf",
+            "selector": "td[data-label='Area (sf)']",
+            "type": "text",
+            "attribute": null,
+            "_id": "68558da9f60a55358d7cdfcc"
+          },
+          {
+            "name": "availability",
+            "selector": "td[data-label='Availability']",
+            "type": "text",
+            "attribute": null,
+            "_id": "68558da9f60a55358d7cdfcd"
+          },
+          {
+            "name": "features",
+            "selector": "td[data-label='Features']",
+            "type": "text",
+            "attribute": null,
+            "_id": "68558da9f60a55358d7cdfce"
+          },
+          {
+            "name": "suite_photos",
+            "selector": "td[data-label='Suite Photos']",
+            "type": "text",
+            "attribute": null,
+            "_id": "68558da9f60a55358d7cdfcf"
+          }
+        ],
+        "_id": "68558da9f60a55358d7cdfc8"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-20T16:34:49.114Z",
+    "createdAt": "2025-06-20T16:34:49.169Z",
+    "updatedAt": "2025-06-20T16:34:49.169Z",
+    "__v": 0
+  },
+  {
+    "_id": "68559585ce94bc9be118fe0f",
+    "domain": "alliedreit.com",
+    "selectors": [
+      {
+        "name": "suite_data",
+        "selector": ".accordion-06-item",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": ".accordion-button h3.number",
+            "type": "text",
+            "attribute": null,
+            "_id": "68559585ce94bc9be118fe11"
+          },
+          {
+            "name": "type",
+            "selector": ".accordion-button p.type",
+            "type": "text",
+            "attribute": null,
+            "_id": "68559585ce94bc9be118fe12"
+          },
+          {
+            "name": "size",
+            "selector": ".accordion-button p.size",
+            "type": "text",
+            "attribute": null,
+            "_id": "68559585ce94bc9be118fe13"
+          },
+          {
+            "name": "availability",
+            "selector": ".accordion-button p.avail",
+            "type": "text",
+            "attribute": null,
+            "_id": "68559585ce94bc9be118fe14"
+          },
+          {
+            "name": "net_rent",
+            "selector": ".accordion-content .section:nth-child(4) p.body",
+            "type": "text",
+            "attribute": null,
+            "_id": "68559585ce94bc9be118fe15"
+          },
+          {
+            "name": "additional_rent",
+            "selector": ".accordion-content .section:nth-child(5) p.body",
+            "type": "text",
+            "attribute": null,
+            "_id": "68559585ce94bc9be118fe16"
+          },
+          {
+            "name": "additional_info",
+            "selector": ".accordion-content .section.links p",
+            "type": "text",
+            "attribute": null,
+            "_id": "68559585ce94bc9be118fe17"
+          },
+          {
+            "name": "copy_link",
+            "selector": ".accordion-content .section.links a.copyLink",
+            "type": "link",
+            "attribute": "data-link",
+            "_id": "68559585ce94bc9be118fe18"
+          }
+        ],
+        "_id": "68559585ce94bc9be118fe10"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-20T17:08:21.127Z",
+    "createdAt": "2025-06-20T17:08:21.176Z",
+    "updatedAt": "2025-06-20T17:08:21.176Z",
+    "__v": 0
+  },
+  {
+    "_id": "685bc4b3ec73828276e73c53",
+    "domain": "quadreal.findspace.com",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "div.SuiteListItem_suiteInfoContainer__NTfk0",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": ".SuiteListItem_suiteNameAndTag__FBNmQ",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc4b3ec73828276e73c55"
+          },
+          {
+            "name": "size",
+            "selector": ".SuiteListItem_suiteArea__qcP0_",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc4b3ec73828276e73c56"
+          },
+          {
+            "name": "availability",
+            "selector": ".SuiteListItem_availabilityDate__Ak_yK",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc4b3ec73828276e73c57"
+          },
+          {
+            "name": "base_rent",
+            "selector": "button.SuiteListItem_inquiryBtn__ZBdtK",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc4b3ec73828276e73c58"
+          },
+          {
+            "name": "additional_rent",
+            "selector": "div.SuiteListItem_additionalRent__n7Yqv",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc4b3ec73828276e73c59"
+          }
+        ],
+        "_id": "685bc4b3ec73828276e73c54"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-25T09:43:15.243Z",
+    "createdAt": "2025-06-25T09:43:15.287Z",
+    "updatedAt": "2025-06-25T09:43:15.287Z",
+    "__v": 0
+  },
+  {
+    "_id": "685bc8cb6931546f6a2d3673",
+    "domain": "www.cushmanwakefield.com",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "div.availabilities-container",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite",
+            "selector": "div.availabilities-title p.blue-color-title span:last-child",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc8cb6931546f6a2d3675"
+          },
+          {
+            "name": "available_space",
+            "selector": ".availabilities-description > div.availabilities-second-level-description:first-child b.bold-font",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc8cb6931546f6a2d3676"
+          },
+          {
+            "name": "rental_price",
+            "selector": ".availabilities-description div.rentalPrice b.bold-font",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc8cb6931546f6a2d3677"
+          },
+          {
+            "name": "rate_type",
+            "selector": ".availabilities-description div.availabilities-second-level-description:has(p:contains(\"Rate Type\")) b.bold-font",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc8cb6931546f6a2d3678"
+          },
+          {
+            "name": "min_max_contiguous",
+            "selector": ".availabilities-description div.availabilities-second-level-description:has(p:contains(\"Min/Max Contiguous\")) b.bold-font",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc8cb6931546f6a2d3679"
+          },
+          {
+            "name": "sublease",
+            "selector": ".availabilities-description div.availabilities-second-level-description:has(p:contains(\"Sublease\")) b.bold-font",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc8cb6931546f6a2d367a"
+          },
+          {
+            "name": "available_date",
+            "selector": ".availabilities-description div.availableData b.bold-font",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bc8cb6931546f6a2d367b"
+          }
+        ],
+        "_id": "685bc8cb6931546f6a2d3674"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-25T10:00:43.514Z",
+    "createdAt": "2025-06-25T10:00:43.560Z",
+    "updatedAt": "2025-06-25T10:00:43.560Z",
+    "__v": 0
+  },
+  {
+    "_id": "685bd73113428950474ede9d",
+    "domain": "www.brookfieldproperties.com",
+    "selectors": [
+      {
+        "name": "availability_row",
+        "selector": "div.b-property-details__vts-grid",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "floor",
+            "selector": "div.b-property-details__vts-grid-item-floor span",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd73113428950474ede9f"
+          },
+          {
+            "name": "suite_type",
+            "selector": "div.b-property-details__vts-grid-item-suite-type span",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd73113428950474edea0"
+          },
+          {
+            "name": "area_sf",
+            "selector": "div.b-property-details__vts-grid-item-magnitude span",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd73113428950474edea1"
+          },
+          {
+            "name": "condition",
+            "selector": "div.b-property-details__vts-grid-item-condition span",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd73113428950474edea2"
+          },
+          {
+            "name": "availability",
+            "selector": "div.b-property-details__vts-grid-item-availability span",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd73113428950474edea3"
+          },
+          {
+            "name": "learn_more_link",
+            "selector": "div.b-property-details__vts-grid-item-learnmore a",
+            "type": "link",
+            "attribute": "href",
+            "_id": "685bd73113428950474edea4"
+          }
+        ],
+        "_id": "685bd73113428950474ede9e"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-25T11:02:09.795Z",
+    "createdAt": "2025-06-25T11:02:09.848Z",
+    "updatedAt": "2025-06-25T11:02:09.848Z",
+    "__v": 0
+  },
+  {
+    "_id": "685bd94e683386aaa74c2950",
+    "domain": "canderel.findspace.com",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "div.SuiteListItem_suiteInfoContainer__NTfk0",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": ".SuiteListItem_suiteNameAndTag__FBNmQ",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd94e683386aaa74c2952"
+          },
+          {
+            "name": "area_sf",
+            "selector": ".SuiteListItem_suiteArea__qcP0_",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd94e683386aaa74c2953"
+          },
+          {
+            "name": "availability",
+            "selector": ".SuiteListItem_availabilityDate__Ak_yK",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd94e683386aaa74c2954"
+          },
+          {
+            "name": "additional_rent",
+            "selector": ".SuiteListItem_additionalRent__n7Yqv",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bd94e683386aaa74c2955"
+          },
+          {
+            "name": "plans_link",
+            "selector": ".DownloadButtons_downloadContainer__lbKUN a[href$=\".pdf\"]",
+            "type": "link",
+            "attribute": "href",
+            "_id": "685bd94e683386aaa74c2956"
+          }
+        ],
+        "_id": "685bd94e683386aaa74c2951"
+      }
+    ],
+    "htmlChecksum": "initial-load",
+    "lastChecked": "2025-06-25T11:11:10.831Z",
+    "createdAt": "2025-06-25T11:11:10.881Z",
+    "updatedAt": "2025-06-25T11:11:10.881Z",
+    "__v": 0
+  },
+  {
+    "_id": "685bdcb5f71e224dcfa2a189",
+    "domain": "capitolbuildings.com",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "#available-suites .office-space-card",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": ".content-area h3.title",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bdcb5f71e224dcfa2a18b"
+          },
+          {
+            "name": "size_sf",
+            "selector": ".content-area span.title:contains('Size')",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bdcb5f71e224dcfa2a18c"
+          },
+          {
+            "name": "rate",
+            "selector": ".content-area span.title:contains('Rate')",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bdcb5f71e224dcfa2a18d"
+          },
+          {
+            "name": "availability",
+            "selector": ".content-area span.title:contains('Availability')",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bdcb5f71e224dcfa2a18e"
+          },
+          {
+            "name": "detail_page",
+            "selector": ".content-footer-area a.btn-primary:first-of-type",
+            "type": "link",
+            "attribute": "href",
+            "_id": "685bdcb5f71e224dcfa2a18f"
+          },
+          {
+            "name": "brochure_pdf",
+            "selector": ".content-footer-area a.btn-primary[href$='.pdf']",
+            "type": "link",
+            "attribute": "href",
+            "_id": "685bdcb5f71e224dcfa2a190"
+          }
+        ],
+        "_id": "685bdcb5f71e224dcfa2a18a"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-25T11:25:41.527Z",
+    "createdAt": "2025-06-25T11:25:41.573Z",
+    "updatedAt": "2025-06-25T11:25:41.573Z",
+    "__v": 0
+  },
+  {
+    "_id": "685be5b77b85af0115899a75",
+    "domain": "www.avisonyoung.ca",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": ".availability-card-v2",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "space_type",
+            "selector": ".availability-card-info-item:contains('Space Type') .availability-card-info-item-value",
+            "type": "text",
+            "attribute": null,
+            "_id": "685be5b77b85af0115899a77"
+          },
+          {
+            "name": "unit_suite",
+            "selector": ".availability-card-info-item:contains('Unit/Suite') .availability-card-info-item-value",
+            "type": "text",
+            "attribute": null,
+            "_id": "685be5b77b85af0115899a78"
+          },
+          {
+            "name": "total_size",
+            "selector": ".availability-card-info-item:contains('Total Size') .availability-card-info-item-value",
+            "type": "text",
+            "attribute": null,
+            "_id": "685be5b77b85af0115899a79"
+          }
+        ],
+        "_id": "685be5b77b85af0115899a76"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-25T12:04:07.204Z",
+    "createdAt": "2025-06-25T12:04:07.272Z",
+    "updatedAt": "2025-06-25T12:04:07.272Z",
+    "__v": 0
+  },
+  {
+    "_id": "685be9ed275c5da06ab4995b",
+    "domain": "www.crownrealtypartners.com",
+    "selectors": [
+      {
+        "name": "availability_rows",
+        "selector": "#property-suites .vts-single-listing[id^=\"vsl-\"]",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite",
+            "selector": ".vts-single-listing__data-suite",
+            "type": "text",
+            "attribute": null,
+            "_id": "685be9ed275c5da06ab4995d"
+          },
+          {
+            "name": "area",
+            "selector": ".vts-single-listing__data-area",
+            "type": "text",
+            "attribute": null,
+            "_id": "685be9ed275c5da06ab4995e"
+          },
+          {
+            "name": "net_rent",
+            "selector": ".vts-single-listing__data-net-rent",
+            "type": "text",
+            "attribute": null,
+            "_id": "685be9ed275c5da06ab4995f"
+          },
+          {
+            "name": "availability",
+            "selector": ".vts-single-listing__data-availability",
+            "type": "text",
+            "attribute": null,
+            "_id": "685be9ed275c5da06ab49960"
+          },
+          {
+            "name": "comments",
+            "selector": ".vts-single-listing__data-comments",
+            "type": "text",
+            "attribute": null,
+            "_id": "685be9ed275c5da06ab49961"
+          },
+          {
+            "name": "floor_plan_link",
+            "selector": ".vts-single-comments-media a[title*=\"Floor Plan\"]",
+            "type": "link",
+            "attribute": "href",
+            "_id": "685be9ed275c5da06ab49962"
+          }
+        ],
+        "_id": "685be9ed275c5da06ab4995c"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-25T12:22:05.900Z",
+    "createdAt": "2025-06-25T12:22:05.946Z",
+    "updatedAt": "2025-06-25T12:22:05.946Z",
+    "__v": 0
+  },
+  {
+    "_id": "685bee8bfa948e33b37b1810",
+    "domain": "leasing.dream.ca",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "div[class^='SuiteListItem_suiteInfoContainer']",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "div[class^='SuiteListItem_suiteNameAndTag'] a",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bee8bfa948e33b37b1812"
+          },
+          {
+            "name": "size",
+            "selector": "div[class^='SuiteListItem_suiteArea']",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bee8bfa948e33b37b1813"
+          },
+          {
+            "name": "availability",
+            "selector": "div[class^='SuiteListItem_availabilityDate']",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bee8bfa948e33b37b1814"
+          },
+          {
+            "name": "base_rent",
+            "selector": "div[class^='SuiteListItem_baseRent']",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bee8bfa948e33b37b1815"
+          },
+          {
+            "name": "additional_rent",
+            "selector": "div[class^='SuiteListItem_additionalRent']",
+            "type": "text",
+            "attribute": null,
+            "_id": "685bee8bfa948e33b37b1816"
+          }
+        ],
+        "_id": "685bee8bfa948e33b37b1811"
+      }
+    ],
+    "htmlChecksum": "initial-checksum",
+    "lastChecked": "2025-06-25T12:41:47.471Z",
+    "createdAt": "2025-06-25T12:41:47.517Z",
+    "updatedAt": "2025-06-25T12:41:47.517Z",
+    "__v": 0
+  },
+  {
+    "_id": "685c00ec8191358679f9888b",
+    "domain": "www.fidelitypm.com",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "div.suite-row",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_type",
+            "selector": ".suite-box .suite-type",
+            "type": "text",
+            "attribute": null,
+            "_id": "685c00ec8191358679f9888d"
+          },
+          {
+            "name": "square_feet",
+            "selector": "li:contains('Square feet') span.info",
+            "type": "text",
+            "attribute": null,
+            "_id": "685c00ec8191358679f9888e"
+          },
+          {
+            "name": "rent_from",
+            "selector": "li:contains('Rent From') span.info",
+            "type": "text",
+            "attribute": null,
+            "_id": "685c00ec8191358679f9888f"
+          },
+          {
+            "name": "contract_type",
+            "selector": "li:contains('Contract Type') span.info",
+            "type": "text",
+            "attribute": null,
+            "_id": "685c00ec8191358679f98890"
+          },
+          {
+            "name": "availability",
+            "selector": "li:contains('Availability') span.info",
+            "type": "text",
+            "attribute": null,
+            "_id": "685c00ec8191358679f98891"
+          },
+          {
+            "name": "floorplans_link",
+            "selector": "li:contains('Floorplans') a",
+            "type": "link",
+            "attribute": "href",
+            "_id": "685c00ec8191358679f98892"
+          },
+          {
+            "name": "suite_photos",
+            "selector": "li:contains('Suite Photos') a",
+            "type": "link",
+            "attribute": "href",
+            "_id": "685c00ec8191358679f98893"
+          }
+        ],
+        "_id": "685c00ec8191358679f9888c"
+      }
+    ],
+    "htmlChecksum": "initial-checksum",
+    "lastChecked": "2025-06-25T14:00:12.331Z",
+    "createdAt": "2025-06-25T14:00:12.379Z",
+    "updatedAt": "2025-06-25T14:00:12.379Z",
+    "__v": 0
+  },
+  {
+    "_id": "686142b4bd65f1d4fa6f870e",
+    "domain": "fieldgateproperties.com",
+    "selectors": [
+      {
+        "name": "property_info",
+        "selector": ".property-intro .col-sm-4",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "title",
+            "selector": "h4.title",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142b4bd65f1d4fa6f8710"
+          },
+          {
+            "name": "address",
+            "selector": "h5.address",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142b4bd65f1d4fa6f8711"
+          },
+          {
+            "name": "property_type",
+            "selector": ".property-type",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142b4bd65f1d4fa6f8712"
+          },
+          {
+            "name": "total_area",
+            "selector": ".total-area",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142b4bd65f1d4fa6f8713"
+          },
+          {
+            "name": "leasing_available",
+            "selector": ".leasing",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142b4bd65f1d4fa6f8714"
+          },
+          {
+            "name": "contact_name",
+            "selector": ".leasing-available .name",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142b4bd65f1d4fa6f8715"
+          },
+          {
+            "name": "contact_phone",
+            "selector": ".leasing-available .number",
+            "type": "text",
+            "attribute": null,
+            "_id": "686142b4bd65f1d4fa6f8716"
+          },
+          {
+            "name": "contact_email",
+            "selector": ".leasing-available .email a",
+            "type": "link",
+            "attribute": "href",
+            "_id": "686142b4bd65f1d4fa6f8717"
+          }
+        ],
+        "_id": "686142b4bd65f1d4fa6f870f"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-29T13:42:12.795Z",
+    "createdAt": "2025-06-29T13:42:12.846Z",
+    "updatedAt": "2025-06-29T13:42:12.846Z",
+    "__v": 0
+  },
+  {
+    "_id": "6861a551f453924762d4fe88",
+    "domain": "davpart.ca",
+    "selectors": [
+      {
+        "name": "available_units",
+        "selector": "section.details-available-units .row.details-available-units-content",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "space_type",
+            "selector": ".col-sm-3.col-lg-2 p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6861a551f453924762d4fe8a"
+          },
+          {
+            "name": "suite",
+            "selector": ".col-sm-3.col-lg-1:nth-of-type(1) p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6861a551f453924762d4fe8b"
+          },
+          {
+            "name": "size_sf",
+            "selector": ".col-sm-3.col-lg-1:nth-of-type(2) p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6861a551f453924762d4fe8c"
+          },
+          {
+            "name": "possession",
+            "selector": ".hidden-small.col-lg-2 p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6861a551f453924762d4fe8d"
+          },
+          {
+            "name": "t_and_o",
+            "selector": ".hidden-small.col-lg-1 p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6861a551f453924762d4fe8e"
+          },
+          {
+            "name": "comments",
+            "selector": ".hidden-small.col-lg-3",
+            "type": "text",
+            "attribute": null,
+            "_id": "6861a551f453924762d4fe8f"
+          },
+          {
+            "name": "unit_plan",
+            "selector": ".col-sm-3.col-lg-2 a",
+            "type": "link",
+            "attribute": "href",
+            "_id": "6861a551f453924762d4fe90"
+          }
+        ],
+        "_id": "6861a551f453924762d4fe89"
+      }
+    ],
+    "htmlChecksum": "davpart-available-units-v1",
+    "lastChecked": "2025-06-29T20:42:57.211Z",
+    "createdAt": "2025-06-29T20:42:57.259Z",
+    "updatedAt": "2025-06-29T20:42:57.259Z",
+    "__v": 0
+  },
+  {
+    "_id": "6861b0a40a469e17d335f852",
+    "domain": "gottardoconstruction.gottardogroup.com",
+    "selectors": [
+      {
+        "name": "listing_title",
+        "selector": "span.titles",
+        "type": "text",
+        "attribute": null,
+        "_id": "6861b0a40a469e17d335f853",
+        "childSelectors": []
+      },
+      {
+        "name": "available_unit",
+        "selector": "p.body > b",
+        "type": "text",
+        "attribute": null,
+        "_id": "6861b0a40a469e17d335f854",
+        "childSelectors": []
+      },
+      {
+        "name": "rent_bullet",
+        "selector": "ul li span.body:contains(\"$\")",
+        "type": "text",
+        "attribute": null,
+        "_id": "6861b0a40a469e17d335f855",
+        "childSelectors": []
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-29T21:31:16.825Z",
+    "createdAt": "2025-06-29T21:31:16.871Z",
+    "updatedAt": "2025-06-29T21:31:16.871Z",
+    "__v": 0
+  },
+  {
+    "_id": "6862e0d539e12d6425d7956e",
+    "domain": "www.greenwin.ca",
+    "selectors": [
+      {
+        "name": "available_units",
+        "selector": ".suite.commercial-suite-details",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "floor",
+            "selector": ".top-content:has(h3.suite-type:contains('FLOOR')) .suite-type-text",
+            "type": "text",
+            "attribute": null,
+            "_id": "6862e0d539e12d6425d79570"
+          },
+          {
+            "name": "unit",
+            "selector": ".top-content:has(h3.suite-type:contains('UNIT')) .suite-type-text",
+            "type": "text",
+            "attribute": null,
+            "_id": "6862e0d539e12d6425d79571"
+          },
+          {
+            "name": "available_sqft",
+            "selector": ".top-content:has(h3.suite-type:contains('AVAIL. SQFT')) .suite-type-text",
+            "type": "text",
+            "attribute": null,
+            "_id": "6862e0d539e12d6425d79572"
+          },
+          {
+            "name": "asking_net_rent",
+            "selector": ".bottom-content:has(h3.suite-type:contains('Asking NET Rent')) .suite-type-text",
+            "type": "text",
+            "attribute": null,
+            "_id": "6862e0d539e12d6425d79573"
+          },
+          {
+            "name": "additional_rent",
+            "selector": ".bottom-content:has(h3.suite-type:contains('ADDITIONAL RENT')) .suite-type-text",
+            "type": "text",
+            "attribute": null,
+            "_id": "6862e0d539e12d6425d79574"
+          },
+          {
+            "name": "available_on",
+            "selector": ".bottom-content:has(h3.suite-type:contains('AVAILABLE ON')) .suite-type-text",
+            "type": "text",
+            "attribute": null,
+            "_id": "6862e0d539e12d6425d79575"
+          },
+          {
+            "name": "floorplans",
+            "selector": ".detail.floorplans",
+            "type": "text",
+            "attribute": null,
+            "_id": "6862e0d539e12d6425d79576"
+          }
+        ],
+        "_id": "6862e0d539e12d6425d7956f"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-06-30T19:09:09.631Z",
+    "createdAt": "2025-06-30T19:09:09.676Z",
+    "updatedAt": "2025-06-30T19:09:09.676Z",
+    "__v": 0
+  },
+  {
+    "_id": "6883691ae4c403fd3d15d686",
+    "domain": "www.humboldproperties.com",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "div[id^='tablepress'] table tbody tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "td.column-1",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883691ae4c403fd3d15d688"
+          },
+          {
+            "name": "area_sf",
+            "selector": "td.column-2",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883691ae4c403fd3d15d689"
+          },
+          {
+            "name": "availability",
+            "selector": "td.column-3",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883691ae4c403fd3d15d68a"
+          },
+          {
+            "name": "market_rent",
+            "selector": "td.column-4",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883691ae4c403fd3d15d68b"
+          },
+          {
+            "name": "tmi_2025",
+            "selector": "td.column-5",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883691ae4c403fd3d15d68c"
+          }
+        ],
+        "_id": "6883691ae4c403fd3d15d687"
+      }
+    ],
+    "htmlChecksum": "humbold-finch-v1",
+    "lastChecked": "2025-07-25T11:23:06.030Z",
+    "createdAt": "2025-07-25T11:23:06.076Z",
+    "updatedAt": "2025-07-25T11:23:06.076Z",
+    "__v": 0
+  },
+  {
+    "_id": "68837140ba7ebf0942c91a9d",
+    "domain": "www.jilanigroup.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div.bc-text-content span[style*='font-size:30']",
+        "type": "text",
+        "attribute": null,
+        "_id": "68837140ba7ebf0942c91a9e",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.bc-text-content:contains('Suite')",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "span",
+            "type": "text",
+            "attribute": null,
+            "_id": "68837140ba7ebf0942c91aa0"
+          }
+        ],
+        "_id": "68837140ba7ebf0942c91a9f"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-25T11:57:52.806Z",
+    "createdAt": "2025-07-25T11:57:52.854Z",
+    "updatedAt": "2025-07-25T11:57:52.854Z",
+    "__v": 0
+  },
+  {
+    "_id": "6883785c7c00cbe8845fc93c",
+    "domain": "www.cbre.ca",
+    "selectors": [
+      {
+        "name": "vacancy_data",
+        "selector": "div.leasesBlock div.cbre_table__row",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "div.cbre_table__cell:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc93e"
+          },
+          {
+            "name": "availability",
+            "selector": "div.cbre_table__cell:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc93f"
+          },
+          {
+            "name": "lease_type",
+            "selector": "div.cbre_table__cell:nth-child(2)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc940"
+          },
+          {
+            "name": "gross_rent",
+            "selector": "div.cbre_table__cell:nth-child(3)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc941"
+          },
+          {
+            "name": "additional_rent",
+            "selector": "div.cbre_table__cell:nth-child(4)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc942"
+          },
+          {
+            "name": "net_rent",
+            "selector": "div.cbre_table__cell:nth-child(5)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc943"
+          },
+          {
+            "name": "zoning",
+            "selector": "div.cbre_table__cell:nth-child(6)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc944"
+          },
+          {
+            "name": "number_of_storeys",
+            "selector": "div.cbre_table__cell:nth-child(7)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc945"
+          },
+          {
+            "name": "year_built",
+            "selector": "div.cbre_table__cell:nth-child(8)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc946"
+          },
+          {
+            "name": "vacancy_status",
+            "selector": "div.cbre_table__cell:nth-child(9)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6883785c7c00cbe8845fc947"
+          }
+        ],
+        "_id": "6883785c7c00cbe8845fc93d"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-25T12:28:12.457Z",
+    "createdAt": "2025-07-25T12:28:12.509Z",
+    "updatedAt": "2025-07-25T12:28:12.509Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885aa57ad676545f35630c0",
+    "domain": "www.commercialcafe.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div.property-header h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885aa57ad676545f35630c1",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "#availabilitySection table.availability tr.space",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "li:contains('Space Number') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aa57ad676545f35630c3"
+          },
+          {
+            "name": "space_type",
+            "selector": "li:contains('Space Type') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aa57ad676545f35630c4"
+          },
+          {
+            "name": "lease_rate",
+            "selector": "li:contains('Lease Rate') a, li:contains('Lease Rate') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aa57ad676545f35630c5"
+          },
+          {
+            "name": "total_space",
+            "selector": "li:contains('Total Space Available') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aa57ad676545f35630c6"
+          },
+          {
+            "name": "floor",
+            "selector": "li:contains('Floor') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aa57ad676545f35630c7"
+          },
+          {
+            "name": "available_date",
+            "selector": "li:contains('Available Date') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aa57ad676545f35630c8"
+          }
+        ],
+        "_id": "6885aa57ad676545f35630c2"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T04:25:59.583Z",
+    "createdAt": "2025-07-27T04:25:59.638Z",
+    "updatedAt": "2025-07-27T04:25:59.638Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885aeabd5e2ae2adad7823a",
+    "domain": "lisgardev.ca",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "#page-title h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885aeabd5e2ae2adad7823b",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "h4.vc_custom_heading",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885aeabd5e2ae2adad7823c",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "table tbody tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "field",
+            "selector": "td:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aeabd5e2ae2adad7823e"
+          },
+          {
+            "name": "value",
+            "selector": "td:nth-child(2)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aeabd5e2ae2adad7823f"
+          }
+        ],
+        "_id": "6885aeabd5e2ae2adad7823d"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T04:44:27.196Z",
+    "createdAt": "2025-07-27T04:44:27.247Z",
+    "updatedAt": "2025-07-27T04:44:27.247Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885aecb9febf89c43e8ae95",
+    "domain": "madisongroup.ca",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div.elementor-widget-heading h2.elementor-heading-title",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885aecb9febf89c43e8ae96",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "div.elementor-widget-heading h4.elementor-heading-title",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885aecb9febf89c43e8ae97",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.elementor-widget-theme-post-content table tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "td:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aecb9febf89c43e8ae99"
+          },
+          {
+            "name": "area_sf",
+            "selector": "td:nth-child(2)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aecb9febf89c43e8ae9a"
+          },
+          {
+            "name": "availability",
+            "selector": "td:nth-child(3)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885aecb9febf89c43e8ae9b"
+          }
+        ],
+        "_id": "6885aecb9febf89c43e8ae98"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T04:44:59.247Z",
+    "createdAt": "2025-07-27T04:44:59.295Z",
+    "updatedAt": "2025-07-27T04:44:59.295Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885b57e82c008bbda17a80a",
+    "domain": "melroseinvestments.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1.elementor-heading-title.elementor-size-default",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885b57e82c008bbda17a80b",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "h2.elementor-heading-title.elementor-size-default",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885b57e82c008bbda17a80c",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.w-100.p-3.bg-white.text-center",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "h5.text-secondary",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885b57e82c008bbda17a80e"
+          },
+          {
+            "name": "area_sf",
+            "selector": "p.m-0",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885b57e82c008bbda17a80f"
+          },
+          {
+            "name": "plans_link",
+            "selector": "a.btn",
+            "type": "link",
+            "attribute": "href",
+            "_id": "6885b57e82c008bbda17a810"
+          }
+        ],
+        "_id": "6885b57e82c008bbda17a80d"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T05:13:34.826Z",
+    "createdAt": "2025-07-27T05:13:34.872Z",
+    "updatedAt": "2025-07-27T05:13:34.872Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885b777d41c8627e27f7ef9",
+    "domain": "www.menkes.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div.project-header h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885b777d41c8627e27f7efa",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.project-floorplans__item",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "floor_label",
+            "selector": "a",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885b777d41c8627e27f7efc"
+          },
+          {
+            "name": "plans_link",
+            "selector": "a",
+            "type": "link",
+            "attribute": "href",
+            "_id": "6885b777d41c8627e27f7efd"
+          }
+        ],
+        "_id": "6885b777d41c8627e27f7efb"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T05:21:59.465Z",
+    "createdAt": "2025-07-27T05:21:59.512Z",
+    "updatedAt": "2025-07-27T05:21:59.512Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885c8b9bdaf49c4709eb51e",
+    "domain": "morguardleasing.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div[class^=\"BuildingContainer_nameAddress\"] h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885c8b9bdaf49c4709eb51f",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "div[class^=\"BuildingContainer_nameAddress\"] address",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885c8b9bdaf49c4709eb520",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div[class^=\"SuiteListItem_suiteInfoContainer\"]",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "div[class^=\"SuiteListItem_suiteNameAndTag\"] div",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8b9bdaf49c4709eb522"
+          },
+          {
+            "name": "suite_size",
+            "selector": "div[class^=\"SuiteListItem_suiteArea\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8b9bdaf49c4709eb523"
+          },
+          {
+            "name": "availability_date",
+            "selector": "div[class^=\"SuiteListItem_availabilityDate\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8b9bdaf49c4709eb524"
+          },
+          {
+            "name": "base_rent",
+            "selector": "div[class^=\"SuiteListItem_baseRent\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8b9bdaf49c4709eb525"
+          },
+          {
+            "name": "additional_rent",
+            "selector": "div[class^=\"SuiteListItem_additionalRent\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8b9bdaf49c4709eb526"
+          },
+          {
+            "name": "suite_type",
+            "selector": "div[class^=\"SuiteListItem_suiteType\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8b9bdaf49c4709eb527"
+          },
+          {
+            "name": "contiguous_area",
+            "selector": "div[class^=\"SuiteListItem_sizeRange\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8b9bdaf49c4709eb528"
+          },
+          {
+            "name": "suite_notes",
+            "selector": "div[class^=\"SuiteListItem_suiteNotesNotExpanded\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c8b9bdaf49c4709eb529"
+          }
+        ],
+        "_id": "6885c8b9bdaf49c4709eb521"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T06:35:36.998Z",
+    "createdAt": "2025-07-27T06:35:37.064Z",
+    "updatedAt": "2025-07-27T06:35:37.064Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885c95fef7806ab328b7c55",
+    "domain": "nwhproperties.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1.typography-heading-3",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885c95fef7806ab328b7c56",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "address",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885c95fef7806ab328b7c57",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "#suites div[class*=\"rounded-small\"]",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "h3",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c95fef7806ab328b7c59"
+          },
+          {
+            "name": "suite_size",
+            "selector": "div:contains('Area') span.typography-body-base-bold",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c95fef7806ab328b7c5a"
+          },
+          {
+            "name": "asking_rent",
+            "selector": "div:contains('Asking Rent') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c95fef7806ab328b7c5b"
+          },
+          {
+            "name": "additional_rent",
+            "selector": "div:contains('Additional Rent') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c95fef7806ab328b7c5c"
+          },
+          {
+            "name": "availability_date",
+            "selector": "div:contains('Availability') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c95fef7806ab328b7c5d"
+          },
+          {
+            "name": "move_in_ready",
+            "selector": "span.typography-micro",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c95fef7806ab328b7c5e"
+          },
+          {
+            "name": "suite_notes",
+            "selector": "div.prose-sm p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885c95fef7806ab328b7c5f"
+          }
+        ],
+        "_id": "6885c95fef7806ab328b7c58"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T06:38:23.092Z",
+    "createdAt": "2025-07-27T06:38:23.143Z",
+    "updatedAt": "2025-07-27T06:38:23.143Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885d4d93702ebb5985e9179",
+    "domain": "www.oxfordproperties.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div.single-property h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d4d93702ebb5985e917a",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "div.marker-in-focus-false p",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d4d93702ebb5985e917b",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.lg\\:grid.lg\\:grid-cols-6.border-t.border-light-blue.py-4",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "div.py-2:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d4d93702ebb5985e917d"
+          },
+          {
+            "name": "suite_size",
+            "selector": "div.py-2:nth-child(2)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d4d93702ebb5985e917e"
+          },
+          {
+            "name": "availability_date",
+            "selector": "div.py-2:nth-child(3)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d4d93702ebb5985e917f"
+          },
+          {
+            "name": "suite_notes",
+            "selector": "div.py-2:nth-child(4)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d4d93702ebb5985e9180"
+          },
+          {
+            "name": "additional_link",
+            "selector": "a[href$=\".pdf\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d4d93702ebb5985e9181"
+          }
+        ],
+        "_id": "6885d4d93702ebb5985e917c"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T07:27:21.545Z",
+    "createdAt": "2025-07-27T07:27:21.593Z",
+    "updatedAt": "2025-07-27T07:27:21.593Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885d6f004a11875cc1dcb18",
+    "domain": "commercialme.orlandocorp.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div.property-header h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d6f004a11875cc1dcb19",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "div.property-header .location h2",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d6f004a11875cc1dcb1a",
+        "childSelectors": []
+      },
+      {
+        "name": "property_status",
+        "selector": "div.price span.type",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d6f004a11875cc1dcb1b",
+        "childSelectors": []
+      },
+      {
+        "name": "asking_rate",
+        "selector": "div.price span:first-child",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d6f004a11875cc1dcb1c",
+        "childSelectors": []
+      },
+      {
+        "name": "date_updated",
+        "selector": "ul.inline-columns.date-update span",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d6f004a11875cc1dcb1d",
+        "childSelectors": []
+      },
+      {
+        "name": "description",
+        "selector": "div.property-details-description div.description-text",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d6f004a11875cc1dcb1e",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "#availabilitySection tr.space",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite",
+            "selector": "li:contains('Suite') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb20"
+          },
+          {
+            "name": "space_number",
+            "selector": "li:contains('Space Number') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb21"
+          },
+          {
+            "name": "space_type",
+            "selector": "li:contains('Space Type') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb22"
+          },
+          {
+            "name": "total_space",
+            "selector": "li:contains('Total Space Available') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb23"
+          },
+          {
+            "name": "floor",
+            "selector": "li:contains('Floor') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb24"
+          },
+          {
+            "name": "divisible_space",
+            "selector": "li:contains('Divisible Space') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb25"
+          },
+          {
+            "name": "build_type",
+            "selector": "li:contains('Build Type') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb26"
+          },
+          {
+            "name": "lease_rate",
+            "selector": "li:contains('Lease Rate') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb27"
+          },
+          {
+            "name": "additional_rent",
+            "selector": "li:contains('Additional Rent') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb28"
+          },
+          {
+            "name": "available_date",
+            "selector": "li:contains('Available Date') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb29"
+          },
+          {
+            "name": "lease_term",
+            "selector": "li:contains('Lease Term') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb2a"
+          },
+          {
+            "name": "suite_description",
+            "selector": "section.space-description p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d6f004a11875cc1dcb2b"
+          }
+        ],
+        "_id": "6885d6f004a11875cc1dcb1f"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T07:36:16.581Z",
+    "createdAt": "2025-07-27T07:36:16.638Z",
+    "updatedAt": "2025-07-27T07:36:16.638Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885d8b73a64a0afc47c70dc",
+    "domain": "www.pinedaleprop.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d8b73a64a0afc47c70dd",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.col_half.col_last",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "li:contains('Suite Number') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d8b73a64a0afc47c70df"
+          },
+          {
+            "name": "property_address",
+            "selector": "h4 span.dev-current",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d8b73a64a0afc47c70e0"
+          },
+          {
+            "name": "description",
+            "selector": "p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d8b73a64a0afc47c70e1"
+          }
+        ],
+        "_id": "6885d8b73a64a0afc47c70de"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T07:43:51.284Z",
+    "createdAt": "2025-07-27T07:43:51.334Z",
+    "updatedAt": "2025-07-27T07:43:51.334Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885d8c83dc7a67bf4ff4d44",
+    "domain": "pinedaleprop.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885d8c83dc7a67bf4ff4d45",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.col_half.col_last",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "li:contains('Suite Number') span",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d8c83dc7a67bf4ff4d47"
+          },
+          {
+            "name": "property_address",
+            "selector": "h4 span.dev-current",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d8c83dc7a67bf4ff4d48"
+          },
+          {
+            "name": "description",
+            "selector": "p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885d8c83dc7a67bf4ff4d49"
+          }
+        ],
+        "_id": "6885d8c83dc7a67bf4ff4d46"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T07:44:08.363Z",
+    "createdAt": "2025-07-27T07:44:08.412Z",
+    "updatedAt": "2025-07-27T07:44:08.412Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885db961e124d6a9f6a309b",
+    "domain": "www.polarisrealty.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "#divImage .property p",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885db961e124d6a9f6a309c",
+        "childSelectors": []
+      },
+      {
+        "name": "breadcrumb_address",
+        "selector": "#dlBreadcrumb a.current",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885db961e124d6a9f6a309d",
+        "childSelectors": []
+      },
+      {
+        "name": "leasing_contact_email",
+        "selector": "dl.left a[href^=\"mailto:\"]",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885db961e124d6a9f6a309e",
+        "childSelectors": []
+      },
+      {
+        "name": "contact_phone",
+        "selector": "dl.left dt:contains(\"P\")",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885db961e124d6a9f6a309f",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "#divContent h2.content",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "span.suite-number-not-present",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885db961e124d6a9f6a30a1"
+          },
+          {
+            "name": "section_title",
+            "selector": "self",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885db961e124d6a9f6a30a2"
+          },
+          {
+            "name": "section_details",
+            "selector": "div + div",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885db961e124d6a9f6a30a3"
+          }
+        ],
+        "_id": "6885db961e124d6a9f6a30a0"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T07:56:06.583Z",
+    "createdAt": "2025-07-27T07:56:06.633Z",
+    "updatedAt": "2025-07-27T07:56:06.633Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885e52176fc868ac894e5d8",
+    "domain": "www.sterlingkaramar.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1.property-hero__building-name",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885e52176fc868ac894e5d9",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "p.property-hero__building-address",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885e52176fc868ac894e5da",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "section#availability .suite, div.availability-row",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": ".suite-header, .suite-number",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885e52176fc868ac894e5dc"
+          },
+          {
+            "name": "space_type",
+            "selector": ".suite-type, .space-type",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885e52176fc868ac894e5dd"
+          },
+          {
+            "name": "lease_rate",
+            "selector": ".suite-rate, .lease-rate",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885e52176fc868ac894e5de"
+          },
+          {
+            "name": "total_space",
+            "selector": ".suite-size, .total-space",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885e52176fc868ac894e5df"
+          },
+          {
+            "name": "floor",
+            "selector": ".suite-floor, .floor",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885e52176fc868ac894e5e0"
+          },
+          {
+            "name": "available_date",
+            "selector": ".suite-available-date, .available-date",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885e52176fc868ac894e5e1"
+          }
+        ],
+        "_id": "6885e52176fc868ac894e5db"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T08:36:49.240Z",
+    "createdAt": "2025-07-27T08:36:49.290Z",
+    "updatedAt": "2025-07-27T08:36:49.290Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885ebcf298bf30c92cb8e20",
+    "domain": "www.cadillacfairview.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1.Text_type-h2__BunAW",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885ebcf298bf30c92cb8e21",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "h2.Text_type-h4__jfywE",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885ebcf298bf30c92cb8e22",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "section#availability table tbody tr",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "td:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ebcf298bf30c92cb8e24"
+          },
+          {
+            "name": "total_space",
+            "selector": "td:nth-child(2)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ebcf298bf30c92cb8e25"
+          },
+          {
+            "name": "available_date",
+            "selector": "td:nth-child(3)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ebcf298bf30c92cb8e26"
+          },
+          {
+            "name": "remarks",
+            "selector": "td:nth-child(4)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ebcf298bf30c92cb8e27"
+          },
+          {
+            "name": "suite_sheet_link",
+            "selector": "td:nth-child(5) a[href$=\".pdf\"], td:nth-child(5) a[href$=\".jpeg\"], td:nth-child(5) a[href$=\".jpg\"], td:nth-child(5) a[href$=\".png\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ebcf298bf30c92cb8e28"
+          },
+          {
+            "name": "virtual_tour_link",
+            "selector": "td:nth-child(6) a[href]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ebcf298bf30c92cb8e29"
+          },
+          {
+            "name": "floor_plan_link",
+            "selector": "td:nth-child(7) a[href$=\".pdf\"], td:nth-child(7) a[href$=\".jpeg\"], td:nth-child(7) a[href$=\".jpg\"], td:nth-child(7) a[href$=\".png\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ebcf298bf30c92cb8e2a"
+          }
+        ],
+        "_id": "6885ebcf298bf30c92cb8e23"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T09:05:19.284Z",
+    "createdAt": "2025-07-27T09:05:19.340Z",
+    "updatedAt": "2025-07-27T09:05:19.340Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885ef6fad7bb84621ac1d83",
+    "domain": "leasing.triovest.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div[class^=\"BuildingContainer_nameAddress\"] h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885ef6fad7bb84621ac1d84",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "div[class^=\"BuildingContainer_nameAddress\"] address",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885ef6fad7bb84621ac1d85",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div[class^=\"SuiteListItem_suiteInfoContainer\"]",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "div[class^=\"SuiteListItem_suiteNameAndTag\"] div",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ef6fad7bb84621ac1d87"
+          },
+          {
+            "name": "suite_size",
+            "selector": "div[class^=\"SuiteListItem_suiteArea\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ef6fad7bb84621ac1d88"
+          },
+          {
+            "name": "availability_date",
+            "selector": "div[class^=\"SuiteListItem_availabilityDate\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ef6fad7bb84621ac1d89"
+          },
+          {
+            "name": "additional_rent",
+            "selector": "div[class^=\"SuiteListItem_additionalRent\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ef6fad7bb84621ac1d8a"
+          },
+          {
+            "name": "base_rent",
+            "selector": "div[class^=\"SuiteListItem_baseRent\"]",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885ef6fad7bb84621ac1d8b"
+          }
+        ],
+        "_id": "6885ef6fad7bb84621ac1d86"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T09:20:46.962Z",
+    "createdAt": "2025-07-27T09:20:47.018Z",
+    "updatedAt": "2025-07-27T09:20:47.018Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885f176e6e6f9a03310fef5",
+    "domain": "www.westdaleproperties.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1.property_title",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f176e6e6f9a03310fef6",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "div#blkHeader a[href*=\"google.com/maps\"]",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f176e6e6f9a03310fef7",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div#txtDetail",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "property_description",
+            "selector": "p",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f176e6e6f9a03310fef9"
+          }
+        ],
+        "_id": "6885f176e6e6f9a03310fef8"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T09:29:26.713Z",
+    "createdAt": "2025-07-27T09:29:26.760Z",
+    "updatedAt": "2025-07-27T09:29:26.760Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885f312426ff496e8fd6854",
+    "domain": "wtfgroup.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h2.property-title",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f312426ff496e8fd6855",
+        "childSelectors": []
+      },
+      {
+        "name": "description",
+        "selector": "p.description",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f312426ff496e8fd6856",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.suite-box div.suite-row:not(:first-child)",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "div.suite-col:first-child a",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f312426ff496e8fd6858"
+          },
+          {
+            "name": "suite_term",
+            "selector": "div.suite-col:nth-child(2)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f312426ff496e8fd6859"
+          },
+          {
+            "name": "suite_size",
+            "selector": "div.suite-col:nth-child(3)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f312426ff496e8fd685a"
+          },
+          {
+            "name": "occupancy",
+            "selector": "div.suite-col:nth-child(4)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f312426ff496e8fd685b"
+          }
+        ],
+        "_id": "6885f312426ff496e8fd6857"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T09:36:18.700Z",
+    "createdAt": "2025-07-27T09:36:18.754Z",
+    "updatedAt": "2025-07-27T09:36:18.754Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885f35877ded039d4ba8a38",
+    "domain": "www.metrusproperties.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "div.mainbody h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f35877ded039d4ba8a39",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "div.desc a[href*=\"maps.google.com\"]",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f35877ded039d4ba8a3a",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.desc",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "property_description",
+            "selector": "self",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f35877ded039d4ba8a3c"
+          }
+        ],
+        "_id": "6885f35877ded039d4ba8a3b"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T09:37:28.792Z",
+    "createdAt": "2025-07-27T09:37:28.841Z",
+    "updatedAt": "2025-07-27T09:37:28.841Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885f5ea64ee4f8ee2d942c8",
+    "domain": "www.yorkheritage.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1.page-title span[data-content-field=\"title\"], h1.page-title",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f5ea64ee4f8ee2d942c9",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "p:contains(\"LOCATION\")",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f5ea64ee4f8ee2d942ca",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "div.main-content",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "property_description",
+            "selector": "div.sqs-block-html h2",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f5ea64ee4f8ee2d942cc"
+          }
+        ],
+        "_id": "6885f5ea64ee4f8ee2d942cb"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T09:48:26.623Z",
+    "createdAt": "2025-07-27T09:48:26.672Z",
+    "updatedAt": "2025-07-27T09:48:26.672Z",
+    "__v": 0
+  },
+  {
+    "_id": "6885f6bfcd12f147054291e5",
+    "domain": "www.riocan.com",
+    "selectors": [
+      {
+        "name": "title",
+        "selector": "h1",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f6bfcd12f147054291e6",
+        "childSelectors": []
+      },
+      {
+        "name": "address",
+        "selector": "div[data-content=\"address\"]",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f6bfcd12f147054291e7",
+        "childSelectors": []
+      },
+      {
+        "name": "property_overview",
+        "selector": "div.overview p",
+        "type": "text",
+        "attribute": null,
+        "_id": "6885f6bfcd12f147054291e8",
+        "childSelectors": []
+      },
+      {
+        "name": "vacancy_data",
+        "selector": "ol.list-tenants li",
+        "type": "container",
+        "attribute": null,
+        "childSelectors": [
+          {
+            "name": "suite_number",
+            "selector": "span:nth-child(1)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f6bfcd12f147054291ea"
+          },
+          {
+            "name": "tenant_name",
+            "selector": "span:nth-child(2)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f6bfcd12f147054291eb"
+          },
+          {
+            "name": "suite_size",
+            "selector": "span:nth-child(3)",
+            "type": "text",
+            "attribute": null,
+            "_id": "6885f6bfcd12f147054291ec"
+          }
+        ],
+        "_id": "6885f6bfcd12f147054291e9"
+      }
+    ],
+    "htmlChecksum": "test-checksum",
+    "lastChecked": "2025-07-27T09:51:59.645Z",
+    "createdAt": "2025-07-27T09:51:59.694Z",
+    "updatedAt": "2025-07-27T09:51:59.694Z",
+    "__v": 0
+  }
+]

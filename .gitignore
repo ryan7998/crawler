@@ -12,7 +12,5 @@ client/files
 server/KEYS
 server/oauth2-credentials.json
 server/oauth2-tokens.json
-server/.env copy
 server/oauth2-credentials-web.json
-server/.env copy 2
-vhostsettings
+server/.env copy

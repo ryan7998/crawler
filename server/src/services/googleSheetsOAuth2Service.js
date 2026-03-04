@@ -24,15 +24,14 @@ class GoogleSheetsOAuth2Service {
     async initializeAuth() {
         try {
             if (!google) return;
-            const credentialsPath = process.env.GOOGLE_OAUTH2_CREDENTIALS || './oauth2-credentials-web.json';
+            const credentialsPath = process.env.GOOGLE_OAUTH2_CREDENTIALS || './oauth2-credentials.json';
             if (!fs.existsSync(credentialsPath)) return;
             this.credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
             const tokensPath = './oauth2-tokens.json';
             if (fs.existsSync(tokensPath)) {
                 this.tokens = JSON.parse(fs.readFileSync(tokensPath, 'utf8'));
             }
-            // Handle 'web' (web application) credential formats
-            const { client_secret, client_id, redirect_uris } = this.credentials.web;
+            const { client_secret, client_id, redirect_uris } = this.credentials.web || this.credentials.installed;
             const redirectUri = process.env.GOOGLE_OAUTH2_REDIRECT_URI || redirect_uris[0];
             this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirectUri);
             if (this.tokens) {
@@ -95,7 +94,7 @@ class GoogleSheetsOAuth2Service {
                     removeParents: 'root',
                     fields: 'id, parents'
                 });
-            } catch { }
+            } catch {}
         }
         return spreadsheetId;
     }
@@ -120,7 +119,7 @@ class GoogleSheetsOAuth2Service {
                 requestBody: { role: 'writer', type: 'user', emailAddress: userEmail },
                 sendNotificationEmail: false
             });
-        } catch { }
+        } catch {}
     }
     // --- Helper: Find Sheet by Name ---
     async getSheetIdByName(spreadsheetId, sheetName) {

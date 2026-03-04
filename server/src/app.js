@@ -7,7 +7,7 @@ require('dotenv').config();
 const cors = require('cors');
 
 // Import routes with error handling
-let crawlerRoutes, exportRoutes, oauth2Routes;
+let crawlerRoutes, exportRoutes, oauth2Routes, authRoutes;
 try {
     crawlerRoutes = require('./routes/crawlerRoutes');
     console.log('✅ Crawler routes loaded successfully');
@@ -30,6 +30,14 @@ try {
 } catch (error) {
     console.error('❌ Error loading OAuth2 routes:', error.message);
     oauth2Routes = express.Router();
+}
+
+try {
+    authRoutes = require('./routes/authRoutes');
+    console.log('✅ Auth routes loaded successfully');
+} catch (error) {
+    console.error('❌ Error loading auth routes:', error.message);
+    authRoutes = express.Router();
 }
 
 const app = express();
@@ -60,9 +68,10 @@ app.use((req, res, next) => {
 /* ———————————————————
    3) API routes
    ——————————————————— */
-app.use('/api', crawlerRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/oauth2', oauth2Routes);
+app.use('/api', crawlerRoutes);
 
 // Add a test route to verify the server is working
 app.get('/test', (req, res) => {
@@ -71,6 +80,7 @@ app.get('/test', (req, res) => {
 });
 
 console.log('🚀 Routes registered:');
+console.log('   - /api/auth/* (authentication routes)');
 console.log('   - /api/* (crawler routes)');
 console.log('   - /api/export/* (export routes)');
 console.log('   - /api/oauth2/* (OAuth2 routes)');
@@ -100,7 +110,14 @@ mongoose
 if (!isProd) mongoose.set('debug', true); // query logging in dev
 
 /* ———————————————————
-   6) Start server
+   6) Error handling middleware
+   ——————————————————— */
+const { errorHandler, notFound } = require('./middleware/errorHandler');
+app.use(notFound);
+app.use(errorHandler);
+
+/* ———————————————————
+   7) Start server
    ——————————————————— */
 const PORT = process.env.PORT || (isProd ? 3000 : 3001);
 app.listen(PORT, () => {

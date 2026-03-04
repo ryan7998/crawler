@@ -1,10 +1,19 @@
 import { ref, computed } from 'vue'
 import { useApiService } from './useApiService'
-import { useFormatting } from './useFormatting'
+import { 
+  formatNumber, 
+  formatCost, 
+  formatPercentage, 
+  formatDate, 
+  getRelativeTime, 
+  getSuccessRateColor 
+} from '@/utils/formattingUtils'
+import { useAuth } from './useAuth'
 
 export function useProxyStats() {
   // Initialize composables
   const { get, del, loading: apiLoading, error: apiError } = useApiService()
+  const { isAuthenticated } = useAuth()
   const proxyStats = ref(null)
   const globalStats = ref(null)
   const costAnalysis = ref(null)
@@ -12,17 +21,14 @@ export function useProxyStats() {
   const error = ref(null)
 
   // Use centralized formatting utilities
-  const {
-    formatNumber,
-    formatCost,
-    formatPercentage,
-    formatDate,
-    getRelativeTime,
-    getSuccessRateColor
-  } = useFormatting()
 
   // Get proxy stats for a specific crawl
   const fetchCrawlProxyStats = async (crawlId) => {
+    if (!isAuthenticated.value) {
+      proxyStats.value = null
+      return
+    }
+    
     loading.value = true
     error.value = null
     
@@ -52,7 +58,7 @@ export function useProxyStats() {
           totalProxyRequests: 0,
           uniqueProxiesUsed: 0,
           totalCost: 0,
-          averageProxySuccessRate: 0,
+          averageSuccessRate: 0,
           lastProxyUsed: null
         },
         detailedUsage: [],
@@ -67,6 +73,11 @@ export function useProxyStats() {
 
   // Get global proxy stats
   const fetchGlobalProxyStats = async () => {
+    if (!isAuthenticated.value) {
+      globalStats.value = null
+      return
+    }
+    
     loading.value = true
     error.value = null
     
@@ -110,6 +121,11 @@ export function useProxyStats() {
 
   // Get cost analysis
   const fetchCostAnalysis = async (params = {}) => {
+    if (!isAuthenticated.value) {
+      costAnalysis.value = null
+      return
+    }
+    
     loading.value = true
     error.value = null
     
@@ -153,6 +169,10 @@ export function useProxyStats() {
 
   // Get proxy usage for a specific URL
   const fetchProxyUsageForUrl = async (url) => {
+    if (!isAuthenticated.value) {
+      return null
+    }
+    
     loading.value = true
     error.value = null
     
@@ -182,6 +202,10 @@ export function useProxyStats() {
 
   // Cleanup old proxy usage records
   const cleanupProxyUsage = async (daysOld = 90) => {
+    if (!isAuthenticated.value) {
+      throw new Error('Authentication required to cleanup proxy usage')
+    }
+    
     loading.value = true
     error.value = null
     
@@ -224,7 +248,7 @@ export function useProxyStats() {
       totalRequests: summary.totalProxyRequests || 0,
       uniqueProxies: summary.uniqueProxiesUsed || 0,
       totalCost: summary.totalCost || 0,
-      successRate: summary.averageProxySuccessRate || 0,
+      successRate: summary.averageSuccessRate || 0,
       lastUsed: summary.lastProxyUsed ? new Date(summary.lastProxyUsed) : null
     }
   })
