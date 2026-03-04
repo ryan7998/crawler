@@ -231,23 +231,18 @@
             Previous
           </button>
           <div v-else></div>
-          
-          <div class="flex space-x-3">
+
+          <div class="flex items-center space-x-3">
             <button
               @click="closeModal"
               class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                    Cancel
+            >
+              Cancel
             </button>
+
+            <!-- Update: visible on every step, only when editing -->
             <button
-                    v-if="currentStep < 3"
-              @click="nextStep"
-              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    Next
-            </button>
-            <button
-                    v-else
+              v-if="isEditing"
               @click="saveCrawl"
               :disabled="isLoading"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
@@ -255,7 +250,29 @@
               <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
               </svg>
-              <span>{{ isLoading ? 'Saving...' : (isEditing ? 'Update Crawl' : 'Create Crawl') }}</span>
+              <span>{{ isLoading ? 'Updating...' : 'Update Crawl' }}</span>
+            </button>
+
+            <!-- Next: steps 1–2, always visible for navigation -->
+            <button
+              v-if="currentStep < 3"
+              @click="nextStep"
+              class="px-6 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              Next
+            </button>
+
+            <!-- Create: step 3 only, only when not editing -->
+            <button
+              v-if="currentStep === 3 && !isEditing"
+              @click="saveCrawl"
+              :disabled="isLoading"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+            >
+              <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span>{{ isLoading ? 'Creating...' : 'Create Crawl' }}</span>
             </button>
           </div>
         </div>
