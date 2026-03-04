@@ -31,7 +31,7 @@ class GoogleSheetsOAuth2Service {
             if (fs.existsSync(tokensPath)) {
                 this.tokens = JSON.parse(fs.readFileSync(tokensPath, 'utf8'));
             }
-            const { client_secret, client_id, redirect_uris } = this.credentials.installed;
+            const { client_secret, client_id, redirect_uris } = this.credentials.web || this.credentials.installed;
             const redirectUri = process.env.GOOGLE_OAUTH2_REDIRECT_URI || redirect_uris[0];
             this.oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirectUri);
             if (this.tokens) {

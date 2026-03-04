@@ -12,3 +12,5 @@ client/files
 server/KEYS
 server/oauth2-credentials.json
 server/oauth2-tokens.json
+server/oauth2-credentials-web.json
+server/.env copy

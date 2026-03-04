@@ -83,14 +83,15 @@ class ProxyUsageService extends BaseService {
     }
 
     /**
-     * Get global proxy usage statistics
+     * Get global proxy usage statistics (user-specific)
+     * @param {Object} user - The authenticated user
      * @returns {Promise<Object>} Global proxy usage statistics
      */
-    async getGlobalProxyStats() {
+    async getGlobalProxyStats(user) {
         try {
-            const summary = await ProxyUsage.getGlobalSummary();
-            const topProxies = await this.getTopProxies();
-            const recentUsage = await this.getRecentProxyUsage();
+            const summary = await ProxyUsage.getGlobalSummary(user);
+            const topProxies = await this.getTopProxies(user);
+            const recentUsage = await this.getRecentProxyUsage(user);
 
             return {
                 summary,
@@ -118,13 +119,16 @@ class ProxyUsageService extends BaseService {
     }
 
     /**
-     * Get top performing proxies globally
+     * Get top performing proxies (user-specific)
+     * @param {Object} user - The authenticated user
      * @param {number} limit - Number of proxies to return
      * @returns {Promise<Array>} Top proxies data
      */
-    async getTopProxies(limit = 10) {
+    async getTopProxies(user, limit = 10) {
         try {
-            const pipeline = buildProxyPerformancePipeline({ limit });
+            const userCrawlIds = await this.getUserCrawlIds(user);
+            const matchStage = { crawlId: { $in: userCrawlIds } };
+            const pipeline = buildProxyPerformancePipeline({ matchStage, limit });
             return await this.aggregate(pipeline);
         } catch (error) {
             this.handleError('getTopProxies', error);
@@ -163,13 +167,18 @@ class ProxyUsageService extends BaseService {
     }
 
     /**
-     * Get recent proxy usage globally
+     * Get recent proxy usage (user-specific)
+     * @param {Object} user - The authenticated user
      * @param {number} limit - Number of records to return
      * @returns {Promise<Array>} Recent usage data
      */
-    async getRecentProxyUsage(limit = 20) {
+    async getRecentProxyUsage(user, limit = 20) {
         try {
+            // Get user's crawl IDs
+            const userCrawlIds = await this.getUserCrawlIds(user);
+            
             const pipeline = [
+                { $match: { crawlId: { $in: userCrawlIds } } },
                 {
                     $project: {
                         url: 1,
@@ -193,18 +202,27 @@ class ProxyUsageService extends BaseService {
     }
 
     /**
-     * Get cost analysis for proxy usage
+     * Get cost analysis for proxy usage (user-specific)
      * @param {string} crawlId - Optional crawl ID to filter by
      * @param {Date} startDate - Optional start date
      * @param {Date} endDate - Optional end date
+     * @param {Object} user - The authenticated user
      * @returns {Promise<Object>} Cost analysis data
      */
-    async getCostAnalysis(crawlId = null, startDate = null, endDate = null) {
+    async getCostAnalysis(crawlId = null, startDate = null, endDate = null, user = null) {
         try {
             const matchStage = {
-                ...createCrawlMatch(crawlId),
                 ...createDateRangeMatch(startDate, endDate)
             };
+
+            if (crawlId) {
+                // Filter by a specific crawl
+                Object.assign(matchStage, createCrawlMatch(crawlId));
+            } else if (user) {
+                // No specific crawl — scope to all crawls owned by the user
+                const userCrawlIds = await this.getUserCrawlIds(user);
+                matchStage.crawlId = { $in: userCrawlIds };
+            }
 
             const pipeline = buildCostAnalysisPipeline({ matchStage });
             const costAnalysis = await this.aggregate(pipeline);
@@ -220,14 +238,40 @@ class ProxyUsageService extends BaseService {
     }
 
     /**
-     * Get proxy usage for a specific URL
+     * Get user's crawl IDs for filtering
+     * @param {Object} user - The authenticated user
+     * @returns {Promise<Array>} Array of crawl IDs
+     */
+    async getUserCrawlIds(user) {
+        try {
+            let query = {};
+            if (user.isSuperAdmin()) {
+                // Superadmin can see all crawls
+                query = {};
+            } else {
+                // Regular admin can only see their own crawls
+                query = { userId: user._id };
+            }
+            
+            const userCrawls = await Crawl.find(query).select('_id').lean();
+            return userCrawls.map(crawl => crawl._id);
+        } catch (error) {
+            this.handleError('getUserCrawlIds', error);
+            return [];
+        }
+    }
+
+    /**
+     * Get proxy usage for a specific URL (user-specific)
      * @param {string} url - The URL to get usage for
+     * @param {Object} user - The authenticated user
      * @returns {Promise<Array>} Proxy usage data for the URL
      */
-    async getProxyUsageForUrl(url) {
+    async getProxyUsageForUrl(url, user) {
         try {
+            const userCrawlIds = await this.getUserCrawlIds(user);
             const pipeline = buildProxyPerformancePipeline({
-                matchStage: { url },
+                matchStage: { url, crawlId: { $in: userCrawlIds } },
                 sortBy: 'lastUsed'
             });
             
@@ -238,18 +282,25 @@ class ProxyUsageService extends BaseService {
     }
 
     /**
-     * Cleanup old proxy usage records
+     * Cleanup old proxy usage records (user-specific)
      * @param {number} daysOld - Number of days to keep
+     * @param {Object} user - The authenticated user
      * @returns {Promise<Object>} Cleanup result
      */
-    async cleanupOldRecords(daysOld = 90) {
+    async cleanupOldRecords(daysOld = 90, user = null) {
         try {
             const cutoffDate = new Date();
             cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-            const result = await this.deleteMany({
-                lastUsed: { $lt: cutoffDate }
-            });
+            let query = { lastUsed: { $lt: cutoffDate } };
+            
+            // Add user filtering if user is provided
+            if (user) {
+                const userCrawlIds = await this.getUserCrawlIds(user);
+                query.crawlId = { $in: userCrawlIds };
+            }
+
+            const result = await this.deleteMany(query);
 
             console.log(`Cleaned up ${result.deletedCount} old proxy usage records`);
             return result;
