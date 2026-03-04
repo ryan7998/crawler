@@ -252,8 +252,7 @@ onUnmounted(() => {
 })
 
 const configureCrawl = () => {
-    crawlStore.setSelectedCrawl(crawl.value)
-    crawlStore.openCreateModal(crawl)
+    crawlStore.openCreateModal(crawl.value)
 }
 
 // Use shared action functions
@@ -263,16 +262,10 @@ const handleStartCrawl = async () => {
 }
 
 
-// Handler for crawl creation/update (specific crawl dashboard)
-const handleCrawlCreated = (updatedCrawl) => {
-    showNotification('Crawl updated successfully', 'success')
+// Re-fetch when ModalWrapper signals a save (create or update)
+watch(() => crawlStore.refreshTrigger, () => {
     fetchCrawlData(crawlId.value)
-}
-
-// Error handler for modal (specific crawl dashboard)
-const handleModalError = (errorMessage) => {
-    showNotification(errorMessage, 'error')
-}
+})
 
 // Handle successful export - now handled by useCrawlExport composable
 

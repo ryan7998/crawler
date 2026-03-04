@@ -153,7 +153,13 @@ const handleAuthSuccess = () => {
 // Modal handlers
 const handleCrawlCreated = (crawl) => {
   crawlStore.closeCreateModal()
-  crawlStore.addCrawl(crawl)
+  const exists = crawlStore.allCrawls.some(c => c._id === crawl._id)
+  if (exists) {
+    crawlStore.updateCrawl(crawl)
+  } else {
+    crawlStore.addCrawl(crawl)
+  }
+  crawlStore.triggerRefresh()
   showNotification('Crawl saved successfully', 'success')
 }
 
