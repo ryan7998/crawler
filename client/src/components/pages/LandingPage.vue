@@ -10,17 +10,29 @@
           </span>
         </h1>
         <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-          Powerful web scraping tool with real-time monitoring, custom selectors, and automated data export. 
-          Scale your data extraction with enterprise-grade reliability.
+          Full-stack web scraping: crawl multiple URLs with custom CSS selectors, extract structured data, and export to Google Sheets or CSV. Real-time progress via Socket.IO, Bull/Redis job queue, proxy analytics, and change detection between runs.
         </p>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-6 text-sm text-gray-500">
+          <span class="font-medium text-gray-600">Built with</span>
+          <span>Vue 3</span><span>·</span><span>Node.js</span><span>·</span><span>Playwright</span><span>·</span><span>Bull + Redis</span><span>·</span><span>Socket.IO</span><span>·</span><span>MongoDB</span>
+        </div>
         
-        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
           <button
-            @click="openAuthModal('register')"
+            @click="openAuthModal('login')"
             class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
           >
-            Start Free Trial
+            Sign In
           </button>
+          <a
+            href="https://crawler.onthis.website/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-50 transition-all duration-200 text-center"
+          >
+            Try Live Demo
+          </a>
           <button
             @click="scrollToFeatures"
             class="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
@@ -29,21 +41,9 @@
           </button>
         </div>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <div class="text-center">
-            <div class="text-3xl font-bold text-blue-600 mb-2">10K+</div>
-            <div class="text-gray-600">Websites Scraped</div>
-          </div>
-          <div class="text-center">
-            <div class="text-3xl font-bold text-indigo-600 mb-2">99.9%</div>
-            <div class="text-gray-600">Uptime</div>
-          </div>
-          <div class="text-center">
-            <div class="text-3xl font-bold text-purple-600 mb-2">24/7</div>
-            <div class="text-gray-600">Monitoring</div>
-          </div>
-        </div>
+        <p class="text-gray-600 text-center max-w-xl mx-auto text-sm sm:text-base">
+          <span class="font-medium text-amber-600">Beta.</span> Sign in and use the default admin credentials to test the app.
+        </p>
       </div>
     </div>
 
@@ -55,8 +55,21 @@
             Everything You Need to Scale Data Extraction
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            From simple web scraping to complex data pipelines, our platform handles it all with enterprise-grade features.
+            Multi-URL crawls, a 3-step wizard you can save at any step, queue monitoring, and export to Google Sheets or CSV—all with live progress and change detection.
           </p>
+        </div>
+
+        <!-- README-backed highlights -->
+        <div class="flex flex-wrap justify-center gap-4 mb-14 text-sm">
+          <span class="px-4 py-2 rounded-full bg-blue-100 text-blue-800 font-medium">Multi-URL crawling</span>
+          <span class="px-4 py-2 rounded-full bg-green-100 text-green-800 font-medium">Real-time Socket.IO updates</span>
+          <span class="px-4 py-2 rounded-full bg-purple-100 text-purple-800 font-medium">3-step crawl wizard</span>
+          <span class="px-4 py-2 rounded-full bg-amber-100 text-amber-800 font-medium">Bull/Redis job queue</span>
+          <span class="px-4 py-2 rounded-full bg-teal-100 text-teal-800 font-medium">Google Sheets & CSV export</span>
+          <span class="px-4 py-2 rounded-full bg-indigo-100 text-indigo-800 font-medium">Proxy usage & cost analytics</span>
+          <span class="px-4 py-2 rounded-full bg-rose-100 text-rose-800 font-medium">Change detection between runs</span>
+          <span class="px-4 py-2 rounded-full bg-slate-100 text-slate-800 font-medium">Stuck crawl recovery</span>
+          <span class="px-4 py-2 rounded-full bg-gray-100 text-gray-800 font-medium">Role-based auth</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -67,8 +80,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-3">Lightning Fast</h3>
-            <p class="text-gray-600">Extract data from thousands of pages in minutes with our optimized crawling engine and parallel processing.</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Multi-URL Crawling</h3>
+            <p class="text-gray-600">Crawl many URLs per job with configurable concurrency. Playwright loads pages; Cheerio extracts structured data from your selectors.</p>
           </div>
           
           <!-- Feature 2 -->
@@ -78,8 +91,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-3">Real-time Monitoring</h3>
-            <p class="text-gray-600">Track crawl progress, monitor success rates, and get instant notifications when data changes.</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Real-time Progress</h3>
+            <p class="text-gray-600">Watch each URL complete live via Socket.IO—no refresh needed. Track progress, success rates, and queue status in real time.</p>
           </div>
 
           <!-- Feature 3 -->
@@ -90,8 +103,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-3">Custom Selectors</h3>
-            <p class="text-gray-600">Create complex CSS selectors with nested data extraction and domain-specific templates.</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Custom CSS Selectors</h3>
+            <p class="text-gray-600">Define selectors per crawl with nested extraction. Use domain-specific templates or the 3-step wizard—save at any step.</p>
           </div>
         
           <!-- Feature 4 -->
@@ -101,8 +114,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-3">Multiple Export Formats</h3>
-            <p class="text-gray-600">Export to CSV, Excel, or Google Sheets with automated scheduling and change detection.</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Export & Change Detection</h3>
+            <p class="text-gray-600">Export to Google Sheets or CSV/Excel. Compare crawl runs to see what changed—new, updated, or removed data.</p>
           </div>
 
           <!-- Feature 5 -->
@@ -112,8 +125,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-3">Secure & Reliable</h3>
-            <p class="text-gray-600">Enterprise-grade security with proxy rotation, rate limiting, and 99.9% uptime guarantee.</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Proxy & Queue</h3>
+            <p class="text-gray-600">Optional proxy (e.g. Oxylabs) with per-crawl and global usage analytics and cost analysis. Bull/Redis queue with stuck-crawl recovery on worker restart.</p>
           </div>
 
           <!-- Feature 6 -->
@@ -123,8 +136,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-3">Analytics & Insights</h3>
-            <p class="text-gray-600">Comprehensive analytics dashboard with success rates, performance metrics, and data trends.</p>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Analytics & Roles</h3>
+            <p class="text-gray-600">Per-crawl and global proxy stats, cost analysis, and queue status. Role-based access: admin and superadmin with secure JWT auth.</p>
           </div>
         </div>
       </div>
@@ -134,23 +147,31 @@
     <div class="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
-          Ready to Scale Your Data Extraction?
+          Crawl, Extract, Export—All in One Place
         </h2>
         <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-          Join thousands of businesses already using CrawlerPro to extract valuable data from the web.
+          CrawlerPro is a full-stack scraping platform: custom selectors, real-time progress, job queues, proxy analytics, and change detection. Try the live demo or sign in to explore.
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
-            @click="openAuthModal('register')"
-            class="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+        <div class="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
+          <a
+            href="https://crawler.onthis.website/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 inline-block text-center"
           >
-            Start Your Free Trial
+            Try Live Demo
+          </a>
+          <button
+            @click="openAuthModal('login')"
+            class="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-200"
+          >
+            Sign In
           </button>
           <button
             @click="scrollToFeatures"
-            class="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-200"
+            class="border-2 border-white/70 text-blue-100 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white/10 transition-all duration-200"
           >
-            Learn More
+            See Features
           </button>
         </div>
       </div>
@@ -168,8 +189,30 @@
             </div>
             <span class="ml-3 text-2xl font-bold text-white">CrawlerPro</span>
           </div>
-          <p class="text-gray-400 mb-4">
-            Advanced web scraping platform for modern businesses
+          <p class="text-gray-400 mb-2">
+            Full-stack web scraping: multi-URL crawls, custom selectors, real-time progress, Google Sheets & CSV export, change detection, proxy analytics.
+          </p>
+          <p class="text-gray-300 font-bold mb-2">
+            Developed by
+            <a
+              href="https://fazleryan.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-300 hover:text-white underline transition-colors"
+            >Fazle Ryan Chowdhury</a>
+          </p>
+          <p class="text-gray-400 text-sm mb-2">
+            <a
+              href="https://github.com/ryan7998/crawler"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-1"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+              </svg>
+              GitHub
+            </a>
           </p>
           <p class="text-gray-500 text-sm">
             © {{ currentYear }} CrawlerPro. All rights reserved.
