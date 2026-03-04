@@ -55,24 +55,33 @@ const startCrawl = async (crawlId, urls) => {
 
     await Crawl.findByIdAndUpdate(crawlId, { status: 'in-progress' })
 
-    try {
-        await axios.post(`http://localhost:3002/processor/${crawlId}`);
-    } catch (err) {
-        console.error('Failed to notify worker to start processor:', err.message);
-    }
-
     const q = crawlQueue(crawlId)
     const [waitingCount, activeCount, delayedCount] = await Promise.all([
         q.getWaitingCount(), q.getActiveCount(), q.getDelayedCount()
     ])
     if (waitingCount + activeCount + delayedCount > 0) {
+        // Jobs already queued — still wake the worker in case it restarted
+        try {
+            await axios.post(`http://localhost:3002/processor/${crawlId}`);
+        } catch (err) {
+            console.error('Failed to notify worker to start processor:', err.message);
+        }
         return { alreadyQueued: true }
     }
 
+    // Add jobs to the queue BEFORE waking the processor so that ensureProcessor
+    // can see the waiting jobs and scope its progress counter to this runId.
     const runId = Date.now().toString();
     for (const url of urls) {
         await q.add({ url, crawlId, runId })
     }
+
+    try {
+        await axios.post(`http://localhost:3002/processor/${crawlId}`, { runId });
+    } catch (err) {
+        console.error('Failed to notify worker to start processor:', err.message);
+    }
+
     return { started: true }
 }
 
