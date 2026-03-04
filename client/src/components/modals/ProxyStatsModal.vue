@@ -390,13 +390,6 @@ watch(() => props.crawlId, async (newCrawlId, oldCrawlId) => {
   }
 }, { immediate: true })
 
-// Load data on mount if crawlId is available
-onMounted(async () => {
-  if (props.crawlId) {
-    await loadData()
-  }
-})
-
 // Watch for modal open to load data
 watch(isOpen, async (newValue) => {
   if (newValue && props.crawlId) {

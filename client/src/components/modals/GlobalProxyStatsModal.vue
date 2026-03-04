@@ -1,297 +1,317 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="900px" persistent @click:outside="closeModal">
-    <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
-        <div class="d-flex align-center">
-          <v-icon icon="mdi-server-network" class="mr-2" />
-          Global Proxy Usage Statistics
+  <div v-if="isOpen" class="fixed inset-0 z-50 overflow-y-auto">
+    <!-- Backdrop -->
+    <div
+      class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+      @click="closeModal"
+    ></div>
+
+    <!-- Modal -->
+    <div class="relative flex min-h-screen items-center justify-center p-4">
+      <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/>
+              </svg>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-900">Global Proxy Usage Statistics</h2>
+          </div>
+          <button @click="closeModal" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
-        <v-btn icon="mdi-close" variant="text" @click="closeModal" />
-      </v-card-title>
 
-      <v-card-text>
-        <div v-if="loading" class="text-center py-8">
-          <v-progress-circular indeterminate size="48" />
-          <div class="mt-4">Loading global proxy statistics...</div>
-        </div>
+        <!-- Scrollable body -->
+        <div class="flex-1 overflow-y-auto p-6">
 
-        <div v-else-if="error" class="text-center py-8">
-          <v-icon icon="mdi-alert-circle" color="error" size="48" />
-          <div class="mt-4 text-error">{{ error }}</div>
-          <v-btn class="mt-4" @click="refreshData">Retry</v-btn>
-        </div>
+          <!-- Loading -->
+          <div v-if="loading" class="flex flex-col items-center justify-center py-16">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+            <p class="text-sm text-gray-500">Loading global proxy statistics...</p>
+          </div>
 
-        <div v-else-if="!globalStats || !globalStats.summary" class="text-center py-8">
-          <v-icon icon="mdi-server-off" size="48" color="grey" />
-          <div class="mt-4 text-grey">No global proxy usage data available</div>
-          <v-btn class="mt-4" @click="refreshData">Refresh</v-btn>
-        </div>
+          <!-- Error -->
+          <div v-else-if="error" class="flex flex-col items-center justify-center py-16">
+            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <p class="text-sm text-red-600 mb-4">{{ error }}</p>
+            <button @click="refreshData" class="px-4 py-2 bg-white border border-gray-300 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Retry</button>
+          </div>
 
-        <div v-else-if="globalStats && globalStats.summary">
-          <!-- Summary Section -->
-          <v-card class="mb-6" variant="outlined">
-            <v-card-title class="text-h6">Global Summary</v-card-title>
-            <v-card-text>
-              <v-row>
-                <v-col cols="6" md="3">
-                  <div class="text-center">
-                    <div class="text-h4 font-weight-bold text-primary">
-                      {{ formatNumber(globalStats.summary.totalProxyRequests || 0) }}
-                    </div>
-                    <div class="text-caption text-medium-emphasis">Total Requests</div>
-                  </div>
-                </v-col>
-                <v-col cols="6" md="3">
-                  <div class="text-center">
-                    <div class="text-h4 font-weight-bold text-success">
-                      {{ formatNumber(globalStats.summary.uniqueProxiesUsed || 0) }}
-                    </div>
-                    <div class="text-caption text-medium-emphasis">Unique Proxies</div>
-                  </div>
-                </v-col>
-                <v-col cols="6" md="3">
-                  <div class="text-center">
-                    <div class="text-h4 font-weight-bold text-info">
-                      {{ formatPercentage(parseFloat(globalStats.summary.averageSuccessRate) || 0) }}
-                    </div>
-                    <div class="text-caption text-medium-emphasis">Success Rate</div>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
+          <!-- No data -->
+          <div v-else-if="!globalStats || !globalStats.summary" class="flex flex-col items-center justify-center py-16">
+            <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"/>
+              </svg>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">No global proxy usage data available</p>
+            <button @click="refreshData" class="px-4 py-2 bg-white border border-gray-300 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">Refresh</button>
+          </div>
 
-          <!-- Tabs for different views -->
-          <v-tabs v-model="activeTab" class="mb-4">
-            <v-tab value="performance">Top Proxies</v-tab>
-            <v-tab value="usage">Recent Usage</v-tab>
-            <v-tab value="costs">Cost Analysis</v-tab>
-          </v-tabs>
+          <!-- Data -->
+          <div v-else>
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-3 gap-4 mb-6">
+              <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+                <div class="text-2xl font-bold text-blue-600">{{ formatNumber(globalStats.summary.totalProxyRequests || 0) }}</div>
+                <div class="text-xs text-gray-500 mt-1">Total Requests</div>
+              </div>
+              <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+                <div class="text-2xl font-bold text-green-600">{{ formatNumber(globalStats.summary.uniqueProxiesUsed || 0) }}</div>
+                <div class="text-xs text-gray-500 mt-1">Unique Proxies</div>
+              </div>
+              <div class="bg-white rounded-xl border border-gray-200 p-4 text-center">
+                <div class="text-2xl font-bold text-indigo-600">{{ formatPercentage(parseFloat(globalStats.summary.averageSuccessRate) || 0) }}</div>
+                <div class="text-xs text-gray-500 mt-1">Success Rate</div>
+              </div>
+            </div>
 
-          <v-window v-model="activeTab">
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 mb-4">
+              <nav class="flex space-x-6">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab.value"
+                  @click="activeTab = tab.value"
+                  :class="[
+                    'pb-3 text-sm font-medium border-b-2 transition-colors',
+                    activeTab === tab.value
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ]"
+                >
+                  {{ tab.label }}
+                </button>
+              </nav>
+            </div>
+
             <!-- Top Proxies Tab -->
-            <v-window-item value="performance">
-              <v-card variant="outlined">
-                <v-card-title class="d-flex justify-space-between align-center">
-                  Top Performing Proxies
-                  <v-btn
-                    icon="mdi-refresh"
-                    size="small"
-                    variant="text"
-                    :loading="loading"
-                    @click="refreshData"
-                  />
-                </v-card-title>
-                <v-card-text>
-                  <v-data-table
-                    :headers="performanceHeaders"
-                    :items="globalStats.topProxies || []"
-                    :loading="loading"
-                    class="elevation-0"
-                  >
-                    <template v-slot:item.proxyId="{ item }">
-                      <div>
-                        <div class="font-weight-medium">{{ item.proxyId || 'Unknown' }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.location || 'Unknown Location' }}</div>
-                      </div>
-                    </template>
-                    <template v-slot:item.totalRequests="{ item }">
-                      {{ formatNumber(item.totalRequests || 0) }}
-                    </template>
-                    <template v-slot:item.successRate="{ item }">
-                      <v-chip
-                        :color="getSuccessRateColor(item.successRate || 0)"
-                        size="small"
-                        variant="tonal"
-                      >
-                        {{ formatPercentage(item.successRate || 0) }}
-                      </v-chip>
-                    </template>
-                    <template v-slot:item.lastUsed="{ item }">
-                      {{ getRelativeTime(item.lastUsed) }}
-                    </template>
-                  </v-data-table>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
+            <div v-if="activeTab === 'performance'" class="bg-white rounded-xl border border-gray-200">
+              <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-900">Top Performing Proxies</h3>
+                <button @click="refreshData" :disabled="loading" class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors">
+                  <svg class="w-4 h-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proxy ID</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Requests</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Success Rate</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Used</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-if="!globalStats.topProxies || globalStats.topProxies.length === 0">
+                      <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-400">No data</td>
+                    </tr>
+                    <tr v-for="item in (globalStats.topProxies || [])" :key="item.proxyId" class="hover:bg-gray-50 transition-colors">
+                      <td class="px-4 py-3">
+                        <div class="text-sm font-medium text-gray-900">{{ item.proxyId || 'Unknown' }}</div>
+                        <div class="text-xs text-gray-500">{{ item.location || 'Unknown Location' }}</div>
+                      </td>
+                      <td class="px-4 py-3 text-sm text-gray-700">{{ formatNumber(item.totalRequests || 0) }}</td>
+                      <td class="px-4 py-3">
+                        <span :class="['inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium', getSuccessRateBadgeClass(item.successRate || 0)]">
+                          {{ formatPercentage(item.successRate || 0) }}
+                        </span>
+                      </td>
+                      <td class="px-4 py-3 text-sm text-gray-500">{{ getRelativeTime(item.lastUsed) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             <!-- Recent Usage Tab -->
-            <v-window-item value="usage">
-              <v-card variant="outlined">
-                <v-card-title class="d-flex justify-space-between align-center">
-                  Recent Proxy Usage
-                  <v-btn
-                    icon="mdi-refresh"
-                    size="small"
-                    variant="text"
-                    :loading="loading"
-                    @click="refreshData"
-                  />
-                </v-card-title>
-                <v-card-text>
-                  <v-data-table
-                    :headers="usageHeaders"
-                    :items="globalStats.recentUsage || []"
-                    :loading="loading"
-                    class="elevation-0"
-                  >
-                    <template v-slot:item.url="{ item }">
-                      <div class="text-truncate" style="max-width: 200px;">
-                        {{ item.url }}
-                      </div>
-                    </template>
-                    <template v-slot:item.proxyId="{ item }">
-                      <div>
-                        <div class="font-weight-medium">{{ item.proxyId || 'Unknown' }}</div>
-                        <div class="text-caption text-medium-emphasis">{{ item.proxyLocation || 'Unknown Location' }}</div>
-                      </div>
-                    </template>
-                    <template v-slot:item.totalRequests="{ item }">
-                      {{ formatNumber(item.totalRequests || 0) }}
-                    </template>
-                    <template v-slot:item.successCount="{ item }">
-                      <span class="text-success">{{ formatNumber(item.successCount || 0) }}</span>
-                    </template>
-                    <template v-slot:item.failureCount="{ item }">
-                      <span class="text-error">{{ formatNumber(item.failureCount || 0) }}</span>
-                    </template>
-                    <template v-slot:item.lastUsed="{ item }">
-                      {{ getRelativeTime(item.lastUsed) }}
-                    </template>
-                  </v-data-table>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
+            <div v-if="activeTab === 'usage'" class="bg-white rounded-xl border border-gray-200">
+              <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-900">Recent Proxy Usage</h3>
+                <button @click="refreshData" :disabled="loading" class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors">
+                  <svg class="w-4 h-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proxy</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requests</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Success</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Failures</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Used</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-if="!globalStats.recentUsage || globalStats.recentUsage.length === 0">
+                      <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-400">No data</td>
+                    </tr>
+                    <tr v-for="item in (globalStats.recentUsage || [])" :key="item.url + item.proxyId" class="hover:bg-gray-50 transition-colors">
+                      <td class="px-4 py-3 max-w-[200px]">
+                        <div class="text-sm text-gray-700 truncate">{{ item.url }}</div>
+                      </td>
+                      <td class="px-4 py-3">
+                        <div class="text-sm font-medium text-gray-900">{{ item.proxyId || 'Unknown' }}</div>
+                        <div class="text-xs text-gray-500">{{ item.proxyLocation || 'Unknown Location' }}</div>
+                      </td>
+                      <td class="px-4 py-3 text-sm text-gray-700">{{ formatNumber(item.totalRequests || 0) }}</td>
+                      <td class="px-4 py-3 text-sm text-green-600 font-medium">{{ formatNumber(item.successCount || 0) }}</td>
+                      <td class="px-4 py-3 text-sm text-red-600 font-medium">{{ formatNumber(item.failureCount || 0) }}</td>
+                      <td class="px-4 py-3 text-sm text-gray-500">{{ getRelativeTime(item.lastUsed) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             <!-- Cost Analysis Tab -->
-            <v-window-item value="costs">
-              <v-card variant="outlined">
-                <v-card-title class="d-flex justify-space-between align-center">
-                  Cost Analysis
-                  <div class="d-flex gap-2">
-                    <v-btn
-                      icon="mdi-refresh"
-                      size="small"
-                      variant="text"
-                      :loading="loading"
-                      @click="refreshData"
-                    />
-                    <v-btn
-                      size="small"
-                      variant="outlined"
-                      color="warning"
+            <div v-if="activeTab === 'costs'" class="space-y-4">
+              <div class="bg-white rounded-xl border border-gray-200">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+                  <h3 class="text-sm font-semibold text-gray-900">Cost Analysis</h3>
+                  <div class="flex items-center space-x-2">
+                    <button @click="refreshData" :disabled="loading" class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors">
+                      <svg class="w-4 h-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                      </svg>
+                    </button>
+                    <button
                       @click="showCleanupDialog = true"
+                      class="px-3 py-1.5 text-sm font-medium border border-yellow-300 text-yellow-700 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors"
                     >
                       Cleanup Old Data
-                    </v-btn>
+                    </button>
                   </div>
-                </v-card-title>
-                <v-card-text>
-                  <!-- Cost Summary -->
-                  <div class="cost-summary">
-                    <v-row>
-                      <v-col cols="4">
-                        <div class="text-center">
-                          <div class="text-h5 font-weight-bold text-primary">
-                            {{ formatNumber(costAnalysis.totalRequests || 0) }}
-                          </div>
-                          <div class="text-caption text-medium-emphasis">Total Requests</div>
-                        </div>
-                      </v-col>
-                      <v-col cols="4">
-                        <div class="text-center">
-                          <div class="text-h5 font-weight-bold text-info">
-                            {{ formatCost((costAnalysis.totalCost || 0) / Math.max(costAnalysis.totalRequests || 1, 1)) }}
-                          </div>
-                          <div class="text-caption text-medium-emphasis">Avg Cost/Request</div>
-                        </div>
-                      </v-col>
-                    </v-row>
+                </div>
+
+                <!-- Cost summary -->
+                <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 border-b border-gray-200">
+                  <div class="text-center">
+                    <div class="text-xl font-bold text-blue-600">{{ formatNumber(costAnalysis.totalRequests || 0) }}</div>
+                    <div class="text-xs text-gray-500 mt-0.5">Total Requests</div>
                   </div>
+                  <div class="text-center">
+                    <div class="text-xl font-bold text-indigo-600">{{ formatCost((costAnalysis.totalCost || 0) / Math.max(costAnalysis.totalRequests || 1, 1)) }}</div>
+                    <div class="text-xs text-gray-500 mt-0.5">Avg Cost / Request</div>
+                  </div>
+                </div>
 
-                  <!-- Date Range Filter -->
-                  <v-row class="mb-4">
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="costAnalysisParams.startDate"
-                        label="Start Date"
-                        type="date"
-                        variant="outlined"
-                        density="compact"
-                        @update:model-value="updateCostAnalysis"
-                      />
-                    </v-col>
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="costAnalysisParams.endDate"
-                        label="End Date"
-                        type="date"
-                        variant="outlined"
-                        density="compact"
-                        @update:model-value="updateCostAnalysis"
-                      />
-                    </v-col>
-                  </v-row>
+                <!-- Date range filter -->
+                <div class="grid grid-cols-2 gap-4 p-4 border-b border-gray-200">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                    <input
+                      v-model="costAnalysisParams.startDate"
+                      type="date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      @change="updateCostAnalysis"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+                    <input
+                      v-model="costAnalysisParams.endDate"
+                      type="date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      @change="updateCostAnalysis"
+                    />
+                  </div>
+                </div>
 
-                  <!-- Daily Costs Table -->
-                  <v-data-table
-                    :headers="costHeaders"
-                    :items="costAnalysis.dailyCosts || []"
-                    :loading="loading"
-                    class="elevation-0"
-                  >
-                    <template v-slot:item.date="{ item }">
-                      {{ formatDate(item.date) }}
-                    </template>
-                    <template v-slot:item.totalRequests="{ item }">
-                      {{ formatNumber(item.totalRequests || 0) }}
-                    </template>
-                    <template v-slot:item.uniqueProxies="{ item }">
-                      {{ formatNumber(item.uniqueProxies || 0) }}
-                    </template>
-                  </v-data-table>
-                </v-card-text>
-              </v-card>
-            </v-window-item>
-          </v-window>
+                <!-- Daily costs table -->
+                <div class="overflow-x-auto">
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Requests</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unique Proxies</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr v-if="!costAnalysis.dailyCosts || costAnalysis.dailyCosts.length === 0">
+                        <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-400">No data</td>
+                      </tr>
+                      <tr v-for="item in (costAnalysis.dailyCosts || [])" :key="item.date" class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ formatDate(item.date) }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ formatNumber(item.totalRequests || 0) }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700">{{ formatNumber(item.uniqueProxies || 0) }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </v-card-text>
 
-      <v-card-actions class="pa-4">
-        <v-spacer />
-        <v-btn variant="outlined" @click="closeModal">Close</v-btn>
-      </v-card-actions>
-    </v-card>
+        <!-- Footer -->
+        <div class="flex justify-end px-6 py-4 border-t border-gray-200 flex-shrink-0">
+          <button
+            @click="closeModal"
+            class="px-4 py-2 border border-gray-300 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Cleanup Confirmation Dialog -->
-    <v-dialog v-model="showCleanupDialog" max-width="400px">
-      <v-card>
-        <v-card-title>Cleanup Old Data</v-card-title>
-        <v-card-text>
-          <p>This will permanently delete proxy usage records older than the specified number of days.</p>
-          <v-text-field
-            v-model="cleanupDays"
-            label="Days to keep"
-            type="number"
-            variant="outlined"
-            density="compact"
-            :rules="[v => v > 0 || 'Must be greater than 0']"
-          />
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="outlined" @click="showCleanupDialog = false">Cancel</v-btn>
-          <v-btn
-            color="warning"
-            @click="performCleanup"
-            :loading="loading"
-          >
-            Cleanup
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-dialog>
+    <div v-if="showCleanupDialog" class="fixed inset-0 z-[60] overflow-y-auto">
+      <div class="fixed inset-0 bg-black bg-opacity-50" @click="showCleanupDialog = false"></div>
+      <div class="relative flex min-h-screen items-center justify-center p-4">
+        <div class="relative bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
+          <h3 class="text-base font-semibold text-gray-900 mb-2">Cleanup Old Data</h3>
+          <p class="text-sm text-gray-600 mb-4">This will permanently delete proxy usage records older than the specified number of days.</p>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Days to keep</label>
+            <input
+              v-model.number="cleanupDays"
+              type="number"
+              min="1"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div class="flex justify-end space-x-3">
+            <button
+              @click="showCleanupDialog = false"
+              class="px-4 py-2 border border-gray-300 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              @click="performCleanup"
+              :disabled="loading"
+              class="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+            >
+              <svg v-if="loading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span>Cleanup</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -335,30 +355,12 @@ const costAnalysisParams = ref({
   endDate: new Date().toISOString().split('T')[0]
 })
 
-// Table headers
-const performanceHeaders = [
-  { title: 'Proxy ID', key: 'proxyId', sortable: true },
-  { title: 'Total Requests', key: 'totalRequests', sortable: true },
-  { title: 'Success Rate', key: 'successRate', sortable: true },
-  { title: 'Last Used', key: 'lastUsed', sortable: true }
+const tabs = [
+  { value: 'performance', label: 'Top Proxies' },
+  { value: 'usage', label: 'Recent Usage' },
+  { value: 'costs', label: 'Cost Analysis' }
 ]
 
-const usageHeaders = [
-  { title: 'URL', key: 'url', sortable: true },
-  { title: 'Proxy', key: 'proxyId', sortable: true },
-  { title: 'Total Requests', key: 'totalRequests', sortable: true },
-  { title: 'Success', key: 'successCount', sortable: true },
-  { title: 'Failures', key: 'failureCount', sortable: true },
-  { title: 'Last Used', key: 'lastUsed', sortable: true }
-]
-
-const costHeaders = [
-  { title: 'Date', key: 'date', sortable: true },
-  { title: 'Total Requests', key: 'totalRequests', sortable: true },
-  { title: 'Unique Proxies', key: 'uniqueProxies', sortable: true }
-]
-
-// Watch for modal open to load data
 const loadData = async () => {
   try {
     await fetchGlobalProxyStats()
@@ -390,7 +392,7 @@ const performCleanup = async () => {
   try {
     await cleanupProxyUsage(cleanupDays.value)
     showCleanupDialog.value = false
-    await loadData() // Refresh data after cleanup
+    await loadData()
   } catch (err) {
     console.error('Error performing cleanup:', err)
   }
@@ -400,14 +402,12 @@ const closeModal = () => {
   isOpen.value = false
 }
 
-// Add escape key handler
 const handleEscape = (event) => {
   if (event.key === 'Escape' && isOpen.value) {
     closeModal()
   }
 }
 
-// Add event listener when modal opens
 watch(isOpen, (newValue) => {
   if (newValue) {
     document.addEventListener('keydown', handleEscape)
@@ -417,24 +417,14 @@ watch(isOpen, (newValue) => {
   }
 })
 
-// Cleanup on unmount
 onUnmounted(() => {
   document.removeEventListener('keydown', handleEscape)
 })
 
-// Helper functions
-const getSuccessRateColor = (rate) => {
-  if (rate >= 90) return 'success'
-  if (rate >= 70) return 'warning'
-  return 'error'
+// Returns Tailwind badge classes based on success rate
+const getSuccessRateBadgeClass = (rate) => {
+  if (rate >= 90) return 'bg-green-100 text-green-700'
+  if (rate >= 70) return 'bg-yellow-100 text-yellow-700'
+  return 'bg-red-100 text-red-700'
 }
 </script>
-
-<style scoped>
-.cost-summary {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-</style> 

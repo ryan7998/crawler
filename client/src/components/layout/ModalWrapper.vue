@@ -11,12 +11,6 @@
     v-model="crawlStore.showCreateModal"
     :crawl-data="crawlStore.selectedCrawl"
     @crawl-created="handleCrawlCreated"
-    @error="handleModalError"
-  />
-
-  <GlobalExportModal
-    v-model="crawlStore.showGlobalExportModal"
-    @export-success="handleGlobalExportSuccess"
   />
 
   <ExportModal
@@ -49,7 +43,6 @@
     confirm-text="Delete All"
     cancel-text="Cancel"
     color="error"
-    icon="mdi-delete"
     @confirm="confirmBulkDelete"
   />
 
@@ -61,7 +54,6 @@
     confirm-text="Delete Crawl"
     cancel-text="Cancel"
     color="error"
-    icon="mdi-delete"
     :loading="deleteLoading"
     @confirm="confirmDeleteCrawl"
   />
@@ -73,7 +65,6 @@
     confirm-text="Clear Data"
     cancel-text="Cancel"
     color="warning"
-    icon="mdi-database-remove"
     :loading="clearDataLoading"
     @confirm="confirmClearData"
   />
@@ -85,7 +76,6 @@
     confirm-text="Clear Queue"
     cancel-text="Cancel"
     color="warning"
-    icon="mdi-queue-remove"
     :loading="clearQueueLoading"
     @confirm="confirmClearQueue"
   />
@@ -97,18 +87,15 @@
     confirm-text="Restart Crawl"
     cancel-text="Cancel"
     color="info"
-    icon="mdi-restart"
     :loading="restartLoading"
     @confirm="confirmRestartUrls"
   />
 </template>
 
 <script setup>
-import { inject, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 import AuthModal from '../modals/AuthModal.vue'
 import CreateCrawlModal from '../modals/CreateCrawlModal.vue'
-import GlobalExportModal from '../modals/GlobalExportModal.vue'
 import ExportModal from '../modals/ExportModal.vue'
 import QueueStatusModal from '../modals/QueueStatusModal.vue'
 import ConfirmationModal from '../modals/ui/ConfirmationModal.vue'
@@ -116,6 +103,7 @@ import { useCrawlStore } from '../../stores/crawlStore'
 import { useCrawlManagement } from '../../composables/useCrawlManagement'
 import { useCrawlActions } from '../../composables/useCrawlActions'
 import { useApiService } from '../../composables/useApiService'
+import { useNotification } from '../../composables/useNotification'
 
 // Use crawl store for modal state
 const crawlStore = useCrawlStore()
@@ -131,14 +119,10 @@ const {
   confirmClearCrawlQueue: clearQueueAction
 } = useCrawlActions()
 
-// Router for navigation
-const router = useRouter()
-
 // API service
 const { post, del } = useApiService()
 
-// Inject notification function
-const showNotification = inject('showNotification')
+const { showNotification } = useNotification()
 
 // Loading states for new modals
 const clearDataLoading = ref(false)
@@ -161,14 +145,6 @@ const handleCrawlCreated = (crawl) => {
   }
   crawlStore.triggerRefresh()
   showNotification('Crawl saved successfully', 'success')
-}
-
-const handleModalError = (errorMessage) => {
-  showNotification(errorMessage, 'error')
-}
-
-const handleGlobalExportSuccess = (exportResult) => {
-  showNotification('Global export completed successfully!', 'success')
 }
 
 const handleExportSuccess = (exportResult) => {
@@ -286,8 +262,4 @@ const confirmRestartUrls = async () => {
   }
 }
 
-// Expose auth modal handler for global access
-window.openAuthModal = (mode) => {
-  crawlStore.openAuthModal(mode)
-}
 </script>

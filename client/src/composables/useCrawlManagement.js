@@ -65,7 +65,7 @@ export function useCrawlManagement() {
             return { success: false, message: 'Not authenticated' }
         }
         
-        runAllLoading.value = true
+        setLoading(LOADING_KEYS.START_CRAWL, true)
         try {
             const data = await post('/api/runallcrawls')
             const { message, started, skipped } = data
@@ -76,7 +76,7 @@ export function useCrawlManagement() {
             showNotification(error.message, 'error')
             return { success: false, message: error.message }
         } finally {
-            runAllLoading.value = false
+            setLoading(LOADING_KEYS.START_CRAWL, false)
         }
     }
 

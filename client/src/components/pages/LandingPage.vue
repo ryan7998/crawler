@@ -5,7 +5,7 @@
       <div class="text-center">
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
           Extract Data from
-          <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent animated-gradient">
             Any Website
           </span>
         </h1>
@@ -182,15 +182,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useCrawlStore } from '../../stores/crawlStore'
 
+const crawlStore = useCrawlStore()
 const featuresSection = ref(null)
-
-// Get current year
 const currentYear = computed(() => new Date().getFullYear())
 
-// Use store for auth modal
 const openAuthModal = (mode) => {
-  window.openAuthModal(mode)
+  crawlStore.openAuthModal(mode)
 }
 
 const scrollToFeatures = () => {
@@ -217,25 +216,14 @@ const scrollToFeatures = () => {
   background: #94a3b8;
 }
 
-/* Smooth transitions for all interactive elements */
-* {
-  transition: all 0.2s ease-in-out;
-}
-
-/* Gradient text animation */
+/* Animated gradient for hero heading */
 @keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.bg-gradient-to-r {
+.animated-gradient {
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;
 }

@@ -188,10 +188,13 @@ export const COMPONENT_SIZES = {
   ICON_SIZE: 'w-5 h-5'
 }
 
-// Animation Durations
+// Animation Durations (Tailwind classes)
 export const ANIMATION_DURATIONS = {
   FAST: 'duration-150',
   NORMAL: 'duration-200',
   SLOW: 'duration-300'
 }
+
+// Animation duration in milliseconds (mirrors ANIMATION_DURATIONS.SLOW)
+export const SLIDE_OVER_DURATION_MS = 300
 

@@ -61,24 +61,20 @@
     <ProxyStatsModal
       v-model="showProxyStatsModal"
       :crawl-id="crawlId"
-      @update:modelValue="statsBarStore.closeProxyModal"
     />
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watch, inject, computed, onUnmounted, shallowRef } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onMounted, ref, watch, computed, onUnmounted, shallowRef } from 'vue'
+import { useRoute } from 'vue-router'
 import ViewResult from '../features/crawl/ViewResult.vue'
 import SlideOver from '../ui/SlideOver.vue'
-import { formatDate } from '../../utils/formattingUtils'
 import ProxyStatsModal from '../modals/ProxyStatsModal.vue'
-import StatusPill from '../ui/data/StatusPill.vue'
 import CrawlDetailsHeader from './components/CrawlDetailsHeader.vue'
 import CrawlUrlsTable from './components/CrawlUrlsTable.vue'
 import CrawlDetailsSidebar from './components/CrawlDetailsSidebar.vue'
 import { useProxyStats } from '../../composables/useProxyStats'
-import { useSocketConnection } from '../../composables/useSocketConnection'
 import { useApiService } from '../../composables/useApiService'
 import { useCrawlActions } from '../../composables/useCrawlActions'
 import { useCrawlData } from '../../composables/useCrawlData'
@@ -88,46 +84,31 @@ import { useCrawlDetailsView } from '../../composables/useCrawlDetailsView'
 import { useCrawlExport } from '../../composables/useCrawlExport'
 import { useCrawlSocket } from '../../composables/useCrawlSocket'
 import { useNotification } from '../../composables/useNotification'
-import { saveExportMetadata, loadExportMetadata } from '../../utils/fileUtils'
-import { debounce, throttle, shallowEqual } from '../../utils/performanceUtils'
 
 // Get crawlId from route params
 const route = useRoute()
-const router = useRouter()
 const crawlId = computed(() => route.params.crawlId)
 
 // Initialize composables
-const { get, post, del, loading: apiLoading, error: apiError } = useApiService()
+const { loading: apiLoading } = useApiService()
 const { confirmDeleteUrlData, confirmRestartSelectedUrls, startCrawl } = useCrawlActions()
-const { crawl, errorMessage, excerpts, liveStatusDictionary, hasCrawlData, fetchCrawlData, refreshCrawlData, clearLiveStatusDictionary, updateLiveStatus } = useCrawlData()
+const { crawl, errorMessage, excerpts, liveStatusDictionary, fetchCrawlData, clearLiveStatusDictionary, updateLiveStatus } = useCrawlData()
 const crawlStore = useCrawlStore()
 const statsBarStore = useStatsBarStore()
 
-// Initialize new composables
-const { selectedUrls, selectAll, toggleSelectAll, clearSelection, toggleUrlSelection } = useCrawlDetailsView(crawl)
-const { latestExportLink, latestExportDate, loadExportData, handleExportSuccess } = useCrawlExport(crawlId)
-const { isConnected, logs, queueStatus, connectToCrawl, disconnectFromCrawl } = useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveStatus)
-const { handleError, handleSuccess, handleApiError } = useNotification()
+const { selectedUrls, selectAll, toggleSelectAll, toggleUrlSelection } = useCrawlDetailsView(crawl)
+const { latestExportLink, latestExportDate, loadExportData } = useCrawlExport(crawlId)
+const { queueStatus, connectToCrawl, disconnectFromCrawl } = useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveStatus)
+const { handleApiError } = useNotification()
 
 const viewResults = shallowRef({})
-const clearQueueLoading = ref(false)
 
 // Initialize proxy stats composable
 const {
   proxyStats,
   loading: proxyStatsLoading,
-  error: proxyStatsError,
   fetchCrawlProxyStats,
-  formattedCrawlStats,
-  formattedGlobalStats
 } = useProxyStats()
-
-
-// Computed properties for proxy stats
-const detailedProxyStats = computed(() => proxyStats.value)
-
-// Inject the notification function
-const showNotification = inject('showNotification')
 
 // These functions are now provided by useCrawlData composable
 
@@ -223,20 +204,10 @@ watch(crawlId, async (newCrawlId, oldCrawlId) => {
             // Clear previous data
             crawl.value = null
             errorMessage.value = ''
-            
-            // Fetch new crawl data
+
             await fetchCrawlData(newCrawlId)
             await fetchProxyStats()
-            
-            // Load saved export link for new crawl
-            const savedExport = loadExportMetadata(newCrawlId)
-            if (savedExport) {
-                latestExportLink.value = savedExport.sheetUrl
-                latestExportDate.value = new Date(savedExport.exportDate)
-            }
-            
-            // Join the room for the new crawl ID
-            joinRoom(newCrawlId)
+            loadExportData()
         } catch (error) {
             console.error('Error loading new crawl data:', error)
             errorMessage.value = 'Failed to load crawl data'

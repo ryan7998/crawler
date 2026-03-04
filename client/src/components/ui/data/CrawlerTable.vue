@@ -301,13 +301,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, inject } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRelativeTime } from '../../../utils/formattingUtils'
 import { processTableData, toggleSort } from '../../../utils/tableUtils'
 import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../../stores/crawlStore'
 import { useCrawlManagement } from '../../../composables/useCrawlManagement'
+import { useNotification } from '../../../composables/useNotification'
 
 // Router for navigation
 const router = useRouter()
@@ -318,8 +319,7 @@ const crawlStore = useCrawlStore()
 // Initialize crawl management for data fetching
 const { fetchCrawls, toggleDisableCrawl, disableLoadingId } = useCrawlManagement()
 
-// Inject the notification function
-const showNotification = inject('showNotification')
+const { showNotification } = useNotification()
 
 // Navigation and action functions
 const openCrawl = (crawlId) => {
@@ -386,7 +386,7 @@ const getRowClasses = (crawl) => [
 const getToggleSwitchClasses = (crawl) => [
   'relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out',
   crawl.disabled ? 'bg-gray-300' : 'bg-green-500',
-  disableLoadingId === crawl._id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+  disableLoadingId.value === crawl._id ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
 ]
 
 const getToggleHandleClasses = (crawl) => [

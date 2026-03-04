@@ -70,15 +70,11 @@
 </template>
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
-import { ANIMATION_DURATIONS } from '../../constants/crawlDetailsConstants'
+import { ANIMATION_DURATIONS, SLIDE_OVER_DURATION_MS } from '../../constants/crawlDetailsConstants'
 
 const emits = defineEmits(['closeSlideOver'])
 
-// Animation state
 const isVisible = ref(false)
-
-// Animation timing using constants
-const ANIMATION_DURATION = 300 // duration-300 = 300ms
 
 // Animate in when component mounts
 onMounted(async () => {
@@ -95,6 +91,6 @@ const handleClose = () => {
     // Wait for animation to complete before emitting
     setTimeout(() => {
         emits('closeSlideOver')
-    }, ANIMATION_DURATION)
+    }, SLIDE_OVER_DURATION_MS)
 }
 </script>

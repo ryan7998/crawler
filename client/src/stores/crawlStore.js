@@ -2,7 +2,6 @@ import { defineStore } from "pinia"
 
 export const useCrawlStore = defineStore('crawl', {
     state: () => ({
-        currentCrawl: {},
         // Crawls data
         allCrawls: [],
         crawlsLoading: false,
@@ -12,7 +11,6 @@ export const useCrawlStore = defineStore('crawl', {
         // Modal states
         showCreateModal: false,
         selectedCrawl: null,
-        showGlobalExportModal: false,
         showExportModal: false,
         showQueueStatusModal: false,
         showRunAllConfirm: false,
@@ -52,12 +50,6 @@ export const useCrawlStore = defineStore('crawl', {
         }
     },
     actions: {
-        setData(data) {
-            this.currentCrawl = data
-        },
-        clearData() {
-            this.currentCrawl = {}
-        },
         // Modal actions
         openCreateModal(crawlData = null) {
             this.selectedCrawl = crawlData
@@ -70,13 +62,7 @@ export const useCrawlStore = defineStore('crawl', {
         setSelectedCrawl(crawl) {
             this.selectedCrawl = crawl
         },
-        // Global modals
-        openGlobalExportModal() {
-            this.showGlobalExportModal = true
-        },
-        closeGlobalExportModal() {
-            this.showGlobalExportModal = false
-        },
+        // Modals
         openExportModal() {
             this.showExportModal = true
         },
@@ -188,8 +174,7 @@ export const useCrawlStore = defineStore('crawl', {
             return this.selectedCrawls.length > 0
         },
         confirmDeleteCrawl(crawlId) {
-            // Store the crawl ID for single delete without selecting it
-            this.selectedCrawl = crawlId
+            this.selectedCrawl = this.allCrawls.find(c => c._id === crawlId) || crawlId
             this.openBulkDeleteConfirm()
         },
         toggleSelectedCrawl(crawlId) {

@@ -151,8 +151,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, inject } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useApiService } from '../../composables/useApiService'
+import { useNotification } from '../../composables/useNotification'
 
 const props = defineProps({
   modelValue: {
@@ -172,8 +173,7 @@ const queues = ref([])
 const summary = ref(null)
 const error = ref(null)
 
-// Inject notification function
-const showNotification = inject('showNotification')
+const { showNotification } = useNotification()
 
 // Computed
 const hasActiveQueues = computed(() => {

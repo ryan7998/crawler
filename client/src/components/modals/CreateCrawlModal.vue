@@ -299,7 +299,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'crawl-created'])
 
-const { post, put, loading: apiLoading } = useApiService()
+const { post, put } = useApiService()
 
 // Modal state
 const dialog = computed({
@@ -461,19 +461,3 @@ const saveCrawl = async () => {
   }
 }
 </script>
-
-<style scoped>
-/* Custom animations */
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-</style>

@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   // API service
-  const { post, get } = useApiService()
+  const { post, put, get } = useApiService()
 
   // Actions
   const setAuthData = (userData, authToken) => {
@@ -138,7 +138,7 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       error.value = null
 
-      const response = await post('/api/auth/profile', profileData, { method: 'PUT' })
+      const response = await put('/api/auth/profile', profileData)
       
       if (response.success) {
         user.value = response.data
@@ -159,7 +159,7 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       error.value = null
 
-      const response = await post('/api/auth/change-password', passwordData, { method: 'PUT' })
+      const response = await put('/api/auth/change-password', passwordData)
       
       if (response.success) {
         return { success: true, message: 'Password changed successfully' }

@@ -94,25 +94,6 @@
                                     </svg>
                                     <span>Queue Status</span>
                                 </button>
-                                <button
-                                    @click="openGlobalExportModal(); showUserMenu = false"
-                                    class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    <span>Export All</span>
-                                </button>
-                                <button
-                                    @click="openGlobalSheet(); showUserMenu = false"
-                                    :disabled="!globalSheetUrl"
-                                    class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    <span>Open Sheet</span>
-                                </button>
                                 <div class="border-t border-gray-200 my-2"></div>
                                 <button
                                     @click="handleLogout(); showUserMenu = false"
@@ -134,75 +115,30 @@
 </template>
 
 <script setup>
-import { ref, inject, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCrawlManagement } from '../../composables/useCrawlManagement'
 import { useAuth } from '../../composables/useAuth'
 import { useCrawlStore } from '../../stores/crawlStore'
+import { useNotification } from '../../composables/useNotification'
 
 const router = useRouter()
-const showNotification = inject('showNotification')
+const { showNotification } = useNotification()
 
-// Define emits
-const emit = defineEmits(['open-auth-modal'])
-
-// Use the crawl management composable
-const {
-    runAllLoading,
-    runAllCrawls: runAllCrawlsFromComposable
-} = useCrawlManagement()
-
-// Use the auth composable
-const {
-    isAuthenticated,
-    userFullName,
-    logout
-} = useAuth()
-
-// Use the crawl store
+const { runAllLoading } = useCrawlManagement()
+const { isAuthenticated, userFullName, logout } = useAuth()
 const crawlStore = useCrawlStore()
 
-// Local state
 const showProfile = ref(false)
 const showUserMenu = ref(false)
 
-// Open create modal
-const openCreateModal = () => {
-    crawlStore.openCreateModal()
-}
+const openCreateModal = () => crawlStore.openCreateModal()
+const openQueueStatusModal = () => crawlStore.openQueueStatusModal()
+const openRunAllConfirm = () => crawlStore.openRunAllConfirm()
+const goToDashboard = () => router.push('/')
 
-// Modal functions
-const openGlobalExportModal = () => {
-    crawlStore.openGlobalExportModal()
-}
-
-const openQueueStatusModal = () => {
-    crawlStore.openQueueStatusModal()
-}
-
-const openRunAllConfirm = () => {
-    crawlStore.openRunAllConfirm()
-}
-
-const openGlobalSheet = () => {
-  if (globalSheetUrl.value) {
-    window.open(globalSheetUrl.value, '_blank')
-  }
-}
-
-// Navigation methods
-const goToDashboard = () => {
-  if (isAuthenticated.value) {
-    router.push('/')
-  } else {
-    router.push('/')
-  }
-}
-
-// Authentication methods
 const openAuthModal = (mode) => {
-  // Emit event to parent component to handle auth modal
-  emit('open-auth-modal', mode)
+  crawlStore.openAuthModal(mode)
 }
 
 const handleLogout = async () => {
@@ -225,18 +161,3 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
-
-<style scoped>
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-</style>

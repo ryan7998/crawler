@@ -113,10 +113,3 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown)
 })
 </script>
-
-<style scoped>
-/* Ensure modal is above everything */
-.fixed {
-  z-index: 9999;
-}
-</style>

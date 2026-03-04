@@ -182,10 +182,11 @@
 </template>
 
 <script setup>
-import { computed, inject, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useStatsBarStore } from '../../../../stores/statsBarStore'
 import { useCrawlStore } from '../../../../stores/crawlStore'
 import { useCrawlActions } from '../../../../composables/useCrawlActions'
+import { useNotification } from '../../../../composables/useNotification'
 import { formatNumber, formatPercentage } from '../../../../utils/formattingUtils'
 import { ANIMATION_DURATIONS } from '../../../../constants/crawlDetailsConstants'
 
@@ -205,7 +206,7 @@ const {
   refreshCrawl,
   configureCrawl
 } = useCrawlActions()
-const showNotification = inject('showNotification')
+const { showNotification } = useNotification()
 
 const contextData = computed(() => statsBarStore.contextData)
 const proxyStats = computed(() => statsBarStore.proxyStats)
@@ -289,8 +290,8 @@ const handleConfigure = () => {
 const handleStartCrawl = async () => {
   await startCrawl(
     contextData.value.crawlId,
-    [], // URLs - would need to be passed from context
-    [] // Selectors - would need to be passed from context
+    contextData.value.urls || [],
+    contextData.value.selectors || []
   )
   closeDropdown()
 }

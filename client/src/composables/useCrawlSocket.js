@@ -31,25 +31,30 @@ export function useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveS
   // Methods
   const setupSocketListeners = () => {
     on("crawlLog", async (data) => {
-      // Use throttled log update to prevent excessive log additions
       throttledLogUpdate(data)
       
-      // Update crawl status if it's a final status update
       if (data.status === 'completed' || data.status === 'failed') {
         crawl.value.status = data.status
         clearStartedStatuses()
       } else if (data.url) {
-        // Use debounced status update to prevent excessive updates
         debouncedStatusUpdate(data.url, data.status)
       }
 
-      // Append new crawled data into FE rather than making a new api call
       if (data.status === 'success') {
         if (!crawl.value.aggregatedData[data.url]) {
           crawl.value.aggregatedData[data.url] = []
         }
         crawl.value.aggregatedData[data.url]
           .push({ data: data.result, date: new Date(), status: data.status })
+      }
+    })
+
+    on("queueStatus", (data) => {
+      queueStatus.value = {
+        active: data.active ?? 0,
+        waiting: data.waiting ?? 0,
+        delayed: data.delayed ?? 0,
+        total: (data.active ?? 0) + (data.waiting ?? 0) + (data.delayed ?? 0)
       }
     })
   }

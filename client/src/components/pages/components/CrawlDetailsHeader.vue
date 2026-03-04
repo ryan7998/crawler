@@ -95,12 +95,9 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { formatDate } from '../../../utils/formattingUtils'
 import StatusPill from '../../ui/data/StatusPill.vue'
-import { CRAWL_STATUSES, BUTTON_VARIANTS } from '../../../constants/crawlDetailsConstants'
 
-// Props
 defineProps({
   crawl: {
     type: Object,
@@ -112,9 +109,5 @@ defineProps({
   }
 })
 
-// Emits
 defineEmits(['configure', 'start'])
-
-// Router
-const router = useRouter()
 </script>

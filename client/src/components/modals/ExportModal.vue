@@ -295,16 +295,26 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, inject, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useApiService } from '../../composables/useApiService'
+import { useNotification } from '../../composables/useNotification'
 
-// Initialize composables
-const { get, post, loading: apiLoading, error: apiError } = useApiService()
+const { get, post } = useApiService()
+const { showNotification } = useNotification()
 
 const props = defineProps({
-    modelValue: Boolean,
-    crawlId: String,
-    crawlTitle: String
+    modelValue: {
+        type: Boolean,
+        default: false
+    },
+    crawlId: {
+        type: String,
+        default: ''
+    },
+    crawlTitle: {
+        type: String,
+        default: ''
+    }
 })
 
 const emit = defineEmits(['update:modelValue', 'export-success'])
@@ -415,8 +425,7 @@ const exportData = async () => {
 
     } catch (error) {
         console.error('Error exporting data:', error)
-        // Show error notification
-        alert('Error exporting data: ' + error.message)
+        showNotification('Error exporting data: ' + error.message, 'error')
     } finally {
         exporting.value = false
     }

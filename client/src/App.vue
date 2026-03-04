@@ -11,11 +11,6 @@ import { useAuth } from './composables/useAuth'
 const { isAuthenticated } = useAuth()
 const router = useRouter()
 
-// Handle auth modal opening
-const handleOpenAuthModal = (mode) => {
-  window.openAuthModal(mode)
-}
-
 // Watch for auth state changes and redirect if user becomes unauthenticated
 watch(isAuthenticated, (isAuth, wasAuth) => {
   // If user was authenticated but is no longer, redirect to home
@@ -28,7 +23,7 @@ watch(isAuthenticated, (isAuth, wasAuth) => {
 <template>
     <NotificationWrapper>
         <div class="min-h-screen bg-white w-full">
-          <Navbar @open-auth-modal="handleOpenAuthModal" />
+          <Navbar />
           
           <!-- Stats Wrapper for authenticated users only -->
           <StatsWrapper v-if="isAuthenticated">
@@ -42,6 +37,3 @@ watch(isAuthenticated, (isAuth, wasAuth) => {
     </NotificationWrapper>
 </template>
 
-<style scoped>
-/* App-specific styles only */
-</style>

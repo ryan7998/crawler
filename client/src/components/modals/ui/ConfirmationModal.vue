@@ -119,10 +119,6 @@ const props = defineProps({
     type: String,
     default: 'primary'
   },
-  icon: {
-    type: String,
-    default: 'mdi-alert-circle'
-  },
   loading: {
     type: Boolean,
     default: false

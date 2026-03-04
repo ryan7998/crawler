@@ -69,6 +69,8 @@ export function useCrawlData() {
         crawlId: crawlId,
         title: crawl.value.title,
         status: crawl.value.status,
+        urls: crawl.value.urls || [],
+        selectors: crawl.value.selectors || [],
         totalUrls: crawl.value.urls?.length || 0,
         completedUrls: Object.values(crawl.value.aggregatedData || {})
           .filter(urlData => urlData && urlData.length > 0)

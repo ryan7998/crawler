@@ -1,157 +1,236 @@
-# Web Crawler Application
+# CrawlerPro — Advanced Web Scraping Platform
 
-A full-stack web application for crawling websites and extracting data using custom selectors. The application features real-time updates, queue management, and data export capabilities.
+A full-stack web application for crawling websites, extracting structured data with custom CSS selectors, and exporting results to Google Sheets or CSV. Features real-time progress updates, a Bull/Redis job queue, proxy usage analytics, and role-based authentication.
 
 ## Live Demo
 
-Visit the live application at: [http://crawler.onthis.website/](http://crawler.onthis.website/)
+[http://crawler.onthis.website/](http://crawler.onthis.website/)
 
-## Features
+---
 
-- 🔍 Multi-URL crawling with custom selectors
-- 📊 Real-time crawl status updates via WebSocket
-- 📈 Queue management with Bull and Redis
-- 💾 Data export to CSV and Excel
-- 🔄 Support for child selectors and nested data extraction
-- 🎯 Domain-specific selector templates
-- 📱 Responsive UI with Vuetify
-- 🔒 User authentication and authorization
+## Feature Highlights
+
+- **Multi-URL crawling** with custom CSS selector configurations
+- **Real-time status updates** via Socket.IO — watch each URL complete live
+- **3-step crawl wizard** — create or edit crawls at any step, no need to finish the wizard to save
+- **Bull/Redis job queue** with queue status monitoring
+- **Data export** to Google Sheets or CSV/Excel
+- **Proxy usage analytics** — per-crawl and global statistics with cost analysis
+- **Stuck crawl recovery** — worker restarts automatically reset `in-progress` crawls
+- **Role-based auth** — `user`, `admin`, `superadmin`
+- **Change detection** — compare crawl runs to identify changed content
+
+---
 
 ## Tech Stack
 
 ### Frontend
 
-- Vue.js 3 with Composition API
-- Vuetify 3 for UI components
-- TailwindCSS for styling
-- Pinia for state management
-- Vue Router for navigation
-- Socket.io-client for real-time updates
-- Axios for API requests
+| Technology | Version | Role |
+|---|---|---|
+| Vue 3 | `^3.4` | UI framework (Composition API / `<script setup>`) |
+| Pinia | `^2.2` | State management |
+| Vue Router | `^4` | Client-side routing |
+| Tailwind CSS | `^3.4` | Styling — only CSS framework used |
+| Axios | `^1.7` | HTTP client |
+| Socket.IO Client | `^4.7` | Real-time crawl progress |
+| Vite | `^5.4` | Build tool and dev server |
+
+> **Note:** Vuetify has been fully removed. All UI is implemented with Tailwind CSS utility classes.
 
 ### Backend
 
-- Node.js with Express
-- MongoDB with Mongoose
-- Bull for job queue management
-- Redis for queue storage
-- Socket.io for real-time communication
-- Playwright for web scraping
-- Cheerio for HTML parsing
-- HuggingFace for AI integration
+| Technology | Role |
+|---|---|
+| Node.js + Express | REST API server |
+| MongoDB + Mongoose | Data persistence |
+| Bull + Redis | Job queue for crawl tasks |
+| Socket.IO | Real-time event broadcasting |
+| Playwright | Headless browser scraping |
+| Cheerio | HTML parsing |
+
+---
+
+## Project Structure
+
+```
+crawler-advanced/
+├── client/                       # Vue 3 frontend
+│   ├── src/
+│   │   ├── App.vue
+│   │   ├── main.js
+│   │   ├── router.js
+│   │   ├── index.css             # Tailwind directives
+│   │   ├── components/
+│   │   │   ├── features/crawl/   # Domain-specific crawl UI
+│   │   │   ├── forms/            # Standalone form components
+│   │   │   ├── layout/           # App shell (Navbar, ModalWrapper, StatsWrapper…)
+│   │   │   ├── modals/           # All modal dialogs
+│   │   │   ├── pages/            # Route-level page components
+│   │   │   └── ui/               # Generic UI primitives (table, status pill, slide-over…)
+│   │   ├── composables/          # Reusable Composition API logic
+│   │   ├── constants/            # Shared constant objects
+│   │   ├── stores/               # Pinia stores (crawl, auth, statsBar)
+│   │   └── utils/                # Pure helper functions
+│   ├── FRONTEND.md               # Frontend developer documentation
+│   └── package.json
+│
+└── server/                       # Node.js backend
+    └── src/
+        ├── controllers/          # Express route handlers
+        ├── middleware/           # Auth, error handling
+        ├── models/               # Mongoose schemas (Crawl, CrawlData, User…)
+        ├── routes/               # Express router definitions
+        ├── services/             # Business logic services
+        ├── utils/                # Server-side helpers
+        └── worker.js             # Bull queue worker process
+```
+
+---
 
 ## Prerequisites
 
-- Node.js (v16 or higher)
-- MongoDB
-- Redis
-- npm or yarn
+- Node.js v18+
+- MongoDB (local or Atlas)
+- Redis (local or managed)
+- npm
 
-## Installation
+---
 
-1. Clone the repository:
+## Quick Start
 
-```bash
-git clone https://github.com/yourusername/crawler.git
-cd crawler
-```
-
-2. Install dependencies for both client and server:
+### 1. Clone and install
 
 ```bash
-# Install server dependencies
-cd server
-npm install
+git clone https://github.com/yourusername/crawler-advanced.git
+cd crawler-advanced
 
-# Install client dependencies
-cd ../client
-npm install
+# Server
+cd server && npm install
+
+# Client
+cd ../client && npm install
 ```
 
-3. Create environment files:
+### 2. Environment variables
 
-For server (.env):
+**`server/.env`**
 
 ```env
-MONGODB_URI=your_mongodb_uri
-REDIS_URL=your_redis_url
+MONGODB_URI=mongodb://localhost:27017/crawler
+REDIS_URL=redis://localhost:6379
 PORT=3001
 WORKER_PORT=3002
+JWT_SECRET=your_jwt_secret
 ```
 
-For client (.env):
+**`client/.env`**
 
 ```env
 VITE_BASE_URL=http://localhost:3001
 VITE_SOCKET_URL=http://localhost:3002
 ```
 
-## Running the Application
-
-1. Start the server (in the server directory):
+### 3. Run in development
 
 ```bash
-npm run dev
+# Terminal 1 — API server
+cd server && npm run dev
+
+# Terminal 2 — Vue dev server
+cd client && npm run dev
 ```
 
-2. Start the client (in the client directory):
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| API | http://localhost:3001 |
+| Worker / Socket | http://localhost:3002 |
 
-```bash
-npm run dev
+---
+
+## API Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/auth/login` | Login |
+| `POST` | `/api/auth/register` | Register |
+| `POST` | `/api/auth/logout` | Logout |
+| `GET` | `/api/auth/verify` | Verify token |
+| `GET` | `/api/auth/profile` | Get profile |
+| `PUT` | `/api/auth/profile` | Update profile |
+| `PUT` | `/api/auth/change-password` | Change password |
+| `GET` | `/api/getallcrawlers` | List crawls (paginated, searchable) |
+| `GET` | `/api/getcrawler/:id` | Get single crawl with aggregated data |
+| `POST` | `/api/createcrawler` | Create crawl |
+| `PUT` | `/api/updatecrawl/:id` | Update crawl |
+| `DELETE` | `/api/deletecrawl/:id` | Delete crawl |
+| `POST` | `/api/startcrawl` | Queue crawl job(s) |
+| `POST` | `/api/runallcrawls` | Queue all enabled crawls |
+| `DELETE` | `/api/deletecrawldata/:id` | Clear all scraped data for a crawl |
+| `DELETE` | `/api/deletecrawldata/:id/urls` | Clear data for specific URLs |
+| `DELETE` | `/api/clearqueue/:id` | Clear Bull queue for a crawl |
+| `GET` | `/api/queuestatus/:id` | Get queue job counts |
+| `GET` | `/api/proxy-stats/crawl/:id` | Per-crawl proxy usage stats |
+| `GET` | `/api/proxy-stats/global` | System-wide proxy stats |
+| `GET` | `/api/proxy-stats/cost-analysis` | Cost analysis with date range |
+
+---
+
+## Architecture Overview
+
+### Frontend
+
+```
+App.vue
+ ├── NotificationWrapper   (toast provider)
+ │    ├── Navbar
+ │    ├── StatsWrapper      (auth-only — wraps router-view with a bottom stats bar)
+ │    │    └── StatsBottomBar  → GlobalStatsBar | CrawlDetailsStatsBar
+ │    ├── <router-view>     (unauthenticated fallback)
+ │    └── ModalWrapper      (renders all global modals, reads crawlStore flags)
 ```
 
-The application will be available at:
+**Modal system**: All modals are rendered centrally in `ModalWrapper`. Components open modals by calling `crawlStore.open*Modal()`. Saves are handled in `ModalWrapper`, which updates the store and fires `crawlStore.triggerRefresh()` to notify any watching component to re-fetch.
 
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:3001
-- Worker: http://localhost:3002
+**Real-time**: `CrawlDetailsView` connects to a Socket.IO room keyed by `crawlId`. Incoming `crawlLog` events update `liveStatusDictionary` and append to `aggregatedData` without a round-trip API call.
 
-## Project Structure
+### Backend / Worker
 
-```
-crawler/
-├── client/                 # Frontend Vue.js application
-│   ├── src/
-│   │   ├── components/    # Vue components
-│   │   ├── views/        # Page components
-│   │   ├── stores/       # Pinia stores
-│   │   └── utils/        # Utility functions
-│   └── public/           # Static assets
-│
-└── server/                # Backend Node.js application
-    ├── src/
-    │   ├── controllers/  # Route controllers
-    │   ├── models/       # Mongoose models
-    │   ├── queues/       # Bull queue configurations
-    │   └── utils/        # Utility functions
-    └── files/            # Temporary file storage
-```
+The Express API and the Bull worker run as **two separate Node processes**:
 
-## API Endpoints
+- **API server** (`PORT=3001`) — CRUD, auth, export
+- **Worker** (`WORKER_PORT=3002`) — processes Bull jobs, runs Playwright, emits Socket.IO events
 
-- `POST /api/startcrawl` - Start a new crawl
-- `GET /api/getcrawler/:id` - Get crawl details
-- `GET /api/getallcrawlers` - List all crawls
-- `POST /api/createcrawler` - Create a new crawl
-- `PUT /api/updatecrawler/:id` - Update a crawl
-- `DELETE /api/deletecrawl/:id` - Delete a crawl
-- `GET /api/queuestatus/:id` - Get queue status
+On startup the worker:
+1. Connects to MongoDB
+2. Scans for any `in-progress` crawls (stuck from a previous crash) and resets them to `pending`
+3. Listens for new jobs and re-queues stalled ones
+
+---
+
+## Frontend Developer Docs
+
+See **[`client/FRONTEND.md`](client/FRONTEND.md)** for:
+
+- Full component catalogue with props/emits
+- All composables documented with usage examples
+- Pinia store API reference
+- Styling conventions and copy-paste patterns
+- Data flow diagrams
+- Checklist for adding new features
+
+---
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Follow the conventions in `client/FRONTEND.md`
+4. Open a pull request with a description of what changed and why
+
+---
 
 ## License
 
-This project is licensed under the ISC License.
-
-## Acknowledgments
-
-- [Vue.js](https://vuejs.org/)
-- [Vuetify](https://vuetifyjs.com/)
-- [Bull](https://github.com/OptimalBits/bull)
-- [Playwright](https://playwright.dev/)
+ISC

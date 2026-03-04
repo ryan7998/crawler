@@ -121,11 +121,10 @@
 </template>
 
 <script setup>
-import { computed, shallowRef } from 'vue'
+import { computed } from 'vue'
 import StatusPill from '../../ui/data/StatusPill.vue'
-import { processTableData, getBulkActionsConfig, getTableHeaders, getRowActions } from '../../../utils/tableOperationsUtils'
-import { CRAWL_STATUSES, URL_STATUSES, BUTTON_VARIANTS, TABLE_CONFIG, ANIMATION_DURATIONS } from '../../../constants/crawlDetailsConstants'
-import { memoize, shallowEqual } from '../../../utils/performanceUtils'
+import { ANIMATION_DURATIONS } from '../../../constants/crawlDetailsConstants'
+import { memoize } from '../../../utils/performanceUtils'
 
 // Props
 const props = defineProps({
@@ -165,39 +164,8 @@ defineEmits([
   'delete-url'
 ])
 
-// Memoized functions for performance
-const memoizedProcessTableData = memoize(processTableData, (urls, excerpts, liveStatusDictionary, crawl) => 
-  `${urls.length}-${Object.keys(excerpts).length}-${Object.keys(liveStatusDictionary).length}-${crawl?.id}`
-)
-
-const memoizedGetBulkActions = memoize(getBulkActionsConfig)
-
-const memoizedGetRowActions = memoize(getRowActions)
-
-// Computed properties
-const tableData = computed(() => {
-  return memoizedProcessTableData(
-    props.crawl?.urls || [],
-    props.excerpts,
-    props.liveStatusDictionary,
-    props.crawl
-  )
-})
-
-const bulkActions = computed(() => {
-  return memoizedGetBulkActions(props.selectedUrls.length)
-})
-
-const tableHeaders = computed(() => {
-  return getTableHeaders()
-})
-
 // Methods
 const hasUrlData = (url) => {
   return props.crawl?.aggregatedData?.[url] && props.crawl.aggregatedData[url].length > 0
-}
-
-const getRowActionsForUrl = (url) => {
-  return memoizedGetRowActions(hasUrlData(url))
 }
 </script>

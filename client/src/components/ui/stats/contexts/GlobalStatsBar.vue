@@ -57,11 +57,12 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { computed } from 'vue'
 import { useCrawlStore } from '../../../../stores/crawlStore'
+import { useNotification } from '../../../../composables/useNotification'
 
 const crawlStore = useCrawlStore()
-const showNotification = inject('showNotification')
+const { showNotification } = useNotification()
 
 const stats = computed(() => crawlStore.crawlStats)
 const loading = computed(() => crawlStore.crawlsLoading)
