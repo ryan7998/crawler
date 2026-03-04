@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
-// const Crawl = require('./models/Crawl')
 require('dotenv').config()
-const Crawl           = require('../models/Crawl');
+const Crawl = require('../models/Crawl');
 
 const migrateSelectors = async () => {
     try {
@@ -69,5 +68,9 @@ const migrateSelectors = async () => {
     }
 }
 
-// Run the migration
-migrateSelectors() 
+// Run the migration only when executed directly
+if (require.main === module) {
+    migrateSelectors()
+        .then(() => process.exit(0))
+        .catch((err) => { console.error(err); process.exit(1); });
+}

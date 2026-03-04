@@ -16,17 +16,6 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-const strictAuthLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // limit each IP to 5 requests per windowMs
-    message: {
-        error: 'Too many authentication attempts, please try again later.',
-        code: 'TOO_MANY_ATTEMPTS'
-    },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
 /**
  * POST /api/auth/register
  * Register a new user
@@ -54,7 +43,7 @@ router.post('/register', authLimiter, async (req, res) => {
  * POST /api/auth/login
  * Login user
  */
-router.post('/login', strictAuthLimiter, async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
     try {
         const result = await AuthService.login(req.body);
         

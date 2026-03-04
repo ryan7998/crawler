@@ -13,7 +13,7 @@ const sendSuccess = (res, data = null, message = 'Success', statusCode = 200) =>
     const response = {
         success: true,
         message,
-        ...(data && { data })
+        ...(data !== null && data !== undefined ? { data } : {})
     };
 
     return res.status(statusCode).json(response);

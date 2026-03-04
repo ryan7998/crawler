@@ -1,24 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { optionalAuth } = require('../middleware/auth');
-
-// Test route to verify the server is working
-router.get('/test', (req, res) => {
-    console.log('🔍 Export test route hit');
-    res.json({ 
-        message: 'Export routes are working!', 
-        timestamp: new Date().toISOString(),
-        availableRoutes: [
-            'GET /api/export/test',
-            'GET /api/export/changes/:crawlId',
-            'GET /api/export/csv/:crawlId',
-            'GET /api/export/crawls',
-            'POST /api/export/google-sheets/:crawlId',
-            'POST /api/export/google-sheets/multiple',
-            'POST /api/export/google-sheets/global'
-        ]
-    });
-});
+const { authenticate, optionalAuth } = require('../middleware/auth');
 
 /**
  * Get Google Sheet ID for global exports
@@ -74,7 +56,7 @@ const CrawlData = require('../models/CrawlData');
  * Export multiple crawls to a single Google Sheet
  * POST /api/export/google-sheets/multiple
  */
-router.post('/google-sheets/multiple', async (req, res) => {
+router.post('/google-sheets/multiple', authenticate, async (req, res) => {
     try {
         const { crawlIds, sheetTitle } = req.body;
 
@@ -109,7 +91,7 @@ router.post('/google-sheets/multiple', async (req, res) => {
  * Export all crawls with changes to a global Google Sheet
  * POST /api/export/google-sheets/global
  */
-router.post('/google-sheets/global', async (req, res) => {
+router.post('/google-sheets/global', authenticate, async (req, res) => {
     try {
         const { 
             userId, 
@@ -150,7 +132,7 @@ router.post('/google-sheets/global', async (req, res) => {
  * By default, automatically compares the most recent run with the previous run of the same crawl.
  * Use compareWith parameter to compare with a specific different crawl.
  */
-router.post('/google-sheets/:crawlId', async (req, res) => {
+router.post('/google-sheets/:crawlId', authenticate, async (req, res) => {
     try {
         const { crawlId } = req.params;
         const { 
@@ -203,12 +185,10 @@ router.post('/google-sheets/:crawlId', async (req, res) => {
  * By default, automatically compares the most recent run with the previous run of the same crawl.
  * Use compareWith query parameter to compare with a specific different crawl.
  */
-router.get('/changes/:crawlId', async (req, res) => {
-    console.log('🔍 Changes route hit:', req.params, req.query);
+router.get('/changes/:crawlId', authenticate, async (req, res) => {
     try {
         const { crawlId } = req.params;
         const { compareWith } = req.query;
-        console.log('compareWith: ', compareWith);
 
         // Validate crawlId
         if (!crawlId) {
@@ -227,79 +207,6 @@ router.get('/changes/:crawlId', async (req, res) => {
         console.error('Error getting change analysis:', error);
         res.status(500).json({ 
             message: 'Error getting change analysis', 
-            error: error.message 
-        });
-    }
-});
-
-/**
- * Export multiple crawls to a single Google Sheet
- * POST /api/export/google-sheets/multiple
- */
-router.post('/google-sheets/multiple', async (req, res) => {
-    try {
-        const { crawlIds, sheetTitle } = req.body;
-
-        // Validate input
-        if (!crawlIds || !Array.isArray(crawlIds) || crawlIds.length === 0) {
-            return res.status(400).json({ message: 'Crawl IDs array is required' });
-        }
-
-        // Validate that all crawls exist
-        const crawls = await Crawl.find({ _id: { $in: crawlIds } });
-        if (crawls.length !== crawlIds.length) {
-            return res.status(400).json({ message: 'One or more crawls not found' });
-        }
-
-        // Export multiple crawls
-        const result = await googleSheetsService.exportMultipleCrawls(crawlIds, {
-            sheetTitle
-        });
-
-        res.json(result);
-
-    } catch (error) {
-        console.error('Error exporting multiple crawls:', error);
-        res.status(500).json({ 
-            message: 'Error exporting multiple crawls', 
-            error: error.message 
-        });
-    }
-});
-
-/**
- * Export all crawls with changes to a global Google Sheet
- * POST /api/export/google-sheets/global
- */
-router.post('/google-sheets/global', async (req, res) => {
-    try {
-        const { 
-            userId, 
-            includeUnchanged = false, 
-            sheetTitle, 
-            limit = 100,
-            statusFilter 
-        } = req.body;
-
-        // Export global changes
-        const result = await googleSheetsService.exportGlobalChanges({
-            userId,
-            includeUnchanged,
-            sheetTitle,
-            limit,
-            statusFilter
-        });
-
-        if (result.error) {
-            return res.status(500).json({ message: result.error });
-        }
-
-        res.json(result);
-
-    } catch (error) {
-        console.error('Error exporting global changes:', error);
-        res.status(500).json({ 
-            message: 'Error exporting global changes', 
             error: error.message 
         });
     }
@@ -358,7 +265,7 @@ router.get('/crawls', optionalAuth, async (req, res) => {
  * Export crawl data to CSV with change tracking
  * GET /api/export/csv/:crawlId
  */
-router.get('/csv/:crawlId', async (req, res) => {
+router.get('/csv/:crawlId', authenticate, async (req, res) => {
     try {
         const { crawlId } = req.params;
         const { compareWith, includeUnchanged = false } = req.query;
@@ -410,7 +317,7 @@ router.get('/csv/:crawlId', async (req, res) => {
  * Get Google Drive storage quota for the service account
  * GET /api/export/google-storage
  */
-router.get('/google-storage', async (req, res) => {
+router.get('/google-storage', authenticate, async (req, res) => {
     try {
         const quota = await googleSheetsService.getDriveStorageQuota();
         res.json(quota);

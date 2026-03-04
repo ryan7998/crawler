@@ -36,14 +36,6 @@ const userSchema = new Schema({
     lastLogin: {
         type: Date,
         default: null
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
     }
 }, {
     timestamps: true
@@ -66,12 +58,6 @@ userSchema.pre('save', async function(next) {
     } catch (error) {
         next(error);
     }
-});
-
-// Update the updatedAt field
-userSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
-    next();
 });
 
 // Instance method to check password

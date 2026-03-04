@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const GoogleSheetsOAuth2Service = require('../services/googleSheetsOAuth2Service');
+const { authenticate } = require('../middleware/auth');
 
 /**
  * GET /api/oauth2/auth
  * Start OAuth2 authentication flow
  */
-router.get('/auth', (req, res) => {
+router.get('/auth', authenticate, (req, res) => {
     try {
         const authUrl = GoogleSheetsOAuth2Service.getAuthUrl();
         res.json({ 
@@ -25,7 +26,7 @@ router.get('/auth', (req, res) => {
  * GET /api/oauth2/callback
  * Handle OAuth2 callback
  */
-router.get('/callback', async (req, res) => {
+router.get('/callback', authenticate, async (req, res) => {
     try {
         const { code } = req.query;
         
@@ -64,7 +65,7 @@ router.get('/callback', async (req, res) => {
  * GET /api/oauth2/status
  * Check OAuth2 authentication status
  */
-router.get('/status', (req, res) => {
+router.get('/status', authenticate, (req, res) => {
     const isAuthenticated = GoogleSheetsOAuth2Service.isAuthenticated();
     res.json({ 
         authenticated: isAuthenticated,

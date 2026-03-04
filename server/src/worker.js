@@ -158,17 +158,17 @@ async function ensureProcessor(crawlId) {
 
   // Handle jobs that stall (lock expired — Bull will re-queue them once).
   // Count them as done so the completion check isn't permanently blocked.
+  // Guard against double-counting: Bull may re-queue the job which then fires completed/failed.
   q.on('stalled', async (jobId) => {
     console.warn(`[${crawlId}] Job ${jobId} stalled — counting as done`);
     const state = activeJobs.get(crawlId);
-    if (!state) return;
+    if (!state || state.completed >= state.total) return;
     state.completed++;
     if (state.completed === state.total) {
       const allData = await CrawlData.find({ crawlId });
       const statusInfo = determineCrawlStatus(allData);
       await Crawl.findByIdAndUpdate(crawlId, { status: statusInfo.status, endTime: new Date() });
-      const io = getSocket();
-      io.to(String(crawlId)).emit('crawlLog', {
+      io.to(crawlIdStr).emit('crawlLog', {
         status: statusInfo.status,
         message: 'Crawl finalised after stalled job'
       });

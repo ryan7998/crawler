@@ -69,9 +69,9 @@ app.use((req, res, next) => {
    3) API routes
    ——————————————————— */
 app.use('/api/auth', authRoutes);
-app.use('/api', crawlerRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/oauth2', oauth2Routes);
+app.use('/api', crawlerRoutes);
 
 // Add a test route to verify the server is working
 app.get('/test', (req, res) => {

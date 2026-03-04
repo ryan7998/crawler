@@ -1,15 +1,26 @@
 const axios = require('axios')
+const Redis = require('ioredis')
 const crawlQueue = require('../queues/getCrawlQueue')
 const Crawl = require('../models/Crawl')
 const CrawlData = require('../models/CrawlData')
 const Selectors = require('../models/Selectors')
-const { aggregateDashboard, extractHtml } = require('../../utils/helperFunctions')
-const { default: mongoose, isObjectIdOrHexString } = require('mongoose')
+const { aggregateDashboard } = require('../../utils/helperFunctions')
+const mongoose = require('mongoose')
 const proxyUsageService = require('../services/proxyUsageService')
-const { sendSuccess, sendError, sendNotFound, sendValidationError } = require('../utils/responseUtils')
+const { sendSuccess, sendError, sendNotFound } = require('../utils/responseUtils')
 const { asyncHandler } = require('../middleware/errorHandler')
-const { validateObjectId } = require('../utils/validationUtils')
 
+// Lazily create a shared Redis client for queue enumeration
+let sharedRedis = null;
+function getRedisClient() {
+    if (!sharedRedis) {
+        sharedRedis = new Redis({
+            host: process.env.REDIS_HOST || '127.0.0.1',
+            port: process.env.REDIS_PORT || 6379,
+        });
+    }
+    return sharedRedis;
+}
 // Helper function to build user-based query
 const buildUserQuery = (user) => {
     if (user.isSuperAdmin()) {
@@ -32,45 +43,54 @@ const buildUserQuery = (user) => {
     }
 };
 
-const crawlWebsite = asyncHandler(async (req, res) => {
-    const { urls, crawlId, selectors } = req.body
-
-    // Check if crawl is already in progress
+/**
+ * Core crawl-start logic, shared by crawlWebsite and runAllCrawls.
+ * Returns { alreadyRunning: true } if the crawl was already in progress,
+ * { alreadyQueued: true } if jobs already existed, or { started: true }.
+ */
+const startCrawl = async (crawlId, urls) => {
     const existingCrawl = await Crawl.findById(crawlId)
-    if (!existingCrawl) {
-        return sendNotFound(res, 'Crawl')
-    }
-    
-    if (existingCrawl.status === 'in-progress') {
-        return sendError(res, 'Crawl is already in progress', 400, 'CRAWL_IN_PROGRESS')
-    }
+    if (!existingCrawl) throw new Error('Crawl not found')
+    if (existingCrawl.status === 'in-progress') return { alreadyRunning: true }
 
-    // Update crawl status to in-progress
     await Crawl.findByIdAndUpdate(crawlId, { status: 'in-progress' })
 
     try {
-        // Notify worker to set up processor for this crawlId
         await axios.post(`http://localhost:3002/processor/${crawlId}`);
     } catch (err) {
         console.error('Failed to notify worker to start processor:', err.message);
-        // Continue with job addition even if worker notification fails
     }
 
     const q = crawlQueue(crawlId)
-
-    // Check if jobs already exist for this crawl
-    const existingJobs = await q.getJobs(['waiting', 'active', 'delayed'])
-    if (existingJobs.length > 0) {
-        return sendSuccess(res, { urls }, 'Crawl jobs already exist in queue')
+    const [waitingCount, activeCount, delayedCount] = await Promise.all([
+        q.getWaitingCount(), q.getActiveCount(), q.getDelayedCount()
+    ])
+    if (waitingCount + activeCount + delayedCount > 0) {
+        return { alreadyQueued: true }
     }
 
-    // Generate a unique runId for this crawl run
     const runId = Date.now().toString();
-
     for (const url of urls) {
         await q.add({ url, crawlId, runId })
     }
-    
+    return { started: true }
+}
+
+const crawlWebsite = asyncHandler(async (req, res) => {
+    const { urls, crawlId } = req.body
+
+    const crawl = await Crawl.findById(crawlId)
+    if (!crawl) {
+        return sendNotFound(res, 'Crawl')
+    }
+    if (crawl.status === 'in-progress') {
+        return sendError(res, 'Crawl is already in progress', 400, 'CRAWL_IN_PROGRESS')
+    }
+
+    const result = await startCrawl(crawlId, urls)
+    if (result.alreadyQueued) {
+        return sendSuccess(res, { urls }, 'Crawl jobs already exist in queue')
+    }
     sendSuccess(res, { urls }, 'Crawl jobs added to queue')
 })
 
@@ -131,585 +151,392 @@ const updateCrawler = asyncHandler(async (req, res) => {
     sendSuccess(res, { crawl: updatedCrawl }, 'Crawl updated successfully')
 })
 
-const deleteCrawler = async (req, res) => {
+const deleteCrawler = asyncHandler(async (req, res) => {
     const { id } = req.params
 
-    // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid crawlId' })
     }
-    try {
-        // Find existing crawl
-        const crawl = await Crawl.findById(id)
-        if (!crawl) {
-            return res.status(404).json({ message: 'Crawl not found' })
-        }
-        // Remove associated CrawlData entries
-        await CrawlData.deleteMany({ crawlId: id })
-        
-        // Remove jobs related to this crawl from the queue
-        console.log('deleting jobs for crawl:', id)
-        const q = crawlQueue(id)
-        const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
-        console.log(`Found ${jobs.length} jobs to delete`)
-        
-        for (const job of jobs) {
-            console.log('Deleting job:', job.id)
-            await job.remove()
-        }
-        console.log('Finished deleting jobs')
-        
-        // Delete the crawl document
-        await Crawl.findByIdAndDelete(id)
-        // Emit a socket event to notify clients about the deletion
-        // io.emit('crawlDeleted', { crawlId: id })
-        res.status(200).json({ message: 'Crawl deleted successfully' })
-    } catch (error) {
-        console.error('Error deleting crawl:', error.message);
-        res.status(500).json({ message: 'Error deleting crawl', error: error.message });
-    }
-}
 
-const getCrawler = async (req, res) => {
+    const crawl = await Crawl.findById(id)
+    if (!crawl) {
+        return res.status(404).json({ message: 'Crawl not found' })
+    }
+
+    if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Access denied. You can only delete your own crawls.' })
+    }
+
+    await CrawlData.deleteMany({ crawlId: id })
+
+    const q = crawlQueue(id)
+    const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
+    for (const job of jobs) {
+        await job.remove()
+    }
+
+    await Crawl.findByIdAndDelete(id)
+    res.status(200).json({ message: 'Crawl deleted successfully' })
+})
+
+const getCrawler = asyncHandler(async (req, res) => {
     const { id } = req.params
 
-    // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid crawlId' })
     }
-    try {
-        // Find the crawl by its ObjectId
-        const crawlerData = await Crawl.findById(id)
-            .select('-__v')
-            .populate({
-                path: 'results',
-                select: '-__v'
-            })
 
-        // If the crawl doesn't exist, return a 404
-        if (!crawlerData) {
-            return res.status(404).json({ message: 'Crawler not found' })
-        }
+    const crawlerData = await Crawl.findById(id)
+        .select('-__v')
+        .populate({ path: 'results', select: '-__v' })
 
-        const aggregatedData = aggregateDashboard(crawlerData)
-        const aggregatedCrawlObj = crawlerData.toObject()
-        if (aggregatedData) {
-            aggregatedCrawlObj.aggregatedData = aggregatedData
-            // Return the found crawl data
-        }
-        res.status(200).json(aggregatedCrawlObj)
-    } catch (error) {
-        // Handle invalid ObjectId errors or other server issues
-        if (error.kind === 'ObjectId') {
-            return res.status(400).json({ message: 'Invalid crawl ID' })
-        }
-        res.status(500).json({ message: 'Server error', error: error.message })
-    }
-}
-
-const getAllCrawlers = async (req, res) => {
-
-    try {
-        // Build the query with user-based filtering
-        let query = buildUserQuery(req.user)
-        
-        // Add search functionality
-        if (req.query.search) {
-            query.title = { $regex: req.query.search, $options: 'i' } // Case-insensitive search
-        }
-        
-        // Implement pagination
-        const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 100
-        const skip = (page - 1) * limit
-
-        // Fetch crawls from the database with user filtering
-        const crawls = await Crawl.find(query)
-            .select('-__v') // Exclude the __v field
-            .populate('userId', 'firstName lastName email') // Populate user info
-            .sort({ createdAt: -1 }) // Sort by newest first
-            .skip(skip)
-            .limit(limit)
-
-        // Get total count for pagination
-        const totalCrawls = await Crawl.countDocuments(query)
-
-        res.status(200).json({
-            page,
-            totalPages: Math.ceil(totalCrawls / limit),
-            crawls,
-            totalCrawls
-        })
-    } catch (error) {
-        console.error('Error fetching all crawls: ', error.message)
-        res.status(500).json({ message: 'Error fetching crawls, ', error: error.message })
+    if (!crawlerData) {
+        return res.status(404).json({ message: 'Crawler not found' })
     }
 
-}
+    if (!req.user.isSuperAdmin() && crawlerData.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Access denied. You can only view your own crawls.' })
+    }
 
-const checkDomainSelectors = async (req, res) => {
+    const aggregatedData = aggregateDashboard(crawlerData)
+    const aggregatedCrawlObj = crawlerData.toObject()
+    if (aggregatedData) {
+        aggregatedCrawlObj.aggregatedData = aggregatedData
+    }
+    res.status(200).json(aggregatedCrawlObj)
+})
+
+const getAllCrawlers = asyncHandler(async (req, res) => {
+    let query = buildUserQuery(req.user)
+
+    if (req.query.search) {
+        query.title = { $regex: req.query.search, $options: 'i' }
+    }
+
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 100
+    const skip = (page - 1) * limit
+
+    const crawls = await Crawl.find(query)
+        .select('-__v')
+        .populate('userId', 'firstName lastName email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+
+    const totalCrawls = await Crawl.countDocuments(query)
+
+    res.status(200).json({
+        page,
+        totalPages: Math.ceil(totalCrawls / limit),
+        crawls,
+        totalCrawls
+    })
+})
+
+const checkDomainSelectors = asyncHandler(async (req, res) => {
     const { domain } = req.params
-    console.log('domain: ', domain)
 
-    try {
-        // Find selectors for the domain
-        const domainSelectors = await Selectors.findOne({ domain })
+    const domainSelectors = await Selectors.findOne({ domain })
 
-        if (!domainSelectors) {
-            return res.status(404).json({
-                message: 'No selectors found for this domain',
-                hasSelectors: false
-            })
-        }
-
-        res.status(200).json({
-            message: 'Selectors found for this domain',
-            hasSelectors: true,
-            selectors: domainSelectors.selectors
-        })
-    } catch (error) {
-        console.error('Error checking domain selectors:', error.message)
-        res.status(500).json({
-            message: 'Error checking domain selectors',
-            error: error.message
+    if (!domainSelectors) {
+        return res.status(404).json({
+            message: 'No selectors found for this domain',
+            hasSelectors: false
         })
     }
-}
 
-const getQueueStatus = async (req, res) => {
-    try {
-        const { crawlId } = req.params
-        
-        // Check if user owns this crawl
-        const crawl = await Crawl.findById(crawlId);
-        if (!crawl) {
-            return res.status(404).json({ error: 'Crawl not found' });
-        }
-        
-        if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ error: 'Access denied. You can only view queues for your own crawls.' });
-        }
-        
-        const q = crawlQueue(crawlId)
-        const jobs = await q.getJobs(['active', 'waiting', 'delayed'])
-        res.json({
-            active: jobs.filter(job => job.status === 'active').length,
-            waiting: jobs.filter(job => job.status === 'waiting').length,
-            delayed: jobs.filter(job => job.status === 'delayed').length,
-            total: jobs.length
-        })
-    } catch (error) {
-        res.status(500).json({ error: error.message })
+    res.status(200).json({
+        message: 'Selectors found for this domain',
+        hasSelectors: true,
+        selectors: domainSelectors.selectors
+    })
+})
+
+const getQueueStatus = asyncHandler(async (req, res) => {
+    const { crawlId } = req.params
+
+    const crawl = await Crawl.findById(crawlId);
+    if (!crawl) {
+        return res.status(404).json({ error: 'Crawl not found' });
     }
-}
 
-const deleteCrawlData = async (req, res) => {
+    if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ error: 'Access denied. You can only view queues for your own crawls.' });
+    }
+
+    const q = crawlQueue(crawlId)
+    const [active, waiting, delayed, failed] = await Promise.all([
+        q.getActiveCount(),
+        q.getWaitingCount(),
+        q.getDelayedCount(),
+        q.getFailedCount()
+    ])
+    res.json({
+        active,
+        waiting,
+        delayed,
+        failed,
+        total: active + waiting + delayed + failed
+    })
+})
+
+const deleteCrawlData = asyncHandler(async (req, res) => {
     const { id } = req.params
 
-    // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid crawlId' })
     }
-    
-    try {
-        // Find existing crawl
-        const crawl = await Crawl.findById(id)
-        if (!crawl) {
-            return res.status(404).json({ message: 'Crawl not found' })
-        }
 
-        // Get count of CrawlData entries before deletion
-        const dataCount = await CrawlData.countDocuments({ crawlId: id })
-        
-        // Remove associated CrawlData entries
-        const deleteResult = await CrawlData.deleteMany({ crawlId: id })
-        
-        // Clear the results array in the Crawl document
-        await Crawl.findByIdAndUpdate(id, { 
-            $set: { 
-                results: [],
-                status: 'pending',
-                startTime: null,
-                endTime: null
-            }
-        })
-
-        // Remove any pending jobs for this crawl from the queue
-        const q = crawlQueue(id)
-        const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
-        let removedJobsCount = 0
-        
-        for (const job of jobs) {
-            await job.remove()
-            removedJobsCount++
-        }
-
-        console.log(`Deleted ${deleteResult.deletedCount} crawl data entries and ${removedJobsCount} queue jobs for crawl ${id}`)
-        
-        res.status(200).json({ 
-            message: 'Crawl data deleted successfully',
-            deletedDataCount: deleteResult.deletedCount,
-            deletedJobsCount: removedJobsCount,
-            crawlId: id
-        })
-        
-    } catch (error) {
-        console.error('Error deleting crawl data:', error.message);
-        res.status(500).json({ message: 'Error deleting crawl data', error: error.message });
+    const crawl = await Crawl.findById(id)
+    if (!crawl) {
+        return res.status(404).json({ message: 'Crawl not found' })
     }
-}
 
-const deleteCrawlDataForUrls = async (req, res) => {
+    if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Access denied. You can only delete data for your own crawls.' })
+    }
+
+    const deleteResult = await CrawlData.deleteMany({ crawlId: id })
+
+    await Crawl.findByIdAndUpdate(id, {
+        $set: { results: [], status: 'pending', startTime: null, endTime: null }
+    })
+
+    const q = crawlQueue(id)
+    const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
+    let removedJobsCount = 0
+    for (const job of jobs) {
+        await job.remove()
+        removedJobsCount++
+    }
+
+    res.status(200).json({
+        message: 'Crawl data deleted successfully',
+        deletedDataCount: deleteResult.deletedCount,
+        deletedJobsCount: removedJobsCount,
+        crawlId: id
+    })
+})
+
+const deleteCrawlDataForUrls = asyncHandler(async (req, res) => {
     const { id } = req.params
     const { urls } = req.body
 
-    // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid crawlId' })
     }
 
-    // Validate URLs array
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
         return res.status(400).json({ message: 'URLs array is required and must not be empty' })
     }
-    
-    try {
-        // Find existing crawl
-        const crawl = await Crawl.findById(id)
-        if (!crawl) {
-            return res.status(404).json({ message: 'Crawl not found' })
-        }
 
-        // Remove CrawlData entries for specific URLs
-        const deleteResult = await CrawlData.deleteMany({ 
-            crawlId: id,
-            url: { $in: urls }
-        })
-
-        // Remove queue jobs for specific URLs
-        const q = crawlQueue(id)
-        const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
-        let removedJobsCount = 0
-        
-        for (const job of jobs) {
-            if (urls.includes(job.data.url)) {
-                await job.remove()
-                removedJobsCount++
-            }
-        }
-
-        // Update crawl status if all data is deleted
-        const remainingDataCount = await CrawlData.countDocuments({ crawlId: id })
-        if (remainingDataCount === 0) {
-            await Crawl.findByIdAndUpdate(id, { 
-                $set: { 
-                    results: [],
-                    status: 'pending',
-                    startTime: null,
-                    endTime: null
-                }
-            })
-        }
-
-        console.log(`Deleted ${deleteResult.deletedCount} crawl data entries and ${removedJobsCount} queue jobs for specific URLs in crawl ${id}`)
-        
-        res.status(200).json({ 
-            message: 'Crawl data for specific URLs deleted successfully',
-            deletedDataCount: deleteResult.deletedCount,
-            deletedJobsCount: removedJobsCount,
-            remainingDataCount,
-            crawlId: id,
-            deletedUrls: urls
-        })
-        
-    } catch (error) {
-        console.error('Error deleting crawl data for specific URLs:', error.message);
-        res.status(500).json({ message: 'Error deleting crawl data for specific URLs', error: error.message });
+    const crawl = await Crawl.findById(id)
+    if (!crawl) {
+        return res.status(404).json({ message: 'Crawl not found' })
     }
-}
+
+    const deleteResult = await CrawlData.deleteMany({ crawlId: id, url: { $in: urls } })
+
+    const q = crawlQueue(id)
+    const jobs = await q.getJobs(['waiting', 'active', 'delayed', 'failed'])
+    let removedJobsCount = 0
+    for (const job of jobs) {
+        if (urls.includes(job.data.url)) {
+            await job.remove()
+            removedJobsCount++
+        }
+    }
+
+    const remainingDataCount = await CrawlData.countDocuments({ crawlId: id })
+    if (remainingDataCount === 0) {
+        await Crawl.findByIdAndUpdate(id, {
+            $set: { results: [], status: 'pending', startTime: null, endTime: null }
+        })
+    }
+
+    res.status(200).json({
+        message: 'Crawl data for specific URLs deleted successfully',
+        deletedDataCount: deleteResult.deletedCount,
+        deletedJobsCount: removedJobsCount,
+        remainingDataCount,
+        crawlId: id,
+        deletedUrls: urls
+    })
+})
 
 // GLOBAL RUN: Start all non-disabled crawls (user-specific)
-const runAllCrawls = async (req, res) => {
-    try {
-        // Build query based on user role
-        let query = { disabled: { $ne: true } };
-        if (req.user.isSuperAdmin()) {
-            // Superadmin can run all crawls
-            // query remains as is
-        } else {
-            // Regular admin can only run their own crawls
-            query.userId = req.user._id;
-        }
-
-        // Find all non-disabled crawls for the user
-        const crawls = await Crawl.find(query);
-        if (!crawls.length) {
-            return res.status(200).json({ message: 'No non-disabled crawls found to start', started: [], skipped: [] });
-        }
-        const started = [];
-        const skipped = [];
-        for (const crawl of crawls) {
-            // Defensive: check again if status is in-progress (in case of race)
-            if (crawl.status === 'in-progress') {
-                skipped.push({ crawlId: crawl._id, title: crawl.title, reason: 'already in progress' });
-                continue;
-            }
-            // Use crawlWebsite logic directly
-            try {
-                // Use the same logic as crawlWebsite, but call the function directly
-                await crawlWebsite({
-                    body: {
-                        urls: crawl.urls,
-                        crawlId: crawl._id,
-                        selectors: crawl.selectors
-                    }
-                }, {
-                    json: (result) => {
-                        // Optionally collect result
-                    },
-                    status: () => ({ json: () => {} }) // Dummy for error path
-                });
-                started.push({ crawlId: crawl._id, title: crawl.title });
-            } catch (err) {
-                skipped.push({ crawlId: crawl._id, title: crawl.title, reason: err.message });
-            }
-        }
-        res.status(200).json({ message: `Started ${started.length} crawls`, started, skipped });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to start all crawls', error: error.message });
+const runAllCrawls = asyncHandler(async (req, res) => {
+    let query = { disabled: { $ne: true } };
+    if (!req.user.isSuperAdmin()) {
+        query.userId = req.user._id;
     }
-};
+
+    const crawls = await Crawl.find(query);
+    if (!crawls.length) {
+        return res.status(200).json({ message: 'No non-disabled crawls found to start', started: [], skipped: [] });
+    }
+
+    const started = [];
+    const skipped = [];
+
+    for (const crawl of crawls) {
+        try {
+            const result = await startCrawl(crawl._id, crawl.urls);
+            if (result.alreadyRunning) {
+                skipped.push({ crawlId: crawl._id, title: crawl.title, reason: 'already in progress' });
+            } else {
+                started.push({ crawlId: crawl._id, title: crawl.title });
+            }
+        } catch (err) {
+            skipped.push({ crawlId: crawl._id, title: crawl.title, reason: err.message });
+        }
+    }
+
+    res.status(200).json({ message: `Started ${started.length} crawls`, started, skipped });
+});
 
 // Clear the queue for a specific crawl
-const clearCrawlQueue = async (req, res) => {
+const clearCrawlQueue = asyncHandler(async (req, res) => {
     const { crawlId } = req.params;
-    try {
-        // Check if user owns this crawl
-        const crawl = await Crawl.findById(crawlId);
-        if (!crawl) {
-            return res.status(404).json({ error: 'Crawl not found' });
-        }
-        
-        if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ error: 'Access denied. You can only clear queues for your own crawls.' });
-        }
-        
-        const q = crawlQueue(crawlId);
-        await q.empty();
-        // Set crawl status to pending
-        await Crawl.findByIdAndUpdate(crawlId, { status: 'pending', startTime: null, endTime: null });
-        res.status(200).json({ message: `Queue for crawl ${crawlId} cleared!` });
-    } catch (err) {
-        console.error('Error clearing queue:', err);
-        res.status(500).json({ message: 'Error clearing queue', error: err.message });
+
+    const crawl = await Crawl.findById(crawlId);
+    if (!crawl) {
+        return res.status(404).json({ error: 'Crawl not found' });
     }
-};
+
+    if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ error: 'Access denied. You can only clear queues for your own crawls.' });
+    }
+
+    const q = crawlQueue(crawlId);
+    await q.empty();
+    await Crawl.findByIdAndUpdate(crawlId, { status: 'pending', startTime: null, endTime: null });
+    res.status(200).json({ message: `Queue for crawl ${crawlId} cleared!` });
+});
 
 // Clear all queues (user-specific)
-const clearAllQueues = async (req, res) => {
-    try {
-        // Get user's crawls first
-        let query = {};
-        if (req.user.isSuperAdmin()) {
-            // Superadmin can clear all queues
-            query = {};
-        } else {
-            // Regular admin can only clear their own crawls' queues
-            query = { userId: req.user._id };
-        }
-
-        const userCrawls = await Crawl.find(query).select('_id').lean();
-        const userCrawlIds = userCrawls.map(crawl => crawl._id.toString());
-
-        if (userCrawlIds.length === 0) {
-            return res.status(200).json({ 
-                message: 'No crawls found to clear queues for',
-                clearedQueues: 0,
-                totalJobsCleared: 0
-            });
-        }
-
-        const Redis = require('ioredis')
-        const redis = new Redis({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: process.env.REDIS_PORT || 6379,
-        })
-
-        // Get all queue keys that match the pattern 'bull:crawl:*'
-        const keys = await redis.keys('bull:crawl:*')
-        
-        if (keys.length === 0) {
-            await redis.disconnect()
-            return res.status(200).json({ message: 'No queues found to clear' });
-        }
-
-        let clearedQueues = 0;
-        let totalJobsCleared = 0;
-
-        for (const key of keys) {
-            // Extract crawlId from the key (format: 'bull:crawl:crawlId')
-            const parts = key.split(':')
-            const crawlId = parts[2]
-            
-            if (!crawlId || !userCrawlIds.includes(crawlId)) continue
-
-            try {
-                const queue = crawlQueue(crawlId)
-                const jobs = await queue.getJobs(['waiting', 'active', 'delayed', 'failed'])
-                
-                if (jobs.length > 0) {
-                    await queue.empty()
-                    clearedQueues++
-                    totalJobsCleared += jobs.length
-                    console.log(`Cleared ${jobs.length} jobs from queue for crawl ${crawlId}`)
-                }
-
-                await queue.close()
-            } catch (err) {
-                console.log(`Error clearing queue for crawl ${crawlId}:`, err.message)
-            }
-        }
-
-        await redis.disconnect()
-
-        res.status(200).json({ 
-            message: `Cleared ${clearedQueues} queues with ${totalJobsCleared} total jobs`,
-            clearedQueues,
-            totalJobsCleared
-        });
-
-    } catch (error) {
-        console.error('Error clearing all queues:', error.message)
-        res.status(500).json({ message: 'Error clearing all queues', error: error.message })
+const clearAllQueues = asyncHandler(async (req, res) => {
+    let query = {};
+    if (!req.user.isSuperAdmin()) {
+        query = { userId: req.user._id };
     }
-};
+
+    const userCrawls = await Crawl.find(query).select('_id').lean();
+    const userCrawlIds = userCrawls.map(crawl => crawl._id.toString());
+
+    if (userCrawlIds.length === 0) {
+        return res.status(200).json({ message: 'No crawls found to clear queues for', clearedQueues: 0, totalJobsCleared: 0 });
+    }
+
+    const redis = getRedisClient();
+    const keys = await redis.keys('bull:crawl:*')
+
+    if (keys.length === 0) {
+        return res.status(200).json({ message: 'No queues found to clear' });
+    }
+
+    let clearedQueues = 0;
+    let totalJobsCleared = 0;
+
+    for (const key of keys) {
+        const parts = key.split(':')
+        const crawlId = parts[2]
+        if (!crawlId || !userCrawlIds.includes(crawlId)) continue
+
+        try {
+            const queue = crawlQueue(crawlId)
+            const [waitingCount, activeCount, delayedCount, failedCount] = await Promise.all([
+                queue.getWaitingCount(), queue.getActiveCount(),
+                queue.getDelayedCount(), queue.getFailedCount()
+            ])
+            const jobCount = waitingCount + activeCount + delayedCount + failedCount
+            if (jobCount > 0) {
+                await queue.empty()
+                clearedQueues++
+                totalJobsCleared += jobCount
+            }
+        } catch (err) {
+            console.error(`Error clearing queue for crawl ${crawlId}:`, err.message)
+        }
+    }
+
+    res.status(200).json({
+        message: `Cleared ${clearedQueues} queues with ${totalJobsCleared} total jobs`,
+        clearedQueues,
+        totalJobsCleared
+    });
+});
 
 // Get status of all per-crawl queues (user-specific)
-const getAllQueuesStatus = async (req, res) => {
-    try {
-        // Get user's crawls first
-        let query = {};
-        if (req.user.isSuperAdmin()) {
-            // Superadmin can see all crawls
-            query = {};
-        } else {
-            // Regular admin can only see their own crawls
-            query = { userId: req.user._id };
-        }
-
-        const userCrawls = await Crawl.find(query).select('_id title').lean();
-        const userCrawlIds = userCrawls.map(crawl => crawl._id.toString());
-
-        if (userCrawlIds.length === 0) {
-            return res.json({ 
-                queues: [],
-                summary: {
-                    totalActive: 0,
-                    totalWaiting: 0,
-                    totalDelayed: 0,
-                    totalFailed: 0,
-                    totalCompleted: 0
-                }
-            })
-        }
-
-        const Redis = require('ioredis')
-        const redis = new Redis({
-            host: process.env.REDIS_HOST || '127.0.0.1',
-            port: process.env.REDIS_PORT || 6379,
-        })
-
-        // Get all queue keys that match the pattern 'bull:crawl:*'
-        const keys = await redis.keys('bull:crawl:*')
-        
-        if (keys.length === 0) {
-            await redis.disconnect()
-            return res.json({ 
-                queues: [],
-                summary: {
-                    totalActive: 0,
-                    totalWaiting: 0,
-                    totalDelayed: 0,
-                    totalFailed: 0,
-                    totalCompleted: 0
-                }
-            })
-        }
-
-        let totalActive = 0
-        let totalWaiting = 0
-        let totalDelayed = 0
-        let totalFailed = 0
-        let totalCompleted = 0
-        const queues = []
-
-        for (const key of keys) {
-            // Extract crawlId from the key (format: 'bull:crawl:crawlId')
-            const parts = key.split(':')
-            const crawlId = parts[2]
-            
-            if (!crawlId || !userCrawlIds.includes(crawlId)) continue
-
-            try {
-                const queue = crawlQueue(crawlId) // Use the existing crawlQueue function
-                const waiting = await queue.getJobs(['waiting'])
-                const active = await queue.getJobs(['active'])
-                const delayed = await queue.getJobs(['delayed'])
-                const failed = await queue.getJobs(['failed'])
-                const completed = await queue.getJobs(['completed'])
-
-                const total = waiting.length + active.length + delayed.length + failed.length + completed.length
-                
-                if (total > 0) {
-                    // Find the crawl title for this crawlId
-                    const crawl = userCrawls.find(c => c._id.toString() === crawlId);
-                    const queueInfo = {
-                        crawlId,
-                        crawlTitle: crawl ? crawl.title : 'Unknown Crawl',
-                        total,
-                        waiting: waiting.length,
-                        active: active.length,
-                        delayed: delayed.length,
-                        failed: failed.length,
-                        completed: completed.length,
-                        activeJobs: active.map(job => ({
-                            id: job.id,
-                            url: job.data.url
-                        }))
-                    }
-                    queues.push(queueInfo)
-
-                    totalActive += active.length
-                    totalWaiting += waiting.length
-                    totalDelayed += delayed.length
-                    totalFailed += failed.length
-                    totalCompleted += completed.length
-                }
-
-                await queue.close()
-            } catch (err) {
-                console.log(`Error checking queue for crawl ${crawlId}:`, err.message)
-            }
-        }
-
-        await redis.disconnect()
-
-        res.json({
-            queues,
-            summary: {
-                totalActive,
-                totalWaiting,
-                totalDelayed,
-                totalFailed,
-                totalCompleted
-            }
-        })
-
-    } catch (error) {
-        console.error('Error checking all queues:', error.message)
-        res.status(500).json({ message: 'Error checking queues', error: error.message })
+const getAllQueuesStatus = asyncHandler(async (req, res) => {
+    let query = {};
+    if (!req.user.isSuperAdmin()) {
+        query = { userId: req.user._id };
     }
-};
+
+    const userCrawls = await Crawl.find(query).select('_id title').lean();
+    const userCrawlIds = userCrawls.map(crawl => crawl._id.toString());
+
+    const emptyResult = {
+        queues: [],
+        summary: { totalActive: 0, totalWaiting: 0, totalDelayed: 0, totalFailed: 0, totalCompleted: 0 }
+    };
+
+    if (userCrawlIds.length === 0) {
+        return res.json(emptyResult);
+    }
+
+    const redis = getRedisClient();
+    const keys = await redis.keys('bull:crawl:*')
+
+    if (keys.length === 0) {
+        return res.json(emptyResult);
+    }
+
+    let totalActive = 0, totalWaiting = 0, totalDelayed = 0, totalFailed = 0, totalCompleted = 0;
+    const queues = []
+
+    for (const key of keys) {
+        const parts = key.split(':')
+        const crawlId = parts[2]
+        if (!crawlId || !userCrawlIds.includes(crawlId)) continue
+
+        try {
+            const queue = crawlQueue(crawlId)
+            const [waitingCount, activeCount, delayedCount, failedCount, completedCount] = await Promise.all([
+                queue.getWaitingCount(), queue.getActiveCount(),
+                queue.getDelayedCount(), queue.getFailedCount(), queue.getCompletedCount()
+            ])
+            const total = waitingCount + activeCount + delayedCount + failedCount + completedCount
+
+            if (total > 0) {
+                const activeJobs = await queue.getJobs(['active'])
+                const crawlMeta = userCrawls.find(c => c._id.toString() === crawlId);
+                queues.push({
+                    crawlId,
+                    crawlTitle: crawlMeta ? crawlMeta.title : 'Unknown Crawl',
+                    total,
+                    waiting: waitingCount,
+                    active: activeCount,
+                    delayed: delayedCount,
+                    failed: failedCount,
+                    completed: completedCount,
+                    activeJobs: activeJobs.map(job => ({ id: job.id, url: job.data.url }))
+                })
+                totalActive += activeCount
+                totalWaiting += waitingCount
+                totalDelayed += delayedCount
+                totalFailed += failedCount
+                totalCompleted += completedCount
+            }
+        } catch (err) {
+            console.error(`Error checking queue for crawl ${crawlId}:`, err.message)
+        }
+    }
+
+    res.json({ queues, summary: { totalActive, totalWaiting, totalDelayed, totalFailed, totalCompleted } })
+});
 
 // —————————————— PROXY USAGE ENDPOINTS ——————————————
 
@@ -717,106 +544,78 @@ const getAllQueuesStatus = async (req, res) => {
  * Get proxy usage statistics for a specific crawl
  * @route GET /api/crawls/:id/proxy-stats
  */
-const getCrawlProxyStats = async (req, res) => {
+const getCrawlProxyStats = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    // Validate crawlId
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'Invalid crawlId' });
     }
 
-    try {
-        // Check if user owns this crawl or is superadmin
-        const crawl = await Crawl.findById(id);
-        if (!crawl) {
-            return res.status(404).json({ error: 'Crawl not found' });
-        }
-        
-        if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ error: 'Access denied. You can only view proxy stats for your own crawls.' });
-        }
-
-        const stats = await proxyUsageService.getCrawlProxyStats(id);
-        res.status(200).json(stats);
-    } catch (error) {
-        console.error('Error getting crawl proxy stats:', error.message);
-        res.status(500).json({ message: 'Error getting proxy stats', error: error.message });
+    const crawl = await Crawl.findById(id);
+    if (!crawl) {
+        return res.status(404).json({ error: 'Crawl not found' });
     }
-};
+
+    if (!req.user.isSuperAdmin() && crawl.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ error: 'Access denied. You can only view proxy stats for your own crawls.' });
+    }
+
+    const stats = await proxyUsageService.getCrawlProxyStats(id);
+    res.status(200).json(stats);
+});
 
 /**
  * Get global proxy usage statistics (user-specific)
  * @route GET /api/proxy-stats/global
  */
-const getGlobalProxyStats = async (req, res) => {
-    try {
-        const stats = await proxyUsageService.getGlobalProxyStats(req.user);
-        res.status(200).json(stats);
-    } catch (error) {
-        console.error('Error getting global proxy stats:', error.message);
-        res.status(500).json({ message: 'Error getting global proxy stats', error: error.message });
-    }
-};
+const getGlobalProxyStats = asyncHandler(async (req, res) => {
+    const stats = await proxyUsageService.getGlobalProxyStats(req.user);
+    res.status(200).json(stats);
+});
 
 /**
  * Get proxy usage for a specific URL (user-specific)
  * @route GET /api/proxy-stats/url
  */
-const getProxyUsageForUrl = async (req, res) => {
+const getProxyUsageForUrl = asyncHandler(async (req, res) => {
     const { url } = req.query;
 
     if (!url) {
         return res.status(400).json({ message: 'URL parameter is required' });
     }
 
-    try {
-        const usage = await proxyUsageService.getProxyUsageForUrl(url, req.user);
-        res.status(200).json(usage);
-    } catch (error) {
-        console.error('Error getting proxy usage for URL:', error.message);
-        res.status(500).json({ message: 'Error getting proxy usage for URL', error: error.message });
-    }
-};
+    const usage = await proxyUsageService.getProxyUsageForUrl(url, req.user);
+    res.status(200).json(usage);
+});
 
 /**
  * Get cost analysis for proxy usage (user-specific)
  * @route GET /api/proxy-stats/cost-analysis
  */
-const getProxyCostAnalysis = async (req, res) => {
+const getProxyCostAnalysis = asyncHandler(async (req, res) => {
     const { crawlId, startDate, endDate } = req.query;
 
-    try {
-        const analysis = await proxyUsageService.getCostAnalysis(
-            crawlId || null,
-            startDate ? new Date(startDate) : null,
-            endDate ? new Date(endDate) : null,
-            req.user
-        );
-        res.status(200).json(analysis);
-    } catch (error) {
-        console.error('Error getting proxy cost analysis:', error.message);
-        res.status(500).json({ message: 'Error getting cost analysis', error: error.message });
-    }
-};
+    const analysis = await proxyUsageService.getCostAnalysis(
+        crawlId || null,
+        startDate ? new Date(startDate) : null,
+        endDate ? new Date(endDate) : null,
+        req.user
+    );
+    res.status(200).json(analysis);
+});
 
 /**
  * Clean up old proxy usage records (user-specific)
  * @route DELETE /api/proxy-stats/cleanup
  */
-const cleanupProxyUsage = async (req, res) => {
+const cleanupProxyUsage = asyncHandler(async (req, res) => {
     const { daysOld = 90 } = req.query;
-
-    try {
-        const deletedCount = await proxyUsageService.cleanupOldRecords(parseInt(daysOld), req.user);
-        res.status(200).json({ 
-            message: `Cleaned up ${deletedCount} old proxy usage records`,
-            deletedCount 
-        });
-    } catch (error) {
-        console.error('Error cleaning up proxy usage records:', error.message);
-        res.status(500).json({ message: 'Error cleaning up proxy usage records', error: error.message });
-    }
-};
+    const deletedCount = await proxyUsageService.cleanupOldRecords(parseInt(daysOld), req.user);
+    res.status(200).json({
+        message: `Cleaned up ${deletedCount} old proxy usage records`,
+        deletedCount
+    });
+});
 
 module.exports = {
     crawlWebsite,
@@ -831,9 +630,8 @@ module.exports = {
     deleteCrawlDataForUrls,
     runAllCrawls,
     clearCrawlQueue,
-    clearAllQueues, // Export the new function
-    getAllQueuesStatus, // Export the new function
-    // Proxy usage endpoints
+    clearAllQueues,
+    getAllQueuesStatus,
     getCrawlProxyStats,
     getGlobalProxyStats,
     getProxyUsageForUrl,

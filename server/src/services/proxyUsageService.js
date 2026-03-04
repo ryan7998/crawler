@@ -126,7 +126,9 @@ class ProxyUsageService extends BaseService {
      */
     async getTopProxies(user, limit = 10) {
         try {
-            const pipeline = buildProxyPerformancePipeline({ limit, user });
+            const userCrawlIds = await this.getUserCrawlIds(user);
+            const matchStage = { crawlId: { $in: userCrawlIds } };
+            const pipeline = buildProxyPerformancePipeline({ matchStage, limit });
             return await this.aggregate(pipeline);
         } catch (error) {
             this.handleError('getTopProxies', error);
@@ -210,12 +212,14 @@ class ProxyUsageService extends BaseService {
     async getCostAnalysis(crawlId = null, startDate = null, endDate = null, user = null) {
         try {
             const matchStage = {
-                ...createCrawlMatch(crawlId),
                 ...createDateRangeMatch(startDate, endDate)
             };
 
-            // Add user filtering if user is provided
-            if (user) {
+            if (crawlId) {
+                // Filter by a specific crawl
+                Object.assign(matchStage, createCrawlMatch(crawlId));
+            } else if (user) {
+                // No specific crawl — scope to all crawls owned by the user
                 const userCrawlIds = await this.getUserCrawlIds(user);
                 matchStage.crawlId = { $in: userCrawlIds };
             }
@@ -240,7 +244,6 @@ class ProxyUsageService extends BaseService {
      */
     async getUserCrawlIds(user) {
         try {
-            const Crawl = require('../models/Crawl');
             let query = {};
             if (user.isSuperAdmin()) {
                 // Superadmin can see all crawls
