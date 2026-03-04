@@ -4,26 +4,19 @@ const proxyUsageSchema = new mongoose.Schema({
     crawlId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Crawl',
-        required: true,
-        index: true
+        required: true
     },
     url: {
         type: String,
-        required: true,
-        index: true
+        required: true
     },
     proxyId: {
         type: String,
-        required: true,
-        index: true
+        required: true
     },
     proxyLocation: {
         type: String,
         required: true
-    },
-    usageCount: {
-        type: Number,
-        default: 1
     },
     firstUsed: {
         type: Date,
@@ -70,12 +63,6 @@ const proxyUsageSchema = new mongoose.Schema({
 proxyUsageSchema.index({ crawlId: 1, proxyId: 1 });
 proxyUsageSchema.index({ url: 1, proxyId: 1 });
 proxyUsageSchema.index({ lastUsed: -1 });
-
-// Virtual for success rate
-proxyUsageSchema.virtual('successRate').get(function() {
-    if (this.totalRequests === 0) return 0;
-    return (this.successCount / this.totalRequests) * 100;
-});
 
 // Method to update usage statistics
 proxyUsageSchema.methods.updateUsage = function(success, responseTime) {

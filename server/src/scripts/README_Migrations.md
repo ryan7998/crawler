@@ -18,6 +18,20 @@ This directory contains database migration scripts for the crawler application.
 
 **When to run**: After adding the proxy usage feature to track proxy usage statistics.
 
+### 2. Created At Migration
+
+**File**: `migrateCreatedAt.js`
+
+**Purpose**: Adds `createdAt` field to existing crawl documents.
+
+**What it does**:
+
+- Finds all crawl documents without `createdAt` field
+- Sets `createdAt` to the value of `startTime` (if available) or current date
+- Verifies the migration was successful
+
+**When to run**: After adding the `createdAt` field to the Crawl schema to ensure proper sorting and display of creation dates.
+
 ## Running Migrations
 
 ### From the server directory:
@@ -25,6 +39,9 @@ This directory contains database migration scripts for the crawler application.
 ```bash
 # Run proxy usage migration
 npm run migrate:proxy-usage
+
+# Run created at migration
+npm run migrate:created-at
 ```
 
 ### Direct execution:
@@ -32,6 +49,7 @@ npm run migrate:proxy-usage
 ```bash
 # Run migration directly
 node src/scripts/migrateProxyUsage.js
+node src/scripts/migrateCreatedAt.js
 ```
 
 ## Migration Safety

@@ -1,52 +1,9 @@
 const mongoose = require('mongoose');
 
 /**
- * Database optimization utilities
- * Provides functions to create indexes and optimize queries
+ * Database diagnostic and maintenance utilities.
+ * All indexes are declared directly in the model schemas — no manual index creation here.
  */
-
-/**
- * Create indexes for better query performance
- */
-const createIndexes = async () => {
-    try {
-        console.log('🔧 Creating database indexes...');
-
-        // User model indexes
-        await mongoose.connection.db.collection('users').createIndex({ email: 1 }, { unique: true });
-        await mongoose.connection.db.collection('users').createIndex({ role: 1 });
-        await mongoose.connection.db.collection('users').createIndex({ isActive: 1 });
-
-        // Crawl model indexes
-        await mongoose.connection.db.collection('crawls').createIndex({ userId: 1 });
-        await mongoose.connection.db.collection('crawls').createIndex({ status: 1 });
-        await mongoose.connection.db.collection('crawls').createIndex({ createdAt: -1 });
-        await mongoose.connection.db.collection('crawls').createIndex({ title: 'text' }); // Text search
-        await mongoose.connection.db.collection('crawls').createIndex({ userId: 1, status: 1 }); // Compound index
-
-        // CrawlData model indexes
-        await mongoose.connection.db.collection('crawldatas').createIndex({ crawlId: 1 });
-        await mongoose.connection.db.collection('crawldatas').createIndex({ url: 1 });
-        await mongoose.connection.db.collection('crawldatas').createIndex({ crawlId: 1, url: 1 }); // Compound index
-        await mongoose.connection.db.collection('crawldatas').createIndex({ createdAt: -1 });
-
-        // ProxyUsage model indexes
-        await mongoose.connection.db.collection('proxyusages').createIndex({ crawlId: 1 });
-        await mongoose.connection.db.collection('proxyusages').createIndex({ proxyId: 1 });
-        await mongoose.connection.db.collection('proxyusages').createIndex({ url: 1 });
-        await mongoose.connection.db.collection('proxyusages').createIndex({ lastUsed: -1 });
-        await mongoose.connection.db.collection('proxyusages').createIndex({ crawlId: 1, proxyId: 1 }); // Compound index
-        await mongoose.connection.db.collection('proxyusages').createIndex({ url: 1, proxyId: 1 }); // Compound index
-
-        // Selectors model indexes
-        await mongoose.connection.db.collection('selectors').createIndex({ domain: 1 }, { unique: true });
-
-        console.log('✅ Database indexes created successfully');
-    } catch (error) {
-        console.error('❌ Error creating database indexes:', error.message);
-        throw error;
-    }
-};
 
 /**
  * Analyze query performance
@@ -109,19 +66,13 @@ const cleanupOldData = async (collectionName, filter, daysOld = 90) => {
 };
 
 /**
- * Optimize database performance
+ * Optimize database performance (cleanup old data)
  */
 const optimizeDatabase = async () => {
     try {
         console.log('🚀 Starting database optimization...');
-
-        // Create indexes
-        await createIndexes();
-
-        // Clean up old data
         await cleanupOldData('crawldatas', {}, 180); // Keep crawl data for 6 months
         await cleanupOldData('proxyusages', {}, 90); // Keep proxy usage for 3 months
-
         console.log('✅ Database optimization completed');
     } catch (error) {
         console.error('❌ Database optimization failed:', error.message);
@@ -130,7 +81,6 @@ const optimizeDatabase = async () => {
 };
 
 module.exports = {
-    createIndexes,
     analyzeQuery,
     getCollectionStats,
     cleanupOldData,

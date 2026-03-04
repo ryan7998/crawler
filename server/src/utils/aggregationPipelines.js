@@ -2,6 +2,7 @@
  * Shared aggregation pipeline utilities
  * Reduces duplication in MongoDB aggregation queries across services
  */
+const mongoose = require('mongoose');
 
 /**
  * Common aggregation stages for proxy usage statistics
@@ -50,6 +51,7 @@ const proxyUsageStages = {
     projectProxySummary: {
         $project: {
             proxyId: '$_id',
+            proxyUrl: '$_id',
             totalRequests: 1,
             successRate: {
                 $cond: [
@@ -275,8 +277,7 @@ function buildCostAnalysisPipeline(options = {}) {
  */
 function buildSummaryPipeline(options = {}) {
     const {
-        matchStage = {},
-        includeDetails = false
+        matchStage = {}
     } = options;
 
     const pipeline = [];
@@ -289,18 +290,6 @@ function buildSummaryPipeline(options = {}) {
     // Add summary grouping and projection
     pipeline.push(summaryStages.groupAll);
     pipeline.push(summaryStages.projectSummary);
-
-    // Add additional details if requested
-    if (includeDetails) {
-        pipeline.push({
-            $lookup: {
-                from: 'crawls',
-                localField: 'crawlId',
-                foreignField: '_id',
-                as: 'crawlDetails'
-            }
-        });
-    }
 
     return pipeline;
 }
@@ -332,7 +321,13 @@ function createDateRangeMatch(startDate, endDate, dateField = 'lastUsed') {
  * @returns {Object} Match stage
  */
 function createCrawlMatch(crawlId) {
-    return crawlId ? { crawlId: crawlId } : {};
+    if (!crawlId) return {};
+    
+    return { 
+        crawlId: mongoose.Types.ObjectId.isValid(crawlId) 
+            ? new mongoose.Types.ObjectId(crawlId) 
+            : crawlId 
+    };
 }
 
 module.exports = {

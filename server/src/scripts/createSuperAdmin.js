@@ -29,8 +29,7 @@ async function createSuperAdmin() {
 
         console.log('✅ Superadmin created successfully!');
         console.log('📧 Email:', superAdmin.email);
-        console.log('🔑 Password: admin123456');
-        console.log('⚠️  Please change the password after first login!');
+        console.log('⚠️  IMPORTANT: Change the default password immediately after first login!');
 
     } catch (error) {
         console.error('❌ Error creating superadmin:', error.message);

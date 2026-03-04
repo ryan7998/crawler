@@ -2,14 +2,19 @@ import { ref, computed } from 'vue'
 import { useAuthStore } from '../stores/authStore'
 import { useRouter } from 'vue-router'
 
+/**
+ * Authentication composable with navigation integration
+ * Provides UI-level auth functionality and route guards
+ * For business logic, use useAuthStore() directly
+ */
 export function useAuth() {
   const authStore = useAuthStore()
   const router = useRouter()
 
-  // Reactive state
+  // Local state for UI concerns only
   const isInitialized = ref(false)
 
-  // Computed properties
+  // Computed properties (convenience wrappers)
   const isAuthenticated = computed(() => authStore.isAuthenticated)
   const user = computed(() => authStore.user)
   const loading = computed(() => authStore.loading)
@@ -18,11 +23,19 @@ export function useAuth() {
   const isAdmin = computed(() => authStore.isAdmin)
   const userFullName = computed(() => authStore.userFullName)
 
-  // Auth methods
+  // Helper function to check authentication before operations
+  const withAuth = (callback, fallback = () => {}) => {
+    if (!isAuthenticated.value) {
+      fallback()
+      return false
+    }
+    return callback()
+  }
+
+  // Navigation-integrated auth methods
   const login = async (credentials) => {
     const result = await authStore.login(credentials)
     if (result.success) {
-      // Redirect to dashboard or intended page
       const redirectTo = router.currentRoute.value.query.redirect || '/'
       router.push(redirectTo)
     }
@@ -32,7 +45,6 @@ export function useAuth() {
   const register = async (userData) => {
     const result = await authStore.register(userData)
     if (result.success) {
-      // Redirect to dashboard after successful registration
       router.push('/')
     }
     return result
@@ -40,12 +52,13 @@ export function useAuth() {
 
   const logout = async () => {
     await authStore.logout()
-    router.push('/login')
+    router.push('/')
   }
 
+  // Route guard helpers
   const requireAuth = () => {
     if (!isAuthenticated.value) {
-      router.push('/login')
+      router.push('/')
       return false
     }
     return true
@@ -53,7 +66,7 @@ export function useAuth() {
 
   const requireSuperAdmin = () => {
     if (!isAuthenticated.value) {
-      router.push('/login')
+      router.push('/')
       return false
     }
     if (!isSuperAdmin.value) {
@@ -65,7 +78,7 @@ export function useAuth() {
 
   const requireAdmin = () => {
     if (!isAuthenticated.value) {
-      router.push('/login')
+      router.push('/')
       return false
     }
     if (!isAdmin.value) {
@@ -75,7 +88,7 @@ export function useAuth() {
     return true
   }
 
-  // Initialize authentication on app start
+  // UI initialization
   const initializeAuth = async () => {
     if (!isInitialized.value) {
       await authStore.initializeAuth()
@@ -83,13 +96,12 @@ export function useAuth() {
     }
   }
 
-  // Clear error
   const clearError = () => {
     authStore.error = null
   }
 
   return {
-    // State
+    // Computed state (convenience wrappers)
     isAuthenticated,
     user,
     loading,
@@ -99,17 +111,24 @@ export function useAuth() {
     userFullName,
     isInitialized,
 
-    // Methods
+    // Navigation-integrated methods
     login,
     register,
     logout,
+    
+    // Route guards
     requireAuth,
     requireSuperAdmin,
     requireAdmin,
+    
+    // Helper for composables
+    withAuth,
+    
+    // UI helpers
     initializeAuth,
     clearError,
 
-    // Direct store access for advanced usage
+    // Direct store access for business logic
     authStore
   }
 }

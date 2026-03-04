@@ -21,8 +21,7 @@ const {
     getProxyCostAnalysis,
     cleanupProxyUsage
 } = require('../controllers/crawlerController')
-const { crawlQueue } = require('../queues/crawlQueue')
-const { authenticate, requireAdmin } = require('../middleware/auth')
+const { authenticate } = require('../middleware/auth')
 
 const router = express.Router()
 

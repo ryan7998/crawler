@@ -6,11 +6,15 @@ const CrawlDataSchema = new Schema({
     crawlId: { type: Schema.Types.ObjectId, ref: 'Crawl', required: true },
     url: { type: String, required: true },
     data: { type: Schema.Types.Mixed, default: {} },
-    status: { type: String, default: 'pending' },
+    status: {
+        type: String,
+        enum: ['pending', 'success', 'failed'],
+        default: 'pending'
+    },
     error: { type: String, default: '' },
-    createdAt: { type: Date, default: Date.now },
-    // Add runId field
     runId: { type: String, required: true },
+}, {
+    timestamps: true
 });
 
 // Post middleware for cleanup after a CrawlData document is deleted

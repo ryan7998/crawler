@@ -2,7 +2,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { createUnauthorizedError } = require('../utils/errorHandler');
 
-// JWT Secret - should be in environment variables
+// JWT Secret - must be set via JWT_SECRET environment variable
+if (!process.env.JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET environment variable is not set. Using insecure fallback — set JWT_SECRET in your .env file before deploying.');
+}
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 

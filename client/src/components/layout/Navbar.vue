@@ -1,0 +1,163 @@
+<!-- Modern Navbar -->
+<template>
+    <nav class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <button 
+                        @click="goToDashboard"
+                        class="flex items-center hover:opacity-80 transition-opacity focus:outline-none border-none bg-transparent py-2 px-3 rounded-lg hover:bg-gray-50"
+                    >
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12.25V1m0 11.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M4 19v-2.25m6-13.5V1m0 2.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M10 19V7.75m6 4.5V1m0 11.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM16 19v-2"/>
+                    </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h1 class="text-xl font-bold text-gray-900">CrawlerPro</h1>
+                            <p class="text-xs text-gray-600">Advanced Web Scraping</p>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <!-- Authentication Section -->
+                    <div v-if="!isAuthenticated" class="flex items-center space-x-3">
+                        <button
+                            @click="openAuthModal('login')"
+                            class="text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            Sign In
+                        </button>
+                        <button
+                            @click="openAuthModal('register')"
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                        >
+                            Get Started
+                        </button>
+                    </div>
+
+                    <!-- Authenticated User Section -->
+                    <div v-else class="flex items-center space-x-3">
+                        <button
+                            @click="openCreateModal"
+                            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>New Crawl</span>
+                        </button>
+                        
+                        <!-- User Menu -->
+                        <div class="relative">
+                            <button
+                                @click="showUserMenu = !showUserMenu"
+                                class="flex items-center space-x-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                <span class="text-sm font-medium">{{ userFullName }}</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div v-if="showUserMenu" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-40">
+                                <button
+                                    @click="showProfile = true; showUserMenu = false"
+                                    class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    <span>Profile</span>
+                                </button>
+                                <button
+                                    @click="openRunAllConfirm(); showUserMenu = false"
+                                    :disabled="runAllLoading"
+                                    class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>Run All Crawls</span>
+                                </button>
+                                <button
+                                    @click="openQueueStatusModal(); showUserMenu = false"
+                                    class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
+                                    <span>Queue Status</span>
+                                </button>
+                                <div class="border-t border-gray-200 my-2"></div>
+                                <button
+                                    @click="handleLogout(); showUserMenu = false"
+                                    class="flex items-center space-x-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                    </svg>
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </nav>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCrawlManagement } from '../../composables/useCrawlManagement'
+import { useAuth } from '../../composables/useAuth'
+import { useCrawlStore } from '../../stores/crawlStore'
+import { useNotification } from '../../composables/useNotification'
+
+const router = useRouter()
+const { showNotification } = useNotification()
+
+const { runAllLoading } = useCrawlManagement()
+const { isAuthenticated, userFullName, logout } = useAuth()
+const crawlStore = useCrawlStore()
+
+const showProfile = ref(false)
+const showUserMenu = ref(false)
+
+const openCreateModal = () => crawlStore.openCreateModal()
+const openQueueStatusModal = () => crawlStore.openQueueStatusModal()
+const openRunAllConfirm = () => crawlStore.openRunAllConfirm()
+const goToDashboard = () => router.push('/')
+
+const openAuthModal = (mode) => {
+  crawlStore.openAuthModal(mode)
+}
+
+const handleLogout = async () => {
+  await logout()
+  showNotification('Logged out successfully', 'success')
+}
+
+// Click outside handler for dropdown
+const handleClickOutside = (event) => {
+  if (showUserMenu.value && !event.target.closest('.relative')) {
+    showUserMenu.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+</script>

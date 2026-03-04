@@ -21,12 +21,6 @@ class Seed {
         this.advancedSelectors = advancedSelectors;
     }
 
-    async initialize() {
-        // Initialize selectors
-        // this.selector = await this.getDefaultSelectors()
-        return this
-    }
-
     async loadHTMLContent() {
         let browser = null;
         const maxRetries = 2;
@@ -310,25 +304,6 @@ class Seed {
         }
     }
 
-    async getDefaultSelectors() {
-        try {
-            // Get selectors from database for this domain
-            const Selectors = require('../models/Selectors');
-            const domainSelectors = await Selectors.findOne({ domain: this.hostname });
-            
-            if (domainSelectors) {
-                console.log(`Found selectors for domain: ${this.hostname}`);
-                return domainSelectors.selectors;
-            }
-            
-            console.log(`No selectors found for domain: ${this.hostname}`);
-            return null;
-        } catch (error) {
-            console.error('Error fetching selectors:', error);
-            return null;
-        }
-    }
-
     extractProtocol() {
         const protocolMatch = this.url.match(/(^\w+):\/\//)
         return protocolMatch ? protocolMatch[1] : null
@@ -342,10 +317,6 @@ class Seed {
     extractPath() {
         const pathMatch = this.url.match(/[^\/]+(\/.*)/)
         return pathMatch ? pathMatch[1] : '/'
-    }
-
-    getFullURL() {
-        return `${this.protocol}://${this.hostname}${this.path}`
     }
 
     isValid() {
@@ -365,7 +336,7 @@ class Seed {
             username: process.env.OXYLAB_USERNAME,
             password: process.env.OXYLAB_PASSWORD
         };
-        console.log('Proxy enabled with configuration:', this.proxyConfig);
+        console.log('Proxy enabled');
     }
 
     // Method to disable proxy

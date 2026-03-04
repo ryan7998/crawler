@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   // API service
-  const { post, get } = useApiService()
+  const { post, put, get } = useApiService()
 
   // Actions
   const setAuthData = (userData, authToken) => {
@@ -32,6 +32,13 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     token.value = null
     localStorage.removeItem('auth_token')
+  }
+
+  // Handle auth expiration (called by API service)
+  const handleAuthExpired = () => {
+    clearAuthData()
+    // The router guard will automatically handle navigation
+    // when isAuthenticated becomes false
   }
 
   const login = async (credentials) => {
@@ -131,7 +138,7 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       error.value = null
 
-      const response = await post('/api/auth/profile', profileData, { method: 'PUT' })
+      const response = await put('/api/auth/profile', profileData)
       
       if (response.success) {
         user.value = response.data
@@ -152,7 +159,7 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       error.value = null
 
-      const response = await post('/api/auth/change-password', passwordData, { method: 'PUT' })
+      const response = await put('/api/auth/change-password', passwordData)
       
       if (response.success) {
         return { success: true, message: 'Password changed successfully' }
@@ -196,6 +203,7 @@ export const useAuthStore = defineStore('auth', () => {
     updateProfile,
     changePassword,
     initializeAuth,
-    clearAuthData
+    clearAuthData,
+    handleAuthExpired
   }
 })
