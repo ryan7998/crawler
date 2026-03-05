@@ -11,12 +11,26 @@ import { debounce, throttle } from '../utils/performanceUtils'
  * @returns {Object} Socket state and methods
  */
 export function useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveStatus) {
-  const { joinRoom, on, disconnect } = useSocketConnection()
+  const { joinRoom, on, disconnect, isConnected: socketConnected } = useSocketConnection()
   
   // State
   const isConnected = ref(false)
   const logs = ref([])
   const queueStatus = ref({ active: 0, waiting: 0, delayed: 0, total: 0 })
+
+  // Wait for socket to be connected (with timeout) so we can join the room
+  const waitForConnection = (timeoutMs = 5000) => {
+    return new Promise((resolve) => {
+      if (socketConnected.value) return resolve(true)
+      const deadline = Date.now() + timeoutMs
+      const t = setInterval(() => {
+        if (socketConnected.value || Date.now() >= deadline) {
+          clearInterval(t)
+          resolve(socketConnected.value)
+        }
+      }, 100)
+    })
+  }
 
   // Create debounced status update function
   const debouncedStatusUpdate = debounce((url, status) => {
@@ -30,9 +44,12 @@ export function useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveS
 
   // Methods
   const setupSocketListeners = () => {
-    on("crawlLog", async (data) => {
+    on("crawlLog", (data) => {
+      // Guard: avoid crashes from undefined/malformed payload (e.g. Vue/reactivity reading .payload)
+      if (!data || typeof data !== 'object') return
       throttledLogUpdate(data)
       
+      if (!crawl.value) return
       if (data.status === 'completed' || data.status === 'failed') {
         crawl.value.status = data.status
         clearStartedStatuses()
@@ -40,7 +57,8 @@ export function useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveS
         debouncedStatusUpdate(data.url, data.status)
       }
 
-      if (data.status === 'success') {
+      if (data.status === 'success' && data.url != null) {
+        if (!crawl.value.aggregatedData) crawl.value.aggregatedData = {}
         if (!crawl.value.aggregatedData[data.url]) {
           crawl.value.aggregatedData[data.url] = []
         }
@@ -50,6 +68,7 @@ export function useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveS
     })
 
     on("queueStatus", (data) => {
+      if (!data || typeof data !== 'object') return
       queueStatus.value = {
         active: data.active ?? 0,
         waiting: data.waiting ?? 0,
@@ -60,11 +79,12 @@ export function useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveS
   }
 
   const clearStartedStatuses = () => {
+    if (!crawl.value || !liveStatusDictionary.value) return
     // Clear all 'started' statuses when crawl completes
     Object.keys(liveStatusDictionary.value).forEach(url => {
       if (liveStatusDictionary.value[url] === 'started') {
         // Check if this URL has a final status in aggregatedData
-        const urlData = crawl.value.aggregatedData[url]
+        const urlData = crawl.value.aggregatedData?.[url]
         if (urlData && urlData.length > 0) {
           const lastEntry = urlData[urlData.length - 1]
           liveStatusDictionary.value[url] = lastEntry.status
@@ -78,9 +98,12 @@ export function useCrawlSocket(crawlId, crawl, liveStatusDictionary, updateLiveS
 
   const connectToCrawl = async () => {
     try {
-      await joinRoom(crawlId.value)
-      isConnected.value = true
       setupSocketListeners()
+      const connected = await waitForConnection()
+      if (connected && crawlId.value) {
+        joinRoom(crawlId.value)
+      }
+      isConnected.value = !!connected
     } catch (error) {
       console.error('Failed to connect to crawl room:', error)
       isConnected.value = false
