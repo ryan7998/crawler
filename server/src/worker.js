@@ -302,11 +302,11 @@ async function ensureProcessor(crawlId, runId) {
 
 // —————————————— OPTIONAL: HTTP ENDPOINT TO START A PROCESSOR ——————————————
 // If you'd like to trigger this from your controller via an HTTP call:
-app.post('/processor/:crawlId', (req, res) => {
+app.post('/processor/:crawlId', async (req, res) => {
     const { crawlId } = req.params;
     const { runId } = req.body || {};
     try {
-      ensureProcessor(crawlId, runId);
+      await ensureProcessor(crawlId, runId);
       return res.json({ message: `Processor ensured for ${crawlId}` });
     } catch (err) {
       console.error('Error ensuring processor:', err);
@@ -368,7 +368,7 @@ app.delete('/queue-clear/:crawlId', async (req, res) => {
 });
 
 // —————————————— LAUNCH ——————————————
-const PORT = parseInt(process.env.PORT || '3002', 10);
+const PORT = parseInt(process.env.WORKER_PORT || process.env.PORT || '3002', 10);
 server.listen(PORT, () => {
   console.log(`Worker + Socket.IO listening on port ${PORT}`);
 });

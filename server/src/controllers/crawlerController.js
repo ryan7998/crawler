@@ -1,6 +1,9 @@
 const axios = require('axios')
 const Redis = require('ioredis')
 const crawlQueue = require('../queues/getCrawlQueue')
+
+// Worker base URL (use 127.0.0.1 to avoid IPv6 localhost resolution issues on server)
+const WORKER_BASE_URL = process.env.WORKER_BASE_URL || 'http://127.0.0.1:3002'
 const Crawl = require('../models/Crawl')
 const CrawlData = require('../models/CrawlData')
 const Selectors = require('../models/Selectors')
@@ -62,7 +65,7 @@ const startCrawl = async (crawlId, urls) => {
     if (waitingCount + activeCount + delayedCount > 0) {
         // Jobs already queued — still wake the worker in case it restarted
         try {
-            await axios.post(`http://localhost:3002/processor/${crawlId}`);
+            await axios.post(`${WORKER_BASE_URL}/processor/${crawlId}`);
         } catch (err) {
             console.error('Failed to notify worker to start processor:', err.message);
         }
@@ -77,7 +80,7 @@ const startCrawl = async (crawlId, urls) => {
     }
 
     try {
-        await axios.post(`http://localhost:3002/processor/${crawlId}`, { runId });
+        await axios.post(`${WORKER_BASE_URL}/processor/${crawlId}`, { runId });
     } catch (err) {
         console.error('Failed to notify worker to start processor:', err.message);
     }
