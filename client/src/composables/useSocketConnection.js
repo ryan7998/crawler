@@ -1,6 +1,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { io } from 'socket.io-client'
-import { getSocketUrl } from '../utils/commonUtils'
+import { getSocketUrl } from '../utils/environmentUtils'
 
 /**
  * Reusable socket connection composable
@@ -10,7 +10,6 @@ export function useSocketConnection(options = {}) {
   const socket = ref(null)
   const isConnected = ref(false)
   const connectionError = ref(null)
-  const logs = ref([])
 
   const {
     socketUrl = getSocketUrl(),
@@ -27,7 +26,7 @@ export function useSocketConnection(options = {}) {
   const connect = () => {
     try {
       console.log('Connecting to socket at:', socketUrl)
-
+      
       socket.value = io(socketUrl, {
         path,
         transports,
@@ -37,7 +36,7 @@ export function useSocketConnection(options = {}) {
       })
 
       setupEventListeners()
-
+      
       if (autoConnect) {
         socket.value.connect()
       }
@@ -156,7 +155,6 @@ export function useSocketConnection(options = {}) {
    */
   const cleanup = () => {
     disconnect()
-    logs.value = []
     connectionError.value = null
   }
 
@@ -174,11 +172,10 @@ export function useSocketConnection(options = {}) {
 
   return {
     // State
-    socket: socket.value,
+    socket,
     isConnected,
     connectionError,
-    logs,
-
+    
     // Methods
     connect,
     disconnect,

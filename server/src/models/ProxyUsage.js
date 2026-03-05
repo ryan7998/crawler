@@ -4,26 +4,19 @@ const proxyUsageSchema = new mongoose.Schema({
     crawlId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Crawl',
-        required: true,
-        index: true
+        required: true
     },
     url: {
         type: String,
-        required: true,
-        index: true
+        required: true
     },
     proxyId: {
         type: String,
-        required: true,
-        index: true
+        required: true
     },
     proxyLocation: {
         type: String,
         required: true
-    },
-    usageCount: {
-        type: Number,
-        default: 1
     },
     firstUsed: {
         type: Date,
@@ -70,12 +63,6 @@ const proxyUsageSchema = new mongoose.Schema({
 proxyUsageSchema.index({ crawlId: 1, proxyId: 1 });
 proxyUsageSchema.index({ url: 1, proxyId: 1 });
 proxyUsageSchema.index({ lastUsed: -1 });
-
-// Virtual for success rate
-proxyUsageSchema.virtual('successRate').get(function() {
-    if (this.totalRequests === 0) return 0;
-    return (this.successCount / this.totalRequests) * 100;
-});
 
 // Method to update usage statistics
 proxyUsageSchema.methods.updateUsage = function(success, responseTime) {
@@ -140,21 +127,45 @@ proxyUsageSchema.statics.getCrawlSummary = async function(crawlId) {
     return result;
 };
 
-// Static method to get global proxy usage summary
-proxyUsageSchema.statics.getGlobalSummary = async function() {
-    const summary = await this.aggregate([
-        {
-            $group: {
-                _id: null,
-                totalProxyRequests: { $sum: '$totalRequests' },
-                uniqueProxiesUsed: { $addToSet: '$proxyId' },
-                totalCost: { $sum: '$totalCost' },
-                totalSuccessCount: { $sum: '$successCount' },
-                totalFailureCount: { $sum: '$failureCount' },
-                lastProxyUsed: { $max: '$lastUsed' }
-            }
+// Static method to get global proxy usage summary (user-specific)
+proxyUsageSchema.statics.getGlobalSummary = async function(user = null) {
+    let matchStage = {};
+    
+    // Add user filtering if user is provided
+    if (user) {
+        const Crawl = require('./Crawl');
+        let query = {};
+        if (user.isSuperAdmin()) {
+            // Superadmin can see all crawls
+            query = {};
+        } else {
+            // Regular admin can only see their own crawls
+            query = { userId: user._id };
         }
-    ]);
+        
+        const userCrawls = await Crawl.find(query).select('_id').lean();
+        const userCrawlIds = userCrawls.map(crawl => crawl._id);
+        matchStage.crawlId = { $in: userCrawlIds };
+    }
+    
+    const pipeline = [];
+    if (Object.keys(matchStage).length > 0) {
+        pipeline.push({ $match: matchStage });
+    }
+    
+    pipeline.push({
+        $group: {
+            _id: null,
+            totalProxyRequests: { $sum: '$totalRequests' },
+            uniqueProxiesUsed: { $addToSet: '$proxyId' },
+            totalCost: { $sum: '$totalCost' },
+            totalSuccessCount: { $sum: '$successCount' },
+            totalFailureCount: { $sum: '$failureCount' },
+            lastProxyUsed: { $max: '$lastUsed' }
+        }
+    });
+    
+    const summary = await this.aggregate(pipeline);
     
     if (summary.length === 0) {
         return {

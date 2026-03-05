@@ -1,111 +1,124 @@
-import { ref, inject } from 'vue'
+import { ref, computed } from 'vue'
 import { useApiService } from './useApiService'
+import { useAuth } from './useAuth'
+import { useCrawlStore } from '../stores/crawlStore'
+import { useNotification } from './useNotification'
+import { useLoadingState, LOADING_KEYS } from './useLoadingState'
 
+/**
+ * Composable for crawl management operations
+ * Handles API calls and business logic, delegates UI state to components
+ */
 export function useCrawlManagement() {
     // Initialize composables
     const { get, post, put, loading: apiLoading, error: apiError } = useApiService()
+    const { isAuthenticated, withAuth } = useAuth()
+    const crawlStore = useCrawlStore()
+    const { showNotification, handleError } = useNotification()
+    const { setLoading, isLoading } = useLoadingState()
 
-    // Reactive state
-    const crawls = ref([])
-    const totalCrawls = ref(0)
-    const isSearching = ref(false)
-    const runAllLoading = ref(false)
+    // Business logic state only (using centralized loading)
     const disableLoadingId = ref(null)
-    const showSnackbar = ref(false)
-    const snackbarText = ref('')
-    const snackbarColor = ref('success')
-    const globalSheetUrl = ref('')
 
-    // Inject the notification function
-    const showNotification = inject('showNotification')
 
-    // Fetch Google Sheet URL from server
-    const fetchGoogleSheetUrl = async () => {
-        try {
-            const data = await get('/api/export/google-sheet-id')
-            globalSheetUrl.value = data.sheetUrl
-        } catch (error) {
-            console.error('Error fetching Google Sheet URL:', error)
-            // Don't show notification for this as it's not critical
-            // Set a default value to prevent undefined issues
-            globalSheetUrl.value = ''
-        }
-    }
-
-    // Initialize Google Sheet URL - make it non-blocking
-    // Use setTimeout to avoid blocking the component initialization
-    setTimeout(() => {
-        fetchGoogleSheetUrl()
-    }, 100)
-
-    // Fetch crawls with pagination and search
+    /**
+     * Fetch crawls with pagination and search
+     * @param {Object} options - Pagination options { page, itemsPerPage }
+     * @param {string} searchQuery - Search query string
+     */
     const fetchCrawls = async (options, searchQuery) => {
+        return withAuth(async () => {
+        
         try {
-            isSearching.value = true
+            setLoading(LOADING_KEYS.SEARCH_CRAWLS, true)
+            crawlStore.setCrawlsLoading(true)
+            crawlStore.clearError()
+            
             const { page, itemsPerPage } = options
             const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''
-            const data = await get(`/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`)
-            crawls.value = data.crawls
-            totalCrawls.value = data.totalCrawls
+            const url = `/api/getallcrawlers?page=${page}&limit=${itemsPerPage}${searchParam}`
+            
+            const data = await get(url, {}, { silent: true })
+            crawlStore.setAllCrawls(data.crawls)
+            
         } catch (error) {
             console.error('Error fetching crawls:', error)
+            crawlStore.setError(error.message || 'Error fetching crawls')
             showNotification('Error fetching crawls', 'error')
         } finally {
-            isSearching.value = false
+            setLoading(LOADING_KEYS.SEARCH_CRAWLS, false)
+            crawlStore.setCrawlsLoading(false)
         }
+        }, () => {
+            crawlStore.setAllCrawls([])
+            crawlStore.setCrawlsLoading(false)
+        })
     }
 
-    // Run all crawls
+    /**
+     * Run all crawls
+     * @returns {Promise<Object>} Result object with success status and message
+     */
     const runAllCrawls = async () => {
-        runAllLoading.value = true
+        if (!isAuthenticated.value) {
+            showNotification('Please login to run crawls', 'error')
+            return { success: false, message: 'Not authenticated' }
+        }
+        
+        setLoading(LOADING_KEYS.START_CRAWL, true)
         try {
             const data = await post('/api/runallcrawls')
             const { message, started, skipped } = data
-            snackbarText.value = `${message}. Started: ${started.length}, Skipped: ${skipped.length}`
-            snackbarColor.value = 'success'
-            showSnackbar.value = true
+            const resultMessage = `${message}. Started: ${started.length}, Skipped: ${skipped.length}`
+            showNotification(resultMessage, 'success')
+            return { success: true, message: resultMessage, data }
         } catch (error) {
-            snackbarText.value = error.message
-            snackbarColor.value = 'error'
-            showSnackbar.value = true
+            showNotification(error.message, 'error')
+            return { success: false, message: error.message }
         } finally {
-            runAllLoading.value = false
+            setLoading(LOADING_KEYS.START_CRAWL, false)
         }
     }
 
-    // Toggle disable/enable crawl
+    /**
+     * Toggle disable/enable crawl
+     * @param {Object} item - Crawl item to toggle
+     * @returns {Promise<Object>} Result object with success status and message
+     */
     const toggleDisableCrawl = async (item) => {
+        if (!isAuthenticated.value) {
+            showNotification('Please login to manage crawls', 'error')
+            return { success: false, message: 'Not authenticated' }
+        }
+        
         disableLoadingId.value = item._id
         try {
-            const data = await put(`/api/updatecrawl/${item._id}`,
-                { disabled: !item.disabled })
-            // Update the local crawl list
-            const updated = data.crawl
-            const idx = crawls.value.findIndex(c => c._id === item._id)
-            if (idx !== -1) crawls.value[idx] = { ...crawls.value[idx], ...updated }
-            snackbarText.value = updated.disabled ? 'Crawl disabled' : 'Crawl enabled'
-            snackbarColor.value = 'success'
-            showSnackbar.value = true
+            const response = await put(`/api/updatecrawl/${item._id}`, { disabled: !item.disabled })
+            const updated = response.data?.crawl
+            
+            if (!updated) {
+                throw new Error('No updated crawl data received from server')
+            }
+            
+            // Update store
+            crawlStore.updateCrawl(updated)
+            
+            const message = updated.disabled ? 'Crawl disabled' : 'Crawl enabled'
+            showNotification(message, 'success')
+            return { success: true, message, data: updated }
         } catch (error) {
-            snackbarText.value = error.message
-            snackbarColor.value = 'error'
-            showSnackbar.value = true
+            showNotification(error.message, 'error')
+            return { success: false, message: error.message }
         } finally {
             disableLoadingId.value = null
         }
     }
 
     return {
-        // State
-        crawls,
-        totalCrawls,
-        isSearching,
-        runAllLoading,
+        // Business logic state (centralized loading)
+        isSearching: computed(() => isLoading(LOADING_KEYS.SEARCH_CRAWLS)),
+        runAllLoading: computed(() => isLoading(LOADING_KEYS.START_CRAWL)),
         disableLoadingId,
-        showSnackbar,
-        snackbarText,
-        snackbarColor,
-        globalSheetUrl,
         
         // Functions
         fetchCrawls,

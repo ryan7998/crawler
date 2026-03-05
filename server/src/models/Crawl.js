@@ -1,5 +1,11 @@
 const { Schema, model } = require('mongoose')
 
+const logEntrySchema = new Schema({
+    message: { type: String, required: true },
+    level: { type: String, enum: ['info', 'warn', 'error'], default: 'info' },
+    timestamp: { type: Date, default: Date.now }
+}, { _id: false })
+
 const childSelectorSchema = new Schema({
     target_element: { type: String, required: true },
     selector_value: { type: String, required: true },
@@ -42,7 +48,8 @@ const crawlSchema = new Schema({
         default: {}
     },
     userId: {
-        type: String, // Placeholder for userId
+        type: Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
     status: {
@@ -58,7 +65,7 @@ const crawlSchema = new Schema({
         type: Schema.Types.ObjectId, // Store references to CrawlData documents
         ref: 'CrawlData'
     }],
-    logs: [{}],
+    logs: [logEntrySchema],
     error: {
         type: String, // Error message, if the crawl fails
         default: '',
@@ -69,6 +76,10 @@ const crawlSchema = new Schema({
     },
     endTime: {
         type: Date, // End time of the crawl, will be set when crawl completes
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
     updatedAt: {
         type: Date,

@@ -20,17 +20,12 @@ class ChangeDetectionService {
             const allCrawlData = await CrawlData.find({ crawlId })
                 .sort({ createdAt: -1 });
 
-            // DEBUG LOGGING
-            console.log('DEBUG: allCrawlData.length =', allCrawlData.length);
-            console.log('DEBUG: allCrawlData URLs =', allCrawlData.map(d => d.url));
-
             if (allCrawlData.length === 0) {
                 throw new Error('No crawl data found for this crawl');
             }
 
             // Group by URL and get the latest data for each URL (most recent run)
             const currentDataByUrl = this.groupByUrlAndGetLatest(allCrawlData);
-            console.log('DEBUG: currentDataByUrl keys =', Object.keys(currentDataByUrl));
 
             // Get previous crawl data for comparison
             let previousDataByUrl = {};
@@ -46,28 +41,30 @@ class ChangeDetectionService {
                     previousDataByUrl = this.groupByUrlAndGetLatest(previousRunData);
                 }
             }
-            console.log('DEBUG: previousDataByUrl keys =', Object.keys(previousDataByUrl));
-
             // Analyze changes
             const changes = this.analyzeChanges(currentDataByUrl, previousDataByUrl);
 
-            return {
-                crawlId,
-                crawlTitle: currentCrawl.title,
-                totalUrls: Object.keys(currentDataByUrl).length,
-                changedUrls: changes.changedUrls.length,
-                newUrls: changes.newUrls.length,
-                removedUrls: changes.removedUrls.length,
-                unchangedUrls: changes.unchangedUrls.length,
-                changes: changes,
-                summary: this.generateSummary(changes),
-                comparisonInfo: {
-                    currentRunDate: allCrawlData[0]?.createdAt,
-                    previousRunDate: Object.keys(previousDataByUrl).length > 0 ? 
-                        Math.max(...Object.values(previousDataByUrl).map(d => d.createdAt)) : null,
-                    hasPreviousRun: Object.keys(previousDataByUrl).length > 0
-                }
-            };
+        const previousDates = Object.values(previousDataByUrl);
+        const previousRunDate = previousDates.length > 0
+            ? previousDates.reduce((max, d) => (d.createdAt > max ? d.createdAt : max), previousDates[0].createdAt)
+            : null;
+
+        return {
+            crawlId,
+            crawlTitle: currentCrawl.title,
+            totalUrls: Object.keys(currentDataByUrl).length,
+            changedUrls: changes.changedUrls.length,
+            newUrls: changes.newUrls.length,
+            removedUrls: changes.removedUrls.length,
+            unchangedUrls: changes.unchangedUrls.length,
+            changes: changes,
+            summary: this.generateSummary(changes),
+            comparisonInfo: {
+                currentRunDate: allCrawlData[0]?.createdAt,
+                previousRunDate,
+                hasPreviousRun: previousDates.length > 0
+            }
+        };
 
         } catch (error) {
             console.error('Error detecting changes:', error);
@@ -279,14 +276,19 @@ class ChangeDetectionService {
     generateSummary(changes) {
         const { changedUrls, newUrls, removedUrls, unchangedUrls } = changes;
         
+        const totalUrls = changedUrls.length + newUrls.length + removedUrls.length + unchangedUrls.length;
+        const changedTotal = changedUrls.length + newUrls.length + removedUrls.length;
+        const changePercentage = totalUrls > 0
+            ? ((changedTotal / totalUrls) * 100).toFixed(1)
+            : '0.0';
+
         return {
-            totalUrls: changedUrls.length + newUrls.length + removedUrls.length + unchangedUrls.length,
+            totalUrls,
             changedCount: changedUrls.length,
             newCount: newUrls.length,
             removedCount: removedUrls.length,
             unchangedCount: unchangedUrls.length,
-            changePercentage: ((changedUrls.length + newUrls.length + removedUrls.length) / 
-                (changedUrls.length + newUrls.length + removedUrls.length + unchangedUrls.length) * 100).toFixed(1)
+            changePercentage
         };
     }
 
