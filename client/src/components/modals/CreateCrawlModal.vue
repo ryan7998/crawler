@@ -143,70 +143,16 @@
 
           <!-- Step 3: Selectors -->
           <div v-if="currentStep === 3" class="space-y-6">
-                                <div>
+            <div>
               <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Selectors</h3>
-                                    <div class="space-y-4">
-                <div
-                                            v-for="selector in currentSelectors"
-                                            :key="selector.id"
-                  class="p-4 border border-gray-200 rounded-lg"
-                >
-                  <div class="flex items-center justify-between mb-3">
-                    <h4 class="font-medium text-gray-900">Selector {{ currentSelectors.indexOf(selector) + 1 }}</h4>
-                    <button
-                      @click="removeCurrentSelector(selector.id)"
-                      class="text-red-600 hover:text-red-800 p-1"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                      </svg>
-                    </button>
-                                    </div>
-                  
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Element Name</label>
-                      <input
-                        v-model="selector.name"
-                        type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="e.g., product-title"
-                      />
-                                </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">CSS Selector</label>
-                      <input
-                        v-model="selector.selector"
-                        type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="e.g., .product-title"
-                      />
-                            </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                      <select
-                        v-model="selector.type"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="text">Text</option>
-                        <option value="link">Link</option>
-                        <option value="image">Image</option>
-                        <option value="table">Table</option>
-                        <option value="list">List</option>
-                      </select>
-                    </div>
-                                        <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Attribute (optional)</label>
-                      <input
-                        v-model="selector.attribute"
-                        type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="e.g., href, src"
-                      />
-                                            </div>
-                                        </div>
-                                    </div>
-                
+              <div class="space-y-4">
+                <CssSelector
+                  v-for="selector in currentSelectors"
+                  :key="selector.id"
+                  :selector="selector"
+                  @removeSelector="removeCurrentSelectorHandler"
+                  @updateSelector="updateCurrentSelectorHandler"
+                />
                 <button
                   @click="addNewSelector"
                   class="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
@@ -216,10 +162,75 @@
                   </svg>
                   Add New Selector
                 </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+              </div>
+            </div>
+
+            <div v-if="domainLoading" class="flex justify-center items-center py-4">
+              <svg class="w-8 h-8 animate-spin text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </div>
+            <div v-else class="space-y-4">
+              <div v-if="domainError" class="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                {{ domainError }}
+              </div>
+              <div
+                v-if="domainInfo"
+                :class="[
+                  'p-4 rounded-lg border text-sm',
+                  domainInfo.hasSelectors ? 'bg-green-50 border-green-200 text-green-800' : 'bg-amber-50 border-amber-200 text-amber-800'
+                ]"
+              >
+                <p class="font-semibold">Domain: {{ domainInfo.domain }}</p>
+                <p v-if="domainInfo.hasSelectors">Default selectors found for this domain.</p>
+                <p v-else>No default selectors found for this domain.</p>
+              </div>
+
+              <div v-if="domainInfo?.hasSelectors" class="mt-6">
+                <h4 class="text-md font-semibold text-gray-900 mb-3">Default Selectors for {{ domainInfo.domain }}</h4>
+                <div class="space-y-4">
+                  <div
+                    v-for="selector in localSelectors"
+                    :key="selector.id"
+                    class="flex flex-wrap items-start gap-3 p-3 border border-gray-200 rounded-lg"
+                  >
+                    <div class="flex-1 min-w-0">
+                      <CssSelector
+                        :selector="selector"
+                        :showRemoveButton="false"
+                        @updateSelector="updateDomainSelectorHandler"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      @click="addDomainSelectorToCurrent(selector)"
+                      class="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex-shrink-0"
+                    >
+                      Add to Current
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <details class="mt-6 group">
+              <summary class="cursor-pointer text-sm font-semibold text-gray-700 list-none flex items-center gap-2">
+                <span class="group-open:rotate-90 transition-transform inline-block">▶</span>
+                Advanced
+              </summary>
+              <div class="mt-3 pl-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Advanced CSS Selectors (one per line)</label>
+                <textarea
+                  v-model="advancedSelectorsText"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  placeholder="e.g. .captcha-container"
+                />
+                <p class="mt-1 text-xs text-gray-500">Used to scope captcha checks. If a captcha is inside any of these, it will be ignored.</p>
+              </div>
+            </details>
+          </div>
+        </div>
 
         <!-- Footer -->
         <div class="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
@@ -266,7 +277,7 @@
             <button
               v-if="currentStep === 3 && !isEditing"
               @click="saveCrawl"
-              :disabled="isLoading"
+              :disabled="isLoading || !!domainError"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
             >
               <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,7 +295,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useApiService } from '../../composables/useApiService'
+import { useCrawlActions } from '../../composables/useCrawlActions'
 import { isValidUrl } from '../../utils/urlUtils'
+import CssSelector from '../forms/CssSelector.vue'
 
 const props = defineProps({
     modelValue: {
@@ -300,6 +313,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'crawl-created'])
 
 const { post, put } = useApiService()
+const { getDomainSelectors } = useCrawlActions()
 
 // Modal state
 const dialog = computed({
@@ -319,6 +333,15 @@ const urlsText = ref('')
 const currentSelectors = ref([])
 const urlValidationError = ref('')
 
+// Domain selectors state
+const domainLoading = ref(false)
+const domainError = ref('')
+const domainInfo = ref(null)
+const localSelectors = ref([])
+const advancedSelectorsText = ref('')
+
+const uniqueId = () => `selector-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+
 // Initialize form when modal opens
 watch(() => props.modelValue, (isOpen) => {
   if (isOpen) {
@@ -330,31 +353,60 @@ const initializeForm = () => {
   currentStep.value = 1
   showValidation.value = false
   urlValidationError.value = ''
-  
-    if (props.crawlData) {
+  domainError.value = ''
+  domainInfo.value = null
+  localSelectors.value = []
+
+  if (props.crawlData) {
     title.value = props.crawlData.title || ''
     disabled.value = props.crawlData.disabled || false
     urlsText.value = (props.crawlData.urls || []).join('\n')
-    currentSelectors.value = (props.crawlData.selectors || []).map((selector, index) => ({
-      id: `selector-${index}`,
-      name: selector.target_element || '',
-      selector: selector.selector_value || '',
-            type: selector.type || 'text',
-      attribute: selector.attribute || ''
-    }))
-    } else {
-        title.value = ''
+    currentSelectors.value = (props.crawlData.selectors || []).map((selector, index) => {
+      const childSelectors = (selector.childSelectors || []).map((child, i) => ({
+        id: `child-${index}-${i}`,
+        name: child.target_element || child.name || '',
+        selector: child.selector_value || child.selector || '',
+        type: child.type || 'text',
+        attribute: child.attribute ?? null
+      }))
+      const hasChildren = childSelectors.length > 0
+      return {
+        id: `selector-${index}`,
+        name: selector.target_element || '',
+        selector: selector.selector_value || '',
+        type: hasChildren ? 'container' : (selector.type || 'text'),
+        attribute: selector.attribute ?? null,
+        childSelectors
+      }
+    })
+    advancedSelectorsText.value = (props.crawlData.advancedSelectors || []).join('\n')
+  } else {
+    title.value = ''
     disabled.value = false
-        urlsText.value = ''
-        currentSelectors.value = []
+    urlsText.value = ''
+    currentSelectors.value = []
+    advancedSelectorsText.value = ''
   }
 }
 
 const parseUrls = (text) => {
-  return text.split(/[\s\n]+/).filter(url => url.trim().length > 0)
+  return text.split(/[\s\n]+/).map(u => u.trim()).filter(url => url.length > 0)
 }
 
-// Using isValidUrl from urlUtils
+const extractDomain = (url) => {
+  try {
+    return new URL(url).hostname
+  } catch {
+    return null
+  }
+}
+
+const checkDomainConsistency = (urls) => {
+  const domains = urls.map(url => extractDomain(url)).filter(Boolean)
+  if (domains.length === 0) return null
+  const first = domains[0]
+  return domains.every(d => d === first) ? first : null
+}
 
 const validateUrls = () => {
   const urls = parseUrls(urlsText.value)
@@ -362,51 +414,143 @@ const validateUrls = () => {
     urlValidationError.value = 'Please enter at least one URL'
     return false
   }
-  
   const invalidUrls = urls.filter(url => !isValidUrl(url))
   if (invalidUrls.length > 0) {
     urlValidationError.value = `Invalid URL(s): ${invalidUrls.join(', ')}`
     return false
   }
-  
   urlValidationError.value = ''
   return true
 }
 
-const nextStep = () => {
+const fetchDomainSelectors = async (domain) => {
+  const result = await getDomainSelectors(domain)
+  const transformed = (result.selectors || []).map(s => ({
+    id: uniqueId(),
+    name: s.name || '',
+    selector: s.selector || '',
+    type: s.type || 'text',
+    attribute: s.attribute ?? null,
+    childSelectors: (s.childSelectors || []).map(c => ({
+      name: c.name || '',
+      selector: c.selector || '',
+      type: c.type || 'text',
+      attribute: c.attribute ?? null
+    }))
+  }))
+  localSelectors.value = transformed
+  return { domain: result.domain, hasSelectors: result.hasSelectors }
+}
+
+const nextStep = async () => {
   if (currentStep.value === 1) {
     if (!title.value.trim()) {
       showValidation.value = true
       return
     }
-  } else if (currentStep.value === 2) {
-    if (!validateUrls()) {
+    currentStep.value++
+    return
+  }
+  if (currentStep.value === 2) {
+    if (!validateUrls()) return
+    const urls = parseUrls(urlsText.value)
+    const domain = checkDomainConsistency(urls)
+    if (!domain) {
+      domainError.value = 'All URLs must be from the same domain'
       return
     }
+    domainLoading.value = true
+    domainError.value = ''
+    domainInfo.value = null
+    try {
+      domainInfo.value = await fetchDomainSelectors(domain)
+    } catch {
+      domainError.value = 'Error checking domain selectors'
+      domainInfo.value = { domain, hasSelectors: false }
+    } finally {
+      domainLoading.value = false
+      currentStep.value++
+    }
+    return
   }
-  
   currentStep.value++
 }
 
 const previousStep = () => {
   currentStep.value--
+  if (currentStep.value === 2) {
+    domainError.value = ''
+    domainInfo.value = null
+    localSelectors.value = []
+  }
 }
 
-const addNewSelector = () => {
-        currentSelectors.value.push({
-    id: `selector-${Date.now()}`,
-    name: '',
-    selector: '',
-    type: 'text',
-    attribute: ''
+const updateCurrentSelectorHandler = ({ selector: s }) => {
+  const idx = currentSelectors.value.findIndex(x => x.id === s.id)
+  if (idx === -1) return
+  currentSelectors.value[idx] = {
+    ...currentSelectors.value[idx],
+    name: s.name,
+    selector: s.css ?? s.selector,
+    type: s.type,
+    attribute: s.attribute,
+    childSelectors: s.childSelectors || []
+  }
+}
+
+const updateDomainSelectorHandler = ({ selector: s }) => {
+  const idx = localSelectors.value.findIndex(x => x.id === s.id)
+  if (idx === -1) return
+  localSelectors.value[idx] = {
+    ...localSelectors.value[idx],
+    name: s.name,
+    selector: s.css ?? s.selector,
+    type: s.type,
+    attribute: s.attribute,
+    childSelectors: s.childSelectors || []
+  }
+}
+
+const removeCurrentSelectorHandler = (id) => {
+  currentSelectors.value = currentSelectors.value.filter(s => s.id !== id)
+}
+
+const addDomainSelectorToCurrent = (selector) => {
+  const css = selector.selector || selector.css || ''
+  const exists = currentSelectors.value.some(
+    s => s.name === selector.name && (s.selector === css || s.css === css)
+  )
+  if (exists) return
+  currentSelectors.value.push({
+    id: uniqueId(),
+    name: selector.name || '',
+    selector: selector.selector || selector.css || '',
+    type: selector.type || 'text',
+    attribute: selector.attribute ?? null,
+    childSelectors: (selector.childSelectors || []).map(c => ({
+      name: c.name || '',
+      selector: c.selector || '',
+      type: c.type || 'text',
+      attribute: c.attribute ?? null
+    }))
   })
 }
 
-const removeCurrentSelector = (id) => {
-  const index = currentSelectors.value.findIndex(s => s.id === id)
-  if (index > -1) {
-    currentSelectors.value.splice(index, 1)
-  }
+const addNewSelector = () => {
+  currentSelectors.value.push({
+    id: uniqueId(),
+    name: '',
+    selector: '',
+    type: 'text',
+    attribute: null,
+    childSelectors: []
+  })
+}
+
+const validateSelectors = () => {
+  if (currentSelectors.value.length === 0) return false
+  const empty = currentSelectors.value.some(s => !(s.name || '').trim() || !(s.selector || s.css || '').trim())
+  return !empty
 }
 
 const closeModal = () => {
@@ -416,46 +560,54 @@ const closeModal = () => {
 const saveCrawl = async () => {
   if (!title.value.trim()) {
     showValidation.value = true
-            return
-        }
-
+    return
+  }
   if (!validateUrls()) {
     currentStep.value = 2
-            return
-        }
+    return
+  }
+  if (!validateSelectors()) {
+    return
+  }
 
   isLoading.value = true
-  
   try {
     const urls = parseUrls(urlsText.value)
     const selectors = currentSelectors.value
-      .filter(s => s.name.trim() && s.selector.trim())
+      .filter(s => (s.name || '').trim() && (s.selector || s.css || '').trim())
       .map(s => ({
         target_element: s.name,
-        selector_value: s.selector,
-        type: s.type,
-        attribute: s.attribute || null
+        selector_value: s.selector || s.css,
+        type: s.type || 'text',
+        attribute: s.attribute || null,
+        childSelectors: (s.childSelectors || []).map(c => ({
+          target_element: c.name,
+          selector_value: c.selector,
+          type: c.type || 'text',
+          attribute: c.attribute || null
+        }))
       }))
-    
+    const advancedSelectors = advancedSelectorsText.value
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean)
+
     const crawlData = {
       title: title.value.trim(),
       urls,
       selectors,
+      advancedSelectors,
       disabled: disabled.value
     }
-    
-    let response
-    if (isEditing.value) {
-      response = await put(`/api/updatecrawl/${props.crawlData._id}`, crawlData)
-    } else {
-      response = await post('/api/createcrawler', crawlData)
-    }
-    
-    emit('crawl-created', response.data)
+
+    const response = isEditing
+      ? await put(`/api/updatecrawl/${props.crawlData._id}`, crawlData)
+      : await post('/api/createcrawler', crawlData)
+
+    emit('crawl-created', response?.crawl ?? response?.data ?? response)
     closeModal()
   } catch (error) {
     console.error('Error saving crawl:', error)
-    // Handle error - you might want to show a notification here
   } finally {
     isLoading.value = false
   }

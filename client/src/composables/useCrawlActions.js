@@ -11,7 +11,7 @@ import { useLoadingState, LOADING_KEYS } from './useLoadingState'
  */
 export function useCrawlActions() {
   const router = useRouter()
-  const { post, del } = useApiService()
+  const { get, post, del } = useApiService()
   const crawlStore = useCrawlStore()
   const { showNotification, handleError } = useNotification()
   const { setLoading, isLoading } = useLoadingState()
@@ -266,6 +266,30 @@ export function useCrawlActions() {
     // This would typically open a configure modal
   }
 
+  /**
+   * Fetch default selectors for a domain (authenticated).
+   * On success returns { domain, hasSelectors: true, selectors }.
+   * On any error (e.g. 404) returns { domain, hasSelectors: false, selectors: [] }.
+   * @param {string} domain - The domain to fetch selectors for
+   * @returns {Promise<{ domain: string, hasSelectors: boolean, selectors: Array }>}
+   */
+  const getDomainSelectors = async (domain) => {
+    try {
+      const data = await get(`/api/selectors/${domain}`, {}, { silent: true })
+      return {
+        domain,
+        hasSelectors: true,
+        selectors: data.selectors || []
+      }
+    } catch {
+      return {
+        domain,
+        hasSelectors: false,
+        selectors: []
+      }
+    }
+  }
+
   return {
     // Loading states (centralized)
     clearQueueLoading: computed(() => isLoading(LOADING_KEYS.CLEAR_QUEUE)),
@@ -288,6 +312,7 @@ export function useCrawlActions() {
     restartSelectedUrls,
     exportCrawl,
     refreshCrawl,
-    configureCrawl
+    configureCrawl,
+    getDomainSelectors
   }
 }
