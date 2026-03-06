@@ -111,14 +111,29 @@
                 <!-- Dynamic data columns -->
                 <td v-for="key in allKeys" :key="key" class="px-6 py-4 text-sm text-gray-700">
                   <template v-if="Array.isArray(row.data[key])">
-                    <ul class="space-y-1">
+                    <ul class="space-y-2">
                       <li
                         v-for="(item, index) in row.data[key]"
                         :key="index"
                         class="flex items-start space-x-1.5"
                       >
                         <span class="w-1 h-1 rounded-full bg-gray-400 flex-shrink-0 mt-2"></span>
-                        <span class="break-words">{{ item }}</span>
+                        <!-- Object: show key-value list -->
+                        <div
+                          v-if="item !== null && typeof item === 'object' && !Array.isArray(item)"
+                          class="min-w-0 rounded-md bg-gray-50 border border-gray-100 px-2.5 py-1.5 space-y-1"
+                        >
+                          <div
+                            v-for="(val, attr) in item"
+                            :key="attr"
+                            class="flex flex-wrap gap-x-1.5 gap-y-0.5 text-xs"
+                          >
+                            <span class="font-medium text-gray-500 shrink-0">{{ formatKey(attr) }}:</span>
+                            <span class="break-words text-gray-800">{{ val !== null && val !== undefined ? val : '—' }}</span>
+                          </div>
+                        </div>
+                        <!-- Primitive -->
+                        <span v-else class="break-words">{{ item }}</span>
                       </li>
                     </ul>
                   </template>
