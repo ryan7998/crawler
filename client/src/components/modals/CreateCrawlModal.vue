@@ -296,18 +296,12 @@
 import { ref, computed, watch } from 'vue'
 import { useApiService } from '../../composables/useApiService'
 import { useCrawlActions } from '../../composables/useCrawlActions'
-import { isValidUrl } from '../../utils/urlUtils'
+import { isValidUrl, parseUrls, getSingleDomain } from '../../utils/urlUtils'
 import CssSelector from '../forms/CssSelector.vue'
 
 const props = defineProps({
-    modelValue: {
-        type: Boolean,
-        default: false
-    },
-    crawlData: {
-        type: Object,
-        default: null
-    }
+  modelValue: { type: Boolean, default: false },
+  crawlData: { type: Object, default: null }
 })
 
 const emit = defineEmits(['update:modelValue', 'crawl-created'])
@@ -317,36 +311,78 @@ const { getDomainSelectors } = useCrawlActions()
 
 // Modal state
 const dialog = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
 })
 
 const isEditing = computed(() => !!props.crawlData)
 const isLoading = ref(false)
 const showValidation = ref(false)
 
-// Form data
+// ─── form data ────────────────────────────────────────────────────────────────
 const currentStep = ref(1)
 const title = ref('')
 const disabled = ref(false)
 const urlsText = ref('')
-const currentSelectors = ref([])
 const urlValidationError = ref('')
+const currentSelectors = ref([])
 
-// Domain selectors state
+// ─── domain / default-selector state ─────────────────────────────────────────
 const domainLoading = ref(false)
 const domainError = ref('')
 const domainInfo = ref(null)
 const localSelectors = ref([])
 const advancedSelectorsText = ref('')
 
+// ─── selector shape helpers ───────────────────────────────────────────────────
 const uniqueId = () => `selector-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 
-// Initialize form when modal opens
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    initializeForm()
+/**
+ * Normalize a raw child selector (from either the backend's target_element/selector_value
+ * shape or the Selectors API's name/selector shape) to the UI shape used by CssSelector.
+ */
+const toUiChild = (c) => ({
+  name: c.target_element || c.name || '',
+  selector: c.selector_value || c.selector || '',
+  type: c.type || 'text',
+  attribute: c.attribute ?? null
+})
+
+/**
+ * Normalize a raw selector (backend or API shape) to the UI shape used by CssSelector.
+ * If the selector has children, the type is forced to 'container' so CssSelector renders them.
+ */
+const toUiSelector = (s, id) => {
+  const childSelectors = (s.childSelectors || []).map(toUiChild)
+  return {
+    id,
+    name: s.target_element || s.name || '',
+    selector: s.selector_value || s.selector || '',
+    type: childSelectors.length > 0 ? 'container' : (s.type || 'text'),
+    attribute: s.attribute ?? null,
+    childSelectors
   }
+}
+
+/**
+ * Map a UI selector back to the backend POST/PUT shape.
+ */
+const toBackendSelector = (s) => ({
+  target_element: s.name,
+  selector_value: s.selector,
+  type: s.type || 'text',
+  attribute: s.attribute || null,
+  childSelectors: (s.childSelectors || []).map(c => ({
+    target_element: c.name,
+    selector_value: c.selector,
+    type: c.type || 'text',
+    attribute: c.attribute || null
+  }))
+})
+
+// ─── form init ────────────────────────────────────────────────────────────────
+watch(() => props.modelValue, (isOpen) => {
+  if (isOpen) initializeForm()
 })
 
 const initializeForm = () => {
@@ -361,24 +397,9 @@ const initializeForm = () => {
     title.value = props.crawlData.title || ''
     disabled.value = props.crawlData.disabled || false
     urlsText.value = (props.crawlData.urls || []).join('\n')
-    currentSelectors.value = (props.crawlData.selectors || []).map((selector, index) => {
-      const childSelectors = (selector.childSelectors || []).map((child, i) => ({
-        id: `child-${index}-${i}`,
-        name: child.target_element || child.name || '',
-        selector: child.selector_value || child.selector || '',
-        type: child.type || 'text',
-        attribute: child.attribute ?? null
-      }))
-      const hasChildren = childSelectors.length > 0
-      return {
-        id: `selector-${index}`,
-        name: selector.target_element || '',
-        selector: selector.selector_value || '',
-        type: hasChildren ? 'container' : (selector.type || 'text'),
-        attribute: selector.attribute ?? null,
-        childSelectors
-      }
-    })
+    currentSelectors.value = (props.crawlData.selectors || []).map((s, i) =>
+      toUiSelector(s, `selector-${i}`)
+    )
     advancedSelectorsText.value = (props.crawlData.advancedSelectors || []).join('\n')
   } else {
     title.value = ''
@@ -389,76 +410,40 @@ const initializeForm = () => {
   }
 }
 
-const parseUrls = (text) => {
-  return text.split(/[\s\n]+/).map(u => u.trim()).filter(url => url.length > 0)
-}
-
-const extractDomain = (url) => {
-  try {
-    return new URL(url).hostname
-  } catch {
-    return null
-  }
-}
-
-const checkDomainConsistency = (urls) => {
-  const domains = urls.map(url => extractDomain(url)).filter(Boolean)
-  if (domains.length === 0) return null
-  const first = domains[0]
-  return domains.every(d => d === first) ? first : null
-}
-
+// ─── URL validation ───────────────────────────────────────────────────────────
 const validateUrls = () => {
   const urls = parseUrls(urlsText.value)
   if (urls.length === 0) {
     urlValidationError.value = 'Please enter at least one URL'
     return false
   }
-  const invalidUrls = urls.filter(url => !isValidUrl(url))
-  if (invalidUrls.length > 0) {
-    urlValidationError.value = `Invalid URL(s): ${invalidUrls.join(', ')}`
+  const invalid = urls.filter(url => !isValidUrl(url))
+  if (invalid.length > 0) {
+    urlValidationError.value = `Invalid URL(s): ${invalid.join(', ')}`
     return false
   }
   urlValidationError.value = ''
   return true
 }
 
+// ─── domain / default selectors ───────────────────────────────────────────────
 const fetchDomainSelectors = async (domain) => {
   const result = await getDomainSelectors(domain)
-  const transformed = (result.selectors || []).map(s => ({
-    id: uniqueId(),
-    name: s.name || '',
-    selector: s.selector || '',
-    type: s.type || 'text',
-    attribute: s.attribute ?? null,
-    childSelectors: (s.childSelectors || []).map(c => ({
-      name: c.name || '',
-      selector: c.selector || '',
-      type: c.type || 'text',
-      attribute: c.attribute ?? null
-    }))
-  }))
-  localSelectors.value = transformed
+  localSelectors.value = (result.selectors || []).map(s => toUiSelector(s, uniqueId()))
   return { domain: result.domain, hasSelectors: result.hasSelectors }
 }
 
+// ─── step navigation ──────────────────────────────────────────────────────────
 const nextStep = async () => {
   if (currentStep.value === 1) {
-    if (!title.value.trim()) {
-      showValidation.value = true
-      return
-    }
+    if (!title.value.trim()) { showValidation.value = true; return }
     currentStep.value++
     return
   }
   if (currentStep.value === 2) {
     if (!validateUrls()) return
-    const urls = parseUrls(urlsText.value)
-    const domain = checkDomainConsistency(urls)
-    if (!domain) {
-      domainError.value = 'All URLs must be from the same domain'
-      return
-    }
+    const domain = getSingleDomain(parseUrls(urlsText.value))
+    if (!domain) { domainError.value = 'All URLs must be from the same domain'; return }
     domainLoading.value = true
     domainError.value = ''
     domainInfo.value = null
@@ -485,11 +470,18 @@ const previousStep = () => {
   }
 }
 
-const updateCurrentSelectorHandler = ({ selector: s }) => {
-  const idx = currentSelectors.value.findIndex(x => x.id === s.id)
+// ─── selector handlers ────────────────────────────────────────────────────────
+
+/**
+ * Factory: returns an updateSelector handler that operates on the given list ref.
+ * CssSelector emits { selector: { id, name, css, type, attribute, childSelectors } }.
+ * We normalise `css` → `selector` for internal consistency.
+ */
+const makeSelectorUpdater = (list) => ({ selector: s }) => {
+  const idx = list.value.findIndex(x => x.id === s.id)
   if (idx === -1) return
-  currentSelectors.value[idx] = {
-    ...currentSelectors.value[idx],
+  list.value[idx] = {
+    ...list.value[idx],
     name: s.name,
     selector: s.css ?? s.selector,
     type: s.type,
@@ -498,105 +490,48 @@ const updateCurrentSelectorHandler = ({ selector: s }) => {
   }
 }
 
-const updateDomainSelectorHandler = ({ selector: s }) => {
-  const idx = localSelectors.value.findIndex(x => x.id === s.id)
-  if (idx === -1) return
-  localSelectors.value[idx] = {
-    ...localSelectors.value[idx],
-    name: s.name,
-    selector: s.css ?? s.selector,
-    type: s.type,
-    attribute: s.attribute,
-    childSelectors: s.childSelectors || []
-  }
-}
+const updateCurrentSelectorHandler = makeSelectorUpdater(currentSelectors)
+const updateDomainSelectorHandler = makeSelectorUpdater(localSelectors)
 
 const removeCurrentSelectorHandler = (id) => {
   currentSelectors.value = currentSelectors.value.filter(s => s.id !== id)
 }
 
 const addDomainSelectorToCurrent = (selector) => {
-  const css = selector.selector || selector.css || ''
   const exists = currentSelectors.value.some(
-    s => s.name === selector.name && (s.selector === css || s.css === css)
+    s => s.name === selector.name && s.selector === selector.selector
   )
   if (exists) return
-  currentSelectors.value.push({
-    id: uniqueId(),
-    name: selector.name || '',
-    selector: selector.selector || selector.css || '',
-    type: selector.type || 'text',
-    attribute: selector.attribute ?? null,
-    childSelectors: (selector.childSelectors || []).map(c => ({
-      name: c.name || '',
-      selector: c.selector || '',
-      type: c.type || 'text',
-      attribute: c.attribute ?? null
-    }))
-  })
+  currentSelectors.value.push(toUiSelector(selector, uniqueId()))
 }
 
 const addNewSelector = () => {
-  currentSelectors.value.push({
-    id: uniqueId(),
-    name: '',
-    selector: '',
-    type: 'text',
-    attribute: null,
-    childSelectors: []
-  })
+  currentSelectors.value.push(toUiSelector({}, uniqueId()))
 }
 
+// ─── submit ───────────────────────────────────────────────────────────────────
 const validateSelectors = () => {
   if (currentSelectors.value.length === 0) return false
-  const empty = currentSelectors.value.some(s => !(s.name || '').trim() || !(s.selector || s.css || '').trim())
-  return !empty
+  return !currentSelectors.value.some(s => !s.name.trim() || !s.selector.trim())
 }
 
-const closeModal = () => {
-  dialog.value = false
-}
+const closeModal = () => { dialog.value = false }
 
 const saveCrawl = async () => {
-  if (!title.value.trim()) {
-    showValidation.value = true
-    return
-  }
-  if (!validateUrls()) {
-    currentStep.value = 2
-    return
-  }
-  if (!validateSelectors()) {
-    return
-  }
+  if (!title.value.trim()) { showValidation.value = true; return }
+  if (!validateUrls()) { currentStep.value = 2; return }
+  if (!validateSelectors()) return
 
   isLoading.value = true
   try {
-    const urls = parseUrls(urlsText.value)
-    const selectors = currentSelectors.value
-      .filter(s => (s.name || '').trim() && (s.selector || s.css || '').trim())
-      .map(s => ({
-        target_element: s.name,
-        selector_value: s.selector || s.css,
-        type: s.type || 'text',
-        attribute: s.attribute || null,
-        childSelectors: (s.childSelectors || []).map(c => ({
-          target_element: c.name,
-          selector_value: c.selector,
-          type: c.type || 'text',
-          attribute: c.attribute || null
-        }))
-      }))
-    const advancedSelectors = advancedSelectorsText.value
-      .split('\n')
-      .map(s => s.trim())
-      .filter(Boolean)
-
     const crawlData = {
       title: title.value.trim(),
-      urls,
-      selectors,
-      advancedSelectors,
+      urls: parseUrls(urlsText.value),
+      selectors: currentSelectors.value
+        .filter(s => s.name.trim() && s.selector.trim())
+        .map(toBackendSelector),
+      advancedSelectors: advancedSelectorsText.value
+        .split('\n').map(s => s.trim()).filter(Boolean),
       disabled: disabled.value
     }
 
