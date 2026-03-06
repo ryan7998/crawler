@@ -135,3 +135,28 @@ export function getUrlDisplayText(excerptObj) {
 export function shouldShowUrlToggle(excerptObj) {
   return excerptObj?.needsToggle || false
 }
+
+/**
+ * Parse a whitespace/newline-separated block of text into an array of URL strings.
+ * @param {string} text - Raw textarea value
+ * @returns {string[]} Trimmed, non-empty URL strings
+ */
+export function parseUrls(text) {
+  return (text || '').split(/[\s\n]+/).map(u => u.trim()).filter(u => u.length > 0)
+}
+
+/**
+ * Return the single shared hostname if every URL in the array belongs to the
+ * same domain, otherwise return null.
+ * @param {string[]} urls - Array of URL strings
+ * @returns {string|null} Shared hostname or null
+ */
+export function getSingleDomain(urls) {
+  const getDomain = (url) => {
+    try { return new URL(url).hostname } catch { return null }
+  }
+  const domains = urls.map(getDomain).filter(Boolean)
+  if (domains.length === 0) return null
+  const first = domains[0]
+  return domains.every(d => d === first) ? first : null
+}
