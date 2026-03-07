@@ -278,8 +278,7 @@
     </div>
   </div>
 
-  <!-- Cleanup Confirmation Modal -->
-  <div v-if="showCleanupDialog" class="fixed inset-0 z-60 overflow-y-auto" @click.self="showCleanupDialog = false">
+  <div v-if="showCleanupDialog" class="fixed inset-0 z-[60] overflow-y-auto" @click.self="showCleanupDialog = false">
     <div class="flex min-h-full items-center justify-center p-4">
       <div class="relative w-full max-w-md transform overflow-hidden rounded-xl bg-white shadow-2xl transition-all">
         <div class="px-6 py-4 border-b border-gray-200">
