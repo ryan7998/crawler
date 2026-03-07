@@ -1,5 +1,9 @@
 <template>
-  <div class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+  <!-- Loading: skeleton only (includes header + rows pulse) -->
+  <TableSkeleton v-if="crawlsLoading" :row-count="5" />
+
+  <!-- Not loading: real header + content -->
+  <div v-else class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
     <!-- Table Header -->
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
       <div class="flex items-center justify-between">
@@ -49,14 +53,8 @@
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="crawlsLoading" class="flex justify-center items-center py-12">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <span class="ml-3 text-gray-600">Loading crawls...</span>
-    </div>
-
     <!-- Error State -->
-    <div v-else-if="error" class="text-center py-12">
+    <div v-if="error" class="text-center py-12">
       <div class="text-red-600 mb-4">
         <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -305,6 +303,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRelativeTime } from '../../../utils/formattingUtils'
 import { processTableData, toggleSort } from '../../../utils/tableUtils'
+import TableSkeleton from '../TableSkeleton.vue'
 import StatusPill from './StatusPill.vue'
 import { useCrawlStore } from '../../../stores/crawlStore'
 import { useCrawlManagement } from '../../../composables/useCrawlManagement'

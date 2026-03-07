@@ -17,8 +17,7 @@
             <div class="h-6 w-px bg-gray-300"></div>
             <div>
               <!-- Loading State -->
-              <div v-if="loading || !crawl" class="flex items-center space-x-3">
-                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <div v-if="loading || !crawl">
                 <div class="space-y-1">
                   <div class="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
                   <div class="flex items-center space-x-4">
@@ -27,6 +26,10 @@
                       <div class="h-5 bg-gray-200 rounded-full w-16 animate-pulse"></div>
                     </div>
                     <div class="flex items-center space-x-2">
+                      <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <div class="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
                       <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                       </svg>

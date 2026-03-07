@@ -10,29 +10,23 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <!-- Main Content Area -->
-        <div class="lg:col-span-3">
-          <CrawlUrlsTable
-            :crawl="crawl"
-            :selected-urls="selectedUrls"
-            :select-all="selectAll"
-            :excerpts="excerpts"
-            :live-status-dictionary="liveStatusDictionary"
-            :queue-status="queueStatus"
-            @toggle-select-all="toggleSelectAll"
-            @toggle-url-selection="toggleUrlSelection"
-            @bulk-delete="confirmBulkDelete"
-            @bulk-restart="confirmRestartSelected"
-            @view-result="openViewResult"
-            @delete-url="confirmDeleteUrlData"
-          />
-        </div>
+      <!-- Loading state: pulse skeleton until crawl is loaded -->
+      <TableSkeleton v-if="apiLoading || !crawl" />
 
-        <!-- Right Sidebar -->
-        <CrawlDetailsSidebar
-          :latest-export-link="latestExportLink"
-          :latest-export-date="latestExportDate"
+      <div v-else>
+        <CrawlUrlsTable
+          :crawl="crawl"
+          :selected-urls="selectedUrls"
+          :select-all="selectAll"
+          :excerpts="excerpts"
+          :live-status-dictionary="liveStatusDictionary"
+          :queue-status="queueStatus"
+          @toggle-select-all="toggleSelectAll"
+          @toggle-url-selection="toggleUrlSelection"
+          @bulk-delete="confirmBulkDelete"
+          @bulk-restart="confirmRestartSelected"
+          @view-result="openViewResult"
+          @delete-url="confirmDeleteUrlData"
         />
       </div>
     </div>
@@ -72,8 +66,8 @@ import ViewResult from '../features/crawl/ViewResult.vue'
 import SlideOver from '../ui/SlideOver.vue'
 import ProxyStatsModal from '../modals/ProxyStatsModal.vue'
 import CrawlDetailsHeader from './components/CrawlDetailsHeader.vue'
+import TableSkeleton from '../ui/TableSkeleton.vue'
 import CrawlUrlsTable from './components/CrawlUrlsTable.vue'
-import CrawlDetailsSidebar from './components/CrawlDetailsSidebar.vue'
 import { useProxyStats } from '../../composables/useProxyStats'
 import { useApiService } from '../../composables/useApiService'
 import { useCrawlActions } from '../../composables/useCrawlActions'
