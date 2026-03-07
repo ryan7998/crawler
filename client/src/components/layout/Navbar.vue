@@ -14,7 +14,10 @@
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <h1 class="text-xl font-bold text-gray-900">CrawlerPro</h1>
+                            <div class="flex items-center gap-2">
+                                <h1 class="text-xl font-bold text-gray-900">CrawlerPro</h1>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200/80">Beta</span>
+                            </div>
                             <p class="text-xs text-gray-600">Advanced Web Scraping</p>
                         </div>
                     </button>
