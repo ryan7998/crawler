@@ -358,9 +358,7 @@ const analyzeChanges = async () => {
             params.compareWith = compareWith.value
         }
 
-        console.log('Analyzing changes for crawl:', props.crawlId, 'with params:', params)
         const data = await get(`/api/export/changes/${props.crawlId}`, { params })
-        console.log('Change analysis response:', data)
         changeAnalysis.value = data
     } catch (error) {
         console.error('Error analyzing changes:', error)

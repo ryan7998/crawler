@@ -296,8 +296,8 @@ const handleStartCrawl = async () => {
   closeDropdown()
 }
 
-const handleExportCrawl = async () => {
-  await exportCrawl(contextData.value.crawlId)
+const handleExportCrawl = () => {
+  exportCrawl(contextData.value.crawlId, { title: contextData.value.title })
   closeDropdown()
 }
 

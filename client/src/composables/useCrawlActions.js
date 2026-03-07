@@ -223,23 +223,16 @@ export function useCrawlActions() {
   }
 
   /**
-   * Export crawl data
+   * Open export modal for a crawl (Google Sheets or CSV with change tracking).
    * @param {string} crawlId - The ID of the crawl
-   * @param {Function} onSuccess - Callback function to run after successful export
+   * @param {Object} options - Optional { title, onSuccess }
    */
-  const exportCrawl = async (crawlId, onSuccess = null) => {
-    try {
-      setLoading(LOADING_KEYS.EXPORT_CRAWL, true)
-      // This would typically open an export modal or trigger export
-      showNotification('Opening export modal for this crawl...', 'info')
-      
-      if (onSuccess) {
-        onSuccess()
-      }
-    } catch (error) {
-      showNotification(error.message, 'error')
-    } finally {
-      setLoading(LOADING_KEYS.EXPORT_CRAWL, false)
+  const exportCrawl = (crawlId, options = {}) => {
+    const title = options?.title ?? ''
+    crawlStore.setSelectedCrawl({ _id: crawlId, title })
+    crawlStore.openExportModal()
+    if (typeof options?.onSuccess === 'function') {
+      options.onSuccess()
     }
   }
 
