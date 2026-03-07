@@ -174,8 +174,13 @@ watch(proxyStatsLoading, (newLoading) => {
     statsBarStore.setProxyStatsLoading(newLoading)
 })
 
-// Watch for proxy modal state changes from store
-const showProxyStatsModal = computed(() => statsBarStore.showProxyModal)
+// Proxy modal: writable computed so Close/X can update the store
+const showProxyStatsModal = computed({
+  get: () => statsBarStore.showProxyModal,
+  set: (value) => {
+    if (!value) statsBarStore.closeProxyModal()
+  }
+})
 
 // Initialize component on mount
 onMounted(async () => {
